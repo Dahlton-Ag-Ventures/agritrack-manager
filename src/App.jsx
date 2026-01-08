@@ -127,11 +127,23 @@ useEffect(() => {
     return () => clearTimeout(timeoutId);
   }
 }, [inventory, machinery, serviceHistory]);
-  const addInventoryItem = () => {
+const addInventoryItem = () => {
   const newInventory = [...inventory, { ...inventoryForm, id: Date.now() }];
   setInventory(newInventory);
   setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '' });
   setShowInventoryModal(false);
+  // Save after adding
+  setTimeout(async () => {
+    try {
+      await supabase
+        .from('agritrack_data')
+        .update({ inventory: newInventory })
+        .eq('id', 1);
+    } catch (error) {
+      console.error('Add error:', error);
+    }
+  }, 100);
+};
   // Save after adding
   setTimeout(() => saveData(), 100);
 };
@@ -152,11 +164,23 @@ useEffect(() => {
   }, 100);
 };
 
-  const addMachineryItem = () => {
-    setMachinery([...machinery, { ...machineryForm, id: Date.now() }]);
-    setMachineryForm({ name: '', serial: '', category: '', status: 'Active' });
-    setShowMachineryModal(false);
-  };
+const addMachineryItem = () => {
+  const newMachinery = [...machinery, { ...machineryForm, id: Date.now() }];
+  setMachinery(newMachinery);
+  setMachineryForm({ name: '', serial: '', category: '', status: 'Active' });
+  setShowMachineryModal(false);
+  // Save after adding
+  setTimeout(async () => {
+    try {
+      await supabase
+        .from('agritrack_data')
+        .update({ machinery: newMachinery })
+        .eq('id', 1);
+    } catch (error) {
+      console.error('Add error:', error);
+    }
+  }, 100);
+};
 
 const deleteMachineryItem = (id) => {
   const newMachinery = machinery.filter(item => item.id !== id);
