@@ -73,16 +73,25 @@ export default function App() {
           table: 'agritrack_data',
           filter: 'id=eq.1'
         },
-        (payload) => {
-          console.log('🔔 Real-time update received!', payload);
-          if (payload.new) {
-            setInventory(payload.new.inventory || []);
-            setMachinery(payload.new.machinery || []);
-            setServiceHistory(payload.new.service_history || []);
-            setLastSync(new Date());
-            setRealtimeStatus('connected');
-          }
-        }
+(payload) => {
+  console.log('🔔 Real-time update received!', payload);
+  if (payload.new) {
+    // Only update if data actually changed
+    const newInv = payload.new.inventory || [];
+    const newMach = payload.new.machinery || [];
+    
+    if (JSON.stringify(newInv) !== JSON.stringify(inventory)) {
+      setInventory(newInv);
+    }
+    if (JSON.stringify(newMach) !== JSON.stringify(machinery)) {
+      setMachinery(newMach);
+    }
+    
+    setServiceHistory(payload.new.service_history || []);
+    setLastSync(new Date());
+    setRealtimeStatus('connected');
+  }
+}
       )
       .subscribe((status) => {
         console.log('🔔 Real-time status:', status);
