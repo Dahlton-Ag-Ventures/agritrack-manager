@@ -3,8 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw } from 'lucide-react';
 
 // Supabase configuration
-const supabaseUrl = 'https://ldsvvxyaakhmpmcmfpxc.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxkc3Z2eHlhYWtobXBuY21mcHhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4ODcyMjMsImV4cCI6MjA4MzQ2MzIyM30.ANj5iFSfZNBBKBMcB7T9H6zqp78_7BUz9_dkuS2eEHI';
+const supabaseUrl = 'https://ekjjtfemibtaxyhuvgea.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVramp0ZmVtaWJ0YXh5aHV2Z2VhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4NTM0ODgsImV4cCI6MjA4MzQyOTQ4OH0.c4qjGG0F1nCR0UcyttQKuMX4S_9bJlAPCglzq3fB8v0';
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
