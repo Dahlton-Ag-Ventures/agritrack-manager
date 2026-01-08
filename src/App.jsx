@@ -120,7 +120,7 @@ export default function App() {
     }
   };
 
-// Auto-save on data changes
+// Remove auto-save - only save when user makes changes
 useEffect(() => {
   if (!loading && (inventory.length > 0 || machinery.length > 0 || serviceHistory.length > 0)) {
     const timeoutId = setTimeout(saveData, 1000);
@@ -128,10 +128,13 @@ useEffect(() => {
   }
 }, [inventory, machinery, serviceHistory]);
   const addInventoryItem = () => {
-    setInventory([...inventory, { ...inventoryForm, id: Date.now() }]);
-    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '' });
-    setShowInventoryModal(false);
-  };
+  const newInventory = [...inventory, { ...inventoryForm, id: Date.now() }];
+  setInventory(newInventory);
+  setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '' });
+  setShowInventoryModal(false);
+  // Save after adding
+  setTimeout(() => saveData(), 100);
+};
 
   const deleteInventoryItem = (id) => {
     setInventory(inventory.filter(item => item.id !== id));
@@ -169,8 +172,8 @@ useEffect(() => {
             </p>
           </div>
           <div style={styles.statusContainer}>
-            {syncing && (
-              <div style={styles.syncingBadge}>
+          {false && syncing && (
+  <div style={styles.syncingBadge}>
                 <RefreshCw size={12} style={{ animation: 'spin 0.6s linear infinite' }} />
                 Syncing...
               </div>
