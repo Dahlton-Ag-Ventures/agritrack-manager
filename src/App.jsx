@@ -120,14 +120,13 @@ export default function App() {
     }
   };
 
- // Auto-save on data changes
+// Auto-save on data changes
 useEffect(() => {
   if (!loading && (inventory.length > 0 || machinery.length > 0 || serviceHistory.length > 0)) {
     const timeoutId = setTimeout(saveData, 1000);
     return () => clearTimeout(timeoutId);
   }
 }, [inventory, machinery, serviceHistory]);
-
   const addInventoryItem = () => {
     setInventory([...inventory, { ...inventoryForm, id: Date.now() }]);
     setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '' });
