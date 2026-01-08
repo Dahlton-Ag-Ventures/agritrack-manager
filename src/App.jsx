@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Plus, Trash2, Package, Tractor, Users, AlertCircle, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw } from 'lucide-react';
 
 // Supabase configuration
 const supabaseUrl = 'https://ldsvvxyaakhmpmcmfpxc.supabase.co';
@@ -237,7 +237,7 @@ export default function App() {
                 <p>Inventory Items</p>
               </div>
               <div style={{ ...styles.statCard, background: 'rgba(6, 182, 212, 0.2)', borderColor: '#06b6d4' }}>
-                <Tractor style={{ width: '48px', height: '48px', margin: '0 auto 16px', color: '#06b6d4' }} />
+                <Truck style={{ width: '48px', height: '48px', margin: '0 auto 16px', color: '#06b6d4' }} />
                 <h3 style={{ fontSize: '3rem', marginBottom: '8px' }}>{machinery.length}</h3>
                 <p>Machines</p>
               </div>
@@ -304,7 +304,7 @@ export default function App() {
 
             {machinery.length === 0 ? (
               <div style={styles.emptyState}>
-                <Tractor size={64} style={{ color: '#6b7280', margin: '0 auto 16px' }} />
+                <Truck size={64} style={{ color: '#6b7280', margin: '0 auto 16px' }} />
                 <h3>No Machinery Yet</h3>
                 <p>Start by adding your first machine</p>
                 <button onClick={() => setShowMachineryModal(true)} style={{ ...styles.addButton, background: '#06b6d4' }}>
