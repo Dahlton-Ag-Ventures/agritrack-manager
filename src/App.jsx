@@ -135,14 +135,15 @@ const addInventoryItem = async () => {
   const newItem = { ...inventoryForm, id: Date.now() };
   const newInventory = [...inventory, newItem];
   
+  setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '' });
+  setShowInventoryModal(false);
+  
   try {
     await supabase
       .from('agritrack_data')
       .update({ inventory: newInventory })
       .eq('id', 1);
-    
-    // Reload the page to get fresh data
-    window.location.reload();
+    // Don't update local state - let real-time do it
   } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
@@ -160,8 +161,7 @@ const deleteInventoryItem = async (id) => {
       .from('agritrack_data')
       .update({ inventory: newInventory })
       .eq('id', 1);
-    
-    window.location.reload();
+    // Don't update local state - let real-time do it
   } catch (error) {
     console.error('Delete error:', error);
     alert('Error: ' + error.message);
@@ -172,13 +172,15 @@ const addMachineryItem = async () => {
   const newItem = { ...machineryForm, id: Date.now() };
   const newMachinery = [...machinery, newItem];
   
+  setMachineryForm({ name: '', serial: '', category: '', status: 'Active' });
+  setShowMachineryModal(false);
+  
   try {
     await supabase
       .from('agritrack_data')
       .update({ machinery: newMachinery })
       .eq('id', 1);
-    
-    window.location.reload();
+    // Don't update local state - let real-time do it
   } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
@@ -193,8 +195,7 @@ const deleteMachineryItem = async (id) => {
       .from('agritrack_data')
       .update({ machinery: newMachinery })
       .eq('id', 1);
-    
-    window.location.reload();
+    // Don't update local state - let real-time do it
   } catch (error) {
     console.error('Delete error:', error);
     alert('Error: ' + error.message);
