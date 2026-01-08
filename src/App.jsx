@@ -130,12 +130,7 @@ export default function App() {
   };
 
 // Remove auto-save - only save when user makes changes
-useEffect(() => {
-  if (!loading && (inventory.length > 0 || machinery.length > 0 || serviceHistory.length > 0)) {
-    const timeoutId = setTimeout(saveData, 1000);
-    return () => clearTimeout(timeoutId);
-  }
-}, [inventory, machinery, serviceHistory]);
+
 const addInventoryItem = async () => {
   const newItem = { ...inventoryForm, id: Date.now() };
   const newInventory = [...inventory, newItem];
