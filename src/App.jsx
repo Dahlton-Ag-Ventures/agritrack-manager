@@ -127,75 +127,89 @@ useEffect(() => {
     return () => clearTimeout(timeoutId);
   }
 }, [inventory, machinery, serviceHistory]);
-const addInventoryItem = () => {
-  const newInventory = [...inventory, { ...inventoryForm, id: Date.now() }];
-  setInventory(newInventory);
-  setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '' });
-  setShowInventoryModal(false);
-  // Save after adding
-  setTimeout(async () => {
-    try {
-      await supabase
-        .from('agritrack_data')
-        .update({ inventory: newInventory })
-        .eq('id', 1);
-    } catch (error) {
-      console.error('Add error:', error);
-    }
-  }, 100);
+const addInventoryItem = async () => {
+  const newItem = { ...inventoryForm, id: Date.now() };
+  const newInventory = [...inventory, newItem];
+  
+  try {
+    // Save to database first
+    const { error } = await supabase
+      .from('agritrack_data')
+      .update({ inventory: newInventory })
+      .eq('id', 1);
+    
+    if (error) throw error;
+    
+    // Then update local state
+    setInventory(newInventory);
+    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '' });
+    setShowInventoryModal(false);
+  } catch (error) {
+    console.error('Add error:', error);
+    alert('Error adding item: ' + error.message);
+  }
 };
   // Save after adding
   setTimeout(() => saveData(), 100);
 };
 
- const deleteInventoryItem = (id) => {
+const deleteInventoryItem = async (id) => {
   const newInventory = inventory.filter(item => item.id !== id);
-  setInventory(newInventory);
-  // Save after deleting
-  setTimeout(async () => {
-    try {
-      await supabase
-        .from('agritrack_data')
-        .update({ inventory: newInventory })
-        .eq('id', 1);
-    } catch (error) {
-      console.error('Delete error:', error);
-    }
-  }, 100);
+  
+  try {
+    const { error } = await supabase
+      .from('agritrack_data')
+      .update({ inventory: newInventory })
+      .eq('id', 1);
+    
+    if (error) throw error;
+    
+    setInventory(newInventory);
+  } catch (error) {
+    console.error('Delete error:', error);
+    alert('Error deleting item: ' + error.message);
+  }
 };
 
-const addMachineryItem = () => {
-  const newMachinery = [...machinery, { ...machineryForm, id: Date.now() }];
-  setMachinery(newMachinery);
-  setMachineryForm({ name: '', serial: '', category: '', status: 'Active' });
-  setShowMachineryModal(false);
-  // Save after adding
-  setTimeout(async () => {
-    try {
-      await supabase
-        .from('agritrack_data')
-        .update({ machinery: newMachinery })
-        .eq('id', 1);
-    } catch (error) {
-      console.error('Add error:', error);
-    }
-  }, 100);
+const addMachineryItem = async () => {
+  const newItem = { ...machineryForm, id: Date.now() };
+  const newMachinery = [...machinery, newItem];
+  
+  try {
+    // Save to database first
+    const { error } = await supabase
+      .from('agritrack_data')
+      .update({ machinery: newMachinery })
+      .eq('id', 1);
+    
+    if (error) throw error;
+    
+    // Then update local state
+    setMachinery(newMachinery);
+    setMachineryForm({ name: '', serial: '', category: '', status: 'Active' });
+    setShowMachineryModal(false);
+  } catch (error) {
+    console.error('Add error:', error);
+    alert('Error adding item: ' + error.message);
+  }
 };
 
-const deleteMachineryItem = (id) => {
+const deleteMachineryItem = async (id) => {
   const newMachinery = machinery.filter(item => item.id !== id);
-  setMachinery(newMachinery);
-  // Save after deleting
-  setTimeout(async () => {
-    try {
-      await supabase
-        .from('agritrack_data')
-        .update({ machinery: newMachinery })
-        .eq('id', 1);
-    } catch (error) {
-      console.error('Delete error:', error);
-    }
-  }, 100);
+  
+  try {
+    const { error } = await supabase
+      .from('agritrack_data')
+      .update({ machinery: newMachinery })
+      .eq('id', 1);
+    
+    if (error) throw error;
+    
+    setMachinery(newMachinery);
+  } catch (error) {
+    console.error('Delete error:', error);
+    alert('Error deleting item: ' + error.message);
+  }
 };
 
   if (loading) {
