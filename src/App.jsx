@@ -141,21 +141,16 @@ const addInventoryItem = async () => {
   const newInventory = [...inventory, newItem];
   
   try {
-    // Save to database first
-    const { error } = await supabase
+    await supabase
       .from('agritrack_data')
       .update({ inventory: newInventory })
       .eq('id', 1);
     
-    if (error) throw error;
-    
-    // Then update local state
-    setInventory(newInventory);
-    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '' });
-    setShowInventoryModal(false);
+    // Reload the page to get fresh data
+    window.location.reload();
   } catch (error) {
     console.error('Add error:', error);
-    alert('Error adding item: ' + error.message);
+    alert('Error: ' + error.message);
   }
 };
   // Save after adding
@@ -166,17 +161,15 @@ const deleteInventoryItem = async (id) => {
   const newInventory = inventory.filter(item => item.id !== id);
   
   try {
-    const { error } = await supabase
+    await supabase
       .from('agritrack_data')
       .update({ inventory: newInventory })
       .eq('id', 1);
     
-    if (error) throw error;
-    
-    setInventory(newInventory);
+    window.location.reload();
   } catch (error) {
     console.error('Delete error:', error);
-    alert('Error deleting item: ' + error.message);
+    alert('Error: ' + error.message);
   }
 };
 
@@ -185,21 +178,15 @@ const addMachineryItem = async () => {
   const newMachinery = [...machinery, newItem];
   
   try {
-    // Save to database first
-    const { error } = await supabase
+    await supabase
       .from('agritrack_data')
       .update({ machinery: newMachinery })
       .eq('id', 1);
     
-    if (error) throw error;
-    
-    // Then update local state
-    setMachinery(newMachinery);
-    setMachineryForm({ name: '', serial: '', category: '', status: 'Active' });
-    setShowMachineryModal(false);
+    window.location.reload();
   } catch (error) {
     console.error('Add error:', error);
-    alert('Error adding item: ' + error.message);
+    alert('Error: ' + error.message);
   }
 };
 
@@ -207,17 +194,15 @@ const deleteMachineryItem = async (id) => {
   const newMachinery = machinery.filter(item => item.id !== id);
   
   try {
-    const { error } = await supabase
+    await supabase
       .from('agritrack_data')
       .update({ machinery: newMachinery })
       .eq('id', 1);
     
-    if (error) throw error;
-    
-    setMachinery(newMachinery);
+    window.location.reload();
   } catch (error) {
     console.error('Delete error:', error);
-    alert('Error deleting item: ' + error.message);
+    alert('Error: ' + error.message);
   }
 };
 
