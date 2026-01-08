@@ -136,9 +136,21 @@ useEffect(() => {
   setTimeout(() => saveData(), 100);
 };
 
-  const deleteInventoryItem = (id) => {
-    setInventory(inventory.filter(item => item.id !== id));
-  };
+ const deleteInventoryItem = (id) => {
+  const newInventory = inventory.filter(item => item.id !== id);
+  setInventory(newInventory);
+  // Save after deleting
+  setTimeout(async () => {
+    try {
+      await supabase
+        .from('agritrack_data')
+        .update({ inventory: newInventory })
+        .eq('id', 1);
+    } catch (error) {
+      console.error('Delete error:', error);
+    }
+  }, 100);
+};
 
   const addMachineryItem = () => {
     setMachinery([...machinery, { ...machineryForm, id: Date.now() }]);
@@ -146,9 +158,21 @@ useEffect(() => {
     setShowMachineryModal(false);
   };
 
-  const deleteMachineryItem = (id) => {
-    setMachinery(machinery.filter(item => item.id !== id));
-  };
+const deleteMachineryItem = (id) => {
+  const newMachinery = machinery.filter(item => item.id !== id);
+  setMachinery(newMachinery);
+  // Save after deleting
+  setTimeout(async () => {
+    try {
+      await supabase
+        .from('agritrack_data')
+        .update({ machinery: newMachinery })
+        .eq('id', 1);
+    } catch (error) {
+      console.error('Delete error:', error);
+    }
+  }, 100);
+};
 
   if (loading) {
     return (
