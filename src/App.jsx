@@ -36,12 +36,11 @@ export default function App() {
     name: '', vinSerial: '', category: '', status: 'Active', photoUrl: ''
   });
   const [serviceForm, setServiceForm] = useState({
-    machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: '', receiptPhotoUrl: ''
+    machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: ''
   });
   
-  // OCR and photo upload states
+  // Photo upload state
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [processingOCR, setProcessingOCR] = useState(false);
 
   // Load initial data
   useEffect(() => {
@@ -133,64 +132,6 @@ export default function App() {
       };
       reader.readAsDataURL(file);
     });
-  };
-
-  // OCR Function using Claude API (processes receipt images)
-  const processReceiptOCR = async (imageBase64) => {
-    setProcessingOCR(true);
-    
-    try {
-      // Extract the base64 data without the data URL prefix
-      const base64Data = imageBase64.split(',')[1];
-      
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': 'YOUR_ANTHROPIC_API_KEY', // User will need to add their key
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-          model: 'claude-3-5-sonnet-20241022',
-          max_tokens: 1024,
-          messages: [{
-            role: 'user',
-            content: [
-              {
-                type: 'image',
-                source: {
-                  type: 'base64',
-                  media_type: 'image/jpeg',
-                  data: base64Data
-                }
-              },
-              {
-                type: 'text',
-                text: 'Extract information from this service receipt and return ONLY a JSON object with these fields: machineName, serviceType, date (YYYY-MM-DD format), cost (number only), technician, notes. If a field is not found, use empty string.'
-              }
-            ]
-          }]
-        })
-      });
-      
-      const data = await response.json();
-      const extractedText = data.content[0].text;
-      
-      // Parse the JSON response
-      try {
-        const extractedData = JSON.parse(extractedText);
-        return extractedData;
-      } catch (e) {
-        console.error('Failed to parse OCR response:', e);
-        return null;
-      }
-    } catch (error) {
-      console.error('OCR Error:', error);
-      alert('Failed to process receipt. Please enter details manually.');
-      return null;
-    } finally {
-      setProcessingOCR(false);
-    }
   };
 
   // Check inventory stock levels
@@ -379,7 +320,7 @@ export default function App() {
     };
     const newServiceHistory = [...serviceHistory, newRecord];
     
-    setServiceForm({ machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: '', receiptPhotoUrl: '' });
+    setServiceForm({ machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: '' });
     setShowServiceModal(false);
     
     try {
@@ -443,7 +384,7 @@ export default function App() {
 
   const cancelServiceEdit = () => {
     setEditingServiceId(null);
-    setServiceForm({ machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: '', receiptPhotoUrl: '' });
+    setServiceForm({ machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: '' });
   };
 
   const quickUpdateQuantity = async (id, delta) => {
@@ -1126,54 +1067,6 @@ export default function App() {
               value={serviceForm.notes}
               onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
             />
-            <div style={{ marginBottom: '16px', padding: '16px', background: '#1f2937', borderRadius: '8px', border: '1px solid #10b981' }}>
-              <label style={{ display: 'block', color: '#10b981', fontSize: '0.875rem', marginBottom: '8px', fontWeight: 'bold' }}>
-                🤖 Upload Receipt for Auto-Fill (OCR)
-              </label>
-              <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginBottom: '8px' }}>
-                Take a photo of your service receipt and we'll extract the information automatically!
-              </p>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={async (e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    const photoUrl = await handlePhotoUpload(file, 'receipt');
-                    if (photoUrl) {
-                      setServiceForm({ ...serviceForm, receiptPhotoUrl: photoUrl });
-                      
-                      // Process OCR
-                      const extractedData = await processReceiptOCR(photoUrl);
-                      if (extractedData) {
-                        setServiceForm({
-                          ...serviceForm,
-                          machineName: extractedData.machineName || serviceForm.machineName,
-                          serviceType: extractedData.serviceType || serviceForm.serviceType,
-                          date: extractedData.date || serviceForm.date,
-                          cost: extractedData.cost || serviceForm.cost,
-                          technician: extractedData.technician || serviceForm.technician,
-                          notes: extractedData.notes || serviceForm.notes,
-                          receiptPhotoUrl: photoUrl
-                        });
-                      }
-                    }
-                  }
-                }}
-                style={{ ...styles.input, padding: '8px' }}
-              />
-              {processingOCR && (
-                <p style={{ color: '#10b981', fontSize: '0.875rem', marginTop: '8px' }}>
-                  🔄 Processing receipt... This may take a few seconds...
-                </p>
-              )}
-              {serviceForm.receiptPhotoUrl && !processingOCR && (
-                <div style={{ marginTop: '8px' }}>
-                  <p style={{ color: '#10b981', fontSize: '0.875rem', marginBottom: '4px' }}>✓ Receipt uploaded and processed!</p>
-                  <img src={serviceForm.receiptPhotoUrl} alt="Receipt" style={{ maxWidth: '150px', borderRadius: '8px' }} />
-                </div>
-              )}
-            </div>
             <div style={{ display: 'flex', gap: '12px' }}>
               <button onClick={addServiceRecord} style={styles.primaryButton}>Add Record</button>
               <button onClick={() => setShowServiceModal(false)} style={styles.secondaryButton}>Cancel</button>
