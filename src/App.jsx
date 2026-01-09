@@ -41,6 +41,14 @@ export default function App() {
   
   // Photo upload state
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  
+  // Search and sort states
+  const [inventorySearch, setInventorySearch] = useState('');
+  const [inventorySort, setInventorySort] = useState('name-asc');
+  const [machinerySearch, setMachinerySearch] = useState('');
+  const [machinerySort, setMachinerySort] = useState('name-asc');
+  const [serviceSearch, setServiceSearch] = useState('');
+  const [serviceSort, setServiceSort] = useState('date-desc');
 
   // Load initial data
   useEffect(() => {
@@ -143,6 +151,86 @@ export default function App() {
     if (min > 0 && qty <= min) return 'low';
     if (max < Infinity && qty >= max) return 'high';
     return 'normal';
+  };
+
+  // Filter and sort functions
+  const getFilteredAndSortedInventory = () => {
+    let filtered = inventory.filter(item => {
+      const searchLower = inventorySearch.toLowerCase();
+      return (
+        item.name?.toLowerCase().includes(searchLower) ||
+        item.partNumber?.toLowerCase().includes(searchLower) ||
+        item.location?.toLowerCase().includes(searchLower)
+      );
+    });
+
+    return filtered.sort((a, b) => {
+      switch (inventorySort) {
+        case 'name-asc':
+          return (a.name || '').localeCompare(b.name || '');
+        case 'name-desc':
+          return (b.name || '').localeCompare(a.name || '');
+        case 'quantity-asc':
+          return (parseInt(a.quantity) || 0) - (parseInt(b.quantity) || 0);
+        case 'quantity-desc':
+          return (parseInt(b.quantity) || 0) - (parseInt(a.quantity) || 0);
+        case 'location':
+          return (a.location || '').localeCompare(b.location || '');
+        default:
+          return 0;
+      }
+    });
+  };
+
+  const getFilteredAndSortedMachinery = () => {
+    let filtered = machinery.filter(item => {
+      const searchLower = machinerySearch.toLowerCase();
+      return (
+        item.name?.toLowerCase().includes(searchLower) ||
+        item.vinSerial?.toLowerCase().includes(searchLower) ||
+        item.category?.toLowerCase().includes(searchLower)
+      );
+    });
+
+    return filtered.sort((a, b) => {
+      switch (machinerySort) {
+        case 'name-asc':
+          return (a.name || '').localeCompare(b.name || '');
+        case 'name-desc':
+          return (b.name || '').localeCompare(a.name || '');
+        case 'category':
+          return (a.category || '').localeCompare(b.category || '');
+        default:
+          return 0;
+      }
+    });
+  };
+
+  const getFilteredAndSortedService = () => {
+    let filtered = serviceHistory.filter(record => {
+      const searchLower = serviceSearch.toLowerCase();
+      return (
+        record.machineName?.toLowerCase().includes(searchLower) ||
+        record.serviceType?.toLowerCase().includes(searchLower) ||
+        record.technician?.toLowerCase().includes(searchLower) ||
+        record.notes?.toLowerCase().includes(searchLower)
+      );
+    });
+
+    return filtered.sort((a, b) => {
+      switch (serviceSort) {
+        case 'date-desc':
+          return (b.date || '').localeCompare(a.date || '');
+        case 'date-asc':
+          return (a.date || '').localeCompare(b.date || '');
+        case 'cost-desc':
+          return (parseFloat(b.cost) || 0) - (parseFloat(a.cost) || 0);
+        case 'cost-asc':
+          return (parseFloat(a.cost) || 0) - (parseFloat(b.cost) || 0);
+        default:
+          return 0;
+      }
+    });
   };
 
   const saveData = async () => {
@@ -510,14 +598,42 @@ export default function App() {
                 <Plus size={20} /> Add Item
               </button>
             </div>
+            
+            {/* Search and Sort Controls */}
+            <div style={styles.searchSortContainer}>
+              <input
+                type="text"
+                placeholder="🔍 Search inventory (name, part number, location)..."
+                value={inventorySearch}
+                onChange={(e) => setInventorySearch(e.target.value)}
+                style={styles.searchInput}
+              />
+              <select
+                value={inventorySort}
+                onChange={(e) => setInventorySort(e.target.value)}
+                style={styles.sortSelect}
+              >
+                <option value="name-asc">Name (A → Z)</option>
+                <option value="name-desc">Name (Z → A)</option>
+                <option value="quantity-asc">Stock (Low → High)</option>
+                <option value="quantity-desc">Stock (High → Low)</option>
+                <option value="location">Location</option>
+              </select>
+            </div>
+            
             {inventory.length === 0 ? (
               <div style={styles.emptyState}>
                 <Package size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
                 <p>No inventory items yet</p>
               </div>
+            ) : getFilteredAndSortedInventory().length === 0 ? (
+              <div style={styles.emptyState}>
+                <Package size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+                <p>No items match your search</p>
+              </div>
             ) : (
               <div style={styles.itemsList}>
-                {inventory.map(item => (
+                {getFilteredAndSortedInventory().map(item => (
                   <div key={item.id} style={styles.itemCard}>
                     {editingInventoryId === item.id ? (
                       // Edit Mode
@@ -682,14 +798,40 @@ export default function App() {
                 <Plus size={20} /> Add Machine
               </button>
             </div>
+            
+            {/* Search and Sort Controls */}
+            <div style={styles.searchSortContainer}>
+              <input
+                type="text"
+                placeholder="🔍 Search machinery (name, VIN/serial, category)..."
+                value={machinerySearch}
+                onChange={(e) => setMachinerySearch(e.target.value)}
+                style={styles.searchInput}
+              />
+              <select
+                value={machinerySort}
+                onChange={(e) => setMachinerySort(e.target.value)}
+                style={styles.sortSelect}
+              >
+                <option value="name-asc">Name (A → Z)</option>
+                <option value="name-desc">Name (Z → A)</option>
+                <option value="category">Category</option>
+              </select>
+            </div>
+            
             {machinery.length === 0 ? (
               <div style={styles.emptyState}>
                 <Truck size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
                 <p>No machinery yet</p>
               </div>
+            ) : getFilteredAndSortedMachinery().length === 0 ? (
+              <div style={styles.emptyState}>
+                <Truck size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+                <p>No machines match your search</p>
+              </div>
             ) : (
               <div style={styles.itemsList}>
-                {machinery.map(item => (
+                {getFilteredAndSortedMachinery().map(item => (
                   <div key={item.id} style={styles.itemCard}>
                     {editingMachineryId === item.id ? (
                       // Edit Mode
@@ -799,14 +941,41 @@ export default function App() {
                 <Plus size={20} /> Add Service Record
               </button>
             </div>
+            
+            {/* Search and Sort Controls */}
+            <div style={styles.searchSortContainer}>
+              <input
+                type="text"
+                placeholder="🔍 Search service records (machine, service type, technician, notes)..."
+                value={serviceSearch}
+                onChange={(e) => setServiceSearch(e.target.value)}
+                style={styles.searchInput}
+              />
+              <select
+                value={serviceSort}
+                onChange={(e) => setServiceSort(e.target.value)}
+                style={styles.sortSelect}
+              >
+                <option value="date-desc">Date (Newest First)</option>
+                <option value="date-asc">Date (Oldest First)</option>
+                <option value="cost-desc">Cost (High → Low)</option>
+                <option value="cost-asc">Cost (Low → High)</option>
+              </select>
+            </div>
+            
             {serviceHistory.length === 0 ? (
               <div style={styles.emptyState}>
                 <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
                 <p>No service records yet</p>
               </div>
+            ) : getFilteredAndSortedService().length === 0 ? (
+              <div style={styles.emptyState}>
+                <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+                <p>No records match your search</p>
+              </div>
             ) : (
               <div style={styles.itemsList}>
-                {serviceHistory.map(record => (
+                {getFilteredAndSortedService().map(record => (
                   <div key={record.id} style={styles.itemCard}>
                     {editingServiceId === record.id ? (
                       // Edit Mode
@@ -1252,6 +1421,34 @@ const styles = {
     marginBottom: '24px',
     flexWrap: 'wrap',
     gap: '12px',
+  },
+  searchSortContainer: {
+    display: 'flex',
+    gap: '12px',
+    marginBottom: '24px',
+    flexWrap: 'wrap',
+  },
+  searchInput: {
+    flex: 1,
+    minWidth: '250px',
+    padding: '12px 16px',
+    background: '#374151',
+    border: '1px solid #4b5563',
+    borderRadius: '8px',
+    color: 'white',
+    fontSize: '0.875rem',
+    outline: 'none',
+  },
+  sortSelect: {
+    padding: '12px 16px',
+    background: '#374151',
+    border: '1px solid #4b5563',
+    borderRadius: '8px',
+    color: 'white',
+    fontSize: '0.875rem',
+    cursor: 'pointer',
+    outline: 'none',
+    minWidth: '180px',
   },
   addButton: {
     padding: '12px 24px',
