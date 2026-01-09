@@ -146,10 +146,6 @@ export default function App() {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
   }
-};
-  // Save after adding
-  setTimeout(() => saveData(), 100);
-};
 
   const deleteInventoryItem = async (id) => {
     const newInventory = inventory.filter(item => item.id !== id);
@@ -497,12 +493,13 @@ export default function App() {
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
-        }
+        };
+      }
       `}</style>
     </div>
   );
 
-function Modal({ children, onClose, title }) {
+    }function Modal({ children, onClose, title }) {
   return (
     <div style={styles.modalOverlay}>
       <div style={styles.modal}>
