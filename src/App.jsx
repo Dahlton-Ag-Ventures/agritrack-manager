@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X } from 'lucide-react';
 
 // Supabase configuration
 const supabaseUrl = 'https://ekjjtfemibtaxyhuvgea.supabase.co';
@@ -20,14 +20,28 @@ export default function App() {
   
   const [showInventoryModal, setShowInventoryModal] = useState(false);
   const [showMachineryModal, setShowMachineryModal] = useState(false);
+  const [showServiceModal, setShowServiceModal] = useState(false);
   const [showDebugModal, setShowDebugModal] = useState(false);
   
+  // Edit state
+  const [editingInventoryId, setEditingInventoryId] = useState(null);
+  const [editingMachineryId, setEditingMachineryId] = useState(null);
+  const [editingServiceId, setEditingServiceId] = useState(null);
+  
   const [inventoryForm, setInventoryForm] = useState({ 
-    name: '', partNumber: '', quantity: '', location: '', category: '' 
+    name: '', partNumber: '', quantity: '', location: '', category: '', 
+    minQuantity: '', maxQuantity: '', photoUrl: ''
   });
   const [machineryForm, setMachineryForm] = useState({ 
-    name: '', serial: '', category: '', status: 'Active' 
+    name: '', vinSerial: '', category: '', status: 'Active', photoUrl: ''
   });
+  const [serviceForm, setServiceForm] = useState({
+    machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: '', receiptPhotoUrl: ''
+  });
+  
+  // OCR and photo upload states
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [processingOCR, setProcessingOCR] = useState(false);
 
   // Load initial data
   useEffect(() => {
@@ -73,25 +87,16 @@ export default function App() {
           table: 'agritrack_data',
           filter: 'id=eq.1'
         },
-(payload) => {
-  console.log('🔔 Real-time update received!', payload);
-  if (payload.new) {
-    setInventory(payload.new.inventory || []);
-    setMachinery(payload.new.machinery || []);
-    setServiceHistory(payload.new.service_history || []);
-    setLastSync(new Date());
-    setRealtimeStatus('connected');
-  }
-}
-    if (JSON.stringify(newMach) !== JSON.stringify(machinery)) {
-      setMachinery(newMach);
-    }
-    
-    setServiceHistory(payload.new.service_history || []);
-    setLastSync(new Date());
-    setRealtimeStatus('connected');
-  }
-}
+        (payload) => {
+          console.log('🔔 Real-time update received!', payload);
+          if (payload.new) {
+            setInventory(payload.new.inventory || []);
+            setMachinery(payload.new.machinery || []);
+            setServiceHistory(payload.new.service_history || []);
+            setLastSync(new Date());
+            setRealtimeStatus('connected');
+          }
+        }
       )
       .subscribe((status) => {
         console.log('🔔 Real-time status:', status);
@@ -102,6 +107,101 @@ export default function App() {
           setRealtimeStatus('error');
         }
       });
+  };
+
+  // Photo Upload Function (converts to base64 for storage in JSON)
+  const handlePhotoUpload = async (file, formType) => {
+    if (!file) return null;
+    
+    // Check file size (limit to 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image too large. Please use an image under 5MB.');
+      return null;
+    }
+    
+    setUploadingPhoto(true);
+    
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUploadingPhoto(false);
+        resolve(reader.result); // Returns base64 string
+      };
+      reader.onerror = () => {
+        setUploadingPhoto(false);
+        reject(new Error('Failed to read file'));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // OCR Function using Claude API (processes receipt images)
+  const processReceiptOCR = async (imageBase64) => {
+    setProcessingOCR(true);
+    
+    try {
+      // Extract the base64 data without the data URL prefix
+      const base64Data = imageBase64.split(',')[1];
+      
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': 'YOUR_ANTHROPIC_API_KEY', // User will need to add their key
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 1024,
+          messages: [{
+            role: 'user',
+            content: [
+              {
+                type: 'image',
+                source: {
+                  type: 'base64',
+                  media_type: 'image/jpeg',
+                  data: base64Data
+                }
+              },
+              {
+                type: 'text',
+                text: 'Extract information from this service receipt and return ONLY a JSON object with these fields: machineName, serviceType, date (YYYY-MM-DD format), cost (number only), technician, notes. If a field is not found, use empty string.'
+              }
+            ]
+          }]
+        })
+      });
+      
+      const data = await response.json();
+      const extractedText = data.content[0].text;
+      
+      // Parse the JSON response
+      try {
+        const extractedData = JSON.parse(extractedText);
+        return extractedData;
+      } catch (e) {
+        console.error('Failed to parse OCR response:', e);
+        return null;
+      }
+    } catch (error) {
+      console.error('OCR Error:', error);
+      alert('Failed to process receipt. Please enter details manually.');
+      return null;
+    } finally {
+      setProcessingOCR(false);
+    }
+  };
+
+  // Check inventory stock levels
+  const getStockStatus = (item) => {
+    const qty = parseInt(item.quantity) || 0;
+    const min = parseInt(item.minQuantity) || 0;
+    const max = parseInt(item.maxQuantity) || Infinity;
+    
+    if (min > 0 && qty <= min) return 'low';
+    if (max < Infinity && qty >= max) return 'high';
+    return 'normal';
   };
 
   const saveData = async () => {
@@ -127,74 +227,240 @@ export default function App() {
     } finally {
       setSyncing(false);
     }
- };
-  // Remove auto-save - only save when user makes changes
-    const addInventoryItem = async () => {
-  const newItem = { ...inventoryForm, id: Date.now() };
-  const newInventory = [...inventory, newItem];
-  
-  setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '' });
-  setShowInventoryModal(false);
-  
-  try {
-    await supabase
-      .from('agritrack_data')
-      .update({ inventory: newInventory })
-      .eq('id', 1);
-    // Don't update local state - let real-time do it
-  } catch (error) {
-    console.error('Add error:', error);
-    alert('Error: ' + error.message);
-  }
-};
+  };
+
+  const addInventoryItem = async () => {
+    const newItem = { ...inventoryForm, id: Date.now() };
+    const newInventory = [...inventory, newItem];
+    
+    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
+    setShowInventoryModal(false);
+    
+    try {
+      await supabase
+        .from('agritrack_data')
+        .update({ inventory: newInventory })
+        .eq('id', 1);
+    } catch (error) {
+      console.error('Add error:', error);
+      alert('Error: ' + error.message);
+    }
+  };
+
   const deleteInventoryItem = async (id) => {
+    if (!confirm('Are you sure you want to delete this item?')) return;
+    
     const newInventory = inventory.filter(item => item.id !== id);
-  
-  try {
-    await supabase
-      .from('agritrack_data')
-      .update({ inventory: newInventory })
-      .eq('id', 1);
-    // Don't update local state - let real-time do it
-  } catch (error) {
-    console.error('Delete error:', error);
-    alert('Error: ' + error.message);
-  }
-};
+    
+    try {
+      await supabase
+        .from('agritrack_data')
+        .update({ inventory: newInventory })
+        .eq('id', 1);
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Error: ' + error.message);
+    }
+  };
+
+  const startEditInventory = (item) => {
+    setEditingInventoryId(item.id);
+    setInventoryForm({
+      name: item.name || '',
+      partNumber: item.partNumber || '',
+      quantity: item.quantity || '',
+      location: item.location || '',
+      category: item.category || '',
+      minQuantity: item.minQuantity || '',
+      maxQuantity: item.maxQuantity || '',
+      photoUrl: item.photoUrl || ''
+    });
+  };
+
+  const saveInventoryEdit = async (id) => {
+    const newInventory = inventory.map(item => 
+      item.id === id ? { ...item, ...inventoryForm } : item
+    );
+    
+    setEditingInventoryId(null);
+    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '' });
+    
+    try {
+      await supabase
+        .from('agritrack_data')
+        .update({ inventory: newInventory })
+        .eq('id', 1);
+    } catch (error) {
+      console.error('Update error:', error);
+      alert('Error: ' + error.message);
+    }
+  };
+
+  const cancelInventoryEdit = () => {
+    setEditingInventoryId(null);
+    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
+  };
 
   const addMachineryItem = async () => {
     const newItem = { ...machineryForm, id: Date.now() };
     const newMachinery = [...machinery, newItem];
-  
-  setMachineryForm({ name: '', serial: '', category: '', status: 'Active' });
-  setShowMachineryModal(false);
-  
-  try {
-    await supabase
-      .from('agritrack_data')
-      .update({ machinery: newMachinery })
-      .eq('id', 1);
-    // Don't update local state - let real-time do it
-  } catch (error) {
-    console.error('Add error:', error);
-    alert('Error: ' + error.message);
-  }
-};
+    
+    setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '' });
+    setShowMachineryModal(false);
+    
+    try {
+      await supabase
+        .from('agritrack_data')
+        .update({ machinery: newMachinery })
+        .eq('id', 1);
+    } catch (error) {
+      console.error('Add error:', error);
+      alert('Error: ' + error.message);
+    }
+  };
 
   const deleteMachineryItem = async (id) => {
+    if (!confirm('Are you sure you want to delete this machine?')) return;
+    
     const newMachinery = machinery.filter(item => item.id !== id);
-  
-  try {
-    await supabase
-      .from('agritrack_data')
-      .update({ machinery: newMachinery })
-      .eq('id', 1);
-    // Don't update local state - let real-time do it
-  } catch (error) {
-    console.error('Delete error:', error);
-    alert('Error: ' + error.message);
-  }
-};
+    
+    try {
+      await supabase
+        .from('agritrack_data')
+        .update({ machinery: newMachinery })
+        .eq('id', 1);
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Error: ' + error.message);
+    }
+  };
+
+  const startEditMachinery = (item) => {
+    setEditingMachineryId(item.id);
+    setMachineryForm({
+      name: item.name || '',
+      vinSerial: item.vinSerial || '',
+      category: item.category || '',
+      status: item.status || 'Active',
+      photoUrl: item.photoUrl || ''
+    });
+  };
+
+  const saveMachineryEdit = async (id) => {
+    const newMachinery = machinery.map(item => 
+      item.id === id ? { ...item, ...machineryForm } : item
+    );
+    
+    setEditingMachineryId(null);
+    setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active' });
+    
+    try {
+      await supabase
+        .from('agritrack_data')
+        .update({ machinery: newMachinery })
+        .eq('id', 1);
+    } catch (error) {
+      console.error('Update error:', error);
+      alert('Error: ' + error.message);
+    }
+  };
+
+  const cancelMachineryEdit = () => {
+    setEditingMachineryId(null);
+    setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '' });
+  };
+
+  // Service Record Functions
+  const addServiceRecord = async () => {
+    const newRecord = { 
+      ...serviceForm, 
+      id: Date.now(),
+      date: serviceForm.date || new Date().toISOString().split('T')[0]
+    };
+    const newServiceHistory = [...serviceHistory, newRecord];
+    
+    setServiceForm({ machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: '', receiptPhotoUrl: '' });
+    setShowServiceModal(false);
+    
+    try {
+      await supabase
+        .from('agritrack_data')
+        .update({ service_history: newServiceHistory })
+        .eq('id', 1);
+    } catch (error) {
+      console.error('Add error:', error);
+      alert('Error: ' + error.message);
+    }
+  };
+
+  const deleteServiceRecord = async (id) => {
+    if (!confirm('Are you sure you want to delete this service record?')) return;
+    
+    const newServiceHistory = serviceHistory.filter(record => record.id !== id);
+    
+    try {
+      await supabase
+        .from('agritrack_data')
+        .update({ service_history: newServiceHistory })
+        .eq('id', 1);
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Error: ' + error.message);
+    }
+  };
+
+  const startEditService = (record) => {
+    setEditingServiceId(record.id);
+    setServiceForm({
+      machineName: record.machineName || '',
+      serviceType: record.serviceType || '',
+      date: record.date || '',
+      cost: record.cost || '',
+      notes: record.notes || '',
+      technician: record.technician || '',
+      receiptPhotoUrl: record.receiptPhotoUrl || ''
+    });
+  };
+
+  const saveServiceEdit = async (id) => {
+    const newServiceHistory = serviceHistory.map(record => 
+      record.id === id ? { ...record, ...serviceForm } : record
+    );
+    
+    setEditingServiceId(null);
+    setServiceForm({ machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: '' });
+    
+    try {
+      await supabase
+        .from('agritrack_data')
+        .update({ service_history: newServiceHistory })
+        .eq('id', 1);
+    } catch (error) {
+      console.error('Update error:', error);
+      alert('Error: ' + error.message);
+    }
+  };
+
+  const cancelServiceEdit = () => {
+    setEditingServiceId(null);
+    setServiceForm({ machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: '', receiptPhotoUrl: '' });
+  };
+
+  const quickUpdateQuantity = async (id, delta) => {
+    const newInventory = inventory.map(item => 
+      item.id === id ? { ...item, quantity: Math.max(0, (parseInt(item.quantity) || 0) + delta) } : item
+    );
+    
+    try {
+      await supabase
+        .from('agritrack_data')
+        .update({ inventory: newInventory })
+        .eq('id', 1);
+    } catch (error) {
+      console.error('Update error:', error);
+      alert('Error: ' + error.message);
+    }
+  };
 
   if (loading) {
     return (
@@ -218,8 +484,8 @@ export default function App() {
             </p>
           </div>
           <div style={styles.statusContainer}>
-          {false && syncing && (
-  <div style={styles.syncingBadge}>
+            {syncing && (
+              <div style={styles.syncingBadge}>
                 <RefreshCw size={12} style={{ animation: 'spin 0.6s linear infinite' }} />
                 Syncing...
               </div>
@@ -244,7 +510,7 @@ export default function App() {
 
         {/* Tabs */}
         <div style={styles.tabs}>
-          {['home', 'inventory', 'machinery'].map(tab => (
+          {['home', 'inventory', 'machinery', 'service'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -256,6 +522,7 @@ export default function App() {
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
               {tab === 'inventory' && ` (${inventory.length})`}
               {tab === 'machinery' && ` (${machinery.length})`}
+              {tab === 'service' && ` (${serviceHistory.length})`}
             </button>
           ))}
         </div>
@@ -297,42 +564,167 @@ export default function App() {
         {activeTab === 'inventory' && (
           <div>
             <div style={styles.tabHeader}>
-              <h2>Inventory ({inventory.length} items)</h2>
+              <h2 style={{ fontSize: '1.5rem' }}>Inventory Items</h2>
               <button onClick={() => setShowInventoryModal(true)} style={styles.addButton}>
                 <Plus size={20} /> Add Item
               </button>
             </div>
-
             {inventory.length === 0 ? (
               <div style={styles.emptyState}>
-                <Package size={64} style={{ color: '#6b7280', margin: '0 auto 16px' }} />
-                <h3>No Inventory Items Yet</h3>
-                <p>Start by adding your first inventory item</p>
-                <button onClick={() => setShowInventoryModal(true)} style={styles.addButton}>
-                  Add Your First Item
-                </button>
+                <Package size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+                <p>No inventory items yet</p>
               </div>
             ) : (
               <div style={styles.itemsList}>
                 {inventory.map(item => (
                   <div key={item.id} style={styles.itemCard}>
-                    <div style={{ flex: 1 }}>
-                      <h3 style={{ fontSize: '1.25rem', marginBottom: '4px' }}>{item.name}</h3>
-                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Part #: {item.partNumber}</p>
-                      <div style={styles.itemDetails}>
-                        <div>
-                          <span style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Quantity:</span>
-                          <p style={{ fontWeight: '500' }}>{item.quantity}</p>
+                    {editingInventoryId === item.id ? (
+                      // Edit Mode
+                      <div style={{ flex: 1 }}>
+                        <input
+                          style={styles.input}
+                          placeholder="Item Name"
+                          value={inventoryForm.name}
+                          onChange={(e) => setInventoryForm({ ...inventoryForm, name: e.target.value })}
+                        />
+                        <input
+                          style={styles.input}
+                          placeholder="Part Number"
+                          value={inventoryForm.partNumber}
+                          onChange={(e) => setInventoryForm({ ...inventoryForm, partNumber: e.target.value })}
+                        />
+                        <input
+                          style={styles.input}
+                          type="number"
+                          placeholder="Quantity"
+                          value={inventoryForm.quantity}
+                          onChange={(e) => setInventoryForm({ ...inventoryForm, quantity: e.target.value })}
+                        />
+                        <input
+                          style={styles.input}
+                          placeholder="Location"
+                          value={inventoryForm.location}
+                          onChange={(e) => setInventoryForm({ ...inventoryForm, location: e.target.value })}
+                        />
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                          <input
+                            style={styles.input}
+                            type="number"
+                            placeholder="Min Quantity"
+                            value={inventoryForm.minQuantity}
+                            onChange={(e) => setInventoryForm({ ...inventoryForm, minQuantity: e.target.value })}
+                          />
+                          <input
+                            style={styles.input}
+                            type="number"
+                            placeholder="Max Quantity"
+                            value={inventoryForm.maxQuantity}
+                            onChange={(e) => setInventoryForm({ ...inventoryForm, maxQuantity: e.target.value })}
+                          />
                         </div>
-                        <div>
-                          <span style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Location:</span>
-                          <p style={{ fontWeight: '500' }}>{item.location}</p>
+                        <div style={{ marginBottom: '12px' }}>
+                          <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+                            📸 Upload Photo
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={async (e) => {
+                              const file = e.target.files[0];
+                              if (file) {
+                                const photoUrl = await handlePhotoUpload(file, 'inventory');
+                                if (photoUrl) {
+                                  setInventoryForm({ ...inventoryForm, photoUrl });
+                                }
+                              }
+                            }}
+                            style={{ ...styles.input, padding: '8px' }}
+                          />
+                          {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
+                          {inventoryForm.photoUrl && (
+                            <img src={inventoryForm.photoUrl} alt="Preview" style={{ maxWidth: '100px', marginTop: '8px', borderRadius: '8px' }} />
+                          )}
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                          <button onClick={() => saveInventoryEdit(item.id)} style={styles.saveButton}>
+                            <Save size={16} /> Save
+                          </button>
+                          <button onClick={cancelInventoryEdit} style={styles.cancelButton}>
+                            <X size={16} /> Cancel
+                          </button>
                         </div>
                       </div>
-                    </div>
-                    <button onClick={() => deleteInventoryItem(item.id)} style={styles.deleteButton}>
-                      <Trash2 size={16} />
-                    </button>
+                    ) : (
+                      // View Mode
+                      <>
+                        {item.photoUrl && (
+                          <img 
+                            src={item.photoUrl} 
+                            alt={item.name} 
+                            style={{ 
+                              width: '100px', 
+                              height: '100px', 
+                              objectFit: 'cover', 
+                              borderRadius: '8px',
+                              marginRight: '16px'
+                            }} 
+                          />
+                        )}
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                            <h3 style={{ fontSize: '1.25rem' }}>{item.name}</h3>
+                            {getStockStatus(item) === 'low' && (
+                              <span style={styles.stockBadgeLow}>⚠️ Low Stock</span>
+                            )}
+                            {getStockStatus(item) === 'high' && (
+                              <span style={styles.stockBadgeHigh}>⚠️ Overstocked</span>
+                            )}
+                          </div>
+                          <div style={styles.itemDetails}>
+                            <div>
+                              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Part Number</p>
+                              <p>{item.partNumber || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Quantity</p>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <button 
+                                  onClick={() => quickUpdateQuantity(item.id, -1)}
+                                  style={styles.quantityButton}
+                                >
+                                  −
+                                </button>
+                                <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
+                                <button 
+                                  onClick={() => quickUpdateQuantity(item.id, 1)}
+                                  style={styles.quantityButton}
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                            <div>
+                              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Location</p>
+                              <p>{item.location || 'N/A'}</p>
+                            </div>
+                            {(item.minQuantity || item.maxQuantity) && (
+                              <div>
+                                <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Min / Max</p>
+                                <p>{item.minQuantity || '—'} / {item.maxQuantity || '—'}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button onClick={() => startEditInventory(item)} style={styles.editButton}>
+                            <Edit2 size={16} />
+                          </button>
+                          <button onClick={() => deleteInventoryItem(item.id)} style={styles.deleteButton}>
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
@@ -344,45 +736,112 @@ export default function App() {
         {activeTab === 'machinery' && (
           <div>
             <div style={styles.tabHeader}>
-              <h2>Machinery ({machinery.length} machines)</h2>
-              <button onClick={() => setShowMachineryModal(true)} style={{ ...styles.addButton, background: '#06b6d4' }}>
+              <h2 style={{ fontSize: '1.5rem' }}>Machinery</h2>
+              <button onClick={() => setShowMachineryModal(true)} style={styles.addButton}>
                 <Plus size={20} /> Add Machine
               </button>
             </div>
-
             {machinery.length === 0 ? (
               <div style={styles.emptyState}>
-                <Truck size={64} style={{ color: '#6b7280', margin: '0 auto 16px' }} />
-                <h3>No Machinery Yet</h3>
-                <p>Start by adding your first machine</p>
-                <button onClick={() => setShowMachineryModal(true)} style={{ ...styles.addButton, background: '#06b6d4' }}>
-                  Add Your First Machine
-                </button>
+                <Truck size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+                <p>No machinery yet</p>
               </div>
             ) : (
               <div style={styles.itemsList}>
                 {machinery.map(item => (
                   <div key={item.id} style={styles.itemCard}>
-                    <div style={{ flex: 1 }}>
-                      <h3 style={{ fontSize: '1.25rem', marginBottom: '4px' }}>{item.name}</h3>
-                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Serial: {item.serial}</p>
-                      <div style={styles.itemDetails}>
-                        <div>
-                          <span style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Category:</span>
-                          <p style={{ fontWeight: '500' }}>{item.category}</p>
+                    {editingMachineryId === item.id ? (
+                      // Edit Mode
+                      <div style={{ flex: 1 }}>
+                        <input
+                          style={styles.input}
+                          placeholder="Machine Name"
+                          value={machineryForm.name}
+                          onChange={(e) => setMachineryForm({ ...machineryForm, name: e.target.value })}
+                        />
+                        <input
+                          style={styles.input}
+                          placeholder="VIN / Serial Number"
+                          value={machineryForm.vinSerial}
+                          onChange={(e) => setMachineryForm({ ...machineryForm, vinSerial: e.target.value })}
+                        />
+                        <input
+                          style={styles.input}
+                          placeholder="Category"
+                          value={machineryForm.category}
+                          onChange={(e) => setMachineryForm({ ...machineryForm, category: e.target.value })}
+                        />
+                        <div style={{ marginBottom: '12px' }}>
+                          <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+                            📸 Upload Photo
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={async (e) => {
+                              const file = e.target.files[0];
+                              if (file) {
+                                const photoUrl = await handlePhotoUpload(file, 'machinery');
+                                if (photoUrl) {
+                                  setMachineryForm({ ...machineryForm, photoUrl });
+                                }
+                              }
+                            }}
+                            style={{ ...styles.input, padding: '8px' }}
+                          />
+                          {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
+                          {machineryForm.photoUrl && (
+                            <img src={machineryForm.photoUrl} alt="Preview" style={{ maxWidth: '100px', marginTop: '8px', borderRadius: '8px' }} />
+                          )}
                         </div>
-                        <div>
-                          <span style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Status:</span>
-                          <p style={{ 
-                            fontWeight: '500',
-                            color: item.status === 'Active' ? '#10b981' : '#fbbf24'
-                          }}>{item.status}</p>
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                          <button onClick={() => saveMachineryEdit(item.id)} style={styles.saveButton}>
+                            <Save size={16} /> Save
+                          </button>
+                          <button onClick={cancelMachineryEdit} style={styles.cancelButton}>
+                            <X size={16} /> Cancel
+                          </button>
                         </div>
                       </div>
-                    </div>
-                    <button onClick={() => deleteMachineryItem(item.id)} style={styles.deleteButton}>
-                      <Trash2 size={16} />
-                    </button>
+                    ) : (
+                      // View Mode
+                      <>
+                        {item.photoUrl && (
+                          <img 
+                            src={item.photoUrl} 
+                            alt={item.name} 
+                            style={{ 
+                              width: '100px', 
+                              height: '100px', 
+                              objectFit: 'cover', 
+                              borderRadius: '8px',
+                              marginRight: '16px'
+                            }} 
+                          />
+                        )}
+                        <div style={{ flex: 1 }}>
+                          <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{item.name}</h3>
+                          <div style={styles.itemDetails}>
+                            <div>
+                              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>VIN/Serial</p>
+                              <p>{item.vinSerial || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Category</p>
+                              <p>{item.category || 'N/A'}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button onClick={() => startEditMachinery(item)} style={styles.editButton}>
+                            <Edit2 size={16} />
+                          </button>
+                          <button onClick={() => deleteMachineryItem(item.id)} style={styles.deleteButton}>
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
@@ -390,98 +849,346 @@ export default function App() {
           </div>
         )}
 
-        {/* Modals */}
+        {/* Service Records Tab */}
+        {activeTab === 'service' && (
+          <div>
+            <div style={styles.tabHeader}>
+              <h2 style={{ fontSize: '1.5rem' }}>Service Records</h2>
+              <button onClick={() => setShowServiceModal(true)} style={styles.addButton}>
+                <Plus size={20} /> Add Service Record
+              </button>
+            </div>
+            {serviceHistory.length === 0 ? (
+              <div style={styles.emptyState}>
+                <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+                <p>No service records yet</p>
+              </div>
+            ) : (
+              <div style={styles.itemsList}>
+                {serviceHistory.map(record => (
+                  <div key={record.id} style={styles.itemCard}>
+                    {editingServiceId === record.id ? (
+                      // Edit Mode
+                      <div style={{ flex: 1 }}>
+                        <input
+                          style={styles.input}
+                          placeholder="Machine Name"
+                          value={serviceForm.machineName}
+                          onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
+                        />
+                        <input
+                          style={styles.input}
+                          placeholder="Service Type (e.g., Oil Change, Repair)"
+                          value={serviceForm.serviceType}
+                          onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
+                        />
+                        <input
+                          style={styles.input}
+                          type="date"
+                          placeholder="Date"
+                          value={serviceForm.date}
+                          onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
+                        />
+                        <input
+                          style={styles.input}
+                          type="number"
+                          placeholder="Cost"
+                          value={serviceForm.cost}
+                          onChange={(e) => setServiceForm({ ...serviceForm, cost: e.target.value })}
+                        />
+                        <input
+                          style={styles.input}
+                          placeholder="Technician"
+                          value={serviceForm.technician}
+                          onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
+                        />
+                        <textarea
+                          style={{ ...styles.input, minHeight: '80px', resize: 'vertical' }}
+                          placeholder="Notes"
+                          value={serviceForm.notes}
+                          onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
+                        />
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                          <button onClick={() => saveServiceEdit(record.id)} style={styles.saveButton}>
+                            <Save size={16} /> Save
+                          </button>
+                          <button onClick={cancelServiceEdit} style={styles.cancelButton}>
+                            <X size={16} /> Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      // View Mode
+                      <>
+                        <div style={{ flex: 1 }}>
+                          <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
+                          <p style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '12px' }}>{record.serviceType}</p>
+                          <div style={styles.itemDetails}>
+                            <div>
+                              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Date</p>
+                              <p>{record.date || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Cost</p>
+                              <p>${record.cost || '0'}</p>
+                            </div>
+                            <div>
+                              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Technician</p>
+                              <p>{record.technician || 'N/A'}</p>
+                            </div>
+                          </div>
+                          {record.notes && (
+                            <div style={{ marginTop: '12px', padding: '12px', background: '#1f2937', borderRadius: '8px' }}>
+                              <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Notes:</p>
+                              <p style={{ fontSize: '0.875rem' }}>{record.notes}</p>
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button onClick={() => startEditService(record)} style={styles.editButton}>
+                            <Edit2 size={16} />
+                          </button>
+                          <button onClick={() => deleteServiceRecord(record.id)} style={styles.deleteButton}>
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Add Inventory Modal */}
         {showInventoryModal && (
-          <Modal onClose={() => setShowInventoryModal(false)} title="Add Inventory Item">
+          <Modal title="Add Inventory Item" onClose={() => setShowInventoryModal(false)}>
             <input
-              type="text"
-              placeholder="Part Name"
+              style={styles.input}
+              placeholder="Item Name"
               value={inventoryForm.name}
               onChange={(e) => setInventoryForm({ ...inventoryForm, name: e.target.value })}
-              style={styles.input}
             />
             <input
-              type="text"
+              style={styles.input}
               placeholder="Part Number"
               value={inventoryForm.partNumber}
               onChange={(e) => setInventoryForm({ ...inventoryForm, partNumber: e.target.value })}
-              style={styles.input}
             />
             <input
+              style={styles.input}
               type="number"
               placeholder="Quantity"
               value={inventoryForm.quantity}
               onChange={(e) => setInventoryForm({ ...inventoryForm, quantity: e.target.value })}
-              style={styles.input}
             />
             <input
-              type="text"
+              style={styles.input}
               placeholder="Location"
               value={inventoryForm.location}
               onChange={(e) => setInventoryForm({ ...inventoryForm, location: e.target.value })}
-              style={styles.input}
             />
-            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-              <button onClick={addInventoryItem} style={styles.primaryButton}>Add</button>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <input
+                style={styles.input}
+                type="number"
+                placeholder="Min Quantity"
+                value={inventoryForm.minQuantity}
+                onChange={(e) => setInventoryForm({ ...inventoryForm, minQuantity: e.target.value })}
+              />
+              <input
+                style={styles.input}
+                type="number"
+                placeholder="Max Quantity"
+                value={inventoryForm.maxQuantity}
+                onChange={(e) => setInventoryForm({ ...inventoryForm, maxQuantity: e.target.value })}
+              />
+            </div>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+                📸 Upload Photo (Optional)
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const photoUrl = await handlePhotoUpload(file, 'inventory');
+                    if (photoUrl) {
+                      setInventoryForm({ ...inventoryForm, photoUrl });
+                    }
+                  }
+                }}
+                style={{ ...styles.input, padding: '8px' }}
+              />
+              {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
+              {inventoryForm.photoUrl && (
+                <img src={inventoryForm.photoUrl} alt="Preview" style={{ maxWidth: '100px', marginTop: '8px', borderRadius: '8px' }} />
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button onClick={addInventoryItem} style={styles.primaryButton}>Add Item</button>
               <button onClick={() => setShowInventoryModal(false)} style={styles.secondaryButton}>Cancel</button>
             </div>
           </Modal>
         )}
 
+        {/* Add Machinery Modal */}
         {showMachineryModal && (
-          <Modal onClose={() => setShowMachineryModal(false)} title="Add Machine">
+          <Modal title="Add Machinery" onClose={() => setShowMachineryModal(false)}>
             <input
-              type="text"
+              style={styles.input}
               placeholder="Machine Name"
               value={machineryForm.name}
               onChange={(e) => setMachineryForm({ ...machineryForm, name: e.target.value })}
-              style={styles.input}
             />
             <input
-              type="text"
-              placeholder="Serial Number"
-              value={machineryForm.serial}
-              onChange={(e) => setMachineryForm({ ...machineryForm, serial: e.target.value })}
               style={styles.input}
+              placeholder="VIN / Serial Number"
+              value={machineryForm.vinSerial}
+              onChange={(e) => setMachineryForm({ ...machineryForm, vinSerial: e.target.value })}
             />
             <input
-              type="text"
+              style={styles.input}
               placeholder="Category"
               value={machineryForm.category}
               onChange={(e) => setMachineryForm({ ...machineryForm, category: e.target.value })}
-              style={styles.input}
             />
-            <select
-              value={machineryForm.status}
-              onChange={(e) => setMachineryForm({ ...machineryForm, status: e.target.value })}
-              style={styles.input}
-            >
-              <option>Active</option>
-              <option>Maintenance</option>
-              <option>Inactive</option>
-            </select>
-            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-              <button onClick={addMachineryItem} style={{ ...styles.primaryButton, background: '#06b6d4' }}>Add</button>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+                📸 Upload Photo (Optional)
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const photoUrl = await handlePhotoUpload(file, 'machinery');
+                    if (photoUrl) {
+                      setMachineryForm({ ...machineryForm, photoUrl });
+                    }
+                  }
+                }}
+                style={{ ...styles.input, padding: '8px' }}
+              />
+              {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
+              {machineryForm.photoUrl && (
+                <img src={machineryForm.photoUrl} alt="Preview" style={{ maxWidth: '100px', marginTop: '8px', borderRadius: '8px' }} />
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button onClick={addMachineryItem} style={styles.primaryButton}>Add Machine</button>
               <button onClick={() => setShowMachineryModal(false)} style={styles.secondaryButton}>Cancel</button>
             </div>
           </Modal>
         )}
 
+        {/* Add Service Record Modal */}
+        {showServiceModal && (
+          <Modal title="Add Service Record" onClose={() => setShowServiceModal(false)}>
+            <input
+              style={styles.input}
+              placeholder="Machine Name"
+              value={serviceForm.machineName}
+              onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
+            />
+            <input
+              style={styles.input}
+              placeholder="Service Type (e.g., Oil Change, Repair, Inspection)"
+              value={serviceForm.serviceType}
+              onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
+            />
+            <input
+              style={styles.input}
+              type="date"
+              value={serviceForm.date}
+              onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
+            />
+            <input
+              style={styles.input}
+              type="number"
+              placeholder="Cost ($)"
+              value={serviceForm.cost}
+              onChange={(e) => setServiceForm({ ...serviceForm, cost: e.target.value })}
+            />
+            <input
+              style={styles.input}
+              placeholder="Technician Name"
+              value={serviceForm.technician}
+              onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
+            />
+            <textarea
+              style={{ ...styles.input, minHeight: '100px', resize: 'vertical' }}
+              placeholder="Service notes and details..."
+              value={serviceForm.notes}
+              onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
+            />
+            <div style={{ marginBottom: '16px', padding: '16px', background: '#1f2937', borderRadius: '8px', border: '1px solid #10b981' }}>
+              <label style={{ display: 'block', color: '#10b981', fontSize: '0.875rem', marginBottom: '8px', fontWeight: 'bold' }}>
+                🤖 Upload Receipt for Auto-Fill (OCR)
+              </label>
+              <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginBottom: '8px' }}>
+                Take a photo of your service receipt and we'll extract the information automatically!
+              </p>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const photoUrl = await handlePhotoUpload(file, 'receipt');
+                    if (photoUrl) {
+                      setServiceForm({ ...serviceForm, receiptPhotoUrl: photoUrl });
+                      
+                      // Process OCR
+                      const extractedData = await processReceiptOCR(photoUrl);
+                      if (extractedData) {
+                        setServiceForm({
+                          ...serviceForm,
+                          machineName: extractedData.machineName || serviceForm.machineName,
+                          serviceType: extractedData.serviceType || serviceForm.serviceType,
+                          date: extractedData.date || serviceForm.date,
+                          cost: extractedData.cost || serviceForm.cost,
+                          technician: extractedData.technician || serviceForm.technician,
+                          notes: extractedData.notes || serviceForm.notes,
+                          receiptPhotoUrl: photoUrl
+                        });
+                      }
+                    }
+                  }
+                }}
+                style={{ ...styles.input, padding: '8px' }}
+              />
+              {processingOCR && (
+                <p style={{ color: '#10b981', fontSize: '0.875rem', marginTop: '8px' }}>
+                  🔄 Processing receipt... This may take a few seconds...
+                </p>
+              )}
+              {serviceForm.receiptPhotoUrl && !processingOCR && (
+                <div style={{ marginTop: '8px' }}>
+                  <p style={{ color: '#10b981', fontSize: '0.875rem', marginBottom: '4px' }}>✓ Receipt uploaded and processed!</p>
+                  <img src={serviceForm.receiptPhotoUrl} alt="Receipt" style={{ maxWidth: '150px', borderRadius: '8px' }} />
+                </div>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button onClick={addServiceRecord} style={styles.primaryButton}>Add Record</button>
+              <button onClick={() => setShowServiceModal(false)} style={styles.secondaryButton}>Cancel</button>
+            </div>
+          </Modal>
+        )}
+
+        {/* Debug Modal */}
         {showDebugModal && (
-          <Modal onClose={() => setShowDebugModal(false)} title="🔍 Sync Status">
+          <Modal title="System Status" onClose={() => setShowDebugModal(false)}>
             <div style={styles.debugInfo}>
-              <div>
-                <strong>Connection Status:</strong>
-                <p>{realtimeStatus === 'connected' ? '✅ Connected' : '❌ Error'}</p>
-              </div>
-              <div>
-                <strong>Last Sync:</strong>
-                <p>{lastSync ? lastSync.toLocaleString() : 'Never'}</p>
-              </div>
-              <div>
-                <strong>Data Counts:</strong>
-                <p>Inventory: {inventory.length} | Machinery: {machinery.length}</p>
-              </div>
+              <p><strong>Real-time Status:</strong> {realtimeStatus}</p>
+              <p><strong>Last Sync:</strong> {lastSync?.toLocaleString() || 'Never'}</p>
+              <p><strong>Inventory Items:</strong> {inventory.length}</p>
+              <p><strong>Machines:</strong> {machinery.length}</p>
             </div>
             <button onClick={() => window.location.reload()} style={styles.primaryButton}>
               🔄 Refresh App
@@ -493,12 +1200,13 @@ export default function App() {
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
-      }
+        }
       `}</style>
     </div>
   );
+}
 
-    }function Modal({ children, onClose, title }) {
+function Modal({ children, onClose, title }) {
   return (
     <div style={styles.modalOverlay}>
       <div style={styles.modal}>
@@ -685,12 +1393,24 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'start',
+    gap: '16px',
   },
   itemDetails: {
     marginTop: '16px',
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
     gap: '16px',
+  },
+  editButton: {
+    padding: '8px',
+    background: '#0891b2',
+    border: 'none',
+    borderRadius: '8px',
+    color: 'white',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   deleteButton: {
     padding: '8px',
@@ -699,6 +1419,46 @@ const styles = {
     borderRadius: '8px',
     color: 'white',
     cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  saveButton: {
+    padding: '10px 20px',
+    background: '#10b981',
+    border: 'none',
+    borderRadius: '8px',
+    color: 'white',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '0.875rem',
+  },
+  cancelButton: {
+    padding: '10px 20px',
+    background: '#4b5563',
+    border: 'none',
+    borderRadius: '8px',
+    color: 'white',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '0.875rem',
+  },
+  quantityButton: {
+    width: '32px',
+    height: '32px',
+    background: '#10b981',
+    border: 'none',
+    borderRadius: '6px',
+    color: 'white',
+    cursor: 'pointer',
+    fontSize: '1.25rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   modalOverlay: {
     position: 'fixed',
@@ -720,6 +1480,8 @@ const styles = {
     padding: '24px',
     maxWidth: '500px',
     width: '100%',
+    maxHeight: '90vh',
+    overflowY: 'auto',
   },
   closeButton: {
     background: '#4b5563',
@@ -738,6 +1500,7 @@ const styles = {
     color: 'white',
     fontSize: '1rem',
     marginBottom: '16px',
+    boxSizing: 'border-box',
   },
   primaryButton: {
     flex: 1,
@@ -765,5 +1528,23 @@ const styles = {
     borderRadius: '8px',
     padding: '16px',
     marginBottom: '16px',
+  },
+  stockBadgeLow: {
+    padding: '4px 12px',
+    background: 'rgba(239, 68, 68, 0.2)',
+    border: '1px solid #ef4444',
+    borderRadius: '12px',
+    fontSize: '0.75rem',
+    color: '#ef4444',
+    fontWeight: 'bold',
+  },
+  stockBadgeHigh: {
+    padding: '4px 12px',
+    background: 'rgba(251, 191, 36, 0.2)',
+    border: '1px solid #fbbf24',
+    borderRadius: '12px',
+    fontSize: '0.75rem',
+    color: '#fbbf24',
+    fontWeight: 'bold',
   },
 };
