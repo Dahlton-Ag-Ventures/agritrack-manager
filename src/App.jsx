@@ -503,7 +503,6 @@ const deleteMachineryItem = async (id) => {
       `}</style>
     </div>
   );
-};
 
 function Modal({ children, onClose, title }) {
   return (
