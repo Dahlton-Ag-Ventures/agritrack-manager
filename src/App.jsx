@@ -8,6 +8,20 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Machinery categories for dropdown
+const MACHINERY_CATEGORIES = [
+  'Land Improvement Equipment',
+  'Augers & Conveyors',
+  'Straight Cut/Pick Up Headers',
+  'Tillage and Seeding',
+  'Heavy Trucks/Semi Trucks',
+  'Tractors',
+  'Blades',
+  'Combines',
+  'Sprayers',
+  'Other'
+];
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [inventory, setInventory] = useState([]);
@@ -848,12 +862,16 @@ export default function App() {
                           value={machineryForm.vinSerial}
                           onChange={(e) => setMachineryForm({ ...machineryForm, vinSerial: e.target.value })}
                         />
-                        <input
+                        <select
                           style={styles.input}
-                          placeholder="Category"
                           value={machineryForm.category}
                           onChange={(e) => setMachineryForm({ ...machineryForm, category: e.target.value })}
-                        />
+                        >
+                          <option value="">Select Category...</option>
+                          {MACHINERY_CATEGORIES.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                        </select>
                         <div style={{ marginBottom: '12px' }}>
                           <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
                             📸 Upload Photo
@@ -1160,12 +1178,16 @@ export default function App() {
               value={machineryForm.vinSerial}
               onChange={(e) => setMachineryForm({ ...machineryForm, vinSerial: e.target.value })}
             />
-            <input
+            <select
               style={styles.input}
-              placeholder="Category"
               value={machineryForm.category}
               onChange={(e) => setMachineryForm({ ...machineryForm, category: e.target.value })}
-            />
+            >
+              <option value="">Select Category...</option>
+              {MACHINERY_CATEGORIES.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
                 📸 Upload Photo (Optional)
