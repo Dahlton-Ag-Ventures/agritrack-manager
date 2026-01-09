@@ -127,11 +127,9 @@ export default function App() {
     } finally {
       setSyncing(false);
     }
-  };
-
-// Remove auto-save - only save when user makes changes
-
-const addInventoryItem = async () => {
+ };
+  // Remove auto-save - only save when user makes changes
+    const addInventoryItem = async () => {
   const newItem = { ...inventoryForm, id: Date.now() };
   const newInventory = [...inventory, newItem];
   
@@ -153,8 +151,8 @@ const addInventoryItem = async () => {
   setTimeout(() => saveData(), 100);
 };
 
-const deleteInventoryItem = async (id) => {
-  const newInventory = inventory.filter(item => item.id !== id);
+  const deleteInventoryItem = async (id) => {
+    const newInventory = inventory.filter(item => item.id !== id);
   
   try {
     await supabase
@@ -168,9 +166,9 @@ const deleteInventoryItem = async (id) => {
   }
 };
 
-const addMachineryItem = async () => {
-  const newItem = { ...machineryForm, id: Date.now() };
-  const newMachinery = [...machinery, newItem];
+  const addMachineryItem = async () => {
+    const newItem = { ...machineryForm, id: Date.now() };
+    const newMachinery = [...machinery, newItem];
   
   setMachineryForm({ name: '', serial: '', category: '', status: 'Active' });
   setShowMachineryModal(false);
@@ -187,8 +185,8 @@ const addMachineryItem = async () => {
   }
 };
 
-const deleteMachineryItem = async (id) => {
-  const newMachinery = machinery.filter(item => item.id !== id);
+  const deleteMachineryItem = async (id) => {
+    const newMachinery = machinery.filter(item => item.id !== id);
   
   try {
     await supabase
