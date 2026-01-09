@@ -146,7 +146,7 @@ export default function App() {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
   }
-
+};
   const deleteInventoryItem = async (id) => {
     const newInventory = inventory.filter(item => item.id !== id);
   
@@ -493,7 +493,6 @@ export default function App() {
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
-        };
       }
       `}</style>
     </div>
