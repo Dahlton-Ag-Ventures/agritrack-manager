@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X } from 'lucide-react';
+import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut } from 'lucide-react';
 
 // Supabase configuration
 const supabaseUrl = 'https://ekjjtfemibtaxyhuvgea.supabase.co';
@@ -23,11 +23,18 @@ const MACHINERY_CATEGORIES = [
 ];
 
 export default function App() {
+  // Authentication state
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [loggingIn, setLoggingIn] = useState(false);
+
   const [activeTab, setActiveTab] = useState('home');
   const [inventory, setInventory] = useState([]);
   const [machinery, setMachinery] = useState([]);
   const [serviceHistory, setServiceHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [realtimeStatus, setRealtimeStatus] = useState('connecting');
   const [lastSync, setLastSync] = useState(null);
@@ -64,11 +71,65 @@ export default function App() {
   const [serviceSearch, setServiceSearch] = useState('');
   const [serviceSort, setServiceSort] = useState('date-desc');
 
-  // Load initial data
+  // Check authentication status on load
   useEffect(() => {
-    loadData();
-    setupRealtime();
+    checkUser();
   }, []);
+
+  // Load data when user is authenticated
+  useEffect(() => {
+    if (user) {
+      loadData();
+      setupRealtime();
+    }
+  }, [user]);
+
+  const checkUser = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+    } catch (error) {
+      console.error('Error checking user:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoginError('');
+    setLoggingIn(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: loginPassword,
+      });
+
+      if (error) throw error;
+
+      setUser(data.user);
+      setLoginEmail('');
+      setLoginPassword('');
+    } catch (error) {
+      console.error('Login error:', error);
+      setLoginError(error.message || 'Invalid email or password');
+    } finally {
+      setLoggingIn(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setInventory([]);
+      setMachinery([]);
+      setServiceHistory([]);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -90,8 +151,6 @@ export default function App() {
       }
     } catch (error) {
       console.error('❌ Load error:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -290,29 +349,29 @@ export default function App() {
     }
   };
 
-const deleteInventoryItem = async (id) => {
-  const shouldDelete = window.confirm('Are you sure you want to delete this item?');
-  if (!shouldDelete) return;
-  
-  try {
-    // Filter out the item from the inventory array
-    const newInventory = inventory.filter(item => item.id !== id);
+  const deleteInventoryItem = async (id) => {
+    const shouldDelete = window.confirm('Are you sure you want to delete this item?');
+    if (!shouldDelete) return;
     
-    // Update the agritrack_data table with the new inventory array
-    const { error } = await supabase
-      .from('agritrack_data')
-      .update({ inventory: newInventory })
-      .eq('id', 1);
+    try {
+      // Filter out the item from the inventory array
+      const newInventory = inventory.filter(item => item.id !== id);
+      
+      // Update the agritrack_data table with the new inventory array
+      const { error } = await supabase
+        .from('agritrack_data')
+        .update({ inventory: newInventory })
+        .eq('id', 1);
 
-    if (error) throw error;
-    
-    console.log('✅ Item deleted successfully');
-    
-  } catch (error) {
-    console.error('Error deleting inventory item:', error);
-    alert('Failed to delete item. Please try again.');
-  }
-};
+      if (error) throw error;
+      
+      console.log('✅ Item deleted successfully');
+      
+    } catch (error) {
+      console.error('Error deleting inventory item:', error);
+      alert('Failed to delete item. Please try again.');
+    }
+  };
 
   const startEditInventory = (item) => {
     setEditingInventoryId(item.id);
@@ -328,32 +387,32 @@ const deleteInventoryItem = async (id) => {
     });
   };
 
-const saveInventoryEdit = async (id) => {
-  try {
-    // Update the item in the inventory array
-    const newInventory = inventory.map(item => 
-      item.id === id ? { ...item, ...inventoryForm } : item
-    );
-    
-    // Update the agritrack_data table with the modified inventory array
-    const { error } = await supabase
-      .from('agritrack_data')
-      .update({ inventory: newInventory })
-      .eq('id', 1);
+  const saveInventoryEdit = async (id) => {
+    try {
+      // Update the item in the inventory array
+      const newInventory = inventory.map(item => 
+        item.id === id ? { ...item, ...inventoryForm } : item
+      );
+      
+      // Update the agritrack_data table with the modified inventory array
+      const { error } = await supabase
+        .from('agritrack_data')
+        .update({ inventory: newInventory })
+        .eq('id', 1);
 
-    if (error) throw error;
-    
-    // Clear the form and exit edit mode
-    setEditingInventoryId(null);
-    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
-    
-    console.log('✅ Item updated successfully');
-    
-  } catch (error) {
-    console.error('Error updating inventory item:', error);
-    alert('Failed to update item. Please try again.');
-  }
-};
+      if (error) throw error;
+      
+      // Clear the form and exit edit mode
+      setEditingInventoryId(null);
+      setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
+      
+      console.log('✅ Item updated successfully');
+      
+    } catch (error) {
+      console.error('Error updating inventory item:', error);
+      alert('Failed to update item. Please try again.');
+    }
+  };
 
   const cancelInventoryEdit = () => {
     setEditingInventoryId(null);
@@ -505,31 +564,32 @@ const saveInventoryEdit = async (id) => {
     setServiceForm({ machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: '' });
   };
 
- const quickUpdateQuantity = async (id, delta) => {
-  // Optimistically update the UI immediately
-  const newInventory = inventory.map(item => 
-    item.id === id ? { ...item, quantity: Math.max(0, (parseInt(item.quantity) || 0) + delta).toString() } : item
-  );
-  
-  // Update local state immediately for instant feedback
-  setInventory(newInventory);
-  
-  // Then sync to database in the background
-  try {
-    const { error } = await supabase
-      .from('agritrack_data')
-      .update({ inventory: newInventory })
-      .eq('id', 1);
+  const quickUpdateQuantity = async (id, delta) => {
+    // Optimistically update the UI immediately
+    const newInventory = inventory.map(item => 
+      item.id === id ? { ...item, quantity: Math.max(0, (parseInt(item.quantity) || 0) + delta).toString() } : item
+    );
     
-    if (error) throw error;
-  } catch (error) {
-    console.error('Update error:', error);
-    // Revert on error by reloading data
-    loadData();
-    alert('Error updating quantity: ' + error.message);
-  }
-};
+    // Update local state immediately for instant feedback
+    setInventory(newInventory);
+    
+    // Then sync to database in the background
+    try {
+      const { error } = await supabase
+        .from('agritrack_data')
+        .update({ inventory: newInventory })
+        .eq('id', 1);
+      
+      if (error) throw error;
+    } catch (error) {
+      console.error('Update error:', error);
+      // Revert on error by reloading data
+      loadData();
+      alert('Error updating quantity: ' + error.message);
+    }
+  };
 
+  // Show loading spinner
   if (loading) {
     return (
       <div style={styles.loading}>
@@ -539,6 +599,54 @@ const saveInventoryEdit = async (id) => {
     );
   }
 
+  // Show login screen if not authenticated
+  if (!user) {
+    return (
+      <div style={styles.loginContainer}>
+        <div style={styles.loginCard}>
+          <h1 style={styles.loginTitle}>AgriTrack Manager</h1>
+          <p style={styles.loginSubtitle}>Dahlton Ag Ventures</p>
+          
+          <form onSubmit={handleLogin} style={styles.loginForm}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+              style={styles.loginInput}
+              required
+              autoComplete="email"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+              style={styles.loginInput}
+              required
+              autoComplete="current-password"
+            />
+            
+            {loginError && (
+              <div style={styles.loginError}>
+                {loginError}
+              </div>
+            )}
+            
+            <button 
+              type="submit" 
+              style={styles.loginButton}
+              disabled={loggingIn}
+            >
+              {loggingIn ? 'Signing in...' : 'Sign In'}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // Main app content (only shown when authenticated)
   return (
     <div style={styles.container}>
       <div style={styles.content}>
@@ -566,6 +674,10 @@ const saveInventoryEdit = async (id) => {
             }}>
               <Users size={16} />
               {realtimeStatus === 'connected' ? 'Live Sync Active' : 'Sync Error'}
+            </button>
+            <button onClick={handleLogout} style={styles.logoutButton}>
+              <LogOut size={16} />
+              Logout
             </button>
           </div>
         </div>
@@ -815,21 +927,21 @@ const saveInventoryEdit = async (id) => {
                           <button onClick={() => startEditInventory(item)} style={styles.editButton}>
                             <Edit2 size={16} />
                           </button>
-                        <button 
-  onClick={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    deleteInventoryItem(item.id);
-  }}
-  onTouchEnd={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    deleteInventoryItem(item.id);
-  }}
-  style={{...styles.deleteButton, touchAction: 'manipulation'}}
->
-  <Trash2 size={16} />
-</button>
+                          <button 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              deleteInventoryItem(item.id);
+                            }}
+                            onTouchEnd={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              deleteInventoryItem(item.id);
+                            }}
+                            style={{...styles.deleteButton, touchAction: 'manipulation'}}
+                          >
+                            <Trash2 size={16} />
+                          </button>
                         </div>
                       </>
                     )}
@@ -1310,6 +1422,7 @@ const saveInventoryEdit = async (id) => {
               <p><strong>Last Sync:</strong> {lastSync?.toLocaleString() || 'Never'}</p>
               <p><strong>Inventory Items:</strong> {inventory.length}</p>
               <p><strong>Machines:</strong> {machinery.length}</p>
+              <p><strong>Logged in as:</strong> {user?.email}</p>
             </div>
             <button onClick={() => window.location.reload()} style={styles.primaryButton}>
               🔄 Refresh App
@@ -1342,6 +1455,73 @@ function Modal({ children, onClose, title }) {
 }
 
 const styles = {
+  loginContainer: {
+    minHeight: '100vh',
+    background: 'linear-gradient(to bottom right, #1a202c, #2d3748)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '24px',
+  },
+  loginCard: {
+    background: '#1f2937',
+    border: '1px solid #4b5563',
+    borderRadius: '16px',
+    padding: '48px',
+    maxWidth: '400px',
+    width: '100%',
+    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)',
+  },
+  loginTitle: {
+    fontSize: '2rem',
+    fontWeight: 'bold',
+    background: 'linear-gradient(to right, #10b981, #06b6d4)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    marginBottom: '8px',
+    textAlign: 'center',
+  },
+  loginSubtitle: {
+    color: '#9ca3af',
+    marginBottom: '32px',
+    textAlign: 'center',
+  },
+  loginForm: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+  },
+  loginInput: {
+    width: '100%',
+    padding: '14px 16px',
+    background: '#111827',
+    border: '1px solid #4b5563',
+    borderRadius: '8px',
+    color: 'white',
+    fontSize: '1rem',
+    boxSizing: 'border-box',
+    outline: 'none',
+  },
+  loginButton: {
+    width: '100%',
+    padding: '14px',
+    background: 'linear-gradient(to right, #10b981, #06b6d4)',
+    border: 'none',
+    borderRadius: '8px',
+    color: 'white',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    fontWeight: 'bold',
+    marginTop: '8px',
+  },
+  loginError: {
+    padding: '12px',
+    background: 'rgba(239, 68, 68, 0.2)',
+    border: '1px solid #ef4444',
+    borderRadius: '8px',
+    color: '#ef4444',
+    fontSize: '0.875rem',
+  },
   container: {
     minHeight: '100vh',
     background: 'linear-gradient(to bottom right, #1a202c, #2d3748)',
@@ -1421,6 +1601,18 @@ const styles = {
     fontSize: '0.875rem',
     cursor: 'pointer',
     background: 'transparent',
+  },
+  logoutButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '8px 16px',
+    background: '#4b5563',
+    border: 'none',
+    borderRadius: '8px',
+    color: 'white',
+    cursor: 'pointer',
+    fontSize: '0.875rem',
   },
   lastSyncBanner: {
     padding: '12px',
@@ -1561,20 +1753,20 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
   },
-deleteButton: {
-  padding: '8px',
-  background: '#7f1d1d',
-  border: 'none',
-  borderRadius: '8px',
-  color: 'white',
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  minWidth: '40px',
-  minHeight: '40px',
-  touchAction: 'manipulation',
-},
+  deleteButton: {
+    padding: '8px',
+    background: '#7f1d1d',
+    border: 'none',
+    borderRadius: '8px',
+    color: 'white',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: '40px',
+    minHeight: '40px',
+    touchAction: 'manipulation',
+  },
   saveButton: {
     padding: '10px 20px',
     background: '#10b981',
