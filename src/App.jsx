@@ -1563,11 +1563,14 @@ const styles = {
   },
   container: {
     minHeight: '100vh',
-    background: 'linear-gradient(to bottom right, #1a202c, #2d3748)',
+    background: 'linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2940&auto=format&fit=crop")',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundAttachment: 'fixed',
     color: 'white',
-    padding: '24px', 
+    padding: '24px',
   },
-   homeContainer: {
+  homeContainer: {
     background: 'rgba(31, 41, 55, 0.85)',
     borderRadius: '16px',
     padding: '24px',
@@ -1683,7 +1686,7 @@ const styles = {
     cursor: 'pointer',
     fontSize: '1rem',
   },
-welcomeCard: {
+  welcomeCard: {
     background: 'rgba(16, 185, 129, 0.15)',
     border: '1px solid rgba(16, 185, 129, 0.3)',
     borderRadius: '12px',
@@ -1705,7 +1708,7 @@ welcomeCard: {
     gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
     gap: '16px',
   },
-statCard: {
+  statCard: {
     background: 'rgba(16, 185, 129, 0.15)',
     border: '1px solid #10b981',
     borderRadius: '12px',
