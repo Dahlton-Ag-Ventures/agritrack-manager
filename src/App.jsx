@@ -291,9 +291,12 @@ export default function App() {
   };
 
 const deleteInventoryItem = async (id) => {
-  if (!confirm('Are you sure you want to delete this item?')) return;
-  
+  // Prevent any event propagation issues
   try {
+    // Use a more mobile-friendly confirmation
+    const shouldDelete = window.confirm('Are you sure you want to delete this item?');
+    if (!shouldDelete) return;
+
     const { error } = await supabase
       .from('inventory')
       .delete()
@@ -301,13 +304,12 @@ const deleteInventoryItem = async (id) => {
 
     if (error) throw error;
 
-    // Update local state immediately (optimistic update)
+    // Update local state immediately
     setInventory(prev => prev.filter(item => item.id !== id));
     
   } catch (error) {
     console.error('Error deleting inventory item:', error);
     alert('Failed to delete item. Please try again.');
-    // Refresh data to ensure consistency
     fetchInventory();
   }
 };
@@ -810,9 +812,21 @@ const saveInventoryEdit = async (id) => {
                           <button onClick={() => startEditInventory(item)} style={styles.editButton}>
                             <Edit2 size={16} />
                           </button>
-                          <button onClick={() => deleteInventoryItem(item.id)} style={styles.deleteButton}>
-                            <Trash2 size={16} />
-                          </button>
+                        <button 
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    deleteInventoryItem(item.id);
+  }}
+  onTouchEnd={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    deleteInventoryItem(item.id);
+  }}
+  style={{...styles.deleteButton, touchAction: 'manipulation'}}
+>
+  <Trash2 size={16} />
+</button>
                         </div>
                       </>
                     )}
@@ -1544,17 +1558,20 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  deleteButton: {
-    padding: '8px',
-    background: '#7f1d1d',
-    border: 'none',
-    borderRadius: '8px',
-    color: 'white',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+deleteButton: {
+  padding: '8px',
+  background: '#7f1d1d',
+  border: 'none',
+  borderRadius: '8px',
+  color: 'white',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  minWidth: '40px',
+  minHeight: '40px',
+  touchAction: 'manipulation',
+},
   saveButton: {
     padding: '10px 20px',
     background: '#10b981',
