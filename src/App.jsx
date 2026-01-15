@@ -290,21 +290,27 @@ export default function App() {
     }
   };
 
-  const deleteInventoryItem = async (id) => {
-    if (!confirm('Are you sure you want to delete this item?')) return;
+const deleteInventoryItem = async (id) => {
+  if (!confirm('Are you sure you want to delete this item?')) return;
+  
+  try {
+    const { error } = await supabase
+      .from('inventory')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+
+    // Update local state immediately (optimistic update)
+    setInventory(prev => prev.filter(item => item.id !== id));
     
-    const newInventory = inventory.filter(item => item.id !== id);
-    
-    try {
-      await supabase
-        .from('agritrack_data')
-        .update({ inventory: newInventory })
-        .eq('id', 1);
-    } catch (error) {
-      console.error('Delete error:', error);
-      alert('Error: ' + error.message);
-    }
-  };
+  } catch (error) {
+    console.error('Error deleting inventory item:', error);
+    alert('Failed to delete item. Please try again.');
+    // Refresh data to ensure consistency
+    fetchInventory();
+  }
+};
 
   const startEditInventory = (item) => {
     setEditingInventoryId(item.id);
@@ -320,24 +326,38 @@ export default function App() {
     });
   };
 
-  const saveInventoryEdit = async (id) => {
-    const newInventory = inventory.map(item => 
+const saveInventoryEdit = async (id) => {
+  try {
+    // Update the specific item in the database
+    const { error } = await supabase
+      .from('inventory')
+      .update({
+        name: inventoryForm.name,
+        part_number: inventoryForm.partNumber,
+        quantity: inventoryForm.quantity,
+        location: inventoryForm.location,
+        category: inventoryForm.category
+      })
+      .eq('id', id);
+
+    if (error) throw error;
+
+    // Update local state immediately (optimistic update)
+    setInventory(prev => prev.map(item => 
       item.id === id ? { ...item, ...inventoryForm } : item
-    );
+    ));
     
+    // Clear the form and exit edit mode
     setEditingInventoryId(null);
     setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '' });
     
-    try {
-      await supabase
-        .from('agritrack_data')
-        .update({ inventory: newInventory })
-        .eq('id', 1);
-    } catch (error) {
-      console.error('Update error:', error);
-      alert('Error: ' + error.message);
-    }
-  };
+  } catch (error) {
+    console.error('Error updating inventory item:', error);
+    alert('Failed to update item. Please try again.');
+    // Refresh data to ensure consistency
+    fetchInventory();
+  }
+};
 
   const cancelInventoryEdit = () => {
     setEditingInventoryId(null);
