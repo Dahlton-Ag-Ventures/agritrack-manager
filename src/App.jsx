@@ -600,51 +600,55 @@ export default function App() {
   }
 
   // Show login screen if not authenticated
-  if (!user) {
-    return (
-      <div style={styles.loginContainer}>
-        <div style={styles.loginCard}>
-          <h1 style={styles.loginTitle}>AgriTrack Manager</h1>
-          <p style={styles.loginSubtitle}>Dahlton Ag Ventures</p>
+ if (!user) {
+  return (
+    <div style={styles.loginContainer}>
+      <div style={styles.loginCard}>
+        <h1 style={styles.loginTitle}>Welcome to AgriTrack Manager</h1>
+        <p style={styles.loginSubtitle}>created by Dahlton Ag Ventures</p>
+        
+        <form onSubmit={handleLogin} style={styles.loginForm}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={loginEmail}
+            onChange={(e) => setLoginEmail(e.target.value)}
+            style={styles.loginInput}
+            required
+            autoComplete="email"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={loginPassword}
+            onChange={(e) => setLoginPassword(e.target.value)}
+            style={styles.loginInput}
+            required
+            autoComplete="current-password"
+          />
           
-          <form onSubmit={handleLogin} style={styles.loginForm}>
-            <input
-              type="email"
-              placeholder="Email"
-              value={loginEmail}
-              onChange={(e) => setLoginEmail(e.target.value)}
-              style={styles.loginInput}
-              required
-              autoComplete="email"
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={loginPassword}
-              onChange={(e) => setLoginPassword(e.target.value)}
-              style={styles.loginInput}
-              required
-              autoComplete="current-password"
-            />
-            
-            {loginError && (
-              <div style={styles.loginError}>
-                {loginError}
-              </div>
-            )}
-            
-            <button 
-              type="submit" 
-              style={styles.loginButton}
-              disabled={loggingIn}
-            >
-              {loggingIn ? 'Signing in...' : 'Sign In'}
-            </button>
-          </form>
-        </div>
+          {loginError && (
+            <div style={styles.loginError}>
+              {loginError}
+            </div>
+          )}
+          
+          <button 
+            type="submit" 
+            style={styles.loginButton}
+            disabled={loggingIn}
+          >
+            {loggingIn ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
       </div>
-    );
-  }
+      
+      <div style={styles.loginFooter}>
+        powered by Vercel
+      </div>
+    </div>
+  );
+}
 
   // Main app content (only shown when authenticated)
   return (
@@ -1455,42 +1459,53 @@ function Modal({ children, onClose, title }) {
 }
 
 const styles = {
-  loginContainer: {
-    minHeight: '100vh',
-    background: 'linear-gradient(to bottom right, #1a202c, #2d3748)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '24px',
-  },
-  loginCard: {
-    background: '#1f2937',
-    border: '1px solid #4b5563',
-    borderRadius: '16px',
-    padding: '48px',
-    maxWidth: '400px',
-    width: '100%',
-    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)',
-  },
-  loginTitle: {
-    fontSize: '2rem',
-    fontWeight: 'bold',
-    background: 'linear-gradient(to right, #10b981, #06b6d4)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    marginBottom: '8px',
-    textAlign: 'center',
-  },
-  loginSubtitle: {
-    color: '#9ca3af',
-    marginBottom: '32px',
-    textAlign: 'center',
-  },
-  loginForm: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  },
+loginContainer: {
+  minHeight: '100vh',
+  background: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop")',
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  backgroundRepeat: 'no-repeat',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '24px',
+  position: 'relative',
+},
+loginCard: {
+  background: 'rgba(31, 41, 55, 0.95)',
+  border: '1px solid #4b5563',
+  borderRadius: '16px',
+  padding: '48px',
+  maxWidth: '400px',
+  width: '100%',
+  boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)',
+  backdropFilter: 'blur(10px)',
+},
+loginTitle: {
+  fontSize: '1.5rem',
+  fontWeight: 'bold',
+  background: 'linear-gradient(to right, #10b981, #06b6d4)',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  marginBottom: '8px',
+  textAlign: 'center',
+  lineHeight: '1.4',
+},
+loginSubtitle: {
+  color: '#9ca3af',
+  marginBottom: '32px',
+  textAlign: 'center',
+},
+loginFooter: {
+  position: 'absolute',
+  bottom: '16px',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  color: '#9ca3af',
+  fontSize: '0.75rem',
+  textAlign: 'center',
+},
   loginInput: {
     width: '100%',
     padding: '14px 16px',
