@@ -600,12 +600,12 @@ export default function App() {
   }
 
   // Show login screen if not authenticated
- if (!user) {
+if (!user) {
   return (
     <div style={styles.loginContainer}>
       <div style={styles.loginCard}>
-        <h1 style={styles.loginTitle}>Welcome to AgriTrack Manager</h1>
-        <p style={styles.loginSubtitle}>created by Dahlton Ag Ventures</p>
+        <h2 style={styles.loginTitle}>Welcome to</h2>
+        <h1 style={styles.loginAppName}>AgriTrack Manager</h1>
         
         <form onSubmit={handleLogin} style={styles.loginForm}>
           <input
@@ -641,6 +641,8 @@ export default function App() {
             {loggingIn ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+        
+        <p style={styles.loginSubtitle}>created by Dahlton Ag Ventures</p>
       </div>
       
       <div style={styles.loginFooter}>
@@ -1483,19 +1485,31 @@ loginCard: {
   backdropFilter: 'blur(10px)',
 },
 loginTitle: {
-  fontSize: '1.5rem',
-  fontWeight: 'bold',
-  background: 'linear-gradient(to right, #10b981, #06b6d4)',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
+  fontSize: '1.25rem',
+  fontWeight: 'normal',
+  color: '#d1d5db',
   marginBottom: '8px',
   textAlign: 'center',
   lineHeight: '1.4',
 },
-loginSubtitle: {
-  color: '#9ca3af',
+loginAppName: {
+  fontSize: '3rem',
+  fontWeight: 'bold',
+  fontFamily: "'Georgia', 'Times New Roman', serif",
+  background: 'linear-gradient(to right, #10b981, #06b6d4)',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
   marginBottom: '32px',
   textAlign: 'center',
+  lineHeight: '1.2',
+  letterSpacing: '1px',
+},
+loginSubtitle: {
+  color: '#9ca3af',
+  fontSize: '0.8rem',
+  textAlign: 'center',
+  marginTop: '20px',
+},
 },
 loginFooter: {
   position: 'absolute',
