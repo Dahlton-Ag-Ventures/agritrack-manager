@@ -1485,7 +1485,7 @@ const styles = {
     boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)',
     backdropFilter: 'blur(10px)',
   },
-loginTitle: {
+  loginTitle: {
     fontSize: '1.25rem',
     fontWeight: 'normal',
     color: '#d1d5db',
@@ -1493,7 +1493,7 @@ loginTitle: {
     textAlign: 'center',
     lineHeight: '1.4',
   },
-  loginAppName: {  // ← ADD 2 SPACES HERE
+  loginAppName: {
     fontSize: '3rem',
     fontWeight: 'bold',
     fontFamily: "'Inter', 'Helvetica Neue', 'Arial', sans-serif",
