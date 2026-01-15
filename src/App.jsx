@@ -1509,7 +1509,10 @@ loginSubtitle: {
   fontSize: '0.8rem',
   textAlign: 'center',
   marginTop: '20px',
-},
+loginForm: {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '16px'
 },
 loginFooter: {
   position: 'absolute',
