@@ -291,26 +291,26 @@ export default function App() {
   };
 
 const deleteInventoryItem = async (id) => {
-  // Prevent any event propagation issues
+  const shouldDelete = window.confirm('Are you sure you want to delete this item?');
+  if (!shouldDelete) return;
+  
   try {
-    // Use a more mobile-friendly confirmation
-    const shouldDelete = window.confirm('Are you sure you want to delete this item?');
-    if (!shouldDelete) return;
-
+    // Filter out the item from the inventory array
+    const newInventory = inventory.filter(item => item.id !== id);
+    
+    // Update the agritrack_data table with the new inventory array
     const { error } = await supabase
-      .from('inventory')
-      .delete()
-      .eq('id', id);
+      .from('agritrack_data')
+      .update({ inventory: newInventory })
+      .eq('id', 1);
 
     if (error) throw error;
-
-    // Update local state immediately
-    setInventory(prev => prev.filter(item => item.id !== id));
+    
+    console.log('✅ Item deleted successfully');
     
   } catch (error) {
     console.error('Error deleting inventory item:', error);
     alert('Failed to delete item. Please try again.');
-    fetchInventory();
   }
 };
 
