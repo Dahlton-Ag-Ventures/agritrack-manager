@@ -505,21 +505,30 @@ const saveInventoryEdit = async (id) => {
     setServiceForm({ machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: '' });
   };
 
-  const quickUpdateQuantity = async (id, delta) => {
-    const newInventory = inventory.map(item => 
-      item.id === id ? { ...item, quantity: Math.max(0, (parseInt(item.quantity) || 0) + delta) } : item
-    );
+ const quickUpdateQuantity = async (id, delta) => {
+  // Optimistically update the UI immediately
+  const newInventory = inventory.map(item => 
+    item.id === id ? { ...item, quantity: Math.max(0, (parseInt(item.quantity) || 0) + delta).toString() } : item
+  );
+  
+  // Update local state immediately for instant feedback
+  setInventory(newInventory);
+  
+  // Then sync to database in the background
+  try {
+    const { error } = await supabase
+      .from('agritrack_data')
+      .update({ inventory: newInventory })
+      .eq('id', 1);
     
-    try {
-      await supabase
-        .from('agritrack_data')
-        .update({ inventory: newInventory })
-        .eq('id', 1);
-    } catch (error) {
-      console.error('Update error:', error);
-      alert('Error: ' + error.message);
-    }
-  };
+    if (error) throw error;
+  } catch (error) {
+    console.error('Update error:', error);
+    // Revert on error by reloading data
+    loadData();
+    alert('Error updating quantity: ' + error.message);
+  }
+};
 
   if (loading) {
     return (
