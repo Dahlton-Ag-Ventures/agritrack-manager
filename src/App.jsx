@@ -1564,9 +1564,10 @@ const styles = {
 container: {
     minHeight: '100vh',
     background: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.unsplash.com/photo-1623947237443-ce79bbbf0dcd?q=80&w=2940&auto=format&fit=crop")',
-    backgroundSize: 'cover',
+    backgroundSize: '100% auto',
     backgroundPosition: 'center',
     backgroundAttachment: 'fixed',
+    backgroundRepeat: 'no-repeat',
     color: 'white',
     padding: '24px',
   },
