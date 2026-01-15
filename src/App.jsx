@@ -714,9 +714,9 @@ if (!user) {
           ))}
         </div>
 
-        {/* Home Tab */}
+       {/* Home Tab */}
         {activeTab === 'home' && (
-          <div>
+          <div style={styles.homeContainer}>
             <div style={styles.welcomeCard}>
               <h2 style={{ fontSize: '2rem', marginBottom: '8px' }}>Welcome to AgriTrack Manager</h2>
               <p style={{ color: '#d1d5db', marginBottom: '12px' }}>
@@ -742,6 +742,11 @@ if (!user) {
                 <Truck style={{ width: '48px', height: '48px', margin: '0 auto 16px', color: '#06b6d4' }} />
                 <h3 style={{ fontSize: '3rem', marginBottom: '8px' }}>{machinery.length}</h3>
                 <p>Machines</p>
+              </div>
+              <div style={{ ...styles.statCard, background: 'rgba(168, 85, 247, 0.2)', borderColor: '#a855f7' }}>
+                <AlertCircle style={{ width: '48px', height: '48px', margin: '0 auto 16px', color: '#a855f7' }} />
+                <h3 style={{ fontSize: '3rem', marginBottom: '8px' }}>{serviceHistory.length}</h3>
+                <p>Service Records</p>
               </div>
             </div>
           </div>
@@ -1560,7 +1565,13 @@ const styles = {
     minHeight: '100vh',
     background: 'linear-gradient(to bottom right, #1a202c, #2d3748)',
     color: 'white',
+    padding: '24px', 
+  },
+   homeContainer: {
+    background: 'rgba(31, 41, 55, 0.85)',
+    borderRadius: '16px',
     padding: '24px',
+    backdropFilter: 'blur(10px)',
   },
   content: {
     maxWidth: '1200px',
@@ -1672,12 +1683,13 @@ const styles = {
     cursor: 'pointer',
     fontSize: '1rem',
   },
-  welcomeCard: {
-    background: 'rgba(16, 185, 129, 0.2)',
-    border: '1px solid #10b981',
+welcomeCard: {
+    background: 'rgba(16, 185, 129, 0.15)',
+    border: '1px solid rgba(16, 185, 129, 0.3)',
     borderRadius: '12px',
     padding: '32px',
     marginBottom: '24px',
+    backdropFilter: 'blur(5px)',
   },
   syncStatus: {
     display: 'flex',
@@ -1693,12 +1705,15 @@ const styles = {
     gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
     gap: '16px',
   },
-  statCard: {
-    background: 'rgba(16, 185, 129, 0.2)',
+statCard: {
+    background: 'rgba(16, 185, 129, 0.15)',
     border: '1px solid #10b981',
     borderRadius: '12px',
     padding: '24px',
     textAlign: 'center',
+    backdropFilter: 'blur(10px)',
+    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    cursor: 'pointer',
   },
   tabHeader: {
     display: 'flex',
