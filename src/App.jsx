@@ -570,7 +570,156 @@ export default function App() {
     const newInventory = inventory.map(item => 
       item.id === id ? { ...item, quantity: Math.max(0, (parseInt(item.quantity) || 0) + delta).toString() } : item
     );
-    
+    import { useState, useEffect } from 'react';
+import { supabase } from './supabaseClient';
+import AuthPage from './components/AuthPage';
+import HomePage from './components/HomePage';
+import InventoryPage from './components/InventoryPage';
+import MachineryPage from './components/MachineryPage';
+import ServicePage from './components/ServicePage';
+
+function App() {
+  const [currentPage, setCurrentPage] = useState('home');
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <AuthPage />;
+  }
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'home':
+        return <HomePage />;
+      case 'inventory':
+        return <InventoryPage />;
+      case 'machinery':
+        return <MachineryPage />;
+      case 'service':
+        return <ServicePage />;
+      default:
+        return <HomePage />;
+    }
+  };
+
+  return (
+    <div 
+      className="min-h-screen relative"
+      style={{
+        backgroundImage: 'url("https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed'
+      }}
+    >
+      {/* Dark overlay for better readability */}
+      <div className="absolute inset-0 bg-black/40" style={{ zIndex: 0 }} />
+      
+      {/* Content container */}
+      <div className="relative" style={{ zIndex: 1 }}>
+        {/* Navigation */}
+        <nav className="bg-gray-800/95 backdrop-blur-sm shadow-lg sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center space-x-2">
+                <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span className="text-white text-xl font-bold">AgriTrack Manager</span>
+              </div>
+              <button
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                }}
+                className="text-white hover:text-emerald-400 transition-colors px-4 py-2 rounded-lg hover:bg-gray-700/50"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </nav>
+
+        {/* Main navigation buttons */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+            <button
+              onClick={() => setCurrentPage('home')}
+              className={`p-4 rounded-lg font-semibold transition-all transform hover:scale-105 ${
+                currentPage === 'home'
+                  ? 'bg-emerald-500 text-white shadow-lg'
+                  : 'bg-gray-700/90 backdrop-blur-sm text-white hover:bg-gray-600/90'
+              }`}
+            >
+              Home
+            </button>
+            <button
+              onClick={() => setCurrentPage('inventory')}
+              className={`p-4 rounded-lg font-semibold transition-all transform hover:scale-105 ${
+                currentPage === 'inventory'
+                  ? 'bg-emerald-500 text-white shadow-lg'
+                  : 'bg-gray-700/90 backdrop-blur-sm text-white hover:bg-gray-600/90'
+              }`}
+            >
+              Inventory
+            </button>
+            <button
+              onClick={() => setCurrentPage('machinery')}
+              className={`p-4 rounded-lg font-semibold transition-all transform hover:scale-105 ${
+                currentPage === 'machinery'
+                  ? 'bg-emerald-500 text-white shadow-lg'
+                  : 'bg-gray-700/90 backdrop-blur-sm text-white hover:bg-gray-600/90'
+              }`}
+            >
+              Machinery
+            </button>
+            <button
+              onClick={() => setCurrentPage('service')}
+              className={`p-4 rounded-lg font-semibold transition-all transform hover:scale-105 ${
+                currentPage === 'service'
+                  ? 'bg-emerald-500 text-white shadow-lg'
+                  : 'bg-gray-700/90 backdrop-blur-sm text-white hover:bg-gray-600/90'
+              }`}
+            >
+              Service
+            </button>
+          </div>
+        </div>
+
+        {/* Page content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+          {renderPage()}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default App;
+
     // Update local state immediately for instant feedback
     setInventory(newInventory);
     
@@ -642,149 +791,6 @@ if (!user) {
   );
 }
 
-  // Export to CSV function
-  const exportToCSV = (type) => {
-    let data, filename;
-    
-    if (type === 'inventory') {
-      data = inventory;
-      filename = 'inventory_export.csv';
-    } else if (type === 'machinery') {
-      data = machinery;
-      filename = 'machinery_export.csv';
-    } else if (type === 'service') {
-      data = serviceHistory;
-      filename = 'service_records_export.csv';
-    }
-    
-    if (!data || data.length === 0) {
-      alert('No data to export');
-      return;
-    }
-    
-    // Convert to CSV
-    const headers = Object.keys(data[0]).join(',');
-    const rows = data.map(item => 
-      Object.values(item).map(val => 
-        typeof val === 'string' && val.includes(',') ? `"${val}"` : val
-      ).join(',')
-    );
-    const csv = [headers, ...rows].join('\n');
-    
-    // Download
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
-
-  // Import from CSV function
-  const handleImportCSV = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      try {
-        const csv = event.target.result;
-        const lines = csv.split('\n');
-        const headers = lines[0].split(',');
-        
-        // Determine type based on headers
-        let type, data;
-        if (headers.includes('partNumber')) {
-          type = 'inventory';
-          data = inventory;
-        } else if (headers.includes('vinSerial')) {
-          type = 'machinery';
-          data = machinery;
-        } else if (headers.includes('serviceType')) {
-          type = 'service';
-          data = serviceHistory;
-        } else {
-          alert('Unable to determine data type from CSV');
-          return;
-        }
-        
-        const newItems = [];
-        for (let i = 1; i < lines.length; i++) {
-          if (!lines[i].trim()) continue;
-          const values = lines[i].split(',');
-          const item = {};
-          headers.forEach((header, index) => {
-            item[header.trim()] = values[index]?.trim();
-          });
-          newItems.push(item);
-        }
-        
-        const confirmImport = window.confirm(
-          `Import ${newItems.length} ${type} records? This will add to existing data.`
-        );
-        
-        if (!confirmImport) return;
-        
-        // Add new items
-        const updatedData = [...data, ...newItems];
-        
-        // Update database
-        if (type === 'inventory') {
-          await supabase.from('agritrack_data').update({ inventory: updatedData }).eq('id', 1);
-        } else if (type === 'machinery') {
-          await supabase.from('agritrack_data').update({ machinery: updatedData }).eq('id', 1);
-        } else if (type === 'service') {
-          await supabase.from('agritrack_data').update({ service_history: updatedData }).eq('id', 1);
-        }
-        
-        alert(`Successfully imported ${newItems.length} records!`);
-        
-      } catch (error) {
-        console.error('Import error:', error);
-        alert('Error importing CSV: ' + error.message);
-      }
-    };
-    reader.readAsText(file);
-    
-    // Reset input
-    e.target.value = '';
-  };
-
-  // Change password function
-  const handleChangePassword = async () => {
-    const newPassword = prompt('Enter your new password:');
-    
-    if (!newPassword) return;
-    
-    if (newPassword.length < 6) {
-      alert('Password must be at least 6 characters long');
-      return;
-    }
-    
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword
-      });
-      
-      if (error) throw error;
-      
-      alert('Password changed successfully!');
-    } catch (error) {
-      console.error('Password change error:', error);
-      alert('Error changing password: ' + error.message);
-    }
-  };
-
-  // Show loading spinner
-  if (loading) {
-    return (
-      <div style={styles.loading}>
-        <div style={styles.spinner} />
-        <p>Loading AgriTrack...</p>
-      </div>
-      );
-   }
   // Main app content (only shown when authenticated)
   return (
  <div style={styles.container}>
