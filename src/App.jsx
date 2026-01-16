@@ -723,7 +723,7 @@ if (!user) {
               </p>
               <div style={styles.syncStatus}>
                 <Users size={20} style={{ color: '#10b981' }} />
-                <span style={{ color: '#064e3b', fontSize: '0.875rem' }}>
+                <span style={{ color: 'ffffff', fontSize: '1.1rem', fontWeight: '600' }}>
                   {realtimeStatus === 'connected' 
                     ? '✓ Live sync enabled - Changes appear instantly on all devices' 
                     : '⚠️ Connecting to live sync...'}
