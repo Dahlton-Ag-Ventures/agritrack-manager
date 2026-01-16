@@ -716,7 +716,7 @@ if (!user) {
        {/* Home Tab */}
         {activeTab === 'home' && (
           <div style={styles.homeContainer}>
- <div style={{ ...styles.welcomeCard, background: 'rgba(6, 182, 212, 0.2)', border: '1px solid #06b6d4' }}>
+ <div style={{ ...styles.welcomeCard, background: 'rgba(6, 182, 212, 0.4)', border: '1px solid #06b6d4' }}>
   <p style={{ color: '#ffffff', marginBottom: '12px', fontSize: '1.5rem', fontWeight: '600' }}>
     Track inventory, machinery, and service records all in one place.
   </p>
@@ -730,17 +730,17 @@ if (!user) {
 </div>
 
             <div style={styles.statsGrid}>
-              <div style={{ ...styles.statCard, background: 'rgba(6, 182, 212, 0.2)', borderColor: '#06b6d4' }}>
+              <div style={{ ...styles.statCard, background: 'rgba(6, 182, 212, 0.4)', borderColor: '#06b6d4' }}>
                 <Package style={{ width: '48px', height: '48px', margin: '0 auto 16px', color: '#06b6d4' }} />
                 <h3 style={{ fontSize: '3rem', marginBottom: '8px' }}>{inventory.length}</h3>
                 <p>Inventory Items</p>
               </div>
-              <div style={{ ...styles.statCard, background: 'rgba(6, 182, 212, 0.2)', borderColor: '#06b6d4' }}>
+              <div style={{ ...styles.statCard, background: 'rgba(6, 182, 212, 0.4)', borderColor: '#06b6d4' }}>
                 <Truck style={{ width: '48px', height: '48px', margin: '0 auto 16px', color: '#06b6d4' }} />
                 <h3 style={{ fontSize: '3rem', marginBottom: '8px' }}>{machinery.length}</h3>
                 <p>Machines</p>
               </div>
-              <div style={{ ...styles.statCard, background: 'rgba(6, 182, 212, 0.2)', borderColor: '#06b6d4' }}>
+              <div style={{ ...styles.statCard, background: 'rgba(6, 182, 212, 0.4)', borderColor: '#06b6d4' }}>
                 <AlertCircle style={{ width: '48px', height: '48px', margin: '0 auto 16px', color: '#06b6d4' }} />
                 <h3 style={{ fontSize: '3rem', marginBottom: '8px' }}>{serviceHistory.length}</h3>
                 <p>Service Records</p>
