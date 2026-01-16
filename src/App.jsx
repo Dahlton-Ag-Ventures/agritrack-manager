@@ -781,6 +781,13 @@ if (!user) {
 
   // Show loading spinner
   if (loading) {
+    return (
+      <div style={styles.loading}>
+        <div style={styles.spinner} />
+        <p>Loading AgriTrack...</p>
+      </div>
+      );
+   }
   // Main app content (only shown when authenticated)
   return (
  <div style={styles.container}>
