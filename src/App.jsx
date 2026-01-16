@@ -1,4 +1,3 @@
-// Force rebuild 2026-01-16
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut } from 'lucide-react';
@@ -40,17 +39,17 @@ export default function App() {
   const [syncing, setSyncing] = useState(false);
   const [realtimeStatus, setRealtimeStatus] = useState('connecting');
   const [lastSync, setLastSync] = useState(null);
-  
+
   const [showInventoryModal, setShowInventoryModal] = useState(false);
   const [showMachineryModal, setShowMachineryModal] = useState(false);
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [showDebugModal, setShowDebugModal] = useState(false);
-  
+
   // Edit state
   const [editingInventoryId, setEditingInventoryId] = useState(null);
   const [editingMachineryId, setEditingMachineryId] = useState(null);
   const [editingServiceId, setEditingServiceId] = useState(null);
-  
+
   const [inventoryForm, setInventoryForm] = useState({ 
     name: '', partNumber: '', quantity: '', location: '', category: '', 
     minQuantity: '', maxQuantity: '', photoUrl: ''
@@ -61,10 +60,10 @@ export default function App() {
   const [serviceForm, setServiceForm] = useState({
     machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: ''
   });
-  
+
   // Photo upload state
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  
+
   // Search and sort states
   const [inventorySearch, setInventorySearch] = useState('');
   const [inventorySort, setInventorySort] = useState('name-asc');
@@ -141,9 +140,9 @@ export default function App() {
         .select('*')
         .eq('id', 1)
         .single();
-      
+
       if (error) throw error;
-      
+
       if (data) {
         console.log('✅ Data loaded');
         setInventory(data.inventory || []);
@@ -158,7 +157,7 @@ export default function App() {
 
   const setupRealtime = () => {
     console.log('🔔 Setting up real-time subscription...');
-    
+
     const channel = supabase
       .channel('agritrack-changes')
       .on(
@@ -194,15 +193,15 @@ export default function App() {
   // Photo Upload Function (converts to base64 for storage in JSON)
   const handlePhotoUpload = async (file, formType) => {
     if (!file) return null;
-    
+
     // Check file size (limit to 5MB)
     if (file.size > 5 * 1024 * 1024) {
       alert('Image too large. Please use an image under 5MB.');
       return null;
     }
-    
+
     setUploadingPhoto(true);
-    
+
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -222,7 +221,7 @@ export default function App() {
     const qty = parseInt(item.quantity) || 0;
     const min = parseInt(item.minQuantity) || 0;
     const max = parseInt(item.maxQuantity) || Infinity;
-    
+
     if (min > 0 && qty <= min) return 'low';
     if (max < Infinity && qty >= max) return 'high';
     return 'normal';
@@ -321,7 +320,7 @@ export default function App() {
           updated_at: new Date().toISOString()
         })
         .eq('id', 1);
-      
+
       if (error) throw error;
       console.log('✅ Data saved');
       setLastSync(new Date());
@@ -336,10 +335,10 @@ export default function App() {
   const addInventoryItem = async () => {
     const newItem = { ...inventoryForm, id: Date.now() };
     const newInventory = [...inventory, newItem];
-    
+
     setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
     setShowInventoryModal(false);
-    
+
     try {
       await supabase
         .from('agritrack_data')
@@ -354,11 +353,11 @@ export default function App() {
   const deleteInventoryItem = async (id) => {
     const shouldDelete = window.confirm('Are you sure you want to delete this item?');
     if (!shouldDelete) return;
-    
+
     try {
       // Filter out the item from the inventory array
       const newInventory = inventory.filter(item => item.id !== id);
-      
+
       // Update the agritrack_data table with the new inventory array
       const { error } = await supabase
         .from('agritrack_data')
@@ -366,9 +365,9 @@ export default function App() {
         .eq('id', 1);
 
       if (error) throw error;
-      
+
       console.log('✅ Item deleted successfully');
-      
+
     } catch (error) {
       console.error('Error deleting inventory item:', error);
       alert('Failed to delete item. Please try again.');
@@ -395,7 +394,7 @@ export default function App() {
       const newInventory = inventory.map(item => 
         item.id === id ? { ...item, ...inventoryForm } : item
       );
-      
+
       // Update the agritrack_data table with the modified inventory array
       const { error } = await supabase
         .from('agritrack_data')
@@ -403,13 +402,13 @@ export default function App() {
         .eq('id', 1);
 
       if (error) throw error;
-      
+
       // Clear the form and exit edit mode
       setEditingInventoryId(null);
       setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
-      
+
       console.log('✅ Item updated successfully');
-      
+
     } catch (error) {
       console.error('Error updating inventory item:', error);
       alert('Failed to update item. Please try again.');
@@ -424,10 +423,10 @@ export default function App() {
   const addMachineryItem = async () => {
     const newItem = { ...machineryForm, id: Date.now() };
     const newMachinery = [...machinery, newItem];
-    
+
     setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '' });
     setShowMachineryModal(false);
-    
+
     try {
       await supabase
         .from('agritrack_data')
@@ -441,9 +440,9 @@ export default function App() {
 
   const deleteMachineryItem = async (id) => {
     if (!confirm('Are you sure you want to delete this machine?')) return;
-    
+
     const newMachinery = machinery.filter(item => item.id !== id);
-    
+
     try {
       await supabase
         .from('agritrack_data')
@@ -470,10 +469,10 @@ export default function App() {
     const newMachinery = machinery.map(item => 
       item.id === id ? { ...item, ...machineryForm } : item
     );
-    
+
     setEditingMachineryId(null);
     setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active' });
-    
+
     try {
       await supabase
         .from('agritrack_data')
@@ -498,10 +497,10 @@ export default function App() {
       date: serviceForm.date || new Date().toISOString().split('T')[0]
     };
     const newServiceHistory = [...serviceHistory, newRecord];
-    
+
     setServiceForm({ machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: '' });
     setShowServiceModal(false);
-    
+
     try {
       await supabase
         .from('agritrack_data')
@@ -515,9 +514,9 @@ export default function App() {
 
   const deleteServiceRecord = async (id) => {
     if (!confirm('Are you sure you want to delete this service record?')) return;
-    
+
     const newServiceHistory = serviceHistory.filter(record => record.id !== id);
-    
+
     try {
       await supabase
         .from('agritrack_data')
@@ -546,10 +545,10 @@ export default function App() {
     const newServiceHistory = serviceHistory.map(record => 
       record.id === id ? { ...record, ...serviceForm } : record
     );
-    
+
     setEditingServiceId(null);
     setServiceForm({ machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: '' });
-    
+
     try {
       await supabase
         .from('agritrack_data')
@@ -572,158 +571,16 @@ export default function App() {
       item.id === id ? { ...item, quantity: Math.max(0, (parseInt(item.quantity) || 0) + delta).toString() } : item
     );
 
-function App() {
-  const [currentPage, setCurrentPage] = useState('home');
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return <AuthPage />;
-  }
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'home':
-        return <HomePage />;
-      case 'inventory':
-        return <InventoryPage />;
-      case 'machinery':
-        return <MachineryPage />;
-      case 'service':
-        return <ServicePage />;
-      default:
-        return <HomePage />;
-    }
-  };
-
-  return (
-    <div 
-      className="min-h-screen relative"
-      style={{
-        backgroundImage: 'url("https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200")',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed'
-      }}
-    >
-      {/* Dark overlay for better readability */}
-      <div className="absolute inset-0 bg-black/40" style={{ zIndex: 0 }} />
-      
-      {/* Content container */}
-      <div className="relative" style={{ zIndex: 1 }}>
-        {/* Navigation */}
-        <nav className="bg-gray-800/95 backdrop-blur-sm shadow-lg sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center space-x-2">
-                <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-                <span className="text-white text-xl font-bold">AgriTrack Manager</span>
-              </div>
-              <button
-                onClick={async () => {
-                  await supabase.auth.signOut();
-                }}
-                className="text-white hover:text-emerald-400 transition-colors px-4 py-2 rounded-lg hover:bg-gray-700/50"
-              >
-                Sign Out
-              </button>
-            </div>
-          </div>
-        </nav>
-
-        {/* Main navigation buttons */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-            <button
-              onClick={() => setCurrentPage('home')}
-              className={`p-4 rounded-lg font-semibold transition-all transform hover:scale-105 ${
-                currentPage === 'home'
-                  ? 'bg-emerald-500 text-white shadow-lg'
-                  : 'bg-gray-700/90 backdrop-blur-sm text-white hover:bg-gray-600/90'
-              }`}
-            >
-              Home
-            </button>
-            <button
-              onClick={() => setCurrentPage('inventory')}
-              className={`p-4 rounded-lg font-semibold transition-all transform hover:scale-105 ${
-                currentPage === 'inventory'
-                  ? 'bg-emerald-500 text-white shadow-lg'
-                  : 'bg-gray-700/90 backdrop-blur-sm text-white hover:bg-gray-600/90'
-              }`}
-            >
-              Inventory
-            </button>
-            <button
-              onClick={() => setCurrentPage('machinery')}
-              className={`p-4 rounded-lg font-semibold transition-all transform hover:scale-105 ${
-                currentPage === 'machinery'
-                  ? 'bg-emerald-500 text-white shadow-lg'
-                  : 'bg-gray-700/90 backdrop-blur-sm text-white hover:bg-gray-600/90'
-              }`}
-            >
-              Machinery
-            </button>
-            <button
-              onClick={() => setCurrentPage('service')}
-              className={`p-4 rounded-lg font-semibold transition-all transform hover:scale-105 ${
-                currentPage === 'service'
-                  ? 'bg-emerald-500 text-white shadow-lg'
-                  : 'bg-gray-700/90 backdrop-blur-sm text-white hover:bg-gray-600/90'
-              }`}
-            >
-              Service
-            </button>
-          </div>
-        </div>
-
-        {/* Page content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-          {renderPage()}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default App;
-
     // Update local state immediately for instant feedback
     setInventory(newInventory);
-    
+
     // Then sync to database in the background
     try {
       const { error } = await supabase
         .from('agritrack_data')
         .update({ inventory: newInventory })
         .eq('id', 1);
-      
+
       if (error) throw error;
     } catch (error) {
       console.error('Update error:', error);
@@ -732,6 +589,17 @@ export default App;
       alert('Error updating quantity: ' + error.message);
     }
   };
+
+  // Show loading spinner
+  if (loading) {
+    return (
+      <div style={styles.loading}>
+        <div style={styles.spinner} />
+        <p>Loading AgriTrack...</p>
+      </div>
+    );
+  }
+
   // Show login screen if not authenticated
 if (!user) {
   return (
@@ -739,7 +607,7 @@ if (!user) {
       <div style={styles.loginCard}>
         <h2 style={styles.loginTitle}>Welcome to</h2>
         <h1 style={styles.loginAppName}>AgriTrack Manager</h1>
-        
+
         <form onSubmit={handleLogin} style={styles.loginForm}>
           <input
             type="email"
@@ -759,13 +627,13 @@ if (!user) {
             required
             autoComplete="current-password"
           />
-          
+
           {loginError && (
             <div style={styles.loginError}>
               {loginError}
             </div>
           )}
-          
+
           <button 
             type="submit" 
             style={styles.loginButton}
@@ -774,10 +642,10 @@ if (!user) {
             {loggingIn ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
-        
+
         <p style={styles.loginSubtitle}>created by Dahlton Ag Ventures</p>
       </div>
-      
+
       <div style={styles.loginFooter}>
         powered by Vercel
       </div>
@@ -787,8 +655,7 @@ if (!user) {
 
   // Main app content (only shown when authenticated)
   return (
- <div style={styles.container}>
-      {console.log('Current activeTab:', activeTab)}
+    <div style={styles.container}>
       <div style={styles.content}>
         {/* Header */}
         <div style={styles.header}>
@@ -830,6 +697,7 @@ if (!user) {
 
         {/* Tabs */}
         <div style={styles.tabs}>
+          {['home', 'inventory', 'machinery', 'service'].map(tab => (
           {['home', 'inventory', 'machinery', 'service', 'settings'].map(tab => (
             <button
               key={tab}
@@ -892,7 +760,7 @@ if (!user) {
                 <Plus size={20} /> Add Item
               </button>
             </div>
-            
+
             {/* Search and Sort Controls */}
             <div style={styles.searchSortContainer}>
               <input
@@ -914,7 +782,7 @@ if (!user) {
                 <option value="location">Location</option>
               </select>
             </div>
-            
+
             {inventory.length === 0 ? (
               <div style={styles.emptyState}>
                 <Package size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
@@ -1104,7 +972,7 @@ if (!user) {
                 <Plus size={20} /> Add Machine
               </button>
             </div>
-            
+
             {/* Search and Sort Controls */}
             <div style={styles.searchSortContainer}>
               <input
@@ -1124,7 +992,7 @@ if (!user) {
                 <option value="category">Category</option>
               </select>
             </div>
-            
+
             {machinery.length === 0 ? (
               <div style={styles.emptyState}>
                 <Truck size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
@@ -1251,7 +1119,7 @@ if (!user) {
                 <Plus size={20} /> Add Service Record
               </button>
             </div>
-            
+
             {/* Search and Sort Controls */}
             <div style={styles.searchSortContainer}>
               <input
@@ -1272,7 +1140,7 @@ if (!user) {
                 <option value="cost-asc">Cost (Low → High)</option>
               </select>
             </div>
-            
+
             {serviceHistory.length === 0 ? (
               <div style={styles.emptyState}>
                 <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
@@ -1380,169 +1248,7 @@ if (!user) {
             )}
           </div>
         )}
-     {/* Settings Tab */}
-        {activeTab === 'settings' && (
-          <div>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '24px', color: '#ffffff' }}>Settings</h2>
-            
-            {/* Data Management Section */}
-            <div style={{ 
-              background: '#1e3a5f', 
-              border: '1px solid #2563eb',
-              borderRadius: '12px',
-              padding: '24px',
-              marginBottom: '24px'
-            }}>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '16px', color: '#ffffff' }}>Data Management</h3>
-              
-              <div style={{ display: 'grid', gap: '12px' }}>
-                <button 
-                  onClick={() => exportToCSV('inventory')} 
-                  style={{ 
-                    padding: '12px 24px',
-                    background: '#10b981',
-                    border: 'none',
-                    borderRadius: '8px',
-                    color: 'white',
-                    cursor: 'pointer',
-                    fontSize: '1rem',
-                    fontWeight: '600'
-                  }}
-                >
-                  📥 Export Inventory to CSV
-                </button>
-                <button 
-                  onClick={() => exportToCSV('machinery')} 
-                  style={{ 
-                    padding: '12px 24px',
-                    background: '#10b981',
-                    border: 'none',
-                    borderRadius: '8px',
-                    color: 'white',
-                    cursor: 'pointer',
-                    fontSize: '1rem',
-                    fontWeight: '600'
-                  }}
-                >
-                  📥 Export Machinery to CSV
-                </button>
-                <button 
-                  onClick={() => exportToCSV('service')} 
-                  style={{ 
-                    padding: '12px 24px',
-                    background: '#10b981',
-                    border: 'none',
-                    borderRadius: '8px',
-                    color: 'white',
-                    cursor: 'pointer',
-                    fontSize: '1rem',
-                    fontWeight: '600'
-                  }}
-                >
-                  📥 Export Service Records to CSV
-                </button>
-                
-                <div style={{ 
-                  margin: '16px 0', 
-                  borderTop: '1px solid #2563eb', 
-                  paddingTop: '16px' 
-                }}>
-                  <label style={{ 
-                    display: 'block', 
-                    marginBottom: '8px', 
-                    color: '#d1d5db',
-                    fontWeight: '600'
-                  }}>
-                    Import CSV File:
-                  </label>
-                  <input 
-                    type="file" 
-                    accept=".csv" 
-                    onChange={handleImportCSV}
-                    style={{ 
-                      width: '100%',
-                      padding: '12px',
-                      background: '#1a2942',
-                      border: '1px solid #2563eb',
-                      borderRadius: '8px',
-                      color: '#ffffff',
-                      fontSize: '1rem',
-                      marginBottom: '8px',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                  <p style={{ 
-                    fontSize: '0.75rem', 
-                    color: '#9ca3af', 
-                    marginTop: '8px' 
-                  }}>
-                    Upload a CSV file exported from this app to import data
-                  </p>
-                </div>
-              </div>
-            </div>
 
-            {/* Account Settings Section */}
-            <div style={{ 
-              background: '#1e3a5f', 
-              border: '1px solid #2563eb',
-              borderRadius: '12px',
-              padding: '24px',
-              marginBottom: '24px'
-            }}>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '16px', color: '#ffffff' }}>Account Settings</h3>
-              
-              <div style={{ marginBottom: '16px' }}>
-                <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Email</p>
-                <p style={{ color: '#ffffff', fontSize: '1rem' }}>{user?.email}</p>
-              </div>
-              
-              <button 
-                onClick={handleChangePassword}
-                style={{ 
-                  padding: '12px 24px',
-                  background: '#2563eb',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: 'white',
-                  cursor: 'pointer',
-                  fontSize: '1rem',
-                  fontWeight: '600'
-                }}
-              >
-                🔑 Change Password
-              </button>
-            </div>
-
-            {/* App Information Section */}
-            <div style={{ 
-              background: '#1e3a5f', 
-              border: '1px solid #2563eb',
-              borderRadius: '12px',
-              padding: '24px'
-            }}>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '16px', color: '#ffffff' }}>App Information</h3>
-              
-              <div style={{ color: '#d1d5db' }}>
-                <p><strong>Version:</strong> 1.0.0</p>
-                <p style={{ marginTop: '8px' }}><strong>Created by:</strong> Dahlton Ag Ventures</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-So it should look like:
-```
-...Service Records tab code...
-          </div>
-        )}
-
-        {/* Settings Tab */}
-        {activeTab === 'settings' && (
-        ...all the settings code...
-        )}
-
-        {/* Add Inventory Modal */}
         {/* Add Inventory Modal */}
         {showInventoryModal && (
           <Modal title="Add Inventory Item" onClose={() => setShowInventoryModal(false)}>
