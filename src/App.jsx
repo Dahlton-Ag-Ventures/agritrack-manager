@@ -1109,20 +1109,146 @@ if (!user) {
           </div>
         )}
 
-        {/* Service Records Tab */}
-        {activeTab === 'service' && (
-          <div>
-            <div style={styles.tabHeader}>
-              <h2 style={{ fontSize: '1.5rem' }}>Service Records</h2>
-              <button onClick={() => setShowServiceModal(true)} style={styles.addButton}>
-                <Plus size={20} /> Add Service Record
-              </button>
-            </div>
+       {/* Service Records Tab */}
+{activeTab === 'service' && (
+  <div>
+    <div style={styles.tabHeader}>
+      <h2 style={{ fontSize: '1.5rem' }}>Service Records</h2>
+      <button onClick={() => setShowServiceModal(true)} style={styles.addButton}>
+        <Plus size={20} /> Add Service Record
+      </button>
+    </div>
+
+    <div style={styles.searchSortContainer}>
+      <input
+        type="text"
+        placeholder="🔍 Search service records (machine, service type, technician, notes)..."
+        value={serviceSearch}
+        onChange={(e) => setServiceSearch(e.target.value)}
+        style={styles.searchInput}
+      />
+      <select
+        value={serviceSort}
+        onChange={(e) => setServiceSort(e.target.value)}
+        style={styles.sortSelect}
+      >
+        <option value="date-desc">Date (Newest First)</option>
+        <option value="date-asc">Date (Oldest First)</option>
+        <option value="cost-desc">Cost (High → Low)</option>
+        <option value="cost-asc">Cost (Low → High)</option>
+      </select>
+    </div>
+
+    {serviceHistory.length === 0 ? (
+      <div style={styles.emptyState}>
+        <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+        <p>No service records yet</p>
+      </div>
+    ) : getFilteredAndSortedService().length === 0 ? (
+      <div style={styles.emptyState}>
+        <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+        <p>No records match your search</p>
+      </div>
+    ) : (
+      <div style={styles.itemsList}>
+        {getFilteredAndSortedService().map(record => (
+          <div key={record.id} style={styles.itemCard}>
+            {editingServiceId === record.id ? (
+              <div style={{ flex: 1 }}>
+                <input
+                  style={styles.input}
+                  placeholder="Machine Name"
+                  value={serviceForm.machineName}
+                  onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
+                />
+                <input
+                  style={styles.input}
+                  placeholder="Service Type (e.g., Oil Change, Repair)"
+                  value={serviceForm.serviceType}
+                  onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
+                />
+                <input
+                  style={styles.input}
+                  type="date"
+                  placeholder="Date"
+                  value={serviceForm.date}
+                  onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
+                />
+                <input
+                  style={styles.input}
+                  type="number"
+                  placeholder="Cost"
+                  value={serviceForm.cost}
+                  onChange={(e) => setServiceForm({ ...serviceForm, cost: e.target.value })}
+                />
+                <input
+                  style={styles.input}
+                  placeholder="Technician"
+                  value={serviceForm.technician}
+                  onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
+                />
+                <textarea
+                  style={{ ...styles.input, minHeight: '80px', resize: 'vertical' }}
+                  placeholder="Notes"
+                  value={serviceForm.notes}
+                  onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
+                />
+                <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                  <button onClick={() => saveServiceEdit(record.id)} style={styles.saveButton}>
+                    <Save size={16} /> Save
+                  </button>
+                  <button onClick={cancelServiceEdit} style={styles.cancelButton}>
+                    <X size={16} /> Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
+                  <p style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '12px' }}>{record.serviceType}</p>
+                  <div style={styles.itemDetails}>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Date</p>
+                      <p>{record.date || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Cost</p>
+                      <p>${record.cost || '0'}</p>
+                    </div>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Technician</p>
+                      <p>{record.technician || 'N/A'}</p>
+                    </div>
+                  </div>
+                  {record.notes && (
+                    <div style={{ marginTop: '12px', padding: '12px', background: '#1f2937', borderRadius: '8px' }}>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Notes:</p>
+                      <p style={{ fontSize: '0.875rem' }}>{record.notes}</p>
+                    </div>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={() => startEditService(record)} style={styles.editButton}>
+                    <Edit2 size={16} />
+                  </button>
+                  <button onClick={() => deleteServiceRecord(record.id)} style={styles.deleteButton}>
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
+
 {/* Settings Tab */}
 {activeTab === 'settings' && (
   <div>
     <h2 style={{ fontSize: '1.5rem', marginBottom: '24px' }}>Settings</h2>
-    {/* Add your settings content here */}
     <p>Settings panel coming soon...</p>
   </div>
 )}
