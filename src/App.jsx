@@ -1383,159 +1383,156 @@ if (!user) {
             )}
           </div>
         )}
-      {/* Settings Tab */}
-{activeTab === 'settings' && (
-  <div>
-    {console.log('Settings tab is rendering!')}
-    <h2 style={{ fontSize: '1.5rem', marginBottom: '24px', color: '#ffffff' }}>Settings</h2>
-    ...
-    
-    {/* Data Management Section */}
-    <div style={{ 
-      background: '#1e3a5f', 
-      border: '1px solid #2563eb',
-      borderRadius: '12px',
-      padding: '24px',
-      marginBottom: '24px'
-    }}>
-      <h3 style={{ fontSize: '1.25rem', marginBottom: '16px', color: '#ffffff' }}>Data Management</h3>
-      
-      <div style={{ display: 'grid', gap: '12px' }}>
-        <button 
-          onClick={() => exportToCSV('inventory')} 
-          style={{ 
-            padding: '12px 24px',
-            background: '#10b981',
-            border: 'none',
-            borderRadius: '8px',
-            color: 'white',
-            cursor: 'pointer',
-            fontSize: '1rem',
-            fontWeight: '600'
-          }}
-        >
-          📥 Export Inventory to CSV
-        </button>
-        <button 
-          onClick={() => exportToCSV('machinery')} 
-          style={{ 
-            padding: '12px 24px',
-            background: '#10b981',
-            border: 'none',
-            borderRadius: '8px',
-            color: 'white',
-            cursor: 'pointer',
-            fontSize: '1rem',
-            fontWeight: '600'
-          }}
-        >
-          📥 Export Machinery to CSV
-        </button>
-        <button 
-          onClick={() => exportToCSV('service')} 
-          style={{ 
-            padding: '12px 24px',
-            background: '#10b981',
-            border: 'none',
-            borderRadius: '8px',
-            color: 'white',
-            cursor: 'pointer',
-            fontSize: '1rem',
-            fontWeight: '600'
-          }}
-        >
-          📥 Export Service Records to CSV
-        </button>
-        
-        <div style={{ 
-          margin: '16px 0', 
-          borderTop: '1px solid #2563eb', 
-          paddingTop: '16px' 
-        }}>
-          <label style={{ 
-            display: 'block', 
-            marginBottom: '8px', 
-            color: '#d1d5db',
-            fontWeight: '600'
-          }}>
-            Import CSV File:
-          </label>
-          <input 
-            type="file" 
-            accept=".csv" 
-            onChange={handleImportCSV}
-            style={{ 
-              width: '100%',
-              padding: '12px',
-              background: '#1a2942',
+     {/* Settings Tab */}
+        {activeTab === 'settings' && (
+          <div>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '24px', color: '#ffffff' }}>Settings</h2>
+            
+            {/* Data Management Section */}
+            <div style={{ 
+              background: '#1e3a5f', 
               border: '1px solid #2563eb',
-              borderRadius: '8px',
-              color: '#ffffff',
-              fontSize: '1rem',
-              marginBottom: '8px',
-              boxSizing: 'border-box'
-            }}
-          />
-          <p style={{ 
-            fontSize: '0.75rem', 
-            color: '#9ca3af', 
-            marginTop: '8px' 
-          }}>
-            Upload a CSV file exported from this app to import data
-          </p>
-        </div>
-      </div>
-    </div>
+              borderRadius: '12px',
+              padding: '24px',
+              marginBottom: '24px'
+            }}>
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '16px', color: '#ffffff' }}>Data Management</h3>
+              
+              <div style={{ display: 'grid', gap: '12px' }}>
+                <button 
+                  onClick={() => exportToCSV('inventory')} 
+                  style={{ 
+                    padding: '12px 24px',
+                    background: '#10b981',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: 'white',
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    fontWeight: '600'
+                  }}
+                >
+                  📥 Export Inventory to CSV
+                </button>
+                <button 
+                  onClick={() => exportToCSV('machinery')} 
+                  style={{ 
+                    padding: '12px 24px',
+                    background: '#10b981',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: 'white',
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    fontWeight: '600'
+                  }}
+                >
+                  📥 Export Machinery to CSV
+                </button>
+                <button 
+                  onClick={() => exportToCSV('service')} 
+                  style={{ 
+                    padding: '12px 24px',
+                    background: '#10b981',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: 'white',
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    fontWeight: '600'
+                  }}
+                >
+                  📥 Export Service Records to CSV
+                </button>
+                
+                <div style={{ 
+                  margin: '16px 0', 
+                  borderTop: '1px solid #2563eb', 
+                  paddingTop: '16px' 
+                }}>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '8px', 
+                    color: '#d1d5db',
+                    fontWeight: '600'
+                  }}>
+                    Import CSV File:
+                  </label>
+                  <input 
+                    type="file" 
+                    accept=".csv" 
+                    onChange={handleImportCSV}
+                    style={{ 
+                      width: '100%',
+                      padding: '12px',
+                      background: '#1a2942',
+                      border: '1px solid #2563eb',
+                      borderRadius: '8px',
+                      color: '#ffffff',
+                      fontSize: '1rem',
+                      marginBottom: '8px',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                  <p style={{ 
+                    fontSize: '0.75rem', 
+                    color: '#9ca3af', 
+                    marginTop: '8px' 
+                  }}>
+                    Upload a CSV file exported from this app to import data
+                  </p>
+                </div>
+              </div>
+            </div>
 
-    {/* Account Settings Section */}
-    <div style={{ 
-      background: '#1e3a5f', 
-      border: '1px solid #2563eb',
-      borderRadius: '12px',
-      padding: '24px',
-      marginBottom: '24px'
-    }}>
-      <h3 style={{ fontSize: '1.25rem', marginBottom: '16px', color: '#ffffff' }}>Account Settings</h3>
-      
-      <div style={{ marginBottom: '16px' }}>
-        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Email</p>
-        <p style={{ color: '#ffffff', fontSize: '1rem' }}>{user?.email}</p>
-      </div>
-      
-      <button 
-        onClick={handleChangePassword}
-        style={{ 
-          padding: '12px 24px',
-          background: '#2563eb',
-          border: 'none',
-          borderRadius: '8px',
-          color: 'white',
-          cursor: 'pointer',
-          fontSize: '1rem',
-          fontWeight: '600'
-        }}
-      >
-        🔑 Change Password
-      </button>
-    </div>
+            {/* Account Settings Section */}
+            <div style={{ 
+              background: '#1e3a5f', 
+              border: '1px solid #2563eb',
+              borderRadius: '12px',
+              padding: '24px',
+              marginBottom: '24px'
+            }}>
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '16px', color: '#ffffff' }}>Account Settings</h3>
+              
+              <div style={{ marginBottom: '16px' }}>
+                <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Email</p>
+                <p style={{ color: '#ffffff', fontSize: '1rem' }}>{user?.email}</p>
+              </div>
+              
+              <button 
+                onClick={handleChangePassword}
+                style={{ 
+                  padding: '12px 24px',
+                  background: '#2563eb',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  fontWeight: '600'
+                }}
+              >
+                🔑 Change Password
+              </button>
+            </div>
 
-    {/* App Information Section */}
-    <div style={{ 
-      background: '#1e3a5f', 
-      border: '1px solid #2563eb',
-      borderRadius: '12px',
-      padding: '24px'
-    }}>
-      <h3 style={{ fontSize: '1.25rem', marginBottom: '16px', color: '#ffffff' }}>App Information</h3>
-      
-      <div style={{ color: '#d1d5db' }}>
-        <p><strong>Version:</strong> 1.0.0</p>
-        <p style={{ marginTop: '8px' }}><strong>Created by:</strong> Dahlton Ag Ventures</p>
-      </div>
-    </div>
-  </div>
-)}
-```
+            {/* App Information Section */}
+            <div style={{ 
+              background: '#1e3a5f', 
+              border: '1px solid #2563eb',
+              borderRadius: '12px',
+              padding: '24px'
+            }}>
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '16px', color: '#ffffff' }}>App Information</h3>
+              
+              <div style={{ color: '#d1d5db' }}>
+                <p><strong>Version:</strong> 1.0.0</p>
+                <p style={{ marginTop: '8px' }}><strong>Created by:</strong> Dahlton Ag Ventures</p>
+              </div>
+            </div>
+          </div>
+        )}
 
 So it should look like:
 ```
