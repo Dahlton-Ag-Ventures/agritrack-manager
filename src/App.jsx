@@ -570,9 +570,6 @@ export default function App() {
     const newInventory = inventory.map(item => 
       item.id === id ? { ...item, quantity: Math.max(0, (parseInt(item.quantity) || 0) + delta).toString() } : item
     );
-    import { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
-import AuthPage from './components/AuthPage';
 import HomePage from './components/HomePage';
 import InventoryPage from './components/InventoryPage';
 import MachineryPage from './components/MachineryPage';
