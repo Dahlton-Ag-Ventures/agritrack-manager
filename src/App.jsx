@@ -783,7 +783,8 @@ if (!user) {
   if (loading) {
   // Main app content (only shown when authenticated)
   return (
-    <div style={styles.container}>
+ <div style={styles.container}>
+      {console.log('Current activeTab:', activeTab)}
       <div style={styles.content}>
         {/* Header */}
         <div style={styles.header}>
