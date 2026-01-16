@@ -717,11 +717,11 @@ if (!user) {
         {activeTab === 'home' && (
           <div style={styles.homeContainer}>
  <div style={styles.welcomeCard}>
-  <p style={{ color: '#d1d5db', marginBottom: '12px', fontSize: '1.5rem', fontWeight: '600' }}>
+  <p style={{ color: '#ffffff', marginBottom: '12px', fontSize: '1.5rem', fontWeight: '600' }}>
     Track inventory, machinery, and service records all in one place.
   </p>
   <div style={styles.syncStatus}>
-    <span style={{ color: '#ffffff', fontSize: '1.1rem', fontWeight: '600' }}>
+    <span style={{ color: '#d1d5db', fontSize: '0.9rem', fontWeight: '600' }}>
       {realtimeStatus === 'connected' 
         ? '✓ Live sync enabled - Changes appear instantly on all devices' 
         : '⚠️ Connecting to live sync...'}
