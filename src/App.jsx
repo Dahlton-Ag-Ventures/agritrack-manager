@@ -642,9 +642,6 @@ if (!user) {
   );
 }
 
-  }
-  };
-
   // Export to CSV function
   const exportToCSV = (type) => {
     let data, filename;
