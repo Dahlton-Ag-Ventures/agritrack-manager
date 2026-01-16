@@ -1570,8 +1570,13 @@ const styles = {
     color: 'white',
     padding: '24px',
   },
-  homeContainer: {
-    background: 'rgba(31, 41, 55, 0.85)',
+homeContainer: {
+    background: 'linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url("https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2940&auto=format&fit=crop")',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center center',
+    backgroundRepeat: 'no-repeat',
+    backgroundAttachment: 'scroll',
+    minHeight: '400px',
     borderRadius: '16px',
     padding: '24px',
     backdropFilter: 'blur(10px)',
