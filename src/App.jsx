@@ -1560,10 +1560,10 @@ const styles = {
     color: '#ef4444',
     fontSize: '0.875rem',
   },
-  container: {
+ container: {
     minHeight: '100vh',
-    background: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop")',
-    backgroundSize: '100% auto',
+    background: 'linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200")',
+    backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundAttachment: 'fixed',
     backgroundRepeat: 'no-repeat',
@@ -1571,15 +1571,10 @@ const styles = {
     padding: '24px',
   },
 homeContainer: {
-    background: 'linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url("https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2940&auto=format&fit=crop")',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center center',
-    backgroundRepeat: 'no-repeat',
-    backgroundAttachment: 'scroll',
+    background: 'transparent',
     minHeight: '400px',
     borderRadius: '16px',
     padding: '24px',
-    backdropFilter: 'blur(10px)',
   },
   content: {
     maxWidth: '1200px',
