@@ -589,7 +589,6 @@ export default function App() {
       alert('Error updating quantity: ' + error.message);
     }
   };
-};
 
   // Export to CSV function
   const exportToCSV = (type) => {
