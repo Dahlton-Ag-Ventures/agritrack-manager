@@ -1375,10 +1375,12 @@ if (!user) {
             )}
           </div>
         )}
-       {/* Settings Tab */}
+      {/* Settings Tab */}
 {activeTab === 'settings' && (
   <div>
+    {console.log('Settings tab is rendering!')}
     <h2 style={{ fontSize: '1.5rem', marginBottom: '24px', color: '#ffffff' }}>Settings</h2>
+    ...
     
     {/* Data Management Section */}
     <div style={{ 
