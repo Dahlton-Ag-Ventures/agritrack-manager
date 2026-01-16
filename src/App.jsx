@@ -589,7 +589,144 @@ export default function App() {
       alert('Error updating quantity: ' + error.message);
     }
   };
+};
 
+  // Export to CSV function
+  const exportToCSV = (type) => {
+    let data, filename;
+    
+    if (type === 'inventory') {
+      data = inventory;
+      filename = 'inventory_export.csv';
+    } else if (type === 'machinery') {
+      data = machinery;
+      filename = 'machinery_export.csv';
+    } else if (type === 'service') {
+      data = serviceHistory;
+      filename = 'service_records_export.csv';
+    }
+    
+    if (!data || data.length === 0) {
+      alert('No data to export');
+      return;
+    }
+    
+    // Convert to CSV
+    const headers = Object.keys(data[0]).join(',');
+    const rows = data.map(item => 
+      Object.values(item).map(val => 
+        typeof val === 'string' && val.includes(',') ? `"${val}"` : val
+      ).join(',')
+    );
+    const csv = [headers, ...rows].join('\n');
+    
+    // Download
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  // Import from CSV function
+  const handleImportCSV = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const csv = event.target.result;
+        const lines = csv.split('\n');
+        const headers = lines[0].split(',');
+        
+        // Determine type based on headers
+        let type, data;
+        if (headers.includes('partNumber')) {
+          type = 'inventory';
+          data = inventory;
+        } else if (headers.includes('vinSerial')) {
+          type = 'machinery';
+          data = machinery;
+        } else if (headers.includes('serviceType')) {
+          type = 'service';
+          data = serviceHistory;
+        } else {
+          alert('Unable to determine data type from CSV');
+          return;
+        }
+        
+        const newItems = [];
+        for (let i = 1; i < lines.length; i++) {
+          if (!lines[i].trim()) continue;
+          const values = lines[i].split(',');
+          const item = {};
+          headers.forEach((header, index) => {
+            item[header.trim()] = values[index]?.trim();
+          });
+          newItems.push(item);
+        }
+        
+        const confirmImport = window.confirm(
+          `Import ${newItems.length} ${type} records? This will add to existing data.`
+        );
+        
+        if (!confirmImport) return;
+        
+        // Add new items
+        const updatedData = [...data, ...newItems];
+        
+        // Update database
+        if (type === 'inventory') {
+          await supabase.from('agritrack_data').update({ inventory: updatedData }).eq('id', 1);
+        } else if (type === 'machinery') {
+          await supabase.from('agritrack_data').update({ machinery: updatedData }).eq('id', 1);
+        } else if (type === 'service') {
+          await supabase.from('agritrack_data').update({ service_history: updatedData }).eq('id', 1);
+        }
+        
+        alert(`Successfully imported ${newItems.length} records!`);
+        
+      } catch (error) {
+        console.error('Import error:', error);
+        alert('Error importing CSV: ' + error.message);
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset input
+    e.target.value = '';
+  };
+
+  // Change password function
+  const handleChangePassword = async () => {
+    const newPassword = prompt('Enter your new password:');
+    
+    if (!newPassword) return;
+    
+    if (newPassword.length < 6) {
+      alert('Password must be at least 6 characters long');
+      return;
+    }
+    
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+      
+      if (error) throw error;
+      
+      alert('Password changed successfully!');
+    } catch (error) {
+      console.error('Password change error:', error);
+      alert('Error changing password: ' + error.message);
+    }
+  };
+
+  // Show loading spinner
+  if (loading) {
   // Show loading spinner
   if (loading) {
     return (
