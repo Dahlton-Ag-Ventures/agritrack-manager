@@ -25,6 +25,7 @@ const MACHINERY_CATEGORIES = [
 export default function App() {
   // Authentication state
   const [user, setUser] = useState(null);
+  const [theme, setTheme] = useState('dark');
   const [loading, setLoading] = useState(true);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -696,7 +697,7 @@ if (!user) {
 
         {/* Tabs */}
         <div style={styles.tabs}>
-          {['home', 'inventory', 'machinery', 'service'].map(tab => (
+          {['home', 'inventory', 'machinery', 'service', 'settings'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
