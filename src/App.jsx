@@ -716,20 +716,18 @@ if (!user) {
        {/* Home Tab */}
         {activeTab === 'home' && (
           <div style={styles.homeContainer}>
-            <div style={styles.welcomeCard}>
-              <h2 style={{ fontSize: '2rem', marginBottom: '8px' }}>Welcome to AgriTrack Manager</h2>
-              <p style={{ color: '#d1d5db', marginBottom: '12px' }}>
-                Track inventory, machinery, and service records all in one place.
-              </p>
-              <div style={styles.syncStatus}>
-                <Users size={20} style={{ color: '#10b981' }} />
-                <span style={{ color: 'ffffff', fontSize: '1.1rem', fontWeight: '600' }}>
-                  {realtimeStatus === 'connected' 
-                    ? '✓ Live sync enabled - Changes appear instantly on all devices' 
-                    : '⚠️ Connecting to live sync...'}
-                </span>
-              </div>
-            </div>
+ <div style={styles.welcomeCard}>
+  <p style={{ color: '#d1d5db', marginBottom: '12px', fontSize: '1.5rem', fontWeight: '600' }}>
+    Track inventory, machinery, and service records all in one place.
+  </p>
+  <div style={styles.syncStatus}>
+    <span style={{ color: '#ffffff', fontSize: '1.1rem', fontWeight: '600' }}>
+      {realtimeStatus === 'connected' 
+        ? '✓ Live sync enabled - Changes appear instantly on all devices' 
+        : '⚠️ Connecting to live sync...'}
+    </span>
+  </div>
+</div>
 
             <div style={styles.statsGrid}>
               <div style={styles.statCard}>
