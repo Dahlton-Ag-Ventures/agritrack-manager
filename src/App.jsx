@@ -588,15 +588,7 @@ export default function App() {
       loadData();
       alert('Error updating quantity: ' + error.message);
     }
-
-    return (
-      <div style={styles.loading}>
-        <div style={styles.spinner} />
-        <p>Loading AgriTrack...</p>
-      </div>
-    );
-  }
-
+  };
   // Show login screen if not authenticated
 if (!user) {
   return (
