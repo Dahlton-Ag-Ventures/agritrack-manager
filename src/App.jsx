@@ -697,7 +697,6 @@ if (!user) {
 
         {/* Tabs */}
         <div style={styles.tabs}>
-          {['home', 'inventory', 'machinery', 'service'].map(tab => (
           {['home', 'inventory', 'machinery', 'service', 'settings'].map(tab => (
             <button
               key={tab}
@@ -1119,7 +1118,14 @@ if (!user) {
                 <Plus size={20} /> Add Service Record
               </button>
             </div>
-
+{/* Settings Tab */}
+{activeTab === 'settings' && (
+  <div>
+    <h2 style={{ fontSize: '1.5rem', marginBottom: '24px' }}>Settings</h2>
+    {/* Add your settings content here */}
+    <p>Settings panel coming soon...</p>
+  </div>
+)}
             {/* Search and Sort Controls */}
             <div style={styles.searchSortContainer}>
               <input
