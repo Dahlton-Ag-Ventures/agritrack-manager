@@ -1248,8 +1248,69 @@ if (!user) {
 {/* Settings Tab */}
 {activeTab === 'settings' && (
   <div>
-    <h2 style={{ fontSize: '1.5rem', marginBottom: '24px' }}>Settings</h2>
-    <p>Settings panel coming soon...</p>
+    <div style={styles.tabHeader}>
+      <h2 style={{ fontSize: '1.5rem' }}>Settings</h2>
+    </div>
+
+    <div style={styles.itemCard}>
+      <div style={{ flex: 1 }}>
+        <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Account Information</h3>
+        <div style={styles.itemDetails}>
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Email</p>
+            <p>{user?.email || 'Not available'}</p>
+          </div>
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>User ID</p>
+            <p style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>{user?.id || 'Not available'}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style={styles.itemCard}>
+      <div style={{ flex: 1 }}>
+        <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Application Info</h3>
+        <div style={styles.itemDetails}>
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Real-time Status</p>
+            <p style={{ color: realtimeStatus === 'connected' ? '#10b981' : '#ef4444' }}>
+              {realtimeStatus === 'connected' ? '✓ Connected' : '⚠️ Disconnected'}
+            </p>
+          </div>
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Last Sync</p>
+            <p>{lastSync?.toLocaleString() || 'Never'}</p>
+          </div>
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Total Items</p>
+            <p>{inventory.length} inventory, {machinery.length} machines, {serviceHistory.length} records</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style={styles.itemCard}>
+      <div style={{ flex: 1 }}>
+        <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Actions</h3>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <button onClick={() => window.location.reload()} style={styles.primaryButton}>
+            <RefreshCw size={16} style={{ marginRight: '8px' }} />
+            Refresh Application
+          </button>
+          <button onClick={handleLogout} style={{ ...styles.secondaryButton, background: '#ef4444' }}>
+            <LogOut size={16} style={{ marginRight: '8px' }} />
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div style={{ marginTop: '24px', padding: '16px', background: '#1e3a5f', border: '1px solid #2563eb', borderRadius: '12px' }}>
+      <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center' }}>
+        AgriTrack Manager v1.0 • Created by Dahlton Ag Ventures • Powered by Vercel
+      </p>
+    </div>
   </div>
 )}
             {/* Search and Sort Controls */}
