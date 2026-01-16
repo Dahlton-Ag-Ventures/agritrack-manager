@@ -588,6 +588,69 @@ export default function App() {
       loadData();
       alert('Error updating quantity: ' + error.message);
     }
+
+    return (
+      <div style={styles.loading}>
+        <div style={styles.spinner} />
+        <p>Loading AgriTrack...</p>
+      </div>
+    );
+  }
+
+  // Show login screen if not authenticated
+if (!user) {
+  return (
+    <div style={styles.loginContainer}>
+      <div style={styles.loginCard}>
+        <h2 style={styles.loginTitle}>Welcome to</h2>
+        <h1 style={styles.loginAppName}>AgriTrack Manager</h1>
+        
+        <form onSubmit={handleLogin} style={styles.loginForm}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={loginEmail}
+            onChange={(e) => setLoginEmail(e.target.value)}
+            style={styles.loginInput}
+            required
+            autoComplete="email"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={loginPassword}
+            onChange={(e) => setLoginPassword(e.target.value)}
+            style={styles.loginInput}
+            required
+            autoComplete="current-password"
+          />
+          
+          {loginError && (
+            <div style={styles.loginError}>
+              {loginError}
+            </div>
+          )}
+          
+          <button 
+            type="submit" 
+            style={styles.loginButton}
+            disabled={loggingIn}
+          >
+            {loggingIn ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
+        
+        <p style={styles.loginSubtitle}>created by Dahlton Ag Ventures</p>
+      </div>
+      
+      <div style={styles.loginFooter}>
+        powered by Vercel
+      </div>
+    </div>
+  );
+}
+
+  }
   };
 
   // Export to CSV function
@@ -726,69 +789,6 @@ export default function App() {
 
   // Show loading spinner
   if (loading) {
-  // Show loading spinner
-  if (loading) {
-    return (
-      <div style={styles.loading}>
-        <div style={styles.spinner} />
-        <p>Loading AgriTrack...</p>
-      </div>
-    );
-  }
-
-  // Show login screen if not authenticated
-if (!user) {
-  return (
-    <div style={styles.loginContainer}>
-      <div style={styles.loginCard}>
-        <h2 style={styles.loginTitle}>Welcome to</h2>
-        <h1 style={styles.loginAppName}>AgriTrack Manager</h1>
-        
-        <form onSubmit={handleLogin} style={styles.loginForm}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={loginEmail}
-            onChange={(e) => setLoginEmail(e.target.value)}
-            style={styles.loginInput}
-            required
-            autoComplete="email"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={loginPassword}
-            onChange={(e) => setLoginPassword(e.target.value)}
-            style={styles.loginInput}
-            required
-            autoComplete="current-password"
-          />
-          
-          {loginError && (
-            <div style={styles.loginError}>
-              {loginError}
-            </div>
-          )}
-          
-          <button 
-            type="submit" 
-            style={styles.loginButton}
-            disabled={loggingIn}
-          >
-            {loggingIn ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
-        
-        <p style={styles.loginSubtitle}>created by Dahlton Ag Ventures</p>
-      </div>
-      
-      <div style={styles.loginFooter}>
-        powered by Vercel
-      </div>
-    </div>
-  );
-}
-
   // Main app content (only shown when authenticated)
   return (
     <div style={styles.container}>
