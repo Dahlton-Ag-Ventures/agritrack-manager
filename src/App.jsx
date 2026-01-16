@@ -719,11 +719,11 @@ if (!user) {
             <div style={styles.welcomeCard}>
               <h2 style={{ fontSize: '2rem', marginBottom: '8px' }}>Welcome to AgriTrack Manager</h2>
               <p style={{ color: '#d1d5db', marginBottom: '12px' }}>
-                Real-time farm management with automatic sync across all devices.
+                Track inventory, machinery, and service records all in one place.
               </p>
               <div style={styles.syncStatus}>
                 <Users size={20} style={{ color: '#10b981' }} />
-                <span style={{ color: '#10b981', fontSize: '0.875rem' }}>
+                <span style={{ color: '#064e3b', fontSize: '0.875rem' }}>
                   {realtimeStatus === 'connected' 
                     ? '✓ Live sync enabled - Changes appear instantly on all devices' 
                     : '⚠️ Connecting to live sync...'}
