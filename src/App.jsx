@@ -702,7 +702,7 @@ if (!user) {
               onClick={() => setActiveTab(tab)}
               style={{
                 ...styles.tab,
-                background: activeTab === tab ? 'linear-gradient(to right, #10b981, #06b6d4)' : '#374151'
+                background: activeTab === tab ? 'linear-gradient(to right, #10b981, #06b6d4)' : '#1e3a5f'
               }}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -1653,7 +1653,7 @@ homeContainer: {
     alignItems: 'center',
     gap: '8px',
     padding: '8px 16px',
-    background: '#4b5563',
+    background: '#2563eb',
     border: 'none',
     borderRadius: '8px',
     color: 'white',
@@ -1733,8 +1733,8 @@ homeContainer: {
     flex: 1,
     minWidth: '250px',
     padding: '12px 16px',
-    background: '#374151',
-    border: '1px solid #4b5563',
+    background: '#1e3a5f',
+    border: '1px solid #2563eb',
     borderRadius: '8px',
     color: 'white',
     fontSize: '0.875rem',
@@ -1742,8 +1742,8 @@ homeContainer: {
   },
   sortSelect: {
     padding: '12px 16px',
-    background: '#374151',
-    border: '1px solid #4b5563',
+    background: '#1e3a5f',
+    border: '1px solid #2563eb',
     borderRadius: '8px',
     color: 'white',
     fontSize: '0.875rem',
@@ -1764,8 +1764,8 @@ homeContainer: {
     fontSize: '1rem',
   },
   emptyState: {
-    background: '#374151',
-    border: '1px solid #4b5563',
+    background: '#1e3a5f',
+    border: '1px solid #2563eb',
     borderRadius: '12px',
     padding: '48px',
     textAlign: 'center',
@@ -1777,8 +1777,8 @@ homeContainer: {
     overflowY: 'auto',
   },
   itemCard: {
-    background: '#374151',
-    border: '1px solid #4b5563',
+    background: '#1e3a5f',
+    border: '1px solid #2563eb',
     borderRadius: '12px',
     padding: '24px',
     display: 'flex',
@@ -1868,8 +1868,8 @@ homeContainer: {
     zIndex: 50,
   },
   modal: {
-    background: '#1f2937',
-    border: '1px solid #4b5563',
+    background: '#1e3a5f',
+    border: '1px solid #2563eb',
     borderRadius: '12px',
     padding: '24px',
     maxWidth: '500px',
@@ -1878,7 +1878,7 @@ homeContainer: {
     overflowY: 'auto',
   },
   closeButton: {
-    background: '#4b5563',
+    background: '#2563eb',
     border: 'none',
     borderRadius: '8px',
     padding: '8px 16px',
@@ -1888,8 +1888,8 @@ homeContainer: {
   input: {
     width: '100%',
     padding: '12px',
-    background: '#111827',
-    border: '1px solid #4b5563',
+    background: '#1a2942',
+    border: '1px solid #2563eb',
     borderRadius: '8px',
     color: 'white',
     fontSize: '1rem',
@@ -1909,7 +1909,7 @@ homeContainer: {
   secondaryButton: {
     flex: 1,
     padding: '12px',
-    background: '#4b5563',
+    background: '#2563eb',
     border: 'none',
     borderRadius: '8px',
     color: 'white',
@@ -1917,7 +1917,7 @@ homeContainer: {
     fontSize: '1rem',
   },
   debugInfo: {
-    background: '#111827',
+    background: '#1a2942',
     border: '1px solid #4b5563',
     borderRadius: '8px',
     padding: '16px',
