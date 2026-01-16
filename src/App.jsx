@@ -1,3 +1,4 @@
+// Force rebuild 2026-01-16
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut } from 'lucide-react';
