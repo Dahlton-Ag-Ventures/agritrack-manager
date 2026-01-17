@@ -355,19 +355,14 @@ export default function App() {
     if (!shouldDelete) return;
 
     try {
-      // Filter out the item from the inventory array
       const newInventory = inventory.filter(item => item.id !== id);
-
-      // Update the agritrack_data table with the new inventory array
       const { error } = await supabase
         .from('agritrack_data')
         .update({ inventory: newInventory })
         .eq('id', 1);
 
       if (error) throw error;
-
       console.log('✅ Item deleted successfully');
-
     } catch (error) {
       console.error('Error deleting inventory item:', error);
       alert('Failed to delete item. Please try again.');
@@ -390,12 +385,10 @@ export default function App() {
 
   const saveInventoryEdit = async (id) => {
     try {
-      // Update the item in the inventory array
       const newInventory = inventory.map(item => 
         item.id === id ? { ...item, ...inventoryForm } : item
       );
 
-      // Update the agritrack_data table with the modified inventory array
       const { error } = await supabase
         .from('agritrack_data')
         .update({ inventory: newInventory })
@@ -403,12 +396,10 @@ export default function App() {
 
       if (error) throw error;
 
-      // Clear the form and exit edit mode
       setEditingInventoryId(null);
       setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
 
       console.log('✅ Item updated successfully');
-
     } catch (error) {
       console.error('Error updating inventory item:', error);
       alert('Failed to update item. Please try again.');
@@ -566,15 +557,12 @@ export default function App() {
   };
 
   const quickUpdateQuantity = async (id, delta) => {
-    // Optimistically update the UI immediately
     const newInventory = inventory.map(item => 
       item.id === id ? { ...item, quantity: Math.max(0, (parseInt(item.quantity) || 0) + delta).toString() } : item
     );
 
-    // Update local state immediately for instant feedback
     setInventory(newInventory);
 
-    // Then sync to database in the background
     try {
       const { error } = await supabase
         .from('agritrack_data')
@@ -584,13 +572,11 @@ export default function App() {
       if (error) throw error;
     } catch (error) {
       console.error('Update error:', error);
-      // Revert on error by reloading data
       loadData();
       alert('Error updating quantity: ' + error.message);
     }
   };
 
-  // Show loading spinner
   if (loading) {
     return (
       <div style={styles.loading}>
@@ -600,64 +586,61 @@ export default function App() {
     );
   }
 
-  // Show login screen if not authenticated
-if (!user) {
-  return (
-    <div style={styles.loginContainer}>
-      <div style={styles.loginCard}>
-        <h2 style={styles.loginTitle}>Welcome to</h2>
-        <h1 style={styles.loginAppName}>AgriTrack Manager</h1>
+  if (!user) {
+    return (
+      <div style={styles.loginContainer}>
+        <div style={styles.loginCard}>
+          <h2 style={styles.loginTitle}>Welcome to</h2>
+          <h1 style={styles.loginAppName}>AgriTrack Manager</h1>
 
-        <form onSubmit={handleLogin} style={styles.loginForm}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={loginEmail}
-            onChange={(e) => setLoginEmail(e.target.value)}
-            style={styles.loginInput}
-            required
-            autoComplete="email"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={loginPassword}
-            onChange={(e) => setLoginPassword(e.target.value)}
-            style={styles.loginInput}
-            required
-            autoComplete="current-password"
-          />
+          <form onSubmit={handleLogin} style={styles.loginForm}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+              style={styles.loginInput}
+              required
+              autoComplete="email"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+              style={styles.loginInput}
+              required
+              autoComplete="current-password"
+            />
 
-          {loginError && (
-            <div style={styles.loginError}>
-              {loginError}
-            </div>
-          )}
+            {loginError && (
+              <div style={styles.loginError}>
+                {loginError}
+              </div>
+            )}
 
-          <button 
-            type="submit" 
-            style={styles.loginButton}
-            disabled={loggingIn}
-          >
-            {loggingIn ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
+            <button 
+              type="submit" 
+              style={styles.loginButton}
+              disabled={loggingIn}
+            >
+              {loggingIn ? 'Signing in...' : 'Sign In'}
+            </button>
+          </form>
 
-        <p style={styles.loginSubtitle}>created by Dahlton Ag Ventures</p>
+          <p style={styles.loginSubtitle}>created by Dahlton Ag Ventures</p>
+        </div>
+
+        <div style={styles.loginFooter}>
+          powered by Vercel
+        </div>
       </div>
+    );
+  }
 
-      <div style={styles.loginFooter}>
-        powered by Vercel
-      </div>
-    </div>
-  );
-}
-
-  // Main app content (only shown when authenticated)
   return (
     <div style={styles.container}>
       <div style={styles.content}>
-        {/* Header */}
         <div style={styles.header}>
           <div>
             <h1 style={styles.title}>AgriTrack Manager</h1>
@@ -695,7 +678,6 @@ if (!user) {
           </div>
         )}
 
-        {/* Tabs */}
         <div style={styles.tabs}>
           {['home', 'inventory', 'machinery', 'service', 'settings'].map(tab => (
             <button
@@ -714,21 +696,20 @@ if (!user) {
           ))}
         </div>
 
-       {/* Home Tab */}
         {activeTab === 'home' && (
           <div style={styles.homeContainer}>
- <div style={{ ...styles.welcomeCard, background: 'rgba(6, 182, 212, 0.4)', border: '1px solid #06b6d4' }}>
-  <p style={{ color: '#ffffff', marginBottom: '12px', fontSize: '1.5rem', fontWeight: '600' }}>
-    Track inventory, machinery, and service records all in one place.
-  </p>
-  <div style={styles.syncStatus}>
-    <span style={{ color: '#d1d5db', fontSize: '0.9rem', fontWeight: '600' }}>
-      {realtimeStatus === 'connected' 
-        ? '✓ Live sync enabled - Changes appear instantly on all devices' 
-        : '⚠️ Connecting to live sync...'}
-    </span>
-  </div>
-</div>
+            <div style={{ ...styles.welcomeCard, background: 'rgba(6, 182, 212, 0.4)', border: '1px solid #06b6d4' }}>
+              <p style={{ color: '#ffffff', marginBottom: '12px', fontSize: '1.5rem', fontWeight: '600' }}>
+                Track inventory, machinery, and service records all in one place.
+              </p>
+              <div style={styles.syncStatus}>
+                <span style={{ color: '#d1d5db', fontSize: '0.9rem', fontWeight: '600' }}>
+                  {realtimeStatus === 'connected' 
+                    ? '✓ Live sync enabled - Changes appear instantly on all devices' 
+                    : '⚠️ Connecting to live sync...'}
+                </span>
+              </div>
+            </div>
 
             <div style={styles.statsGrid}>
               <div style={{ ...styles.statCard, background: 'rgba(6, 182, 212, 0.4)', borderColor: '#06b6d4' }}>
@@ -750,7 +731,6 @@ if (!user) {
           </div>
         )}
 
-        {/* Inventory Tab */}
         {activeTab === 'inventory' && (
           <div>
             <div style={styles.tabHeader}>
@@ -760,7 +740,6 @@ if (!user) {
               </button>
             </div>
 
-            {/* Search and Sort Controls */}
             <div style={styles.searchSortContainer}>
               <input
                 type="text"
@@ -797,7 +776,6 @@ if (!user) {
                 {getFilteredAndSortedInventory().map(item => (
                   <div key={item.id} style={styles.itemCard}>
                     {editingInventoryId === item.id ? (
-                      // Edit Mode
                       <div style={{ flex: 1 }}>
                         <input
                           style={styles.input}
@@ -873,7 +851,6 @@ if (!user) {
                         </div>
                       </div>
                     ) : (
-                      // View Mode
                       <>
                         {item.photoUrl && (
                           <img 
@@ -962,7 +939,6 @@ if (!user) {
           </div>
         )}
 
-        {/* Machinery Tab */}
         {activeTab === 'machinery' && (
           <div>
             <div style={styles.tabHeader}>
@@ -972,7 +948,6 @@ if (!user) {
               </button>
             </div>
 
-            {/* Search and Sort Controls */}
             <div style={styles.searchSortContainer}>
               <input
                 type="text"
@@ -1007,7 +982,6 @@ if (!user) {
                 {getFilteredAndSortedMachinery().map(item => (
                   <div key={item.id} style={styles.itemCard}>
                     {editingMachineryId === item.id ? (
-                      // Edit Mode
                       <div style={{ flex: 1 }}>
                         <input
                           style={styles.input}
@@ -1064,7 +1038,6 @@ if (!user) {
                         </div>
                       </div>
                     ) : (
-                      // View Mode
                       <>
                         {item.photoUrl && (
                           <img 
@@ -1109,211 +1082,15 @@ if (!user) {
           </div>
         )}
 
-       {/* Service Records Tab */}
-{activeTab === 'service' && (
-  <div>
-    <div style={styles.tabHeader}>
-      <h2 style={{ fontSize: '1.5rem' }}>Service Records</h2>
-      <button onClick={() => setShowServiceModal(true)} style={styles.addButton}>
-        <Plus size={20} /> Add Service Record
-      </button>
-    </div>
-
-    <div style={styles.searchSortContainer}>
-      <input
-        type="text"
-        placeholder="🔍 Search service records (machine, service type, technician, notes)..."
-        value={serviceSearch}
-        onChange={(e) => setServiceSearch(e.target.value)}
-        style={styles.searchInput}
-      />
-      <select
-        value={serviceSort}
-        onChange={(e) => setServiceSort(e.target.value)}
-        style={styles.sortSelect}
-      >
-        <option value="date-desc">Date (Newest First)</option>
-        <option value="date-asc">Date (Oldest First)</option>
-        <option value="cost-desc">Cost (High → Low)</option>
-        <option value="cost-asc">Cost (Low → High)</option>
-      </select>
-    </div>
-
-    {serviceHistory.length === 0 ? (
-      <div style={styles.emptyState}>
-        <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
-        <p>No service records yet</p>
-      </div>
-    ) : getFilteredAndSortedService().length === 0 ? (
-      <div style={styles.emptyState}>
-        <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
-        <p>No records match your search</p>
-      </div>
-    ) : (
-      <div style={styles.itemsList}>
-        {getFilteredAndSortedService().map(record => (
-          <div key={record.id} style={styles.itemCard}>
-            {editingServiceId === record.id ? (
-              <div style={{ flex: 1 }}>
-                <input
-                  style={styles.input}
-                  placeholder="Machine Name"
-                  value={serviceForm.machineName}
-                  onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
-                />
-                <input
-                  style={styles.input}
-                  placeholder="Service Type (e.g., Oil Change, Repair)"
-                  value={serviceForm.serviceType}
-                  onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
-                />
-                <input
-                  style={styles.input}
-                  type="date"
-                  placeholder="Date"
-                  value={serviceForm.date}
-                  onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
-                />
-                <input
-                  style={styles.input}
-                  type="number"
-                  placeholder="Cost"
-                  value={serviceForm.cost}
-                  onChange={(e) => setServiceForm({ ...serviceForm, cost: e.target.value })}
-                />
-                <input
-                  style={styles.input}
-                  placeholder="Technician"
-                  value={serviceForm.technician}
-                  onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
-                />
-                <textarea
-                  style={{ ...styles.input, minHeight: '80px', resize: 'vertical' }}
-                  placeholder="Notes"
-                  value={serviceForm.notes}
-                  onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
-                />
-                <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                  <button onClick={() => saveServiceEdit(record.id)} style={styles.saveButton}>
-                    <Save size={16} /> Save
-                  </button>
-                  <button onClick={cancelServiceEdit} style={styles.cancelButton}>
-                    <X size={16} /> Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
-                  <p style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '12px' }}>{record.serviceType}</p>
-                  <div style={styles.itemDetails}>
-                    <div>
-                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Date</p>
-                      <p>{record.date || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Cost</p>
-                      <p>${record.cost || '0'}</p>
-                    </div>
-                    <div>
-                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Technician</p>
-                      <p>{record.technician || 'N/A'}</p>
-                    </div>
-                  </div>
-                  {record.notes && (
-                    <div style={{ marginTop: '12px', padding: '12px', background: '#1f2937', borderRadius: '8px' }}>
-                      <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Notes:</p>
-                      <p style={{ fontSize: '0.875rem' }}>{record.notes}</p>
-                    </div>
-                  )}
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={() => startEditService(record)} style={styles.editButton}>
-                    <Edit2 size={16} />
-                  </button>
-                  <button onClick={() => deleteServiceRecord(record.id)} style={styles.deleteButton}>
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
-)}
-
-{/* Settings Tab */}
-{activeTab === 'settings' && (
-  <div>
-    <div style={styles.tabHeader}>
-      <h2 style={{ fontSize: '1.5rem' }}>Settings</h2>
-    </div>
-
-    <div style={styles.itemCard}>
-      <div style={{ flex: 1 }}>
-        <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Account Information</h3>
-        <div style={styles.itemDetails}>
+        {activeTab === 'service' && (
           <div>
-            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Email</p>
-            <p>{user?.email || 'Not available'}</p>
-          </div>
-          <div>
-            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>User ID</p>
-            <p style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>{user?.id || 'Not available'}</p>
-          </div>
-        </div>
-      </div>
-    </div>
+            <div style={styles.tabHeader}>
+              <h2 style={{ fontSize: '1.5rem' }}>Service Records</h2>
+              <button onClick={() => setShowServiceModal(true)} style={styles.addButton}>
+                <Plus size={20} /> Add Service Record
+              </button>
+            </div>
 
-    <div style={styles.itemCard}>
-      <div style={{ flex: 1 }}>
-        <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Application Info</h3>
-        <div style={styles.itemDetails}>
-          <div>
-            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Real-time Status</p>
-            <p style={{ color: realtimeStatus === 'connected' ? '#10b981' : '#ef4444' }}>
-              {realtimeStatus === 'connected' ? '✓ Connected' : '⚠️ Disconnected'}
-            </p>
-          </div>
-          <div>
-            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Last Sync</p>
-            <p>{lastSync?.toLocaleString() || 'Never'}</p>
-          </div>
-          <div>
-            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Total Items</p>
-            <p>{inventory.length} inventory, {machinery.length} machines, {serviceHistory.length} records</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div style={styles.itemCard}>
-      <div style={{ flex: 1 }}>
-        <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Actions</h3>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <button onClick={() => window.location.reload()} style={styles.primaryButton}>
-            <RefreshCw size={16} style={{ marginRight: '8px' }} />
-            Refresh Application
-          </button>
-          <button onClick={handleLogout} style={{ ...styles.secondaryButton, background: '#ef4444' }}>
-            <LogOut size={16} style={{ marginRight: '8px' }} />
-            Logout
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div style={{ marginTop: '24px', padding: '16px', background: '#1e3a5f', border: '1px solid #2563eb', borderRadius: '12px' }}>
-      <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center' }}>
-        AgriTrack Manager v1.0 • Created by Dahlton Ag Ventures • Powered by Vercel
-      </p>
-    </div>
-  </div>
-)}
-            {/* Search and Sort Controls */}
             <div style={styles.searchSortContainer}>
               <input
                 type="text"
@@ -1349,7 +1126,6 @@ if (!user) {
                 {getFilteredAndSortedService().map(record => (
                   <div key={record.id} style={styles.itemCard}>
                     {editingServiceId === record.id ? (
-                      // Edit Mode
                       <div style={{ flex: 1 }}>
                         <input
                           style={styles.input}
@@ -1399,7 +1175,6 @@ if (!user) {
                         </div>
                       </div>
                     ) : (
-                      // View Mode
                       <>
                         <div style={{ flex: 1 }}>
                           <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
@@ -1442,7 +1217,74 @@ if (!user) {
           </div>
         )}
 
-        {/* Add Inventory Modal */}
+        {activeTab === 'settings' && (
+          <div>
+            <div style={styles.tabHeader}>
+              <h2 style={{ fontSize: '1.5rem' }}>Settings</h2>
+            </div>
+
+            <div style={styles.itemCard}>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Account Information</h3>
+                <div style={styles.itemDetails}>
+                  <div>
+                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Email</p>
+                    <p>{user?.email || 'Not available'}</p>
+                  </div>
+                  <div>
+                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>User ID</p>
+                    <p style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>{user?.id || 'Not available'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style={styles.itemCard}>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Application Info</h3>
+                <div style={styles.itemDetails}>
+                  <div>
+                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Real-time Status</p>
+                    <p style={{ color: realtimeStatus === 'connected' ? '#10b981' : '#ef4444' }}>
+                      {realtimeStatus === 'connected' ? '✓ Connected' : '⚠️ Disconnected'}
+                    </p>
+                  </div>
+                  <div>
+                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Last Sync</p>
+                    <p>{lastSync?.toLocaleString() || 'Never'}</p>
+                  </div>
+                  <div>
+                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Total Items</p>
+                    <p>{inventory.length} inventory, {machinery.length} machines, {serviceHistory.length} records</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style={styles.itemCard}>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Actions</h3>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                  <button onClick={() => window.location.reload()} style={styles.primaryButton}>
+                    <RefreshCw size={16} style={{ marginRight: '8px' }} />
+                    Refresh Application
+                  </button>
+                  <button onClick={handleLogout} style={{ ...styles.secondaryButton, background: '#ef4444' }}>
+                    <LogOut size={16} style={{ marginRight: '8px' }} />
+                    Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '24px', padding: '16px', background: '#1e3a5f', border: '1px solid #2563eb', borderRadius: '12px' }}>
+              <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center' }}>
+                AgriTrack Manager v1.0 • Created by Dahlton Ag Ventures • Powered by Vercel
+              </p>
+            </div>
+          </div>
+        )}
+
         {showInventoryModal && (
           <Modal title="Add Inventory Item" onClose={() => setShowInventoryModal(false)}>
             <input
@@ -1516,7 +1358,6 @@ if (!user) {
           </Modal>
         )}
 
-        {/* Add Machinery Modal */}
         {showMachineryModal && (
           <Modal title="Add Machinery" onClose={() => setShowMachineryModal(false)}>
             <input
@@ -1571,7 +1412,6 @@ if (!user) {
           </Modal>
         )}
 
-        {/* Add Service Record Modal */}
         {showServiceModal && (
           <Modal title="Add Service Record" onClose={() => setShowServiceModal(false)}>
             <input
@@ -1618,7 +1458,6 @@ if (!user) {
           </Modal>
         )}
 
-        {/* Debug Modal */}
         {showDebugModal && (
           <Modal title="System Status" onClose={() => setShowDebugModal(false)}>
             <div style={styles.debugInfo}>
@@ -1753,13 +1592,13 @@ const styles = {
     color: '#ef4444',
     fontSize: '0.875rem',
   },
-container: {
+  container: {
     minHeight: '100vh',
     background: '#111827',
     color: 'white',
     padding: '24px',
   },
-homeContainer: {
+  homeContainer: {
     background: 'linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200")',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
@@ -2100,6 +1939,9 @@ homeContainer: {
     color: 'white',
     cursor: 'pointer',
     fontSize: '1rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   secondaryButton: {
     flex: 1,
@@ -2110,6 +1952,9 @@ homeContainer: {
     color: 'white',
     cursor: 'pointer',
     fontSize: '1rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   debugInfo: {
     background: '#1a2942',
