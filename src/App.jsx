@@ -1,3 +1,4 @@
+cat > /mnt/user-data/outputs/App.jsx << 'ENDOFFILE'
 import React, { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut, ChevronDown } from 'lucide-react';
@@ -89,19 +90,19 @@ export default function App() {
     }
   }, [user]);
   
-// Close dropdown when clicking outside
-useEffect(() => {
-  function handleClickOutside(event) {
-    if (settingsDropdownRef.current && !settingsDropdownRef.current.contains(event.target)) {
-      setShowSettingsDropdown(false);
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (settingsDropdownRef.current && !settingsDropdownRef.current.contains(event.target)) {
+        setShowSettingsDropdown(false);
+      }
     }
-  }
 
-  document.addEventListener('mousedown', handleClickOutside);
-  return () => {
-    document.removeEventListener('mousedown', handleClickOutside);
-  };
-}, []);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
   
   const checkUser = async () => {
     try {
@@ -150,20 +151,20 @@ useEffect(() => {
     }
   };
   
-const handleSettingsClick = () => {
-  if (activeTab === 'settings') {
-    setShowSettingsDropdown(!showSettingsDropdown);
-  } else {
-    setActiveTab('settings');
-    setShowSettingsDropdown(true);
-  }
-};
+  const handleSettingsClick = () => {
+    if (activeTab === 'settings') {
+      setShowSettingsDropdown(!showSettingsDropdown);
+    } else {
+      setActiveTab('settings');
+      setShowSettingsDropdown(true);
+    }
+  };
 
-const handleSettingsSectionClick = (section) => {
-  setActiveSettingsSection(section);
-  setShowSettingsDropdown(false);
-  setActiveTab('settings');
-};
+  const handleSettingsSectionClick = (section) => {
+    setActiveSettingsSection(section);
+    setShowSettingsDropdown(false);
+    setActiveTab('settings');
+  };
   
   const loadData = async () => {
     try {
@@ -726,87 +727,69 @@ const handleSettingsSectionClick = (section) => {
               {tab === 'machinery' && ` (${machinery.length})`}
               {tab === 'service' && ` (${serviceHistory.length})`}
             </button>
-         ))}
+          ))}
           
-  {/* Settings Tab with Dropdown - KEEP IT INSIDE THE TABS DIV */}
-  <div style={styles.settingsDropdownWrapper} ref={settingsDropdownRef}>
-  <button
-    onClick={handleSettingsClick}
-    style={{
-      ...styles.tab,
-      background: activeTab === 'settings' ? 'linear-gradient(to right, #10b981, #06b6d4)' : '#1e3a5f',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px'
-    }}
-  >
-    Settings
-    <ChevronDown size={16} style={{ 
-      transform: showSettingsDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
-      transition: 'transform 0.2s ease'
-    }} />
-  </button>
-  
-  {showSettingsDropdown && (
-    <div style={styles.settingsDropdownMenu}>
-      <button
-        style={{
-          ...styles.dropdownItem,
-          background: activeSettingsSection === 'general' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
-        }}
-        onClick={() => handleSettingsSectionClick('general')}
-      >
-        ⚙️ General
-      </button>
-      <button
-        style={{
-          ...styles.dropdownItem,
-          background: activeSettingsSection === 'account' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
-        }}
-        onClick={() => handleSettingsSectionClick('account')}
-      >
-        👤 Account
-      </button>
-      <button
-        style={{
-          ...styles.dropdownItem,
-          background: activeSettingsSection === 'application' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
-        }}
-        onClick={() => handleSettingsSectionClick('application')}
-      >
-        📊 Application
-      </button>
-      <button
-        style={{
-          ...styles.dropdownItem,
-          background: activeSettingsSection === 'importexport' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
-        }}
-        onClick={() => handleSettingsSectionClick('importexport')}
-      >
-        📁 Import/Export Data
-      </button>
-    </div>
-  )}
-</div>
+          <div style={styles.settingsDropdownWrapper} ref={settingsDropdownRef}>
+            <button
+              onClick={handleSettingsClick}
+              style={{
+                ...styles.tab,
+                background: activeTab === 'settings' ? 'linear-gradient(to right, #10b981, #06b6d4)' : '#1e3a5f',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              Settings
+              <ChevronDown size={16} style={{ 
+                transform: showSettingsDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s ease'
+              }} />
+            </button>
+            
+            {showSettingsDropdown && (
+              <div style={styles.settingsDropdownMenu}>
+                <button
+                  style={{
+                    ...styles.dropdownItem,
+                    background: activeSettingsSection === 'general' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
+                  }}
+                  onClick={() => handleSettingsSectionClick('general')}
+                >
+                  ⚙️ General
+                </button>
+                <button
+                  style={{
+                    ...styles.dropdownItem,
+                    background: activeSettingsSection === 'account' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
+                  }}
+                  onClick={() => handleSettingsSectionClick('account')}
+                >
+                  👤 Account
+                </button>
+                <button
+                  style={{
+                    ...styles.dropdownItem,
+                    background: activeSettingsSection === 'application' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
+                  }}
+                  onClick={() => handleSettingsSectionClick('application')}
+                >
+                  📊 Application
+                </button>
+                <button
+                  style={{
+                    ...styles.dropdownItem,
+                    background: activeSettingsSection === 'importexport' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
+                  }}
+                  onClick={() => handleSettingsSectionClick('importexport')}
+                >
+                  📁 Import/Export Data
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
 
-    {/* FOOTER */}
-    <div
-      style={{
-        marginTop: '24px',
-        padding: '16px',
-        background: '#1e3a5f',
-        border: '1px solid #2563eb',
-        borderRadius: '12px'
-      }}
-    >
-      <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center' }}>
-         • Created by Dahlton Ag Ventures • Powered by Vercel
-      </p>
-    </button>
-  </div>
-)}
-</div>
-</div>
         {activeTab === 'home' && (
           <div style={styles.homeContainer}>
             <div style={{ ...styles.welcomeCard, background: 'rgba(6, 182, 212, 0.4)', border: '1px solid #06b6d4' }}>
@@ -1328,118 +1311,127 @@ const handleSettingsSectionClick = (section) => {
           </div>
         )}
 
-      {activeTab === 'settings' && (
-  <div style={{ display: 'flex', minHeight: '100%' }}>
-
-    {/* LEFT SIDEBAR */}
-    <div
-      style={{
-        width: settingsCollapsed ? '60px' : '220px',
-        transition: 'width 0.3s ease',
-        background: '#0f172a',
-        borderRight: '1px solid #1e293b',
-        padding: '16px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '12px'
-      }}
-    >
-      {/* Collapse Toggle */}
-      <button
-        onClick={() => setSettingsCollapsed(!settingsCollapsed)}
-        style={{
-          background: 'none',
-          border: 'none',
-          color: '#e5e7eb',
-          cursor: 'pointer',
-          fontSize: '1.25rem',
-          marginBottom: '16px'
-        }}
-      >
-        ☰
-      </button>
-
-      {/* Sidebar Items */}
-      <div style={{ color: '#e5e7eb', fontSize: '0.875rem' }}>
-        ⚙️ {!settingsCollapsed && 'General'}
-      </div>
-      <div style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
-        👤 {!settingsCollapsed && 'Account'}
-      </div>
-      <div style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
-        📊 {!settingsCollapsed && 'Application'}
-      </div>
-    </div>
-
-    {/* MAIN SETTINGS CONTENT */}
-    <div style={{ flex: 1, padding: '24px' }}>
-      <div style={styles.tabHeader}>
-        <h2 style={{ fontSize: '1.5rem' }}>Settings</h2>
-      </div>
-
-      {/* ACCOUNT INFO */}
-      <div style={styles.itemCard}>
-        <div style={{ flex: 1 }}>
-          <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Account Information</h3>
-          <div style={styles.itemDetails}>
-            <div>
-              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Email</p>
-              <p>{user?.email || 'Not available'}</p>
-            </div>
-            <div>
-              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>User ID</p>
-              <p style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>
-                {user?.id || 'Not available'}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* APPLICATION INFO */}
-      <div style={styles.itemCard}>
-        <div style={{ flex: 1 }}>
-          <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Application Info</h3>
-          <div style={styles.itemDetails}>
-            <div>
-              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Real-time Status</p>
-              <p style={{ color: realtimeStatus === 'connected' ? '#10b981' : '#ef4444' }}>
-                {realtimeStatus === 'connected' ? '✓ Connected' : '⚠️ Disconnected'}
-              </p>
-            </div>
-            <div>
-              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Last Sync</p>
-              <p>{lastSync?.toLocaleString() || 'Never'}</p>
-            </div>
-            <div>
-              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Total Items</p>
-              <p>
-                {inventory.length} inventory, {machinery.length} machines, {serviceHistory.length} records
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ACTIONS */}
-      <div style={styles.itemCard}>
-        <div style={{ flex: 1 }}>
-          <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Actions</h3>
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <button onClick={() => window.location.reload()} style={styles.primaryButton}>
-              <RefreshCw size={16} style={{ marginRight: '8px' }} />
-              Refresh Application
-            </button>
-            <button
-              onClick={handleLogout}
-              style={{ ...styles.secondaryButton, background: '#ef4444' }}
+        {activeTab === 'settings' && (
+          <div style={{ display: 'flex', minHeight: '100%' }}>
+            <div
+              style={{
+                width: settingsCollapsed ? '60px' : '220px',
+                transition: 'width 0.3s ease',
+                background: '#0f172a',
+                borderRight: '1px solid #1e293b',
+                padding: '16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px'
+              }}
             >
-              <LogOut size={16} style={{ marginRight: '8px' }} />
-              Logout
-            </button>
+              <button
+                onClick={() => setSettingsCollapsed(!settingsCollapsed)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#e5e7eb',
+                  cursor: 'pointer',
+                  fontSize: '1.25rem',
+                  marginBottom: '16px'
+                }}
+              >
+                ☰
+              </button>
+
+              <div style={{ color: '#e5e7eb', fontSize: '0.875rem' }}>
+                ⚙️ {!settingsCollapsed && 'General'}
+              </div>
+              <div style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
+                👤 {!settingsCollapsed && 'Account'}
+              </div>
+              <div style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
+                📊 {!settingsCollapsed && 'Application'}
+              </div>
+            </div>
+
+            <div style={{ flex: 1, padding: '24px' }}>
+              <div style={styles.tabHeader}>
+                <h2 style={{ fontSize: '1.5rem' }}>Settings</h2>
+              </div>
+
+              <div style={styles.itemCard}>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Account Information</h3>
+                  <div style={styles.itemDetails}>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Email</p>
+                      <p>{user?.email || 'Not available'}</p>
+                    </div>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>User ID</p>
+                      <p style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>
+                        {user?.id || 'Not available'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={styles.itemCard}>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Application Info</h3>
+                  <div style={styles.itemDetails}>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Real-time Status</p>
+                      <p style={{ color: realtimeStatus === 'connected' ? '#10b981' : '#ef4444' }}>
+                        {realtimeStatus === 'connected' ? '✓ Connected' : '⚠️ Disconnected'}
+                      </p>
+                    </div>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Last Sync</p>
+                      <p>{lastSync?.toLocaleString() || 'Never'}</p>
+                    </div>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Total Items</p>
+                      <p>
+                        {inventory.length} inventory, {machinery.length} machines, {serviceHistory.length} records
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={styles.itemCard}>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Actions</h3>
+                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                    <button onClick={() => window.location.reload()} style={styles.primaryButton}>
+                      <RefreshCw size={16} style={{ marginRight: '8px' }} />
+                      Refresh Application
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      style={{ ...styles.secondaryButton, background: '#ef4444' }}
+                    >
+                      <LogOut size={16} style={{ marginRight: '8px' }} />
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginTop: '24px',
+                  padding: '16px',
+                  background: '#1e3a5f',
+                  border: '1px solid #2563eb',
+                  borderRadius: '12px'
+                }}
+              >
+                <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center' }}>
+                  AgriTrack Manager v1.0 • Created by Dahlton Ag Ventures • Powered by Vercel
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        )}
 
         {showInventoryModal && (
           <Modal title="Add Inventory Item" onClose={() => setShowInventoryModal(false)}>
@@ -1874,6 +1866,37 @@ const styles = {
     cursor: 'pointer',
     fontSize: '1rem',
   },
+  settingsDropdownWrapper: {
+    position: 'relative',
+  },
+  settingsDropdownMenu: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    marginTop: '4px',
+    background: '#1e3a5f',
+    border: '1px solid #2563eb',
+    borderRadius: '8px',
+    minWidth: '200px',
+    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
+    zIndex: 50,
+    overflow: 'hidden',
+  },
+  dropdownItem: {
+    width: '100%',
+    padding: '12px 16px',
+    background: 'transparent',
+    border: 'none',
+    borderBottom: '1px solid rgba(37, 99, 235, 0.3)',
+    color: 'white',
+    cursor: 'pointer',
+    fontSize: '0.875rem',
+    textAlign: 'left',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    transition: 'background 0.2s ease',
+  },
   welcomeCard: {
     background: 'rgba(16, 185, 129, 0.15)',
     border: '1px solid rgba(16, 185, 129, 0.3)',
@@ -2128,7 +2151,7 @@ const styles = {
     color: '#ef4444',
     fontWeight: 'bold',
   },
-stockBadgeHigh: {
+  stockBadgeHigh: {
     padding: '4px 12px',
     background: 'rgba(251, 191, 36, 0.2)',
     border: '1px solid #fbbf24',
@@ -2136,36 +2159,5 @@ stockBadgeHigh: {
     fontSize: '0.75rem',
     color: '#fbbf24',
     fontWeight: 'bold',
-  },
-  settingsDropdownWrapper: {
-    position: 'relative',
-  },
-  settingsDropdownMenu: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    marginTop: '4px',
-    background: '#1e3a5f',
-    border: '1px solid #2563eb',
-    borderRadius: '8px',
-    minWidth: '200px',
-    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
-    zIndex: 50,
-    overflow: 'hidden',
-  },
-  dropdownItem: {
-    width: '100%',
-    padding: '12px 16px',
-    background: 'transparent',
-    border: 'none',
-    borderBottom: '1px solid rgba(37, 99, 235, 0.3)',
-    color: 'white',
-    cursor: 'pointer',
-    fontSize: '0.875rem',
-    textAlign: 'left',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    transition: 'background 0.2s ease',
   },
 };
