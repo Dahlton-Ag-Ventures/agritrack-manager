@@ -36,6 +36,7 @@ export default function App() {
   const [inventory, setInventory] = useState([]);
   const [machinery, setMachinery] = useState([]);
   const [serviceHistory, setServiceHistory] = useState([]);
+  const [settingsCollapsed, setSettingsCollapsed] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [realtimeStatus, setRealtimeStatus] = useState('connecting');
   const [lastSync, setLastSync] = useState(null);
