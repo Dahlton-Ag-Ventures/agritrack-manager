@@ -1217,73 +1217,136 @@ export default function App() {
           </div>
         )}
 
-        {activeTab === 'settings' && (
-          <div>
-            <div style={styles.tabHeader}>
-              <h2 style={{ fontSize: '1.5rem' }}>Settings</h2>
-            </div>
+      {activeTab === 'settings' && (
+  <div style={{ display: 'flex', minHeight: '100%' }}>
 
-            <div style={styles.itemCard}>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Account Information</h3>
-                <div style={styles.itemDetails}>
-                  <div>
-                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Email</p>
-                    <p>{user?.email || 'Not available'}</p>
-                  </div>
-                  <div>
-                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>User ID</p>
-                    <p style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>{user?.id || 'Not available'}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+    {/* LEFT SIDEBAR */}
+    <div
+      style={{
+        width: settingsCollapsed ? '60px' : '220px',
+        transition: 'width 0.3s ease',
+        background: '#0f172a',
+        borderRight: '1px solid #1e293b',
+        padding: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px'
+      }}
+    >
+      {/* Collapse Toggle */}
+      <button
+        onClick={() => setSettingsCollapsed(!settingsCollapsed)}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: '#e5e7eb',
+          cursor: 'pointer',
+          fontSize: '1.25rem',
+          marginBottom: '16px'
+        }}
+      >
+        ☰
+      </button>
 
-            <div style={styles.itemCard}>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Application Info</h3>
-                <div style={styles.itemDetails}>
-                  <div>
-                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Real-time Status</p>
-                    <p style={{ color: realtimeStatus === 'connected' ? '#10b981' : '#ef4444' }}>
-                      {realtimeStatus === 'connected' ? '✓ Connected' : '⚠️ Disconnected'}
-                    </p>
-                  </div>
-                  <div>
-                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Last Sync</p>
-                    <p>{lastSync?.toLocaleString() || 'Never'}</p>
-                  </div>
-                  <div>
-                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Total Items</p>
-                    <p>{inventory.length} inventory, {machinery.length} machines, {serviceHistory.length} records</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+      {/* Sidebar Items */}
+      <div style={{ color: '#e5e7eb', fontSize: '0.875rem' }}>
+        ⚙️ {!settingsCollapsed && 'General'}
+      </div>
+      <div style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
+        👤 {!settingsCollapsed && 'Account'}
+      </div>
+      <div style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
+        📊 {!settingsCollapsed && 'Application'}
+      </div>
+    </div>
 
-            <div style={styles.itemCard}>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Actions</h3>
-                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                  <button onClick={() => window.location.reload()} style={styles.primaryButton}>
-                    <RefreshCw size={16} style={{ marginRight: '8px' }} />
-                    Refresh Application
-                  </button>
-                  <button onClick={handleLogout} style={{ ...styles.secondaryButton, background: '#ef4444' }}>
-                    <LogOut size={16} style={{ marginRight: '8px' }} />
-                    Logout
-                  </button>
-                </div>
-              </div>
-            </div>
+    {/* MAIN SETTINGS CONTENT */}
+    <div style={{ flex: 1, padding: '24px' }}>
+      <div style={styles.tabHeader}>
+        <h2 style={{ fontSize: '1.5rem' }}>Settings</h2>
+      </div>
 
-            <div style={{ marginTop: '24px', padding: '16px', background: '#1e3a5f', border: '1px solid #2563eb', borderRadius: '12px' }}>
-              <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center' }}>
-                AgriTrack Manager v1.0 • Created by Dahlton Ag Ventures • Powered by Vercel
+      {/* ACCOUNT INFO */}
+      <div style={styles.itemCard}>
+        <div style={{ flex: 1 }}>
+          <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Account Information</h3>
+          <div style={styles.itemDetails}>
+            <div>
+              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Email</p>
+              <p>{user?.email || 'Not available'}</p>
+            </div>
+            <div>
+              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>User ID</p>
+              <p style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>
+                {user?.id || 'Not available'}
               </p>
             </div>
           </div>
-        )}
+        </div>
+      </div>
+
+      {/* APPLICATION INFO */}
+      <div style={styles.itemCard}>
+        <div style={{ flex: 1 }}>
+          <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Application Info</h3>
+          <div style={styles.itemDetails}>
+            <div>
+              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Real-time Status</p>
+              <p style={{ color: realtimeStatus === 'connected' ? '#10b981' : '#ef4444' }}>
+                {realtimeStatus === 'connected' ? '✓ Connected' : '⚠️ Disconnected'}
+              </p>
+            </div>
+            <div>
+              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Last Sync</p>
+              <p>{lastSync?.toLocaleString() || 'Never'}</p>
+            </div>
+            <div>
+              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Total Items</p>
+              <p>
+                {inventory.length} inventory, {machinery.length} machines, {serviceHistory.length} records
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ACTIONS */}
+      <div style={styles.itemCard}>
+        <div style={{ flex: 1 }}>
+          <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Actions</h3>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <button onClick={() => window.location.reload()} style={styles.primaryButton}>
+              <RefreshCw size={16} style={{ marginRight: '8px' }} />
+              Refresh Application
+            </button>
+            <button
+              onClick={handleLogout}
+              style={{ ...styles.secondaryButton, background: '#ef4444' }}
+            >
+              <LogOut size={16} style={{ marginRight: '8px' }} />
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* FOOTER */}
+      <div
+        style={{
+          marginTop: '24px',
+          padding: '16px',
+          background: '#1e3a5f',
+          border: '1px solid #2563eb',
+          borderRadius: '12px'
+        }}
+      >
+        <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center' }}>
+          AgriTrack Manager v1.0 • Created by Dahlton Ag Ventures • Powered by Vercel
+        </p>
+      </div>
+    </div>
+  </div>
+)}
 
         {showInventoryModal && (
           <Modal title="Add Inventory Item" onClose={() => setShowInventoryModal(false)}>
