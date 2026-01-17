@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut } from 'lucide-react';
+import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut, ChevronDown } from 'lucide-react';
 
 // Supabase configuration
 const supabaseUrl = 'https://ekjjtfemibtaxyhuvgea.supabase.co';
@@ -31,6 +31,9 @@ export default function App() {
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loggingIn, setLoggingIn] = useState(false);
+  const [activeSettingsSection, setActiveSettingsSection] = useState('general');
+  const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
+  const settingsDropdownRef = useRef(null);
 
   const [activeTab, setActiveTab] = useState('home');
   const [inventory, setInventory] = useState([]);
@@ -85,7 +88,21 @@ export default function App() {
       setupRealtime();
     }
   }, [user]);
+  
+// Close dropdown when clicking outside
+useEffect(() => {
+  function handleClickOutside(event) {
+    if (settingsDropdownRef.current && !settingsDropdownRef.current.contains(event.target)) {
+      setShowSettingsDropdown(false);
+    }
+  }
 
+  document.addEventListener('mousedown', handleClickOutside);
+  return () => {
+    document.removeEventListener('mousedown', handleClickOutside);
+  };
+}, []);
+  
   const checkUser = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -132,7 +149,22 @@ export default function App() {
       console.error('Logout error:', error);
     }
   };
+  
+const handleSettingsClick = () => {
+  if (activeTab === 'settings') {
+    setShowSettingsDropdown(!showSettingsDropdown);
+  } else {
+    setActiveTab('settings');
+    setShowSettingsDropdown(true);
+  }
+};
 
+const handleSettingsSectionClick = (section) => {
+  setActiveSettingsSection(section);
+  setShowSettingsDropdown(false);
+  setActiveTab('settings');
+};
+  
   const loadData = async () => {
     try {
       console.log('📥 Loading data from Supabase...');
