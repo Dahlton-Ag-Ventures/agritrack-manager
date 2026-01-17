@@ -729,150 +729,64 @@ const handleSettingsSectionClick = (section) => {
           ))}
         </div>
 <div style={styles.settingsDropdownWrapper} ref={settingsDropdownRef}>
-    <button
-      onClick={handleSettingsClick}
-      style={{
-        ...styles.tab,
-        background: activeTab === 'settings' ? 'linear-gradient(to right, #10b981, #06b6d4)' : '#1e3a5f',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px'
-      }}
-    >
-      Settings
-      <ChevronDown size={16} style={{ 
-        transform: showSettingsDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
-        transition: 'transform 0.2s ease'
-      }} />
-    </button>
-    
-    {showSettingsDropdown && (
-      <div style={styles.settingsDropdownMenu}>
-        <button
-          style={{
-            ...styles.dropdownItem,
-            background: activeSettingsSection === 'general' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
-          }}
-          onClick={() => handleSettingsSectionClick('general')}
-        >
-          ⚙️ General
-        </button>
-        <button
-          style={{
-            ...styles.dropdownItem,
-            background: activeSettingsSection === 'account' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
-          }}
-          onClick={() => handleSettingsSectionClick('account')}
-        >
-          👤 Account
-        </button>
-        <button
-          style={{
-            ...styles.dropdownItem,
-            background: activeSettingsSection === 'application' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
-          }}
-          onClick={() => handleSettingsSectionClick('application')}
-        >
-          📊 Application
-        </button>
-        <button
-          style={{
-            ...styles.dropdownItem,
-            background: activeSettingsSection === 'importexport' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
-          }}
-          onClick={() => handleSettingsSectionClick('importexport')}
-        >
-          {activeSettingsSection === 'importexport' && (
-      <div>
-        <div style={styles.itemCard}>
-          <div style={{ flex: 1 }}>
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>📁 Import/Export Data</h3>
-            <p style={{ color: '#9ca3af', marginBottom: '24px' }}>
-              Export your data to CSV or import existing data
-            </p>
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <button 
-                onClick={() => {
-                  // Export inventory to CSV
-                  const csv = [
-                    ['Name', 'Part Number', 'Quantity', 'Location', 'Category', 'Min Qty', 'Max Qty'].join(','),
-                    ...inventory.map(item => [
-                      item.name,
-                      item.partNumber,
-                      item.quantity,
-                      item.location,
-                      item.category,
-                      item.minQuantity,
-                      item.maxQuantity
-                    ].join(','))
-                  ].join('\n');
-                  
-                  const blob = new Blob([csv], { type: 'text/csv' });
-                  const url = window.URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = 'inventory.csv';
-                  a.click();
-                }}
-                style={styles.primaryButton}
-              >
-                Export Inventory to CSV
-              </button>
-              <button 
-                onClick={() => {
-                  // Export machinery to CSV
-                  const csv = [
-                    ['Name', 'VIN/Serial', 'Category', 'Status'].join(','),
-                    ...machinery.map(item => [
-                      item.name,
-                      item.vinSerial,
-                      item.category,
-                      item.status
-                    ].join(','))
-                  ].join('\n');
-                  
-                  const blob = new Blob([csv], { type: 'text/csv' });
-                  const url = window.URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = 'machinery.csv';
-                  a.click();
-                }}
-                style={styles.primaryButton}
-              >
-                Export Machinery to CSV
-              </button>
-              <button 
-                onClick={() => {
-                  // Export service records to CSV
-                  const csv = [
-                    ['Machine', 'Service Type', 'Date', 'Cost', 'Technician', 'Notes'].join(','),
-                    ...serviceHistory.map(record => [
-                      record.machineName,
-                      record.serviceType,
-                      record.date,
-                      record.cost,
-                      record.technician,
-                      record.notes
-                    ].join(','))
-                  ].join('\n');
-                  
-                  const blob = new Blob([csv], { type: 'text/csv' });
-                  const url = window.URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = 'service-records.csv';
-                  a.click();
-                }}
-                style={styles.primaryButton}
-              >
-                Export Service Records to CSV
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )}
+  <button
+    onClick={handleSettingsClick}
+    style={{
+      ...styles.tab,
+      background: activeTab === 'settings' ? 'linear-gradient(to right, #10b981, #06b6d4)' : '#1e3a5f',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px'
+    }}
+  >
+    Settings
+    <ChevronDown size={16} style={{ 
+      transform: showSettingsDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+      transition: 'transform 0.2s ease'
+    }} />
+  </button>
+  
+  {showSettingsDropdown && (
+    <div style={styles.settingsDropdownMenu}>
+      <button
+        style={{
+          ...styles.dropdownItem,
+          background: activeSettingsSection === 'general' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
+        }}
+        onClick={() => handleSettingsSectionClick('general')}
+      >
+        ⚙️ General
+      </button>
+      <button
+        style={{
+          ...styles.dropdownItem,
+          background: activeSettingsSection === 'account' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
+        }}
+        onClick={() => handleSettingsSectionClick('account')}
+      >
+        👤 Account
+      </button>
+      <button
+        style={{
+          ...styles.dropdownItem,
+          background: activeSettingsSection === 'application' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
+        }}
+        onClick={() => handleSettingsSectionClick('application')}
+      >
+        📊 Application
+      </button>
+      <button
+        style={{
+          ...styles.dropdownItem,
+          background: activeSettingsSection === 'importexport' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
+        }}
+        onClick={() => handleSettingsSectionClick('importexport')}
+      >
+        📁 Import/Export Data
+      </button>
+    </div>
+  )}
+</div>
 
     {/* FOOTER */}
     <div
@@ -887,7 +801,7 @@ const handleSettingsSectionClick = (section) => {
       <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center' }}>
         AgriTrack Manager v1.0 • Created by Dahlton Ag Ventures • Powered by Vercel
       </p>
-    </div>
+    </button>
   </div>
 )}
         {activeTab === 'home' && (
