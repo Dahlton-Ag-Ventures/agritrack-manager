@@ -726,9 +726,10 @@ const handleSettingsSectionClick = (section) => {
               {tab === 'machinery' && ` (${machinery.length})`}
               {tab === 'service' && ` (${serviceHistory.length})`}
             </button>
-          ))}
-        </div>
-<div style={styles.settingsDropdownWrapper} ref={settingsDropdownRef}>
+         ))}
+          
+  {/* Settings Tab with Dropdown - KEEP IT INSIDE THE TABS DIV */}
+  <div style={styles.settingsDropdownWrapper} ref={settingsDropdownRef}>
   <button
     onClick={handleSettingsClick}
     style={{
@@ -799,11 +800,13 @@ const handleSettingsSectionClick = (section) => {
       }}
     >
       <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center' }}>
-        AgriTrack Manager v1.0 • Created by Dahlton Ag Ventures • Powered by Vercel
+         • Created by Dahlton Ag Ventures • Powered by Vercel
       </p>
     </button>
   </div>
 )}
+</div>
+</div>
         {activeTab === 'home' && (
           <div style={styles.homeContainer}>
             <div style={{ ...styles.welcomeCard, background: 'rgba(6, 182, 212, 0.4)', border: '1px solid #06b6d4' }}>
@@ -1437,24 +1440,6 @@ const handleSettingsSectionClick = (section) => {
           </div>
         </div>
       </div>
-
-      {/* FOOTER */}
-      <div
-        style={{
-          marginTop: '24px',
-          padding: '16px',
-          background: '#1e3a5f',
-          border: '1px solid #2563eb',
-          borderRadius: '12px'
-        }}
-      >
-        <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center' }}>
-          AgriTrack Manager v1.0 • Created by Dahlton Ag Ventures • Powered by Vercel
-        </p>
-      </div>
-    </div>
-  </div>
-)}
 
         {showInventoryModal && (
           <Modal title="Add Inventory Item" onClose={() => setShowInventoryModal(false)}>
@@ -2143,7 +2128,7 @@ const styles = {
     color: '#ef4444',
     fontWeight: 'bold',
   },
-  stockBadgeHigh: {
+stockBadgeHigh: {
     padding: '4px 12px',
     background: 'rgba(251, 191, 36, 0.2)',
     border: '1px solid #fbbf24',
@@ -2152,36 +2137,35 @@ const styles = {
     color: '#fbbf24',
     fontWeight: 'bold',
   },
+  settingsDropdownWrapper: {
+    position: 'relative',
+  },
+  settingsDropdownMenu: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    marginTop: '4px',
+    background: '#1e3a5f',
+    border: '1px solid #2563eb',
+    borderRadius: '8px',
+    minWidth: '200px',
+    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
+    zIndex: 50,
+    overflow: 'hidden',
+  },
+  dropdownItem: {
+    width: '100%',
+    padding: '12px 16px',
+    background: 'transparent',
+    border: 'none',
+    borderBottom: '1px solid rgba(37, 99, 235, 0.3)',
+    color: 'white',
+    cursor: 'pointer',
+    fontSize: '0.875rem',
+    textAlign: 'left',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    transition: 'background 0.2s ease',
+  },
 };
-
-settingsDropdownWrapper: {
-  position: 'relative',
-},
-settingsDropdownMenu: {
-  position: 'absolute',
-  top: '100%',
-  left: 0,
-  marginTop: '4px',
-  background: '#1e3a5f',
-  border: '1px solid #2563eb',
-  borderRadius: '8px',
-  minWidth: '200px',
-  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
-  zIndex: 50,
-  overflow: 'hidden',
-},
-dropdownItem: {
-  width: '100%',
-  padding: '12px 16px',
-  background: 'transparent',
-  border: 'none',
-  borderBottom: '1px solid rgba(37, 99, 235, 0.3)',
-  color: 'white',
-  cursor: 'pointer',
-  fontSize: '0.875rem',
-  textAlign: 'left',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-  transition: 'background 0.2s ease',
-},
