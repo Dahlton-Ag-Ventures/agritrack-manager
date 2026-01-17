@@ -1349,90 +1349,198 @@ export default function App() {
                 📊 {!settingsCollapsed && 'Application'}
               </div>
             </div>
+<div style={{ flex: 1, padding: '24px' }}>
+  <div style={styles.tabHeader}>
+    <h2 style={{ fontSize: '1.5rem' }}>Settings</h2>
+  </div>
 
-            <div style={{ flex: 1, padding: '24px' }}>
-              <div style={styles.tabHeader}>
-                <h2 style={{ fontSize: '1.5rem' }}>Settings</h2>
-              </div>
+  {activeSettingsSection === 'general' && (
+    <div style={styles.itemCard}>
+      <div style={{ flex: 1 }}>
+        <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>⚙️ General Settings</h3>
+        <div style={styles.itemDetails}>
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Application Theme</p>
+            <p>Dark Mode (Default)</p>
+          </div>
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Language</p>
+            <p>English (US)</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
 
-              <div style={styles.itemCard}>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Account Information</h3>
-                  <div style={styles.itemDetails}>
-                    <div>
-                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Email</p>
-                      <p>{user?.email || 'Not available'}</p>
-                    </div>
-                    <div>
-                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>User ID</p>
-                      <p style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>
-                        {user?.id || 'Not available'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+  {activeSettingsSection === 'account' && (
+    <div style={styles.itemCard}>
+      <div style={{ flex: 1 }}>
+        <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>👤 Account Information</h3>
+        <div style={styles.itemDetails}>
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Email</p>
+            <p>{user?.email || 'Not available'}</p>
+          </div>
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>User ID</p>
+            <p style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>
+              {user?.id || 'Not available'}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
 
-              <div style={styles.itemCard}>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Application Info</h3>
-                  <div style={styles.itemDetails}>
-                    <div>
-                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Real-time Status</p>
-                      <p style={{ color: realtimeStatus === 'connected' ? '#10b981' : '#ef4444' }}>
-                        {realtimeStatus === 'connected' ? '✓ Connected' : '⚠️ Disconnected'}
-                      </p>
-                    </div>
-                    <div>
-                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Last Sync</p>
-                      <p>{lastSync?.toLocaleString() || 'Never'}</p>
-                    </div>
-                    <div>
-                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Total Items</p>
-                      <p>
-                        {inventory.length} inventory, {machinery.length} machines, {serviceHistory.length} records
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div style={styles.itemCard}>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Actions</h3>
-                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                    <button onClick={() => window.location.reload()} style={styles.primaryButton}>
-                      <RefreshCw size={16} style={{ marginRight: '8px' }} />
-                      Refresh Application
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      style={{ ...styles.secondaryButton, background: '#ef4444' }}
-                    >
-                      <LogOut size={16} style={{ marginRight: '8px' }} />
-                      Logout
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  marginTop: '24px',
-                  padding: '16px',
-                  background: '#1e3a5f',
-                  border: '1px solid #2563eb',
-                  borderRadius: '12px'
-                }}
-              >
-                <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center' }}>
-                  AgriTrack Manager v1.0 • Created by Dahlton Ag Ventures • Powered by Vercel
-                </p>
-              </div>
+  {activeSettingsSection === 'application' && (
+    <>
+      <div style={styles.itemCard}>
+        <div style={{ flex: 1 }}>
+          <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>📊 Application Info</h3>
+          <div style={styles.itemDetails}>
+            <div>
+              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Real-time Status</p>
+              <p style={{ color: realtimeStatus === 'connected' ? '#10b981' : '#ef4444' }}>
+                {realtimeStatus === 'connected' ? '✓ Connected' : '⚠️ Disconnected'}
+              </p>
+            </div>
+            <div>
+              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Last Sync</p>
+              <p>{lastSync?.toLocaleString() || 'Never'}</p>
+            </div>
+            <div>
+              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Total Items</p>
+              <p>
+                {inventory.length} inventory, {machinery.length} machines, {serviceHistory.length} records
+              </p>
             </div>
           </div>
-        )}
+        </div>
+      </div>
 
+      <div style={styles.itemCard}>
+        <div style={{ flex: 1 }}>
+          <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Actions</h3>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <button onClick={() => window.location.reload()} style={styles.primaryButton}>
+              <RefreshCw size={16} style={{ marginRight: '8px' }} />
+              Refresh Application
+            </button>
+            <button
+              onClick={handleLogout}
+              style={{ ...styles.secondaryButton, background: '#ef4444' }}
+            >
+              <LogOut size={16} style={{ marginRight: '8px' }} />
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  )}
+
+  {activeSettingsSection === 'importexport' && (
+    <div style={styles.itemCard}>
+      <div style={{ flex: 1 }}>
+        <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>📁 Import/Export Data</h3>
+        <p style={{ color: '#9ca3af', marginBottom: '24px' }}>
+          Export your data to CSV format
+        </p>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <button 
+            onClick={() => {
+              const csv = [
+                ['Name', 'Part Number', 'Quantity', 'Location', 'Category', 'Min Qty', 'Max Qty'].join(','),
+                ...inventory.map(item => [
+                  item.name,
+                  item.partNumber,
+                  item.quantity,
+                  item.location,
+                  item.category,
+                  item.minQuantity,
+                  item.maxQuantity
+                ].join(','))
+              ].join('\n');
+              
+              const blob = new Blob([csv], { type: 'text/csv' });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'inventory.csv';
+              a.click();
+            }}
+            style={styles.primaryButton}
+          >
+            Export Inventory to CSV
+          </button>
+          <button 
+            onClick={() => {
+              const csv = [
+                ['Name', 'VIN/Serial', 'Category', 'Status'].join(','),
+                ...machinery.map(item => [
+                  item.name,
+                  item.vinSerial,
+                  item.category,
+                  item.status
+                ].join(','))
+              ].join('\n');
+              
+              const blob = new Blob([csv], { type: 'text/csv' });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'machinery.csv';
+              a.click();
+            }}
+            style={styles.primaryButton}
+          >
+            Export Machinery to CSV
+          </button>
+          <button 
+            onClick={() => {
+              const csv = [
+                ['Machine', 'Service Type', 'Date', 'Cost', 'Technician', 'Notes'].join(','),
+                ...serviceHistory.map(record => [
+                  record.machineName,
+                  record.serviceType,
+                  record.date,
+                  record.cost,
+                  record.technician,
+                  record.notes
+                ].join(','))
+              ].join('\n');
+              
+              const blob = new Blob([csv], { type: 'text/csv' });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'service-records.csv';
+              a.click();
+            }}
+            style={styles.primaryButton}
+          >
+            Export Service Records to CSV
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
+
+  <div
+    style={{
+      marginTop: '24px',
+      padding: '16px',
+      background: '#1e3a5f',
+      border: '1px solid #2563eb',
+      borderRadius: '12px'
+    }}
+  >
+    <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center' }}>
+      AgriTrack Manager v1.0 • Created by Dahlton Ag Ventures • Powered by Vercel
+    </p>
+  </div>
+</div>
+           
         {showInventoryModal && (
           <Modal title="Add Inventory Item" onClose={() => setShowInventoryModal(false)}>
             <input
