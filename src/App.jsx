@@ -871,8 +871,9 @@ setUserRole(roleData?.role || 'employee');
               <button onClick={() => setShowInventoryModal(true)} style={styles.addButton}>
                 <Plus size={20} /> Add Item
               </button>
-            </div>
             )}
+            </div>
+            
 
             <div style={styles.searchSortContainer}>
               <input
@@ -1049,9 +1050,9 @@ setUserRole(roleData?.role || 'employee');
                           <button onClick={() => startEditInventory(item)} style={styles.editButton}>
                             <Edit2 size={16} />
                           </button>
-                          <button 
                         )}
                           {userRole !== 'employee' && (
+                            <button
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -1085,8 +1086,8 @@ setUserRole(roleData?.role || 'employee');
               <button onClick={() => setShowMachineryModal(true)} style={styles.addButton}>
                 <Plus size={20} /> Add Machine
               </button>
-            </div>
             )}
+            </div>
 
             <div style={styles.searchSortContainer}>
               <input
@@ -1215,6 +1216,7 @@ setUserRole(roleData?.role || 'employee');
                           <button onClick={() => deleteMachineryItem(item.id)} style={styles.deleteButton}>
                             <Trash2 size={16} />
                           </button>
+                        )}
                         </div>
                       </>
                     )}
@@ -1233,8 +1235,8 @@ setUserRole(roleData?.role || 'employee');
               <button onClick={() => setShowServiceModal(true)} style={styles.addButton}>
                 <Plus size={20} /> Add Service Record
               </button>
-            </div>
             )}
+            </div>
 
             <div style={styles.searchSortContainer}>
               <input
@@ -1355,6 +1357,7 @@ setUserRole(roleData?.role || 'employee');
                           <button onClick={() => deleteServiceRecord(record.id)} style={styles.deleteButton}>
                             <Trash2 size={16} />
                           </button>
+                        )}
                         </div>
                       </>
                     )}
@@ -1404,7 +1407,9 @@ setUserRole(roleData?.role || 'employee');
                         <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>User ID</p>
                         <p style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>
                           {user?.id || 'Not available'}
-                          <div>
+                        </p>
+                        </div>
+                        <div>
   <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Access Level</p>
   <p style={{ 
     textTransform: 'capitalize', 
