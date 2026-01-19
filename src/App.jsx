@@ -1419,8 +1419,6 @@ setUserRole(roleData?.role || 'employee');
     {userRole === 'employee' ? 'Employee (View Only)' : 'Admin/Manager (Full Access)'}
   </p>
 </div>
-                        </p>
-                      </div>
                     </div>
                   </div>
                 </div>
