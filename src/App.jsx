@@ -107,6 +107,7 @@ export default function App() {
 const checkUser = async () => {
   try {
     const { data: { session } } = await supabase.auth.getSession();
+    console.log('🔐 Session user:', session?.user?.id);
     setUser(session?.user ?? null);
     
     if (session?.user) {
@@ -117,9 +118,14 @@ const checkUser = async () => {
         .eq('user_id', session.user.id)
         .single();
       
+      console.log('👤 Role query result:', roleData);
+      console.log('❌ Role query error:', error);
+      
       if (!error && roleData) {
+        console.log('✅ Setting role to:', roleData.role);
         setUserRole(roleData.role);
       } else {
+        console.log('⚠️ No role found, defaulting to employee');
         setUserRole('employee'); // Default role
       }
     }
@@ -130,37 +136,49 @@ const checkUser = async () => {
   }
 };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoginError('');
-    setLoggingIn(true);
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setLoginError('');
+  setLoggingIn(true);
 
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: loginEmail,
-        password: loginPassword,
-      });
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: loginEmail,
+      password: loginPassword,
+    });
 
-      if (error) throw error;
+    if (error) throw error;
 
-      setUser(data.user);
-      // Fetch user role
-const { data: roleData } = await supabase
-  .from('user_roles')
-  .select('role')
-  .eq('user_id', data.user.id)
-  .single();
+    setUser(data.user);
+    console.log('🔐 Logged in user ID:', data.user.id);
+    
+    // Fetch user role
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', data.user.id)
+      .single();
 
-setUserRole(roleData?.role || 'employee');
-      setLoginEmail('');
-      setLoginPassword('');
-    } catch (error) {
-      console.error('Login error:', error);
-      setLoginError(error.message || 'Invalid email or password');
-    } finally {
-      setLoggingIn(false);
+    console.log('👤 Role data after login:', roleData);
+    console.log('❌ Role error after login:', roleError);
+    
+    if (!roleError && roleData) {
+      console.log('✅ Setting user role to:', roleData.role);
+      setUserRole(roleData.role);
+    } else {
+      console.log('⚠️ Defaulting to employee role');
+      setUserRole('employee');
     }
-  };
+    
+    setLoginEmail('');
+    setLoginPassword('');
+  } catch (error) {
+    console.error('Login error:', error);
+    setLoginError(error.message || 'Invalid email or password');
+  } finally {
+    setLoggingIn(false);
+  }
+};
 
   const handleLogout = async () => {
     try {
