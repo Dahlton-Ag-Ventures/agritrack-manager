@@ -727,14 +727,14 @@ const handleLogin = async (e) => {
     <span style={{ 
       marginLeft: '12px', 
       padding: '4px 12px', 
-      background: userRole === 'employee' ? 'rgba(107, 114, 128, 0.2)' : 'rgba(16, 185, 129, 0.2)',
-      border: `1px solid ${userRole === 'employee' ? '#6b7280' : '#10b981'}`,
+      background: userRole === 'employee' ? 'rgba(239, 68, 68, 0.4)' : 'rgba(16, 185, 129, 0.2)',
+      border: `1px solid ${userRole === 'employee' ? '#ef4444' : '#10b981'}`,
       borderRadius: '12px',
       fontSize: '0.75rem',
       fontWeight: 'bold',
       textTransform: 'uppercase'
     }}>
-      {userRole}
+      ROLE: {userRole || 'NONE'}
     </span>
   )}
 </p>
