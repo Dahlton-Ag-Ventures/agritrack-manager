@@ -1408,7 +1408,7 @@ export default function App() {
                   <div style={{ flex: 1 }}>
                     <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>📁 Import/Export Data</h3>
                     <p style={{ color: '#9ca3af', marginBottom: '24px' }}>
-                      Export your data to CSV format
+                      Export and import your data to CSV format
                     </p>
                     <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                       <button 
