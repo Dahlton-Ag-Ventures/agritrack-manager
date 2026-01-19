@@ -25,6 +25,7 @@ const MACHINERY_CATEGORIES = [
 export default function App() {
   // Authentication state
   const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const [theme, setTheme] = useState('dark');
   const [loading, setLoading] = useState(true);
   const [loginEmail, setLoginEmail] = useState('');
@@ -103,16 +104,31 @@ export default function App() {
     };
   }, []);
   
-  const checkUser = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-    } catch (error) {
-      console.error('Error checking user:', error);
-    } finally {
-      setLoading(false);
+const checkUser = async () => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    setUser(session?.user ?? null);
+    
+    if (session?.user) {
+      // Fetch user role
+      const { data: roleData, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .single();
+      
+      if (!error && roleData) {
+        setUserRole(roleData.role);
+      } else {
+        setUserRole('employee'); // Default role
+      }
     }
-  };
+  } catch (error) {
+    console.error('Error checking user:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -128,6 +144,14 @@ export default function App() {
       if (error) throw error;
 
       setUser(data.user);
+      // Fetch user role
+const { data: roleData } = await supabase
+  .from('user_roles')
+  .select('role')
+  .eq('user_id', data.user.id)
+  .single();
+
+setUserRole(roleData?.role || 'employee');
       setLoginEmail('');
       setLoginPassword('');
     } catch (error) {
@@ -142,6 +166,7 @@ export default function App() {
     try {
       await supabase.auth.signOut();
       setUser(null);
+      setUserRole(null);
       setInventory([]);
       setMachinery([]);
       setServiceHistory([]);
@@ -678,9 +703,23 @@ export default function App() {
           <div>
             <h1 style={styles.title}>AgriTrack Manager</h1>
             <p style={styles.subtitle}>Dahlton Ag Ventures</p>
-            <p style={styles.stats}>
-              {inventory.length} Inventory • {machinery.length} Machines • {serviceHistory.length} Service Records
-            </p>
+<p style={styles.stats}>
+  {inventory.length} Inventory • {machinery.length} Machines • {serviceHistory.length} Service Records
+  {userRole && (
+    <span style={{ 
+      marginLeft: '12px', 
+      padding: '4px 12px', 
+      background: userRole === 'employee' ? 'rgba(107, 114, 128, 0.2)' : 'rgba(16, 185, 129, 0.2)',
+      border: `1px solid ${userRole === 'employee' ? '#6b7280' : '#10b981'}`,
+      borderRadius: '12px',
+      fontSize: '0.75rem',
+      fontWeight: 'bold',
+      textTransform: 'uppercase'
+    }}>
+      {userRole}
+    </span>
+  )}
+</p>
           </div>
           <div style={styles.statusContainer}>
             {syncing && (
@@ -727,7 +766,7 @@ export default function App() {
               {tab === 'service' && ` (${serviceHistory.length})`}
             </button>
           ))}
-          
+          {userRole !== 'employee' && (
           <div style={styles.settingsDropdownWrapper} ref={settingsDropdownRef}>
             <button
               onClick={handleSettingsClick}
@@ -787,7 +826,7 @@ export default function App() {
               </div>
             )}
           </div>
-        </div>
+      )}
 
         {activeTab === 'home' && (
           <div style={styles.homeContainer}>
@@ -828,10 +867,12 @@ export default function App() {
           <div>
             <div style={styles.tabHeader}>
               <h2 style={{ fontSize: '1.5rem' }}>Inventory Items</h2>
+              {userRole !== 'employee' && (
               <button onClick={() => setShowInventoryModal(true)} style={styles.addButton}>
                 <Plus size={20} /> Add Item
               </button>
             </div>
+            )}
 
             <div style={styles.searchSortContainer}>
               <input
@@ -1004,10 +1045,13 @@ export default function App() {
                           </div>
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
+                          {userRole !== 'employee' && (
                           <button onClick={() => startEditInventory(item)} style={styles.editButton}>
                             <Edit2 size={16} />
                           </button>
                           <button 
+                        )}
+                          {userRole !== 'employee' && (
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -1022,6 +1066,7 @@ export default function App() {
                           >
                             <Trash2 size={16} />
                           </button>
+                        )}
                         </div>
                       </>
                     )}
@@ -1036,10 +1081,12 @@ export default function App() {
           <div>
             <div style={styles.tabHeader}>
               <h2 style={{ fontSize: '1.5rem' }}>Machinery</h2>
+              {userRole !== 'employee' && (
               <button onClick={() => setShowMachineryModal(true)} style={styles.addButton}>
                 <Plus size={20} /> Add Machine
               </button>
             </div>
+            )}
 
             <div style={styles.searchSortContainer}>
               <input
@@ -1159,9 +1206,12 @@ export default function App() {
                           </div>
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
+                          {userRole !== 'employee' && (
                           <button onClick={() => startEditMachinery(item)} style={styles.editButton}>
                             <Edit2 size={16} />
                           </button>
+                        )}
+                          {userRole !== 'employee' && (
                           <button onClick={() => deleteMachineryItem(item.id)} style={styles.deleteButton}>
                             <Trash2 size={16} />
                           </button>
@@ -1179,10 +1229,12 @@ export default function App() {
           <div>
             <div style={styles.tabHeader}>
               <h2 style={{ fontSize: '1.5rem' }}>Service Records</h2>
+              {userRole !== 'employee' && (
               <button onClick={() => setShowServiceModal(true)} style={styles.addButton}>
                 <Plus size={20} /> Add Service Record
               </button>
             </div>
+            )}
 
             <div style={styles.searchSortContainer}>
               <input
@@ -1294,9 +1346,12 @@ export default function App() {
                           )}
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
+                          {userRole !== 'employee' && (
                           <button onClick={() => startEditService(record)} style={styles.editButton}>
                             <Edit2 size={16} />
                           </button>
+                        )}
+                          {userRole !== 'employee' && (
                           <button onClick={() => deleteServiceRecord(record.id)} style={styles.deleteButton}>
                             <Trash2 size={16} />
                           </button>
@@ -1349,6 +1404,16 @@ export default function App() {
                         <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>User ID</p>
                         <p style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>
                           {user?.id || 'Not available'}
+                          <div>
+  <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Access Level</p>
+  <p style={{ 
+    textTransform: 'capitalize', 
+    fontWeight: 'bold', 
+    color: userRole === 'employee' ? '#9ca3af' : '#10b981' 
+  }}>
+    {userRole === 'employee' ? 'Employee (View Only)' : 'Admin/Manager (Full Access)'}
+  </p>
+</div>
                         </p>
                       </div>
                     </div>
