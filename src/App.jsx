@@ -1615,6 +1615,7 @@ export default function App() {
                         style={{...styles.secondaryButton, background: '#0891b2'}}
                       >
                         Import Service Records from CSV
+                      </button>
                     </div>
                   </div>
                 </div>
