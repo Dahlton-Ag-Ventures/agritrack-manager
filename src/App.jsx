@@ -734,7 +734,7 @@ const handleLogin = async (e) => {
       fontWeight: 'bold',
       textTransform: 'uppercase'
     }}>
-      ROLE: {userRole || 'NONE'}
+      ROLE: {userRole || 'LOADING'}
     </span>
   )}
 </p>
