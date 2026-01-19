@@ -1312,42 +1312,6 @@ export default function App() {
 
         {activeTab === 'settings' && (
           <div style={{ display: 'flex', minHeight: '100%' }}>
-            <div
-              style={{
-                width: settingsCollapsed ? '60px' : '220px',
-                transition: 'width 0.3s ease',
-                background: '#0f172a',
-                borderRight: '1px solid #1e293b',
-                padding: '16px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px'
-              }}
-            >
-              <button
-                onClick={() => setSettingsCollapsed(!settingsCollapsed)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#e5e7eb',
-                  cursor: 'pointer',
-                  fontSize: '1.25rem',
-                  marginBottom: '16px'
-                }}
-              >
-                ☰
-              </button>
-
-              <div style={{ color: '#e5e7eb', fontSize: '0.875rem' }}>
-                ⚙️ {!settingsCollapsed && 'General'}
-              </div>
-              <div style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
-                👤 {!settingsCollapsed && 'Account'}
-              </div>
-              <div style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
-                📊 {!settingsCollapsed && 'Application'}
-              </div>
-            </div>
 
             <div style={{ flex: 1, padding: '24px' }}>
               <div style={styles.tabHeader}>
