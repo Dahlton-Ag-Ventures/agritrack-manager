@@ -1485,7 +1485,6 @@ export default function App() {
                       >
                         Export Service Records to CSV
                       </button>
-                      </button>
                       <button 
                         onClick={async () => {
                           const input = document.createElement('input');
