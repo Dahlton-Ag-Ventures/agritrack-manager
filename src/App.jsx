@@ -654,7 +654,7 @@ const handleLogin = async (e) => {
     }
   };
 
-  if (loading) {
+if (loading) {
     return (
       <div style={styles.loading}>
         <div style={styles.spinner} />
@@ -720,36 +720,22 @@ const handleLogin = async (e) => {
       <div style={styles.content}>
         <div style={styles.header}>
           <div>
-            <h1 style={styles.title}>AgriTrack Manager</h1>
+            <h1 style={styles.title}>AgriTrack Manager v2.0</h1>
             <p style={styles.subtitle}>Dahlton Ag Ventures</p>
-            
-            {/* DEBUG - ALWAYS VISIBLE */}
-<div style={{ 
-  position: 'fixed', 
-  top: '10px', 
-  right: '10px', 
-  background: 'red', 
-  color: 'white', 
-  padding: '10px', 
-  zIndex: 9999,
-  border: '2px solid yellow'
-}}>
-  DEBUG: userRole = "{userRole}" | Type: {typeof userRole}
-</div>
 <p style={styles.stats}>
   {inventory.length} Inventory • {machinery.length} Machines • {serviceHistory.length} Service Records
   {userRole && (
     <span style={{ 
       marginLeft: '12px', 
       padding: '4px 12px', 
-      background: userRole === 'employee' ? 'rgba(239, 68, 68, 0.4)' : 'rgba(16, 185, 129, 0.2)',
-      border: `1px solid ${userRole === 'employee' ? '#ef4444' : '#10b981'}`,
+      background: userRole === 'employee' ? 'rgba(107, 114, 128, 0.2)' : 'rgba(16, 185, 129, 0.2)',
+      border: `1px solid ${userRole === 'employee' ? '#6b7280' : '#10b981'}`,
       borderRadius: '12px',
       fontSize: '0.75rem',
       fontWeight: 'bold',
       textTransform: 'uppercase'
     }}>
-      ROLE: {userRole || 'LOADING'}
+      {userRole}
     </span>
   )}
 </p>
@@ -860,6 +846,7 @@ const handleLogin = async (e) => {
             )}
           </div>
       )}
+        </div>
 
         {activeTab === 'home' && (
           <div style={styles.homeContainer}>
@@ -1403,7 +1390,6 @@ const handleLogin = async (e) => {
 
         {activeTab === 'settings' && (
           <div style={{ display: 'flex', minHeight: '100%' }}>
-
             <div style={{ flex: 1, padding: '24px' }}>
               <div style={styles.tabHeader}>
                 <h2 style={{ fontSize: '1.5rem' }}>Settings</h2>
@@ -1441,17 +1427,17 @@ const handleLogin = async (e) => {
                         <p style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>
                           {user?.id || 'Not available'}
                         </p>
-                        </div>
-                        <div>
-  <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Access Level</p>
-  <p style={{ 
-    textTransform: 'capitalize', 
-    fontWeight: 'bold', 
-    color: userRole === 'employee' ? '#9ca3af' : '#10b981' 
-  }}>
-    {userRole === 'employee' ? 'Employee (View Only)' : 'Admin/Manager (Full Access)'}
-  </p>
-</div>
+                      </div>
+                      <div>
+                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Access Level</p>
+                        <p style={{ 
+                          textTransform: 'capitalize', 
+                          fontWeight: 'bold', 
+                          color: userRole === 'employee' ? '#9ca3af' : '#10b981' 
+                        }}>
+                          {userRole === 'employee' ? 'Employee (View Only)' : 'Admin/Manager (Full Access)'}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1596,7 +1582,7 @@ const handleLogin = async (e) => {
                             if (!file) return;
                             
                             const text = await file.text();
-                            const rows = text.split('\n').slice(1); // Skip header
+                            const rows = text.split('\n').slice(1);
                             const newInventory = rows
                               .filter(row => row.trim())
                               .map((row, index) => {
@@ -1641,7 +1627,7 @@ const handleLogin = async (e) => {
                             if (!file) return;
                             
                             const text = await file.text();
-                            const rows = text.split('\n').slice(1); // Skip header
+                            const rows = text.split('\n').slice(1);
                             const newMachinery = rows
                               .filter(row => row.trim())
                               .map((row, index) => {
@@ -1683,7 +1669,7 @@ const handleLogin = async (e) => {
                             if (!file) return;
                             
                             const text = await file.text();
-                            const rows = text.split('\n').slice(1); // Skip header
+                            const rows = text.split('\n').slice(1);
                             const newRecords = rows
                               .filter(row => row.trim())
                               .map((row, index) => {
@@ -1732,7 +1718,7 @@ const handleLogin = async (e) => {
                 }}
               >
                 <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center' }}>
-                  AgriTrack Manager v1.0 • Created by Dahlton Ag Ventures • Powered by Vercel
+                  AgriTrack Manager v2.0 • Created by Dahlton Ag Ventures • Powered by Vercel
                 </p>
               </div>
             </div>
@@ -1924,16 +1910,18 @@ const handleLogin = async (e) => {
             <button onClick={() => window.location.reload()} style={styles.primaryButton}>
               🔄 Refresh App
             </button>
-        </Modal>
-      )}
+          </Modal>
+        )}
 
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
         }
       `}</style>
+      </div>
     </div>
   );
+}
 
 function Modal({ children, onClose, title }) {
   return (
