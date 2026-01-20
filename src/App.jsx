@@ -1799,8 +1799,6 @@ export default function App() {
             )}
           </div>
         )}
-// PART 5 - SERVICE TAB, SETTINGS TAB, MODALS, AND CLOSING
-// This continues after the Machinery tab section
 
         {activeTab === 'service' && (
           <div>
