@@ -1367,7 +1367,7 @@ dropdownItem: {
                       background: activeSettingsSection === 'general' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
                     }}
                     onClick={() => handleSettingsSectionClick('general')}
-                  >
+                  
                     ⚙️ General
                   </button>
                   <button
@@ -1376,7 +1376,7 @@ dropdownItem: {
                       background: activeSettingsSection === 'account' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
                     }}
                     onClick={() => handleSettingsSectionClick('account')}
-                  >
+                  
                     👤 Account
                   </button>
                   <button
@@ -1385,7 +1385,7 @@ dropdownItem: {
                       background: activeSettingsSection === 'application' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
                     }}
                     onClick={() => handleSettingsSectionClick('application')}
-                  >
+                  
                     📊 Application
                   </button>
                   <button
@@ -1394,7 +1394,7 @@ dropdownItem: {
                       background: activeSettingsSection === 'importexport' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
                     }}
                     onClick={() => handleSettingsSectionClick('importexport')}
-                  >
+                  
                     📁 Import/Export Data
                   </button>
                 </div>
