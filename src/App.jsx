@@ -1926,7 +1926,6 @@ const handleLogin = async (e) => {
             </button>
           </Modal>
         )}
-      </div>
 
       <style>{`
         @keyframes spin {
@@ -1935,6 +1934,7 @@ const handleLogin = async (e) => {
       `}</style>
     </div>
   );
+}
 
 function Modal({ children, onClose, title }) {
   return (
