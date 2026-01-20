@@ -2078,14 +2078,15 @@ const styles = {
     flexWrap: 'wrap',
     gap: '16px',
   },
-  title: {
-    fontSize: '2.5rem',
-    fontWeight: 'bold',
-    background: 'linear-gradient(to right, #10b981, #06b6d4)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    marginBottom: '8px',
-  },
+title: {
+  fontSize: '2.5rem',
+  fontWeight: 'bold',
+  background: 'linear-gradient(to right, #10b981, #06b6d4)',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  marginBottom: '8px',
+  textAlign: 'center',
+},
   subtitle: {
     color: '#9ca3af',
     marginBottom: '8px',
