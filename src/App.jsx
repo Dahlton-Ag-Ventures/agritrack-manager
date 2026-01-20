@@ -919,8 +919,8 @@ export default function App() {
       top: '100%',
       left: 0,
       marginTop: '4px',
-      background: '#1e3a5f',
-      border: '1px solid #2563eb',
+      background: currentTheme.cardBackground,
+      border: '1px solid ${currentTheme.cardBorder}`,
       borderRadius: '8px',
       minWidth: '200px',
       boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
@@ -1342,14 +1342,15 @@ export default function App() {
           {userRole !== 'employee' && (
             <div style={styles.settingsDropdownWrapper} ref={settingsDropdownRef}>
               <button
-                onClick={handleSettingsClick}
-                style={{
-                  ...styles.tab,
-                  background: activeTab === 'settings' ? 'linear-gradient(to right, #10b981, #06b6d4)' : '#1e3a5f',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
+  onClick={handleSettingsClick}
+  style={{
+    ...styles.tab,
+    background: activeTab === 'settings' ? 'linear-gradient(to right, #10b981, #06b6d4)' : currentTheme.tabInactive,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px'
+  }}
+>
               >
                 Settings
                 <ChevronDown size={16} style={{ 
@@ -2296,8 +2297,8 @@ export default function App() {
                 style={{
                   marginTop: '24px',
                   padding: '16px',
-                  background: '#1e3a5f',
-                  border: '1px solid #2563eb',
+                  background: currentTheme.cardBackground,
+                  border: `1px solid ${currentTheme.cardBorder}`,
                   borderRadius: '12px'
                 }}
               >
