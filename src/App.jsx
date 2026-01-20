@@ -1934,7 +1934,6 @@ const handleLogin = async (e) => {
       `}</style>
     </div>
   );
-}
 
 function Modal({ children, onClose, title }) {
   return (
