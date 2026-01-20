@@ -2037,8 +2037,7 @@ dropdownItem: {
             )}
           </div>
         )}
-
-        {activeTab === 'service' && (
+{activeTab === 'service' && (
           <div>
             <div style={styles.tabHeader}>
               <h2 style={{ fontSize: '1.5rem' }}>Service Records</h2>
@@ -2082,123 +2081,129 @@ dropdownItem: {
                 {getFilteredAndSortedService().map(record => (
                   <div key={record.id} style={styles.itemCard}>
                     {editingServiceId === record.id ? (
-  <div style={{ flex: 1 }}>
-    <input
-      style={styles.input}
-      placeholder="Machine Name"
-      value={serviceForm.machineName}
-      onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
-    />
-    <input
-      style={styles.input}
-      placeholder="Service Type (e.g., Oil Change, Repair)"
-      value={serviceForm.serviceType}
-      onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
-    />
-    <input
-      style={styles.input}
-      type="date"
-      placeholder="Date"
-      value={serviceForm.date}
-      onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
-    />
-    <input
-      style={styles.input}
-      placeholder="Technician"
-      value={serviceForm.technician}
-      onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
-    />
-    <textarea
-      style={{ ...styles.input, minHeight: '80px', resize: 'vertical' }}
-      placeholder="Notes"
-      value={serviceForm.notes}
-      onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
-    />
-    <div style={{ marginBottom: '12px' }}>
-      <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
-        📎 Upload Photo/File
-      </label>
-      <input
-        type="file"
-        accept="image/*"
-        onChange={async (e) => {
-          const file = e.target.files[0];
-          if (file) {
-            const photoUrl = await handlePhotoUpload(file, 'service');
-            if (photoUrl) {
-              setServiceForm({ ...serviceForm, photoUrl });
-            }
-          }
-        }}
-        style={{ ...styles.input, padding: '8px' }}
-      />
-      {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
-      {serviceForm.photoUrl && (
-        <img src={serviceForm.photoUrl} alt="Preview" style={{ maxWidth: '200px', marginTop: '8px', borderRadius: '8px' }} />
-      )}
-    </div>
-    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-      <button onClick={() => saveServiceEdit(record.id)} style={styles.saveButton}>
-        <Save size={16} /> Save
-      </button>
-      <button onClick={cancelServiceEdit} style={styles.cancelButton}>
-        <X size={16} /> Cancel
-      </button>
-    </div>
-  </div>
-) : (
-  <>
-    <div style={{ flex: 1 }}>
-      <div style={{ display: 'flex', alignItems: 'start', gap: '16px' }}>
-        {record.photoUrl && (
-          <img 
-            src={record.photoUrl} 
-            alt="Service record" 
-            style={{ 
-              width: '120px', 
-              height: '120px', 
-              objectFit: 'cover', 
-              borderRadius: '8px',
-              flexShrink: 0
-            }} 
-          />
-        )}
-        <div style={{ flex: 1 }}>
-          <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
-          <p style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '12px' }}>{record.serviceType}</p>
-          <div style={styles.itemDetails}>
-            <div>
-              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Date</p>
-              <p>{record.date || 'N/A'}</p>
-            </div>
-            <div>
-              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Technician</p>
-              <p>{record.technician || 'N/A'}</p>
-            </div>
+                      <div style={{ flex: 1 }}>
+                        <input
+                          style={styles.input}
+                          placeholder="Machine Name"
+                          value={serviceForm.machineName}
+                          onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
+                        />
+                        <input
+                          style={styles.input}
+                          placeholder="Service Type (e.g., Oil Change, Repair)"
+                          value={serviceForm.serviceType}
+                          onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
+                        />
+                        <input
+                          style={styles.input}
+                          type="date"
+                          placeholder="Date"
+                          value={serviceForm.date}
+                          onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
+                        />
+                        <input
+                          style={styles.input}
+                          placeholder="Technician"
+                          value={serviceForm.technician}
+                          onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
+                        />
+                        <textarea
+                          style={{ ...styles.input, minHeight: '80px', resize: 'vertical' }}
+                          placeholder="Notes"
+                          value={serviceForm.notes}
+                          onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
+                        />
+                        <div style={{ marginBottom: '12px' }}>
+                          <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+                            📎 Upload Photo/File
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={async (e) => {
+                              const file = e.target.files[0];
+                              if (file) {
+                                const photoUrl = await handlePhotoUpload(file, 'service');
+                                if (photoUrl) {
+                                  setServiceForm({ ...serviceForm, photoUrl });
+                                }
+                              }
+                            }}
+                            style={{ ...styles.input, padding: '8px' }}
+                          />
+                          {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
+                          {serviceForm.photoUrl && (
+                            <img src={serviceForm.photoUrl} alt="Preview" style={{ maxWidth: '200px', marginTop: '8px', borderRadius: '8px' }} />
+                          )}
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                          <button onClick={() => saveServiceEdit(record.id)} style={styles.saveButton}>
+                            <Save size={16} /> Save
+                          </button>
+                          <button onClick={cancelServiceEdit} style={styles.cancelButton}>
+                            <X size={16} /> Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'start', gap: '16px' }}>
+                            {record.photoUrl && (
+                              <img 
+                                src={record.photoUrl} 
+                                alt="Service record" 
+                                style={{ 
+                                  width: '120px', 
+                                  height: '120px', 
+                                  objectFit: 'cover', 
+                                  borderRadius: '8px',
+                                  flexShrink: 0
+                                }} 
+                              />
+                            )}
+                            <div style={{ flex: 1 }}>
+                              <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
+                              <p style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '12px' }}>{record.serviceType}</p>
+                              <div style={styles.itemDetails}>
+                                <div>
+                                  <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Date</p>
+                                  <p>{record.date || 'N/A'}</p>
+                                </div>
+                                <div>
+                                  <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Technician</p>
+                                  <p>{record.technician || 'N/A'}</p>
+                                </div>
+                              </div>
+                              {record.notes && (
+                                <div style={{ marginTop: '12px', padding: '12px', background: '#1f2937', borderRadius: '8px' }}>
+                                  <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Notes:</p>
+                                  <p style={{ fontSize: '0.875rem' }}>{record.notes}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          {userRole !== 'employee' && (
+                            <button onClick={() => startEditService(record)} style={styles.editButton}>
+                              <Edit2 size={16} />
+                            </button>
+                          )}
+                          {userRole !== 'employee' && (
+                            <button onClick={() => deleteServiceRecord(record.id)} style={styles.deleteButton}>
+                              <Trash2 size={16} />
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          {record.notes && (
-            <div style={{ marginTop: '12px', padding: '12px', background: '#1f2937', borderRadius: '8px' }}>
-              <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Notes:</p>
-              <p style={{ fontSize: '0.875rem' }}>{record.notes}</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-    <div style={{ display: 'flex', gap: '8px' }}>
-      {userRole !== 'employee' && (
-        <button onClick={() => startEditService(record)} style={styles.editButton}>
-          <Edit2 size={16} />
-        </button>
-      )}
-      {userRole !== 'employee' && (
-        <button onClick={() => deleteServiceRecord(record.id)} style={styles.deleteButton}>
-          <Trash2 size={16} />
-        </button>
-      )}
-    </div>
-  </>
-)}
+        )}
         {activeTab === 'settings' && (
           <div style={{ display: 'flex', minHeight: '100%' }}>
             <div style={{ flex: 1, padding: '24px' }}>
