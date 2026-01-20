@@ -92,7 +92,7 @@ export default function App() {
     name: '', vinSerial: '', category: '', status: 'Active', photoUrl: ''
   });
   const [serviceForm, setServiceForm] = useState({
-    machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: ''
+    machineName: '', serviceType: '', date: '', notes: '', technician: ''
   });
 
   // Photo upload state
@@ -420,10 +420,6 @@ export default function App() {
           return (b.date || '').localeCompare(a.date || '');
         case 'date-asc':
           return (a.date || '').localeCompare(b.date || '');
-        case 'cost-desc':
-          return (parseFloat(b.cost) || 0) - (parseFloat(a.cost) || 0);
-        case 'cost-asc':
-          return (parseFloat(a.cost) || 0) - (parseFloat(b.cost) || 0);
         default:
           return 0;
       }
@@ -604,27 +600,27 @@ export default function App() {
   };
 
   // Service Record Functions
-  const addServiceRecord = async () => {
-    const newRecord = { 
-      ...serviceForm, 
-      id: Date.now(),
-      date: serviceForm.date || new Date().toISOString().split('T')[0]
-    };
-    const newServiceHistory = [...serviceHistory, newRecord];
-
-    setServiceForm({ machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: '' });
-    setShowServiceModal(false);
-
-    try {
-      await supabase
-        .from('agritrack_data')
-        .update({ service_history: newServiceHistory })
-        .eq('id', 1);
-    } catch (error) {
-      console.error('Add error:', error);
-      alert('Error: ' + error.message);
-    }
+ const addServiceRecord = async () => {
+  const newRecord = { 
+    ...serviceForm, 
+    id: Date.now(),
+    date: serviceForm.date || new Date().toISOString().split('T')[0]
   };
+  const newServiceHistory = [...serviceHistory, newRecord];
+
+  setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
+  setShowServiceModal(false);
+
+  try {
+    await supabase
+      .from('agritrack_data')
+      .update({ service_history: newServiceHistory })
+      .eq('id', 1);
+  } catch (error) {
+    console.error('Add error:', error);
+    alert('Error: ' + error.message);
+  }
+};
 
   const deleteServiceRecord = async (id) => {
     if (!confirm('Are you sure you want to delete this service record?')) return;
@@ -642,42 +638,41 @@ export default function App() {
     }
   };
 
-  const startEditService = (record) => {
-    setEditingServiceId(record.id);
-    setServiceForm({
-      machineName: record.machineName || '',
-      serviceType: record.serviceType || '',
-      date: record.date || '',
-      cost: record.cost || '',
-      notes: record.notes || '',
-      technician: record.technician || '',
-      receiptPhotoUrl: record.receiptPhotoUrl || ''
-    });
-  };
+const startEditService = (record) => {
+  setEditingServiceId(record.id);
+  setServiceForm({
+    machineName: record.machineName || '',
+    serviceType: record.serviceType || '',
+    date: record.date || '',
+    notes: record.notes || '',
+    technician: record.technician || '',
+    photoUrl: record.photoUrl || ''
+  });
+};
 
-  const saveServiceEdit = async (id) => {
-    const newServiceHistory = serviceHistory.map(record => 
-      record.id === id ? { ...record, ...serviceForm } : record
-    );
+const saveServiceEdit = async (id) => {
+  const newServiceHistory = serviceHistory.map(record => 
+    record.id === id ? { ...record, ...serviceForm } : record
+  );
 
-    setEditingServiceId(null);
-    setServiceForm({ machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: '' });
+  setEditingServiceId(null);
+  setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
 
-    try {
-      await supabase
-        .from('agritrack_data')
-        .update({ service_history: newServiceHistory })
-        .eq('id', 1);
-    } catch (error) {
-      console.error('Update error:', error);
-      alert('Error: ' + error.message);
-    }
-  };
+  try {
+    await supabase
+      .from('agritrack_data')
+      .update({ service_history: newServiceHistory })
+      .eq('id', 1);
+  } catch (error) {
+    console.error('Update error:', error);
+    alert('Error: ' + error.message);
+  }
+};;
 
-  const cancelServiceEdit = () => {
-    setEditingServiceId(null);
-    setServiceForm({ machineName: '', serviceType: '', date: '', cost: '', notes: '', technician: '' });
-  };
+const cancelServiceEdit = () => {
+  setEditingServiceId(null);
+  setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
+};
 
   const quickUpdateQuantity = async (id, delta) => {
     const newInventory = inventory.map(item => 
@@ -2069,8 +2064,6 @@ dropdownItem: {
               >
                 <option value="date-desc">Date (Newest First)</option>
                 <option value="date-asc">Date (Oldest First)</option>
-                <option value="cost-desc">Cost (High → Low)</option>
-                <option value="cost-asc">Cost (Low → High)</option>
               </select>
             </div>
 
@@ -2089,101 +2082,123 @@ dropdownItem: {
                 {getFilteredAndSortedService().map(record => (
                   <div key={record.id} style={styles.itemCard}>
                     {editingServiceId === record.id ? (
-                      <div style={{ flex: 1 }}>
-                        <input
-                          style={styles.input}
-                          placeholder="Machine Name"
-                          value={serviceForm.machineName}
-                          onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
-                        />
-                        <input
-                          style={styles.input}
-                          placeholder="Service Type (e.g., Oil Change, Repair)"
-                          value={serviceForm.serviceType}
-                          onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
-                        />
-                        <input
-                          style={styles.input}
-                          type="date"
-                          placeholder="Date"
-                          value={serviceForm.date}
-                          onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
-                        />
-                        <input
-                          style={styles.input}
-                          type="number"
-                          placeholder="Cost"
-                          value={serviceForm.cost}
-                          onChange={(e) => setServiceForm({ ...serviceForm, cost: e.target.value })}
-                        />
-                        <input
-                          style={styles.input}
-                          placeholder="Technician"
-                          value={serviceForm.technician}
-                          onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
-                        />
-                        <textarea
-                          style={{ ...styles.input, minHeight: '80px', resize: 'vertical' }}
-                          placeholder="Notes"
-                          value={serviceForm.notes}
-                          onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
-                        />
-                        <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                          <button onClick={() => saveServiceEdit(record.id)} style={styles.saveButton}>
-                            <Save size={16} /> Save
-                          </button>
-                          <button onClick={cancelServiceEdit} style={styles.cancelButton}>
-                            <X size={16} /> Cancel
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <div style={{ flex: 1 }}>
-                          <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
-                          <p style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '12px' }}>{record.serviceType}</p>
-                          <div style={styles.itemDetails}>
-                            <div>
-                              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Date</p>
-                              <p>{record.date || 'N/A'}</p>
-                            </div>
-                            <div>
-                              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Cost</p>
-                              <p>${record.cost || '0'}</p>
-                            </div>
-                            <div>
-                              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Technician</p>
-                              <p>{record.technician || 'N/A'}</p>
-                            </div>
-                          </div>
-                          {record.notes && (
-                            <div style={{ marginTop: '12px', padding: '12px', background: '#1f2937', borderRadius: '8px' }}>
-                              <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Notes:</p>
-                              <p style={{ fontSize: '0.875rem' }}>{record.notes}</p>
-                            </div>
-                          )}
-                        </div>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          {userRole !== 'employee' && (
-                            <button onClick={() => startEditService(record)} style={styles.editButton}>
-                              <Edit2 size={16} />
-                            </button>
-                          )}
-                          {userRole !== 'employee' && (
-                            <button onClick={() => deleteServiceRecord(record.id)} style={styles.deleteButton}>
-                              <Trash2 size={16} />
-                            </button>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+  <div style={{ flex: 1 }}>
+    <input
+      style={styles.input}
+      placeholder="Machine Name"
+      value={serviceForm.machineName}
+      onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
+    />
+    <input
+      style={styles.input}
+      placeholder="Service Type (e.g., Oil Change, Repair)"
+      value={serviceForm.serviceType}
+      onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
+    />
+    <input
+      style={styles.input}
+      type="date"
+      placeholder="Date"
+      value={serviceForm.date}
+      onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
+    />
+    <input
+      style={styles.input}
+      placeholder="Technician"
+      value={serviceForm.technician}
+      onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
+    />
+    <textarea
+      style={{ ...styles.input, minHeight: '80px', resize: 'vertical' }}
+      placeholder="Notes"
+      value={serviceForm.notes}
+      onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
+    />
+    <div style={{ marginBottom: '12px' }}>
+      <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+        📎 Upload Photo/File
+      </label>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={async (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const photoUrl = await handlePhotoUpload(file, 'service');
+            if (photoUrl) {
+              setServiceForm({ ...serviceForm, photoUrl });
+            }
+          }
+        }}
+        style={{ ...styles.input, padding: '8px' }}
+      />
+      {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
+      {serviceForm.photoUrl && (
+        <img src={serviceForm.photoUrl} alt="Preview" style={{ maxWidth: '200px', marginTop: '8px', borderRadius: '8px' }} />
+      )}
+    </div>
+    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+      <button onClick={() => saveServiceEdit(record.id)} style={styles.saveButton}>
+        <Save size={16} /> Save
+      </button>
+      <button onClick={cancelServiceEdit} style={styles.cancelButton}>
+        <X size={16} /> Cancel
+      </button>
+    </div>
+  </div>
+) : (
+  <>
+    <div style={{ flex: 1 }}>
+      <div style={{ display: 'flex', alignItems: 'start', gap: '16px' }}>
+        {record.photoUrl && (
+          <img 
+            src={record.photoUrl} 
+            alt="Service record" 
+            style={{ 
+              width: '120px', 
+              height: '120px', 
+              objectFit: 'cover', 
+              borderRadius: '8px',
+              flexShrink: 0
+            }} 
+          />
         )}
-
+        <div style={{ flex: 1 }}>
+          <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
+          <p style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '12px' }}>{record.serviceType}</p>
+          <div style={styles.itemDetails}>
+            <div>
+              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Date</p>
+              <p>{record.date || 'N/A'}</p>
+            </div>
+            <div>
+              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Technician</p>
+              <p>{record.technician || 'N/A'}</p>
+            </div>
+          </div>
+          {record.notes && (
+            <div style={{ marginTop: '12px', padding: '12px', background: '#1f2937', borderRadius: '8px' }}>
+              <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Notes:</p>
+              <p style={{ fontSize: '0.875rem' }}>{record.notes}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+    <div style={{ display: 'flex', gap: '8px' }}>
+      {userRole !== 'employee' && (
+        <button onClick={() => startEditService(record)} style={styles.editButton}>
+          <Edit2 size={16} />
+        </button>
+      )}
+      {userRole !== 'employee' && (
+        <button onClick={() => deleteServiceRecord(record.id)} style={styles.deleteButton}>
+          <Trash2 size={16} />
+        </button>
+      )}
+    </div>
+  </>
+)}
         {activeTab === 'settings' && (
           <div style={{ display: 'flex', minHeight: '100%' }}>
             <div style={{ flex: 1, padding: '24px' }}>
@@ -2374,31 +2389,30 @@ dropdownItem: {
                       >
                         Export Machinery to CSV
                       </button>
-                      <button 
-                        onClick={() => {
-                          const csv = [
-                            ['Machine', 'Service Type', 'Date', 'Cost', 'Technician', 'Notes'].join(','),
-                            ...serviceHistory.map(record => [
-                              record.machineName,
-                              record.serviceType,
-                              record.date,
-                              record.cost,
-                              record.technician,
-                              record.notes
-                            ].join(','))
-                          ].join('\n');
-                          
-                          const blob = new Blob([csv], { type: 'text/csv' });
-                          const url = window.URL.createObjectURL(blob);
-                          const a = document.createElement('a');
-                          a.href = url;
-                          a.download = 'service-records.csv';
-                          a.click();
-                        }}
-                        style={styles.primaryButton}
-                      >
-                        Export Service Records to CSV
-                      </button>
+                     <button 
+  onClick={() => {
+    const csv = [
+      ['Machine', 'Service Type', 'Date', 'Technician', 'Notes'].join(','),  // removed Cost
+      ...serviceHistory.map(record => [
+        record.machineName,
+        record.serviceType,
+        record.date,
+        record.technician,
+        record.notes
+      ].join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'service-records.csv';
+    a.click();
+  }}
+  style={styles.primaryButton}
+>
+  Export Service Records to CSV
+</button>
                       <button 
                         onClick={async () => {
                           const input = document.createElement('input');
@@ -2486,48 +2500,49 @@ dropdownItem: {
                       >
                         Import Machinery from CSV
                       </button>
-                      <button 
-                        onClick={async () => {
-                          const input = document.createElement('input');
-                          input.type = 'file';
-                          input.accept = '.csv';
-                          input.onchange = async (e) => {
-                            const file = e.target.files[0];
-                            if (!file) return;
-                            
-                            const text = await file.text();
-                            const rows = text.split('\n').slice(1);
-                            const newRecords = rows
-                              .filter(row => row.trim())
-                              .map((row, index) => {
-                                const [machineName, serviceType, date, cost, technician, notes] = row.split(',');
-                                return {
-                                  id: Date.now() + index,
-                                  machineName: machineName?.trim() || '',
-                                  serviceType: serviceType?.trim() || '',
-                                  date: date?.trim() || '',
-                                  cost: cost?.trim() || '',
-                                  technician: technician?.trim() || '',
-                                  notes: notes?.trim() || '',
-                                };
-                              });
-                            
-                            const { error } = await supabase
-                              .from('agritrack_data')
-                              .update({ service_history: [...serviceHistory, ...newRecords] })
-                              .eq('id', 1);
-                            
-                            if (error) {
-                              alert('Error importing: ' + error.message);
-                            } else {
-                              alert(`Successfully imported ${newRecords.length} service records!`);
-                              loadData();
-                            }
-                          };
-                          input.click();
-                        }}
-                        style={{...styles.secondaryButton, background: '#0891b2'}}
-                      >
+  <button 
+  onClick={async () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv';
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const text = await file.text();
+      const rows = text.split('\n').slice(1);
+      const newRecords = rows
+        .filter(row => row.trim())
+        .map((row, index) => {
+          const [machineName, serviceType, date, technician, notes] = row.split(',');  // removed cost
+          return {
+            id: Date.now() + index,
+            machineName: machineName?.trim() || '',
+            serviceType: serviceType?.trim() || '',
+            date: date?.trim() || '',
+            technician: technician?.trim() || '',
+            notes: notes?.trim() || '',
+          };
+        });
+      
+      const { error } = await supabase
+        .from('agritrack_data')
+        .update({ service_history: [...serviceHistory, ...newRecords] })
+        .eq('id', 1);
+      
+      if (error) {
+        alert('Error importing: ' + error.message);
+      } else {
+        alert(`Successfully imported ${newRecords.length} service records!`);
+        loadData();
+      }
+    };
+    input.click();
+  }}
+  style={{...styles.secondaryButton, background: '#0891b2'}}
+>
+  Import Service Records from CSV
+</button>
                         Import Service Records from CSV
                       </button>
                     </div>
@@ -2680,50 +2695,66 @@ dropdownItem: {
         )}
 
         {showServiceModal && (
-          <Modal title="Add Service Record" onClose={() => setShowServiceModal(false)}>
-            <input
-              style={styles.input}
-              placeholder="Machine Name"
-              value={serviceForm.machineName}
-              onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
-            />
-            <input
-              style={styles.input}
-              placeholder="Service Type (e.g., Oil Change, Repair, Inspection)"
-              value={serviceForm.serviceType}
-              onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
-            />
-            <input
-              style={styles.input}
-              type="date"
-              value={serviceForm.date}
-              onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
-            />
-            <input
-              style={styles.input}
-              type="number"
-              placeholder="Cost ($)"
-              value={serviceForm.cost}
-              onChange={(e) => setServiceForm({ ...serviceForm, cost: e.target.value })}
-            />
-            <input
-              style={styles.input}
-              placeholder="Technician Name"
-              value={serviceForm.technician}
-              onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
-            />
-            <textarea
-              style={{ ...styles.input, minHeight: '100px', resize: 'vertical' }}
-              placeholder="Service notes and details..."
-              value={serviceForm.notes}
-              onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
-            />
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={addServiceRecord} style={styles.primaryButton}>Add Record</button>
-              <button onClick={() => setShowServiceModal(false)} style={styles.secondaryButton}>Cancel</button>
-            </div>
-          </Modal>
-        )}
+  <Modal title="Add Service Record" onClose={() => setShowServiceModal(false)}>
+    <input
+      style={styles.input}
+      placeholder="Machine Name"
+      value={serviceForm.machineName}
+      onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
+    />
+    <input
+      style={styles.input}
+      placeholder="Service Type (e.g., Oil Change, Repair, Inspection)"
+      value={serviceForm.serviceType}
+      onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
+    />
+    <input
+      style={styles.input}
+      type="date"
+      value={serviceForm.date}
+      onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
+    />
+    <input
+      style={styles.input}
+      placeholder="Technician Name"
+      value={serviceForm.technician}
+      onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
+    />
+    <textarea
+      style={{ ...styles.input, minHeight: '100px', resize: 'vertical' }}
+      placeholder="Service notes and details..."
+      value={serviceForm.notes}
+      onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
+    />
+    <div style={{ marginBottom: '16px' }}>
+      <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+        📎 Upload Photo/File (Optional)
+      </label>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={async (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const photoUrl = await handlePhotoUpload(file, 'service');
+            if (photoUrl) {
+              setServiceForm({ ...serviceForm, photoUrl });
+            }
+          }
+        }}
+        style={{ ...styles.input, padding: '8px' }}
+      />
+      {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
+      {serviceForm.photoUrl && (
+        <img src={serviceForm.photoUrl} alt="Preview" style={{ maxWidth: '200px', marginTop: '8px', borderRadius: '8px' }} />
+      )}
+    </div>
+    <div style={{ display: 'flex', gap: '12px' }}>
+      <button onClick={addServiceRecord} style={styles.primaryButton}>Add Record</button>
+      <button onClick={() => setShowServiceModal(false)} style={styles.secondaryButton}>Cancel</button>
+    </div>
+  </Modal>
+)}
 
         {showDebugModal && (
           <Modal title="System Status" onClose={() => setShowDebugModal(false)}>
