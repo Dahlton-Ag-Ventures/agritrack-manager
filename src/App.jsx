@@ -1440,7 +1440,7 @@ dropdownItem: {
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent'
       }}>
-        How to Use AgriTrack Manager
+        How to Use the App
       </h2>
 
       {/* Inventory Section */}
