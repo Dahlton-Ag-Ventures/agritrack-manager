@@ -1,4 +1,4 @@
-// BUILD VERSION: 2025-01-21-v2
+// BUILD VERSION: 2025-01-21-v2-FIXED
 import React, { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut, ChevronDown } from 'lucide-react';
@@ -106,6 +106,9 @@ export default function App() {
   const [serviceSearch, setServiceSearch] = useState('');
   const [serviceSort, setServiceSort] = useState('date-desc');
 
+  // Get current theme object
+  const currentTheme = themes[theme];
+
   // Check authentication status on load
   useEffect(() => {
     checkUser();
@@ -134,94 +137,95 @@ export default function App() {
   }, []);
   
   // Load theme preference on mount (runs once when app loads)
-useEffect(() => {
-  const savedTheme = localStorage.getItem('agritrack-theme');
-  if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
-    setTheme(savedTheme);
-  }
-}, []);
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('agritrack-theme');
+    if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+      setTheme(savedTheme);
+    }
+  }, []);
 
-// Save theme preference whenever it changes
-useEffect(() => {
-  if (user) {
-    localStorage.setItem('agritrack-theme', theme);
-  }
-}, [theme, user]);
-const checkUser = async () => {
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    console.log('🔐 Session user:', session?.user?.id);
-    setUser(session?.user ?? null);
-    
-    if (session?.user) {
+  // Save theme preference whenever it changes
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('agritrack-theme', theme);
+    }
+  }, [theme, user]);
+
+  const checkUser = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('🔐 Session user:', session?.user?.id);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        // Fetch user role
+        const { data: roleData, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .single();
+        
+        console.log('👤 Role query result:', roleData);
+        console.log('❌ Role query error:', error);
+        
+        if (!error && roleData) {
+          console.log('✅ Setting role to:', roleData.role);
+          setUserRole(roleData.role);
+        } else {
+          console.log('⚠️ No role found, defaulting to employee');
+          setUserRole('employee'); // Default role
+        }
+      }
+    } catch (error) {
+      console.error('Error checking user:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoginError('');
+    setLoggingIn(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: loginPassword,
+      });
+
+      if (error) throw error;
+
+      setUser(data.user);
+      console.log('🔐 Logged in user ID:', data.user.id);
+      
       // Fetch user role
-      const { data: roleData, error } = await supabase
+      const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', session.user.id)
+        .eq('user_id', data.user.id)
         .single();
+
+      console.log('👤 Role data after login:', roleData);
+      console.log('❌ Role error after login:', roleError);
       
-      console.log('👤 Role query result:', roleData);
-      console.log('❌ Role query error:', error);
-      
-      if (!error && roleData) {
-        console.log('✅ Setting role to:', roleData.role);
+      if (!roleError && roleData) {
+        console.log('✅ Setting user role to:', roleData.role);
         setUserRole(roleData.role);
       } else {
-        console.log('⚠️ No role found, defaulting to employee');
-        setUserRole('employee'); // Default role
+        console.log('⚠️ Defaulting to employee role');
+        setUserRole('employee');
       }
+      
+      setLoginEmail('');
+      setLoginPassword('');
+    } catch (error) {
+      console.error('Login error:', error);
+      setLoginError(error.message || 'Invalid email or password');
+    } finally {
+      setLoggingIn(false);
     }
-  } catch (error) {
-    console.error('Error checking user:', error);
-  } finally {
-    setLoading(false);
-  }
-};
-
-const handleLogin = async (e) => {
-  e.preventDefault();
-  setLoginError('');
-  setLoggingIn(true);
-
-  try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: loginEmail,
-      password: loginPassword,
-    });
-
-    if (error) throw error;
-
-    setUser(data.user);
-    console.log('🔐 Logged in user ID:', data.user.id);
-    
-    // Fetch user role
-    const { data: roleData, error: roleError } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', data.user.id)
-      .single();
-
-    console.log('👤 Role data after login:', roleData);
-    console.log('❌ Role error after login:', roleError);
-    
-    if (!roleError && roleData) {
-      console.log('✅ Setting user role to:', roleData.role);
-      setUserRole(roleData.role);
-    } else {
-      console.log('⚠️ Defaulting to employee role');
-      setUserRole('employee');
-    }
-    
-    setLoginEmail('');
-    setLoginPassword('');
-  } catch (error) {
-    console.error('Login error:', error);
-    setLoginError(error.message || 'Invalid email or password');
-  } finally {
-    setLoggingIn(false);
-  }
-};
+  };
 
   const handleLogout = async () => {
     try {
@@ -696,7 +700,513 @@ const handleLogin = async (e) => {
     }
   };
 
-if (loading) {
+  // Styles object - NOW USES currentTheme WHICH IS DEFINED
+  const styles = {
+    loginContainer: {
+      minHeight: '100vh',
+      background: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop")',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '24px',
+      position: 'relative',
+    },
+    loginCard: {
+      background: 'rgba(31, 41, 55, 0.95)',
+      border: '1px solid #4b5563',
+      borderRadius: '16px',
+      padding: '48px',
+      maxWidth: '400px',
+      width: '100%',
+      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)',
+      backdropFilter: 'blur(10px)',
+    },
+    loginTitle: {
+      fontSize: '1.25rem',
+      fontWeight: 'normal',
+      color: '#d1d5db',
+      marginBottom: '8px',
+      textAlign: 'center',
+      lineHeight: '1.4',
+    },
+    loginForm: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '16px',
+    },
+    loginSubtitle: {
+      color: '#9ca3af',
+      fontSize: '0.8rem',
+      textAlign: 'center',
+      marginTop: '20px',
+    },
+    loginFooter: {
+      position: 'absolute',
+      bottom: '16px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      color: '#9ca3af',
+      fontSize: '0.75rem',
+      textAlign: 'center',
+    },
+    loginInput: {
+      width: '100%',
+      padding: '14px 16px',
+      background: '#111827',
+      border: '1px solid #4b5563',
+      borderRadius: '8px',
+      color: 'white',
+      fontSize: '1rem',
+      boxSizing: 'border-box',
+      outline: 'none',
+    },
+    loginButton: {
+      width: '100%',
+      padding: '14px',
+      background: 'linear-gradient(to right, #10b981, #06b6d4)',
+      border: 'none',
+      borderRadius: '8px',
+      color: 'white',
+      cursor: 'pointer',
+      fontSize: '1rem',
+      fontWeight: 'bold',
+      marginTop: '8px',
+    },
+    loginError: {
+      padding: '12px',
+      background: 'rgba(239, 68, 68, 0.2)',
+      border: '1px solid #ef4444',
+      borderRadius: '8px',
+      color: '#ef4444',
+      fontSize: '0.875rem',
+    },
+    container: {
+      minHeight: '100vh',
+      background: currentTheme.background,
+      color: currentTheme.text,
+      padding: '24px',
+    },
+    homeContainer: {
+      background: currentTheme.homeBackground,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      minHeight: '500px',
+      borderRadius: '16px',
+      padding: '24px',
+      backdropFilter: 'blur(5px)',
+    },
+    content: {
+      maxWidth: '1200px',
+      margin: '0 auto',
+    },
+    loading: {
+      minHeight: '100vh',
+      background: 'linear-gradient(to bottom right, #1a202c, #2d3748)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: 'white',
+    },
+    spinner: {
+      width: '64px',
+      height: '64px',
+      border: '4px solid #4b5563',
+      borderTopColor: '#10b981',
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite',
+      marginBottom: '16px',
+    },
+    header: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'start',
+      marginBottom: '24px',
+      flexWrap: 'wrap',
+      gap: '16px',
+    },
+    title: {
+      fontSize: '2.5rem',
+      fontWeight: 'bold',
+      background: 'linear-gradient(to right, #10b981, #06b6d4)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      marginBottom: '8px',
+      textAlign: 'center',
+    },
+    subtitle: {
+      color: currentTheme.textSecondary,
+      marginBottom: '8px',
+    },
+    stats: {
+      color: currentTheme.textSecondary,
+      fontSize: '0.875rem',
+    },
+    statusContainer: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      flexWrap: 'wrap',
+    },
+    syncingBadge: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      padding: '8px 16px',
+      background: 'rgba(16, 185, 129, 0.2)',
+      border: '1px solid #10b981',
+      borderRadius: '8px',
+      fontSize: '0.875rem',
+      color: '#10b981',
+    },
+    statusBadge: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      padding: '8px 16px',
+      border: '1px solid',
+      borderRadius: '8px',
+      fontSize: '0.875rem',
+      cursor: 'pointer',
+      background: 'transparent',
+    },
+    logoutButton: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      padding: '8px 16px',
+      background: '#2563eb',
+      border: 'none',
+      borderRadius: '8px',
+      color: 'white',
+      cursor: 'pointer',
+      fontSize: '0.875rem',
+    },
+    lastSyncBanner: {
+      padding: '12px',
+      background: 'rgba(16, 185, 129, 0.1)',
+      border: '1px solid rgba(16, 185, 129, 0.3)',
+      borderRadius: '8px',
+      marginBottom: '24px',
+      fontSize: '0.875rem',
+      color: '#9ca3af',
+    },
+    tabs: {
+      display: 'flex',
+      gap: '8px',
+      marginBottom: '24px',
+      borderBottom: '1px solid #4b5563',
+      flexWrap: 'wrap',
+    },
+    tab: {
+      padding: '12px 24px',
+      border: 'none',
+      borderRadius: '8px 8px 0 0',
+      color: currentTheme.text,
+      cursor: 'pointer',
+      fontSize: '1rem',
+    },
+    settingsDropdownWrapper: {
+      position: 'relative',
+    },
+    settingsDropdownMenu: {
+      position: 'absolute',
+      top: '100%',
+      left: 0,
+      marginTop: '4px',
+      background: '#1e3a5f',
+      border: '1px solid #2563eb',
+      borderRadius: '8px',
+      minWidth: '200px',
+      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
+      zIndex: 50,
+      overflow: 'hidden',
+    },
+    dropdownItem: {
+      width: '100%',
+      padding: '12px 16px',
+      background: 'transparent',
+      border: 'none',
+      borderBottom: '1px solid rgba(37, 99, 235, 0.3)',
+      color: 'white',
+      cursor: 'pointer',
+      fontSize: '0.875rem',
+      textAlign: 'left',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      transition: 'background 0.2s ease',
+    },
+    welcomeCard: {
+      background: 'rgba(16, 185, 129, 0.15)',
+      border: '1px solid rgba(16, 185, 129, 0.3)',
+      borderRadius: '12px',
+      padding: '32px',
+      marginBottom: '24px',
+      backdropFilter: 'blur(5px)',
+    },
+    syncStatus: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      padding: '12px',
+      background: 'rgba(16, 185, 129, 0.3)',
+      borderRadius: '8px',
+      marginTop: '16px',
+    },
+    statsGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+      gap: '16px',
+    },
+    statCard: {
+      background: 'rgba(16, 185, 129, 0.15)',
+      border: '1px solid #10b981',
+      borderRadius: '12px',
+      padding: '24px',
+      textAlign: 'center',
+      backdropFilter: 'blur(10px)',
+      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+      cursor: 'pointer',
+    },
+    tabHeader: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      marginBottom: '24px',
+      flexWrap: 'wrap',
+      gap: '12px',
+    },
+    searchSortContainer: {
+      display: 'flex',
+      gap: '12px',
+      marginBottom: '24px',
+      flexWrap: 'wrap',
+    },
+    searchInput: {
+      flex: 1,
+      minWidth: '250px',
+      padding: '12px 16px',
+      background: currentTheme.inputBackground,
+      border: `1px solid ${currentTheme.cardBorder}`,
+      borderRadius: '8px',
+      color: currentTheme.text,
+      fontSize: '0.875rem',
+      outline: 'none',
+    },
+    sortSelect: {
+      padding: '12px 16px',
+      background: currentTheme.inputBackground,
+      border: `1px solid ${currentTheme.cardBorder}`,
+      borderRadius: '8px',
+      color: currentTheme.text,
+      fontSize: '0.875rem',
+      cursor: 'pointer',
+      outline: 'none',
+      minWidth: '180px',
+    },
+    addButton: {
+      padding: '12px 24px',
+      background: '#10b981',
+      border: 'none',
+      borderRadius: '8px',
+      color: 'white',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      fontSize: '1rem',
+    },
+    emptyState: {
+      background: currentTheme.cardBackground,
+      border: `1px solid ${currentTheme.cardBorder}`,
+      borderRadius: '12px',
+      padding: '48px',
+      textAlign: 'center',
+    },
+    itemsList: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '16px',
+    },
+    itemCard: {
+      background: currentTheme.cardBackground,
+      border: `1px solid ${currentTheme.cardBorder}`,
+      borderRadius: '12px',
+      padding: '24px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'start',
+      gap: '16px',
+    },
+    itemDetails: {
+      marginTop: '16px',
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+      gap: '16px',
+    },
+    editButton: {
+      padding: '8px',
+      background: '#0891b2',
+      border: 'none',
+      borderRadius: '8px',
+      color: 'white',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    deleteButton: {
+      padding: '8px',
+      background: '#7f1d1d',
+      border: 'none',
+      borderRadius: '8px',
+      color: 'white',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: '40px',
+      minHeight: '40px',
+      touchAction: 'manipulation',
+    },
+    saveButton: {
+      padding: '10px 20px',
+      background: '#10b981',
+      border: 'none',
+      borderRadius: '8px',
+      color: 'white',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      fontSize: '0.875rem',
+    },
+    cancelButton: {
+      padding: '10px 20px',
+      background: '#4b5563',
+      border: 'none',
+      borderRadius: '8px',
+      color: 'white',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      fontSize: '0.875rem',
+    },
+    quantityButton: {
+      width: '32px',
+      height: '32px',
+      background: '#10b981',
+      border: 'none',
+      borderRadius: '6px',
+      color: 'white',
+      cursor: 'pointer',
+      fontSize: '1.25rem',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    modalOverlay: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0, 0, 0, 0.75)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '16px',
+      zIndex: 50,
+    },
+    modal: {
+      background: currentTheme.modalBackground,
+      border: `1px solid ${currentTheme.cardBorder}`,
+      borderRadius: '12px',
+      padding: '24px',
+      maxWidth: '500px',
+      width: '100%',
+      maxHeight: '90vh',
+      overflowY: 'auto',
+    },
+    closeButton: {
+      background: '#2563eb',
+      border: 'none',
+      borderRadius: '8px',
+      padding: '8px 16px',
+      color: 'white',
+      cursor: 'pointer',
+    },
+    input: {
+      width: '100%',
+      padding: '12px',
+      background: currentTheme.inputBackground,
+      border: `1px solid ${currentTheme.cardBorder}`,
+      borderRadius: '8px',
+      color: currentTheme.text,
+      fontSize: '1rem',
+      marginBottom: '16px',
+      boxSizing: 'border-box',
+    },
+    primaryButton: {
+      flex: 1,
+      padding: '12px',
+      background: '#10b981',
+      border: 'none',
+      borderRadius: '8px',
+      color: 'white',
+      cursor: 'pointer',
+      fontSize: '1rem',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    secondaryButton: {
+      flex: 1,
+      padding: '12px',
+      background: '#2563eb',
+      border: 'none',
+      borderRadius: '8px',
+      color: 'white',
+      cursor: 'pointer',
+      fontSize: '1rem',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    debugInfo: {
+      background: '#1a2942',
+      border: '1px solid #4b5563',
+      borderRadius: '8px',
+      padding: '16px',
+      marginBottom: '16px',
+    },
+    stockBadgeLow: {
+      padding: '4px 12px',
+      background: 'rgba(239, 68, 68, 0.2)',
+      border: '1px solid #ef4444',
+      borderRadius: '12px',
+      fontSize: '0.75rem',
+      color: '#ef4444',
+      fontWeight: 'bold',
+    },
+    stockBadgeHigh: {
+      padding: '4px 12px',
+      background: 'rgba(251, 191, 36, 0.2)',
+      border: '1px solid #fbbf24',
+      borderRadius: '12px',
+      fontSize: '0.75rem',
+      color: '#fbbf24',
+      fontWeight: 'bold',
+    },
+  };
+
+  if (loading) {
     return (
       <div style={styles.loading}>
         <div style={styles.spinner} />
@@ -756,6 +1266,8 @@ if (loading) {
       </div>
     );
   }
+// PART 4 - MAIN APP RETURN (Insert after login screen)
+// This continues from: if (!user) { return ( ... login screen ... ); }
 
   return (
     <div style={styles.container}>
@@ -764,23 +1276,23 @@ if (loading) {
           <div>
             <h1 style={styles.title}>AgriTrack Manager v2.0</h1>
             <p style={styles.subtitle}>Dahlton Ag Ventures</p>
-<p style={styles.stats}>
-  {inventory.length} Inventory • {machinery.length} Machines • {serviceHistory.length} Service Records
-  {userRole && (
-    <span style={{ 
-      marginLeft: '12px', 
-      padding: '4px 12px', 
-      background: userRole === 'employee' ? 'rgba(107, 114, 128, 0.2)' : 'rgba(16, 185, 129, 0.2)',
-      border: `1px solid ${userRole === 'employee' ? '#6b7280' : '#10b981'}`,
-      borderRadius: '12px',
-      fontSize: '0.75rem',
-      fontWeight: 'bold',
-      textTransform: 'uppercase'
-    }}>
-      {userRole}
-    </span>
-  )}
-</p>
+            <p style={styles.stats}>
+              {inventory.length} Inventory • {machinery.length} Machines • {serviceHistory.length} Service Records
+              {userRole && (
+                <span style={{ 
+                  marginLeft: '12px', 
+                  padding: '4px 12px', 
+                  background: userRole === 'employee' ? 'rgba(107, 114, 128, 0.2)' : 'rgba(16, 185, 129, 0.2)',
+                  border: `1px solid ${userRole === 'employee' ? '#6b7280' : '#10b981'}`,
+                  borderRadius: '12px',
+                  fontSize: '0.75rem',
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase'
+                }}>
+                  {userRole}
+                </span>
+              )}
+            </p>
           </div>
           <div style={styles.statusContainer}>
             {syncing && (
@@ -828,66 +1340,66 @@ if (loading) {
             </button>
           ))}
           {userRole !== 'employee' && (
-          <div style={styles.settingsDropdownWrapper} ref={settingsDropdownRef}>
-            <button
-              onClick={handleSettingsClick}
-              style={{
-                ...styles.tab,
-                background: activeTab === 'settings' ? 'linear-gradient(to right, #10b981, #06b6d4)' : '#1e3a5f',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
-              Settings
-              <ChevronDown size={16} style={{ 
-                transform: showSettingsDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s ease'
-              }} />
-            </button>
-            
-            {showSettingsDropdown && (
-              <div style={styles.settingsDropdownMenu}>
-                <button
-                  style={{
-                    ...styles.dropdownItem,
-                    background: activeSettingsSection === 'general' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
-                  }}
-                  onClick={() => handleSettingsSectionClick('general')}
-                >
-                  ⚙️ General
-                </button>
-                <button
-                  style={{
-                    ...styles.dropdownItem,
-                    background: activeSettingsSection === 'account' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
-                  }}
-                  onClick={() => handleSettingsSectionClick('account')}
-                >
-                  👤 Account
-                </button>
-                <button
-                  style={{
-                    ...styles.dropdownItem,
-                    background: activeSettingsSection === 'application' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
-                  }}
-                  onClick={() => handleSettingsSectionClick('application')}
-                >
-                  📊 Application
-                </button>
-                <button
-                  style={{
-                    ...styles.dropdownItem,
-                    background: activeSettingsSection === 'importexport' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
-                  }}
-                  onClick={() => handleSettingsSectionClick('importexport')}
-                >
-                  📁 Import/Export Data
-                </button>
-              </div>
-            )}
-          </div>
-      )}
+            <div style={styles.settingsDropdownWrapper} ref={settingsDropdownRef}>
+              <button
+                onClick={handleSettingsClick}
+                style={{
+                  ...styles.tab,
+                  background: activeTab === 'settings' ? 'linear-gradient(to right, #10b981, #06b6d4)' : '#1e3a5f',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                Settings
+                <ChevronDown size={16} style={{ 
+                  transform: showSettingsDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s ease'
+                }} />
+              </button>
+              
+              {showSettingsDropdown && (
+                <div style={styles.settingsDropdownMenu}>
+                  <button
+                    style={{
+                      ...styles.dropdownItem,
+                      background: activeSettingsSection === 'general' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
+                    }}
+                    onClick={() => handleSettingsSectionClick('general')}
+                  >
+                    ⚙️ General
+                  </button>
+                  <button
+                    style={{
+                      ...styles.dropdownItem,
+                      background: activeSettingsSection === 'account' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
+                    }}
+                    onClick={() => handleSettingsSectionClick('account')}
+                  >
+                    👤 Account
+                  </button>
+                  <button
+                    style={{
+                      ...styles.dropdownItem,
+                      background: activeSettingsSection === 'application' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
+                    }}
+                    onClick={() => handleSettingsSectionClick('application')}
+                  >
+                    📊 Application
+                  </button>
+                  <button
+                    style={{
+                      ...styles.dropdownItem,
+                      background: activeSettingsSection === 'importexport' ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
+                    }}
+                    onClick={() => handleSettingsSectionClick('importexport')}
+                  >
+                    📁 Import/Export Data
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {activeTab === 'home' && (
@@ -930,12 +1442,11 @@ if (loading) {
             <div style={styles.tabHeader}>
               <h2 style={{ fontSize: '1.5rem' }}>Inventory Items</h2>
               {userRole !== 'employee' && (
-              <button onClick={() => setShowInventoryModal(true)} style={styles.addButton}>
-                <Plus size={20} /> Add Item
-              </button>
-            )}
+                <button onClick={() => setShowInventoryModal(true)} style={styles.addButton}>
+                  <Plus size={20} /> Add Item
+                </button>
+              )}
             </div>
-            
 
             <div style={styles.searchSortContainer}>
               <input
@@ -1109,27 +1620,27 @@ if (loading) {
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
                           {userRole !== 'employee' && (
-                          <button onClick={() => startEditInventory(item)} style={styles.editButton}>
-                            <Edit2 size={16} />
-                          </button>
-                        )}
+                            <button onClick={() => startEditInventory(item)} style={styles.editButton}>
+                              <Edit2 size={16} />
+                            </button>
+                          )}
                           {userRole !== 'employee' && (
                             <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              deleteInventoryItem(item.id);
-                            }}
-                            onTouchEnd={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              deleteInventoryItem(item.id);
-                            }}
-                            style={{...styles.deleteButton, touchAction: 'manipulation'}}
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        )}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                deleteInventoryItem(item.id);
+                              }}
+                              onTouchEnd={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                deleteInventoryItem(item.id);
+                              }}
+                              style={{...styles.deleteButton, touchAction: 'manipulation'}}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
                         </div>
                       </>
                     )}
@@ -1145,10 +1656,10 @@ if (loading) {
             <div style={styles.tabHeader}>
               <h2 style={{ fontSize: '1.5rem' }}>Machinery</h2>
               {userRole !== 'employee' && (
-              <button onClick={() => setShowMachineryModal(true)} style={styles.addButton}>
-                <Plus size={20} /> Add Machine
-              </button>
-            )}
+                <button onClick={() => setShowMachineryModal(true)} style={styles.addButton}>
+                  <Plus size={20} /> Add Machine
+                </button>
+              )}
             </div>
 
             <div style={styles.searchSortContainer}>
@@ -1270,15 +1781,15 @@ if (loading) {
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
                           {userRole !== 'employee' && (
-                          <button onClick={() => startEditMachinery(item)} style={styles.editButton}>
-                            <Edit2 size={16} />
-                          </button>
-                        )}
+                            <button onClick={() => startEditMachinery(item)} style={styles.editButton}>
+                              <Edit2 size={16} />
+                            </button>
+                          )}
                           {userRole !== 'employee' && (
-                          <button onClick={() => deleteMachineryItem(item.id)} style={styles.deleteButton}>
-                            <Trash2 size={16} />
-                          </button>
-                        )}
+                            <button onClick={() => deleteMachineryItem(item.id)} style={styles.deleteButton}>
+                              <Trash2 size={16} />
+                            </button>
+                          )}
                         </div>
                       </>
                     )}
@@ -1288,16 +1799,18 @@ if (loading) {
             )}
           </div>
         )}
+// PART 5 - SERVICE TAB, SETTINGS TAB, MODALS, AND CLOSING
+// This continues after the Machinery tab section
 
         {activeTab === 'service' && (
           <div>
             <div style={styles.tabHeader}>
               <h2 style={{ fontSize: '1.5rem' }}>Service Records</h2>
               {userRole !== 'employee' && (
-              <button onClick={() => setShowServiceModal(true)} style={styles.addButton}>
-                <Plus size={20} /> Add Service Record
-              </button>
-            )}
+                <button onClick={() => setShowServiceModal(true)} style={styles.addButton}>
+                  <Plus size={20} /> Add Service Record
+                </button>
+              )}
             </div>
 
             <div style={styles.searchSortContainer}>
@@ -1411,15 +1924,15 @@ if (loading) {
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
                           {userRole !== 'employee' && (
-                          <button onClick={() => startEditService(record)} style={styles.editButton}>
-                            <Edit2 size={16} />
-                          </button>
-                        )}
+                            <button onClick={() => startEditService(record)} style={styles.editButton}>
+                              <Edit2 size={16} />
+                            </button>
+                          )}
                           {userRole !== 'employee' && (
-                          <button onClick={() => deleteServiceRecord(record.id)} style={styles.deleteButton}>
-                            <Trash2 size={16} />
-                          </button>
-                        )}
+                            <button onClick={() => deleteServiceRecord(record.id)} style={styles.deleteButton}>
+                              <Trash2 size={16} />
+                            </button>
+                          )}
                         </div>
                       </>
                     )}
@@ -1438,53 +1951,53 @@ if (loading) {
               </div>
 
               {activeSettingsSection === 'general' && (
-  <div style={styles.itemCard}>
-    <div style={{ flex: 1 }}>
-      <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>⚙️ General Settings</h3>
-      <div style={styles.itemDetails}>
-        <div>
-          <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '8px' }}>Application Theme</p>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <button
-              onClick={() => setTheme('dark')}
-              style={{
-                padding: '10px 20px',
-                background: theme === 'dark' ? 'linear-gradient(to right, #10b981, #06b6d4)' : '#374151',
-                border: theme === 'dark' ? '2px solid #10b981' : '1px solid #4b5563',
-                borderRadius: '8px',
-                color: 'white',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-                fontWeight: theme === 'dark' ? 'bold' : 'normal',
-              }}
-            >
-              🌙 Dark Mode
-            </button>
-            <button
-              onClick={() => setTheme('light')}
-              style={{
-                padding: '10px 20px',
-                background: theme === 'light' ? 'linear-gradient(to right, #fbbf24, #f59e0b)' : '#374151',
-                border: theme === 'light' ? '2px solid #fbbf24' : '1px solid #4b5563',
-                borderRadius: '8px',
-                color: 'white',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-                fontWeight: theme === 'light' ? 'bold' : 'normal',
-              }}
-            >
-              ☀️ Light Mode
-            </button>
-          </div>
-        </div>
-        <div>
-          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Language</p>
-          <p>English (US)</p>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+                <div style={styles.itemCard}>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>⚙️ General Settings</h3>
+                    <div style={styles.itemDetails}>
+                      <div>
+                        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '8px' }}>Application Theme</p>
+                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                          <button
+                            onClick={() => setTheme('dark')}
+                            style={{
+                              padding: '10px 20px',
+                              background: theme === 'dark' ? 'linear-gradient(to right, #10b981, #06b6d4)' : '#374151',
+                              border: theme === 'dark' ? '2px solid #10b981' : '1px solid #4b5563',
+                              borderRadius: '8px',
+                              color: 'white',
+                              cursor: 'pointer',
+                              fontSize: '0.875rem',
+                              fontWeight: theme === 'dark' ? 'bold' : 'normal',
+                            }}
+                          >
+                            🌙 Dark Mode
+                          </button>
+                          <button
+                            onClick={() => setTheme('light')}
+                            style={{
+                              padding: '10px 20px',
+                              background: theme === 'light' ? 'linear-gradient(to right, #fbbf24, #f59e0b)' : '#374151',
+                              border: theme === 'light' ? '2px solid #fbbf24' : '1px solid #4b5563',
+                              borderRadius: '8px',
+                              color: 'white',
+                              cursor: 'pointer',
+                              fontSize: '0.875rem',
+                              fontWeight: theme === 'light' ? 'bold' : 'normal',
+                            }}
+                          >
+                            ☀️ Light Mode
+                          </button>
+                        </div>
+                      </div>
+                      <div>
+                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Language</p>
+                        <p>English (US)</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {activeSettingsSection === 'account' && (
                 <div style={styles.itemCard}>
@@ -1986,542 +2499,63 @@ if (loading) {
           </Modal>
         )}
 
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
+        <style>{`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
     </div>
   );
 }
 
+// Modal component - defined outside to avoid recreation on each render
 function Modal({ children, onClose, title }) {
+  // Inline styles for modal since it's outside the main component
+  const modalStyles = {
+    modalOverlay: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0, 0, 0, 0.75)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '16px',
+      zIndex: 50,
+    },
+    modal: {
+      background: '#1e3a5f',
+      border: '1px solid #2563eb',
+      borderRadius: '12px',
+      padding: '24px',
+      maxWidth: '500px',
+      width: '100%',
+      maxHeight: '90vh',
+      overflowY: 'auto',
+      color: 'white',
+    },
+    closeButton: {
+      background: '#2563eb',
+      border: 'none',
+      borderRadius: '8px',
+      padding: '8px 16px',
+      color: 'white',
+      cursor: 'pointer',
+    },
+  };
+
   return (
-    <div style={styles.modalOverlay}>
-      <div style={styles.modal}>
+    <div style={modalStyles.modalOverlay}>
+      <div style={modalStyles.modal}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
           <h3 style={{ fontSize: '1.5rem' }}>{title}</h3>
-          <button onClick={onClose} style={styles.closeButton}>✕</button>
+          <button onClick={onClose} style={modalStyles.closeButton}>✕</button>
         </div>
         {children}
       </div>
     </div>
   );
 }
-
-const styles = {
-  loginContainer: {
-    minHeight: '100vh',
-    background: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop")',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '24px',
-    position: 'relative',
-  },
-  loginCard: {
-    background: 'rgba(31, 41, 55, 0.95)',
-    border: '1px solid #4b5563',
-    borderRadius: '16px',
-    padding: '48px',
-    maxWidth: '400px',
-    width: '100%',
-    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)',
-    backdropFilter: 'blur(10px)',
-  },
-  loginTitle: {
-    fontSize: '1.25rem',
-    fontWeight: 'normal',
-    color: '#d1d5db',
-    marginBottom: '8px',
-    textAlign: 'center',
-    lineHeight: '1.4',
-  },
-  loginAppName: {
-    fontSize: '3rem',
-    fontWeight: 'bold',
-    fontFamily: "'Inter', 'Helvetica Neue', 'Arial', sans-serif",
-    background: 'linear-gradient(to right, #10b981, #06b6d4)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    marginBottom: '32px',
-    textAlign: 'center',
-    lineHeight: '1.2',
-    letterSpacing: '-0.02em',
-  },
-  loginSubtitle: {
-    color: '#9ca3af',
-    fontSize: '0.8rem',
-    textAlign: 'center',
-    marginTop: '20px',
-  },
-  loginForm: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  },
-  loginFooter: {
-    position: 'absolute',
-    bottom: '16px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    color: '#9ca3af',
-    fontSize: '0.75rem',
-    textAlign: 'center',
-  },
-  loginInput: {
-    width: '100%',
-    padding: '14px 16px',
-    background: '#111827',
-    border: '1px solid #4b5563',
-    borderRadius: '8px',
-    color: 'white',
-    fontSize: '1rem',
-    boxSizing: 'border-box',
-    outline: 'none',
-  },
-  loginButton: {
-    width: '100%',
-    padding: '14px',
-    background: 'linear-gradient(to right, #10b981, #06b6d4)',
-    border: 'none',
-    borderRadius: '8px',
-    color: 'white',
-    cursor: 'pointer',
-    fontSize: '1rem',
-    fontWeight: 'bold',
-    marginTop: '8px',
-  },
-  loginError: {
-    padding: '12px',
-    background: 'rgba(239, 68, 68, 0.2)',
-    border: '1px solid #ef4444',
-    borderRadius: '8px',
-    color: '#ef4444',
-    fontSize: '0.875rem',
-  },
-container: {
-  minHeight: '100vh',
-  background: themes[theme].background,
-  color: themes[theme].text,
-  padding: '24px',
-},
-homeContainer: {
-  background: themes[theme].homeBackground,
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
-  backgroundRepeat: 'no-repeat',
-  minHeight: '500px',
-  borderRadius: '16px',
-  padding: '24px',
-  backdropFilter: 'blur(5px)',
-},
-  content: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-  },
-  loading: {
-    minHeight: '100vh',
-    background: 'linear-gradient(to bottom right, #1a202c, #2d3748)',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-  },
-  spinner: {
-    width: '64px',
-    height: '64px',
-    border: '4px solid #4b5563',
-    borderTopColor: '#10b981',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-    marginBottom: '16px',
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'start',
-    marginBottom: '24px',
-    flexWrap: 'wrap',
-    gap: '16px',
-  },
-title: {
-  fontSize: '2.5rem',
-  fontWeight: 'bold',
-  background: 'linear-gradient(to right, #10b981, #06b6d4)',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-  marginBottom: '8px',
-  textAlign: 'center',
-},
-subtitle: {
-  color: themes[theme].textSecondary,
-  marginBottom: '8px',
-},
-
-stats: {
-  color: themes[theme].textSecondary,
-  fontSize: '0.875rem',
-},
-  statusContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    flexWrap: 'wrap',
-  },
-  syncingBadge: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '8px 16px',
-    background: 'rgba(16, 185, 129, 0.2)',
-    border: '1px solid #10b981',
-    borderRadius: '8px',
-    fontSize: '0.875rem',
-    color: '#10b981',
-  },
-  statusBadge: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '8px 16px',
-    border: '1px solid',
-    borderRadius: '8px',
-    fontSize: '0.875rem',
-    cursor: 'pointer',
-    background: 'transparent',
-  },
-  logoutButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '8px 16px',
-    background: '#2563eb',
-    border: 'none',
-    borderRadius: '8px',
-    color: 'white',
-    cursor: 'pointer',
-    fontSize: '0.875rem',
-  },
-  lastSyncBanner: {
-    padding: '12px',
-    background: 'rgba(16, 185, 129, 0.1)',
-    border: '1px solid rgba(16, 185, 129, 0.3)',
-    borderRadius: '8px',
-    marginBottom: '24px',
-    fontSize: '0.875rem',
-    color: '#9ca3af',
-  },
-  tabs: {
-    display: 'flex',
-    gap: '8px',
-    marginBottom: '24px',
-    borderBottom: '1px solid #4b5563',
-    flexWrap: 'wrap',
-  },
-tab: {
-  padding: '12px 24px',
-  border: 'none',
-  borderRadius: '8px 8px 0 0',
-  color: theme === 'light' ? '#111827' : 'white',
-  cursor: 'pointer',
-  fontSize: '1rem',
-},
-  settingsDropdownWrapper: {
-    position: 'relative',
-  },
-  settingsDropdownMenu: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    marginTop: '4px',
-    background: '#1e3a5f',
-    border: '1px solid #2563eb',
-    borderRadius: '8px',
-    minWidth: '200px',
-    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
-    zIndex: 50,
-    overflow: 'hidden',
-  },
-  dropdownItem: {
-    width: '100%',
-    padding: '12px 16px',
-    background: 'transparent',
-    border: 'none',
-    borderBottom: '1px solid rgba(37, 99, 235, 0.3)',
-    color: 'white',
-    cursor: 'pointer',
-    fontSize: '0.875rem',
-    textAlign: 'left',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    transition: 'background 0.2s ease',
-  },
-  welcomeCard: {
-    background: 'rgba(16, 185, 129, 0.15)',
-    border: '1px solid rgba(16, 185, 129, 0.3)',
-    borderRadius: '12px',
-    padding: '32px',
-    marginBottom: '24px',
-    backdropFilter: 'blur(5px)',
-  },
-  syncStatus: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '12px',
-    background: 'rgba(16, 185, 129, 0.3)',
-    borderRadius: '8px',
-    marginTop: '16px',
-  },
-  statsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '16px',
-  },
-  statCard: {
-    background: 'rgba(16, 185, 129, 0.15)',
-    border: '1px solid #10b981',
-    borderRadius: '12px',
-    padding: '24px',
-    textAlign: 'center',
-    backdropFilter: 'blur(10px)',
-    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-    cursor: 'pointer',
-  },
-  tabHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginBottom: '24px',
-    flexWrap: 'wrap',
-    gap: '12px',
-  },
-  searchSortContainer: {
-    display: 'flex',
-    gap: '12px',
-    marginBottom: '24px',
-    flexWrap: 'wrap',
-  },
-searchInput: {
-  flex: 1,
-  minWidth: '250px',
-  padding: '12px 16px',
-  background: themes[theme].cardBackground,
-  border: `1px solid ${themes[theme].cardBorder}`,
-  borderRadius: '8px',
-  color: themes[theme].text,
-  fontSize: '0.875rem',
-  outline: 'none',
-},
-
-sortSelect: {
-  padding: '12px 16px',
-  background: themes[theme].cardBackground,
-  border: `1px solid ${themes[theme].cardBorder}`,
-  borderRadius: '8px',
-  color: themes[theme].text,
-  fontSize: '0.875rem',
-  cursor: 'pointer',
-  outline: 'none',
-  minWidth: '180px',
-},
-
-  addButton: {
-    padding: '12px 24px',
-    background: '#10b981',
-    border: 'none',
-    borderRadius: '8px',
-    color: 'white',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    fontSize: '1rem',
-  },
-emptyState: {
-  background: themes[theme].cardBackground,
-  border: `1px solid ${themes[theme].cardBorder}`,
-  borderRadius: '12px',
-  padding: '48px',
-  textAlign: 'center',
-  },
-  
-itemCard: {
-  background: themes[theme].cardBackground,
-  border: `1px solid ${themes[theme].cardBorder}`,
-  borderRadius: '12px',
-  padding: '24px',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'start',
-  gap: '16px',
-},
-  itemDetails: {
-    marginTop: '16px',
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-    gap: '16px',
-  },
-  editButton: {
-    padding: '8px',
-    background: '#0891b2',
-    border: 'none',
-    borderRadius: '8px',
-    color: 'white',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  deleteButton: {
-    padding: '8px',
-    background: '#7f1d1d',
-    border: 'none',
-    borderRadius: '8px',
-    color: 'white',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: '40px',
-    minHeight: '40px',
-    touchAction: 'manipulation',
-  },
-  saveButton: {
-    padding: '10px 20px',
-    background: '#10b981',
-    border: 'none',
-    borderRadius: '8px',
-    color: 'white',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    fontSize: '0.875rem',
-  },
-  cancelButton: {
-    padding: '10px 20px',
-    background: '#4b5563',
-    border: 'none',
-    borderRadius: '8px',
-    color: 'white',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    fontSize: '0.875rem',
-  },
-  quantityButton: {
-    width: '32px',
-    height: '32px',
-    background: '#10b981',
-    border: 'none',
-    borderRadius: '6px',
-    color: 'white',
-    cursor: 'pointer',
-    fontSize: '1.25rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'rgba(0, 0, 0, 0.75)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '16px',
-    zIndex: 50,
-  },
-modal: {
-  background: themes[theme].modalBackground,
-  border: `1px solid ${themes[theme].cardBorder}`,
-  borderRadius: '12px',
-  padding: '24px',
-  maxWidth: '500px',
-  width: '100%',
-  maxHeight: '90vh',
-  overflowY: 'auto',
-},
-  closeButton: {
-    background: '#2563eb',
-    border: 'none',
-    borderRadius: '8px',
-    padding: '8px 16px',
-    color: 'white',
-    cursor: 'pointer',
-  },
-input: {
-  width: '100%',
-  padding: '12px',
-  background: themes[theme].inputBackground,
-  border: `1px solid ${themes[theme].cardBorder}`,
-  borderRadius: '8px',
-  color: themes[theme].text,
-  fontSize: '1rem',
-  marginBottom: '16px',
-  boxSizing: 'border-box',
-},
-  primaryButton: {
-    flex: 1,
-    padding: '12px',
-    background: '#10b981',
-    border: 'none',
-    borderRadius: '8px',
-    color: 'white',
-    cursor: 'pointer',
-    fontSize: '1rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  secondaryButton: {
-    flex: 1,
-    padding: '12px',
-    background: '#2563eb',
-    border: 'none',
-    borderRadius: '8px',
-    color: 'white',
-    cursor: 'pointer',
-    fontSize: '1rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  debugInfo: {
-    background: '#1a2942',
-    border: '1px solid #4b5563',
-    borderRadius: '8px',
-    padding: '16px',
-    marginBottom: '16px',
-  },
-  stockBadgeLow: {
-    padding: '4px 12px',
-    background: 'rgba(239, 68, 68, 0.2)',
-    border: '1px solid #ef4444',
-    borderRadius: '12px',
-    fontSize: '0.75rem',
-    color: '#ef4444',
-    fontWeight: 'bold',
-  },
-  stockBadgeHigh: {
-    padding: '4px 12px',
-    background: 'rgba(251, 191, 36, 0.2)',
-    border: '1px solid #fbbf24',
-    borderRadius: '12px',
-    fontSize: '0.75rem',
-    color: '#fbbf24',
-    fontWeight: 'bold',
-  },
-};
