@@ -1924,17 +1924,17 @@ const handleLogin = async (e) => {
             <button onClick={() => window.location.reload()} style={styles.primaryButton}>
               🔄 Refresh App
             </button>
-          </Modal>
-        )}
+        </Modal>
+      )}
 
-        <style>{`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
-      </div>
-    );
-  }
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+}
 
 function Modal({ children, onClose, title }) {
   return (
