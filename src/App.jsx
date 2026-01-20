@@ -25,9 +25,9 @@ const themes = {
     textSecondary: '#6b7280',
     inputBackground: '#f9fafb',
     modalBackground: '#ffffff',
-    tabInactive: '#e5e7eb',
+    tabInactive: '#dbeafe',
     gradient: 'linear-gradient(to right, #10b981, #06b6d4)',
-    homeBackground: 'linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url("https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200")',
+    homeBackground: 'linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)), url("https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200")',
   }
 };
 
@@ -1330,7 +1330,7 @@ export default function App() {
               onClick={() => setActiveTab(tab)}
               style={{
                 ...styles.tab,
-                background: activeTab === tab ? 'linear-gradient(to right, #10b981, #06b6d4)' : '#1e3a5f'
+                background: activeTab === tab ? 'linear-gradient(to right, #10b981, #06b6d4)' : currentTheme.tabInactive
               }}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
