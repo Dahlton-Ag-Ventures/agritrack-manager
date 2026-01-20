@@ -3,6 +3,34 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut, ChevronDown } from 'lucide-react';
 
+// Theme configurations
+const themes = {
+  dark: {
+    background: '#111827',
+    cardBackground: '#1e3a5f',
+    cardBorder: '#2563eb',
+    text: 'white',
+    textSecondary: '#9ca3af',
+    inputBackground: '#1a2942',
+    modalBackground: '#1e3a5f',
+    tabInactive: '#1e3a5f',
+    gradient: 'linear-gradient(to right, #10b981, #06b6d4)',
+    homeBackground: 'linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200")',
+  },
+  light: {
+    background: '#f3f4f6',
+    cardBackground: '#ffffff',
+    cardBorder: '#e5e7eb',
+    text: '#111827',
+    textSecondary: '#6b7280',
+    inputBackground: '#f9fafb',
+    modalBackground: '#ffffff',
+    tabInactive: '#e5e7eb',
+    gradient: 'linear-gradient(to right, #10b981, #06b6d4)',
+    homeBackground: 'linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url("https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200")',
+  }
+};
+
 // Supabase configuration
 const supabaseUrl = 'https://ekjjtfemibtaxyhuvgea.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVramp0ZmVtaWJ0YXh5aHV2Z2VhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4NTM0ODgsImV4cCI6MjA4MzQyOTQ4OH0.c4qjGG0F1nCR0UcyttQKuMX4S_9bJlAPCglzq3fB8v0';
@@ -105,6 +133,20 @@ export default function App() {
     };
   }, []);
   
+  // Load theme preference on mount (runs once when app loads)
+useEffect(() => {
+  const savedTheme = localStorage.getItem('agritrack-theme');
+  if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+    setTheme(savedTheme);
+  }
+}, []);
+
+// Save theme preference whenever it changes
+useEffect(() => {
+  if (user) {
+    localStorage.setItem('agritrack-theme', theme);
+  }
+}, [theme, user]);
 const checkUser = async () => {
   try {
     const { data: { session } } = await supabase.auth.getSession();
@@ -1396,22 +1438,53 @@ if (loading) {
               </div>
 
               {activeSettingsSection === 'general' && (
-                <div style={styles.itemCard}>
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>⚙️ General Settings</h3>
-                    <div style={styles.itemDetails}>
-                      <div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Application Theme</p>
-                        <p>Dark Mode (Default)</p>
-                      </div>
-                      <div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Language</p>
-                        <p>English (US)</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+  <div style={styles.itemCard}>
+    <div style={{ flex: 1 }}>
+      <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>⚙️ General Settings</h3>
+      <div style={styles.itemDetails}>
+        <div>
+          <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '8px' }}>Application Theme</p>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <button
+              onClick={() => setTheme('dark')}
+              style={{
+                padding: '10px 20px',
+                background: theme === 'dark' ? 'linear-gradient(to right, #10b981, #06b6d4)' : '#374151',
+                border: theme === 'dark' ? '2px solid #10b981' : '1px solid #4b5563',
+                borderRadius: '8px',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: theme === 'dark' ? 'bold' : 'normal',
+              }}
+            >
+              🌙 Dark Mode
+            </button>
+            <button
+              onClick={() => setTheme('light')}
+              style={{
+                padding: '10px 20px',
+                background: theme === 'light' ? 'linear-gradient(to right, #fbbf24, #f59e0b)' : '#374151',
+                border: theme === 'light' ? '2px solid #fbbf24' : '1px solid #4b5563',
+                borderRadius: '8px',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: theme === 'light' ? 'bold' : 'normal',
+              }}
+            >
+              ☀️ Light Mode
+            </button>
+          </div>
+        </div>
+        <div>
+          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Language</p>
+          <p>English (US)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
               {activeSettingsSection === 'account' && (
                 <div style={styles.itemCard}>
@@ -2032,22 +2105,22 @@ const styles = {
     color: '#ef4444',
     fontSize: '0.875rem',
   },
-  container: {
-    minHeight: '100vh',
-    background: '#111827',
-    color: 'white',
-    padding: '24px',
-  },
-  homeContainer: {
-    background: 'linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200")',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    minHeight: '500px',
-    borderRadius: '16px',
-    padding: '24px',
-    backdropFilter: 'blur(5px)',
-  },
+container: {
+  minHeight: '100vh',
+  background: themes[theme].background,
+  color: themes[theme].text,
+  padding: '24px',
+},
+homeContainer: {
+  background: themes[theme].homeBackground,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  backgroundRepeat: 'no-repeat',
+  minHeight: '500px',
+  borderRadius: '16px',
+  padding: '24px',
+  backdropFilter: 'blur(5px)',
+},
   content: {
     maxWidth: '1200px',
     margin: '0 auto',
@@ -2087,14 +2160,15 @@ title: {
   marginBottom: '8px',
   textAlign: 'center',
 },
-  subtitle: {
-    color: '#9ca3af',
-    marginBottom: '8px',
-  },
-  stats: {
-    color: '#6b7280',
-    fontSize: '0.875rem',
-  },
+subtitle: {
+  color: themes[theme].textSecondary,
+  marginBottom: '8px',
+},
+
+stats: {
+  color: themes[theme].textSecondary,
+  fontSize: '0.875rem',
+},,
   statusContainer: {
     display: 'flex',
     alignItems: 'center',
@@ -2151,14 +2225,14 @@ title: {
     borderBottom: '1px solid #4b5563',
     flexWrap: 'wrap',
   },
-  tab: {
-    padding: '12px 24px',
-    border: 'none',
-    borderRadius: '8px 8px 0 0',
-    color: 'white',
-    cursor: 'pointer',
-    fontSize: '1rem',
-  },
+tab: {
+  padding: '12px 24px',
+  border: 'none',
+  borderRadius: '8px 8px 0 0',
+  color: theme === 'light' ? '#111827' : 'white',
+  cursor: 'pointer',
+  fontSize: '1rem',
+},
   settingsDropdownWrapper: {
     position: 'relative',
   },
@@ -2235,28 +2309,30 @@ title: {
     marginBottom: '24px',
     flexWrap: 'wrap',
   },
-  searchInput: {
-    flex: 1,
-    minWidth: '250px',
-    padding: '12px 16px',
-    background: '#1e3a5f',
-    border: '1px solid #2563eb',
-    borderRadius: '8px',
-    color: 'white',
-    fontSize: '0.875rem',
-    outline: 'none',
-  },
-  sortSelect: {
-    padding: '12px 16px',
-    background: '#1e3a5f',
-    border: '1px solid #2563eb',
-    borderRadius: '8px',
-    color: 'white',
-    fontSize: '0.875rem',
-    cursor: 'pointer',
-    outline: 'none',
-    minWidth: '180px',
-  },
+searchInput: {
+  flex: 1,
+  minWidth: '250px',
+  padding: '12px 16px',
+  background: themes[theme].cardBackground,
+  border: `1px solid ${themes[theme].cardBorder}`,
+  borderRadius: '8px',
+  color: themes[theme].text,
+  fontSize: '0.875rem',
+  outline: 'none',
+},
+
+sortSelect: {
+  padding: '12px 16px',
+  background: themes[theme].cardBackground,
+  border: `1px solid ${themes[theme].cardBorder}`,
+  borderRadius: '8px',
+  color: themes[theme].text,
+  fontSize: '0.875rem',
+  cursor: 'pointer',
+  outline: 'none',
+  minWidth: '180px',
+},
+
   addButton: {
     padding: '12px 24px',
     background: '#10b981',
@@ -2269,29 +2345,24 @@ title: {
     gap: '8px',
     fontSize: '1rem',
   },
-  emptyState: {
-    background: '#1e3a5f',
-    border: '1px solid #2563eb',
-    borderRadius: '12px',
-    padding: '48px',
-    textAlign: 'center',
+emptyState: {
+  background: themes[theme].cardBackground,
+  border: `1px solid ${themes[theme].cardBorder}`,
+  borderRadius: '12px',
+  padding: '48px',
+  textAlign: 'center',
   },
-  itemsList: {
-    display: 'grid',
-    gap: '16px',
-    maxHeight: '600px',
-    overflowY: 'auto',
-  },
-  itemCard: {
-    background: '#1e3a5f',
-    border: '1px solid #2563eb',
-    borderRadius: '12px',
-    padding: '24px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'start',
-    gap: '16px',
-  },
+  
+itemCard: {
+  background: themes[theme].cardBackground,
+  border: `1px solid ${themes[theme].cardBorder}`,
+  borderRadius: '12px',
+  padding: '24px',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'start',
+  gap: '16px',
+},
   itemDetails: {
     marginTop: '16px',
     display: 'grid',
@@ -2373,16 +2444,16 @@ title: {
     padding: '16px',
     zIndex: 50,
   },
-  modal: {
-    background: '#1e3a5f',
-    border: '1px solid #2563eb',
-    borderRadius: '12px',
-    padding: '24px',
-    maxWidth: '500px',
-    width: '100%',
-    maxHeight: '90vh',
-    overflowY: 'auto',
-  },
+modal: {
+  background: themes[theme].modalBackground,
+  border: `1px solid ${themes[theme].cardBorder}`,
+  borderRadius: '12px',
+  padding: '24px',
+  maxWidth: '500px',
+  width: '100%',
+  maxHeight: '90vh',
+  overflowY: 'auto',
+},
   closeButton: {
     background: '#2563eb',
     border: 'none',
@@ -2391,17 +2462,17 @@ title: {
     color: 'white',
     cursor: 'pointer',
   },
-  input: {
-    width: '100%',
-    padding: '12px',
-    background: '#1a2942',
-    border: '1px solid #2563eb',
-    borderRadius: '8px',
-    color: 'white',
-    fontSize: '1rem',
-    marginBottom: '16px',
-    boxSizing: 'border-box',
-  },
+input: {
+  width: '100%',
+  padding: '12px',
+  background: themes[theme].inputBackground,
+  border: `1px solid ${themes[theme].cardBorder}`,
+  borderRadius: '8px',
+  color: themes[theme].text,
+  fontSize: '1rem',
+  marginBottom: '16px',
+  boxSizing: 'border-box',
+},
   primaryButton: {
     flex: 1,
     padding: '12px',
