@@ -721,6 +721,20 @@ const handleLogin = async (e) => {
           <div>
             <h1 style={styles.title}>AgriTrack Manager</h1>
             <p style={styles.subtitle}>Dahlton Ag Ventures</p>
+            
+            {/* DEBUG - ALWAYS VISIBLE */}
+<div style={{ 
+  position: 'fixed', 
+  top: '10px', 
+  right: '10px', 
+  background: 'red', 
+  color: 'white', 
+  padding: '10px', 
+  zIndex: 9999,
+  border: '2px solid yellow'
+}}>
+  DEBUG: userRole = "{userRole}" | Type: {typeof userRole}
+</div>
 <p style={styles.stats}>
   {inventory.length} Inventory • {machinery.length} Machines • {serviceHistory.length} Service Records
   {userRole && (
