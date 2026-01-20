@@ -920,7 +920,7 @@ export default function App() {
       left: 0,
       marginTop: '4px',
       background: currentTheme.cardBackground,
-      border: '1px solid ${currentTheme.cardBorder}`,
+      border: `1px solid ${currentTheme.cardBorder}`,
       borderRadius: '8px',
       minWidth: '200px',
       boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
