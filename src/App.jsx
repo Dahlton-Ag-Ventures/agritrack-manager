@@ -1351,12 +1351,8 @@ dropdownItem: {
     gap: '8px'
   }}
 >
-              >
-                Settings
-                <ChevronDown size={16} style={{ 
-                  transform: showSettingsDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.2s ease'
-                }} />
+              
+                Settings {showSettingsDropdown ? '▲' : '▼'}
               </button>
               
               {showSettingsDropdown && (
