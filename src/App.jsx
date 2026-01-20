@@ -1399,19 +1399,30 @@ dropdownItem: {
           )}
         </div>
 
-     {activeTab === 'home' && (
+{activeTab === 'home' && (
   <div style={styles.homeContainer}>
     <div style={{ ...styles.welcomeCard, background: 'rgba(6, 182, 212, 0.4)', border: '1px solid #06b6d4' }}>
-      <p style={{ color: currentTheme.text, marginBottom: '12px', fontSize: '1.5rem', fontWeight: '600' }}>
-        Track inventory, machinery, and service records all in one place.
+      <h1 style={{ 
+        color: currentTheme.text, 
+        marginBottom: '16px', 
+        fontSize: '2.5rem', 
+        fontWeight: '700',
+        textAlign: 'center',
+        background: 'linear-gradient(to right, #10b981, #06b6d4)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent'
+      }}>
+        Welcome to AgriTrack Manager
+      </h1>
+      <p style={{ 
+        color: currentTheme.text, 
+        fontSize: '1.1rem', 
+        fontWeight: '400',
+        textAlign: 'center',
+        opacity: 0.9
+      }}>
+        Track inventory, machinery, and service records all in one place
       </p>
-      <div style={styles.syncStatus}>
-        <span style={{ color: currentTheme.text, fontSize: '0.9rem', fontWeight: '600' }}>
-          {realtimeStatus === 'connected' 
-            ? '✓ Live sync enabled - Changes appear instantly on all devices' 
-            : '⚠️ Connecting to live sync...'}
-        </span>
-      </div>
     </div>
 
     {/* How to Use Guide */}
