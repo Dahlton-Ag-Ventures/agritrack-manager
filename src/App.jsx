@@ -927,21 +927,21 @@ export default function App() {
       zIndex: 50,
       overflow: 'hidden',
     },
-    dropdownItem: {
-      width: '100%',
-      padding: '12px 16px',
-      background: 'transparent',
-      border: 'none',
-      borderBottom: '1px solid rgba(37, 99, 235, 0.3)',
-      color: 'white',
-      cursor: 'pointer',
-      fontSize: '0.875rem',
-      textAlign: 'left',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      transition: 'background 0.2s ease',
-    },
+dropdownItem: {
+  width: '100%',
+  padding: '12px 16px',
+  background: 'transparent',
+  border: 'none',
+  borderBottom: '1px solid rgba(37, 99, 235, 0.3)',
+  color: currentTheme.text,
+  cursor: 'pointer',
+  fontSize: '0.875rem',
+  textAlign: 'left',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  transition: 'background 0.2s ease',
+},
     welcomeCard: {
       background: 'rgba(16, 185, 129, 0.15)',
       border: '1px solid rgba(16, 185, 129, 0.3)',
@@ -1405,18 +1405,18 @@ export default function App() {
 
         {activeTab === 'home' && (
           <div style={styles.homeContainer}>
-            <div style={{ ...styles.welcomeCard, background: 'rgba(6, 182, 212, 0.4)', border: '1px solid #06b6d4' }}>
-              <p style={{ color: '#ffffff', marginBottom: '12px', fontSize: '1.5rem', fontWeight: '600' }}>
-                Track inventory, machinery, and service records all in one place.
-              </p>
-              <div style={styles.syncStatus}>
-                <span style={{ color: '#d1d5db', fontSize: '0.9rem', fontWeight: '600' }}>
-                  {realtimeStatus === 'connected' 
-                    ? '✓ Live sync enabled - Changes appear instantly on all devices' 
-                    : '⚠️ Connecting to live sync...'}
-                </span>
-              </div>
-            </div>
+<div style={{ ...styles.welcomeCard, background: 'rgba(6, 182, 212, 0.4)', border: '1px solid #06b6d4' }}>
+  <p style={{ color: currentTheme.text, marginBottom: '12px', fontSize: '1.5rem', fontWeight: '600' }}>
+    Track inventory, machinery, and service records all in one place.
+  </p>
+  <div style={styles.syncStatus}>
+    <span style={{ color: currentTheme.text, fontSize: '0.9rem', fontWeight: '600' }}>
+      {realtimeStatus === 'connected' 
+        ? '✓ Live sync enabled - Changes appear instantly on all devices' 
+        : '⚠️ Connecting to live sync...'}
+    </span>
+  </div>
+</div>
 
             <div style={styles.statsGrid}>
               <div style={{ ...styles.statCard, background: 'rgba(6, 182, 212, 0.4)', borderColor: '#06b6d4' }}>
