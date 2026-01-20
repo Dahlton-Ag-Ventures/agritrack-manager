@@ -2168,7 +2168,7 @@ subtitle: {
 stats: {
   color: themes[theme].textSecondary,
   fontSize: '0.875rem',
-},,
+},
   statusContainer: {
     display: 'flex',
     alignItems: 'center',
