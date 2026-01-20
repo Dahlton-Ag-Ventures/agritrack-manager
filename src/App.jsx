@@ -1927,14 +1927,14 @@ const handleLogin = async (e) => {
           </Modal>
         )}
 
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
-    </div>
-  );
-}
+        <style>{`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
 function Modal({ children, onClose, title }) {
   return (
