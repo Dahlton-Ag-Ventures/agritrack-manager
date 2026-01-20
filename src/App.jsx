@@ -1,3 +1,4 @@
+// BUILD VERSION: 2025-01-21-v2
 import React, { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut, ChevronDown } from 'lucide-react';
@@ -667,7 +668,7 @@ const handleLogin = async (e) => {
       <div style={styles.loginContainer}>
         <div style={styles.loginCard}>
           <h2 style={styles.loginTitle}>Welcome to</h2>
-          <h1 style={styles.loginAppName}>AgriTrack Manager</h1>
+          <h1 style={styles.title}>AgriTrack Manager v2.0</h1>
 
           <form onSubmit={handleLogin} style={styles.loginForm}>
             <input
