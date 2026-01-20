@@ -15,7 +15,7 @@ const themes = {
     modalBackground: '#1e3a5f',
     tabInactive: '#1e3a5f',
     gradient: 'linear-gradient(to right, #10b981, #06b6d4)',
-    homeBackground: 'linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200")',
+    homeBackground: 'linear-gradient(135deg, #1e3a5f 0%, #1a2942 100%)',
   },
   light: {
     background: '#f3f4f6',
@@ -27,7 +27,7 @@ const themes = {
     modalBackground: '#ffffff',
     tabInactive: '#dbeafe',
     gradient: 'linear-gradient(to right, #10b981, #06b6d4)',
-    homeBackground: 'linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)), url("https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200")',
+    homeBackground: 'linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%)',
   }
 };
 
