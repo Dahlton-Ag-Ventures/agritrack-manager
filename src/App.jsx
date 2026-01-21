@@ -793,12 +793,19 @@ const cancelServiceEdit = () => {
       color: '#ef4444',
       fontSize: '0.875rem',
     },
-    container: {
-      minHeight: '100vh',
-      background: currentTheme.background,
-      color: currentTheme.text,
-      padding: '24px',
-    },
+container: {
+  minHeight: '100vh',
+  background: theme === 'dark' ? '#0d1117' : currentTheme.background,
+  backgroundImage: theme === 'dark' 
+    ? `linear-gradient(rgba(37, 99, 235, 0.15) 1px, transparent 1px),
+       linear-gradient(90deg, rgba(37, 99, 235, 0.15) 1px, transparent 1px),
+       radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+       radial-gradient(circle at 70% 70%, rgba(6, 182, 212, 0.1) 0%, transparent 50%)`
+    : 'none',
+  backgroundSize: theme === 'dark' ? '50px 50px, 50px 50px, 100% 100%, 100% 100%' : 'auto',
+  color: currentTheme.text,
+  padding: '24px',
+},
     homeContainer: {
       background: currentTheme.homeBackground,
       backgroundSize: 'cover',
