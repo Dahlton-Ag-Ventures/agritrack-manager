@@ -795,17 +795,6 @@ const cancelServiceEdit = () => {
     },
 container: {
   minHeight: '100vh',
-  background: theme === 'dark' ? '#0d1117' : currentTheme.background,
-  backgroundImage: theme === 'dark' 
-    ? `linear-gradient(rgba(37, 99, 235, 0.15) 1px, transparent 1px),
-       linear-gradient(90deg, rgba(37, 99, 235, 0.15) 1px, transparent 1px),
-       radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
-       radial-gradient(circle at 70% 70%, rgba(6, 182, 212, 0.1) 0%, transparent 50%)`
-    : `linear-gradient(rgba(17, 24, 39, 0.15) 1px, transparent 1px),
-       linear-gradient(90deg, rgba(17, 24, 39, 0.15) 1px, transparent 1px),
-       radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
-       radial-gradient(circle at 70% 70%, rgba(6, 182, 212, 0.08) 0%, transparent 50%)`,
-  backgroundSize: '50px 50px, 50px 50px, 100% 100%, 100% 100%',
   color: currentTheme.text,
   padding: '24px',
 },
@@ -1289,7 +1278,14 @@ dropdownItem: {
 // This continues from: if (!user) { return ( ... login screen ... ); }
 
   return (
-    <div style={styles.container}>
+    <div style={{
+  ...styles.container,
+  background: theme === 'dark' ? '#0d1117' : '#f3f4f6',
+  backgroundImage: theme === 'dark' 
+    ? 'linear-gradient(rgba(37, 99, 235, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(37, 99, 235, 0.15) 1px, transparent 1px), radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.1) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(6, 182, 212, 0.1) 0%, transparent 50%)'
+    : 'linear-gradient(rgba(17, 24, 39, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(17, 24, 39, 0.15) 1px, transparent 1px), radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.08) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(6, 182, 212, 0.08) 0%, transparent 50%)',
+  backgroundSize: '50px 50px, 50px 50px, 100% 100%, 100% 100%',
+}}>
       <div style={styles.content}>
         <div style={styles.header}>
           <div>
