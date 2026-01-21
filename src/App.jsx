@@ -314,36 +314,94 @@ export default function App() {
       });
   };
 
-// Photo Upload Function (converts to base64 for storage in JSON)
+// Photo Upload Function with automatic compression
   const handlePhotoUpload = async (file, formType) => {
     if (!file) return null;
 
-    // Check file size (limit to 3MB to account for base64 expansion)
-    // Base64 encoding increases size by ~33%, so 3MB becomes ~4MB
-    const maxSizeBytes = 3 * 1024 * 1024; // 3MB
-    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-    
-    if (file.size > maxSizeBytes) {
-      alert(`Image too large (${fileSizeMB}MB). Please use an image under 3MB.\n\nTip: You can resize images using your phone's photo editor or online tools.`);
+    // Check if file is an image
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file (JPG, PNG, etc.)');
       return null;
     }
 
     setUploadingPhoto(true);
 
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
+    try {
+      // Create an image element to load the file
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = objectUrl;
+      });
+
+      // Create canvas for compression
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Maximum dimensions (adjust these as needed)
+      const MAX_WIDTH = 1200;
+      const MAX_HEIGHT = 1200;
+
+      let width = img.width;
+      let height = img.height;
+
+      // Calculate new dimensions maintaining aspect ratio
+      if (width > height) {
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width;
+          width = MAX_WIDTH;
+        }
+      } else {
+        if (height > MAX_HEIGHT) {
+          width *= MAX_HEIGHT / height;
+          height = MAX_HEIGHT;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      // Draw and compress
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Convert to base64 with compression
+      // Start with 0.7 quality, reduce if still too large
+      let quality = 0.7;
+      let base64Result = canvas.toDataURL('image/jpeg', quality);
+
+      // If still over 3MB as base64, reduce quality further
+      while (base64Result.length > 3 * 1024 * 1024 && quality > 0.3) {
+        quality -= 0.1;
+        base64Result = canvas.toDataURL('image/jpeg', quality);
+      }
+
+      // Final check
+      if (base64Result.length > 4 * 1024 * 1024) {
+        alert('Image is too complex to compress sufficiently. Please use a smaller or simpler image.');
         setUploadingPhoto(false);
-        resolve(reader.result); // Returns base64 string
-      };
-      reader.onerror = () => {
-        setUploadingPhoto(false);
-        alert('Failed to read image file. Please try again.');
-        reject(new Error('Failed to read file'));
-      };
-      reader.readAsDataURL(file);
-    });
+        return null;
+      }
+
+      // Clean up
+      URL.revokeObjectURL(objectUrl);
+      setUploadingPhoto(false);
+
+      const finalSizeMB = (base64Result.length / (1024 * 1024)).toFixed(2);
+      console.log(`Image compressed to ${finalSizeMB}MB at ${Math.round(quality * 100)}% quality`);
+
+      return base64Result;
+
+    } catch (error) {
+      console.error('Image processing error:', error);
+      alert('Failed to process image. Please try a different image.');
+      setUploadingPhoto(false);
+      return null;
+    }
   };
+  
   // Check inventory stock levels
   const getStockStatus = (item) => {
     const qty = parseInt(item.quantity) || 0;
