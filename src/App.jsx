@@ -108,7 +108,7 @@ export default function App() {
   const [serviceFilter, setServiceFilter] = useState('');
 
   // Get current theme object
-  
+  const currentTheme = themes[theme];
 
   // Check authentication status on load
   useEffect(() => {
