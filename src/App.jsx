@@ -3319,31 +3319,41 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
   const [lastTouchDistance, setLastTouchDistance] = React.useState(null);
   const imageContainerRef = React.useRef(null);
   const overlayRef = React.useRef(null);
+  const animationFrameRef = React.useRef(null);
 
-  // Smooth wheel zoom handler
+  // SUPER SMOOTH wheel zoom handler with animation frame
   const handleWheel = (e) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Much smoother zoom calculation
-    const zoomIntensity = 0.1;
-    const delta = -e.deltaY * zoomIntensity * 0.01;
+    // Cancel any pending animation frame
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
     
-    setScale(prevScale => {
-      const newScale = Math.min(Math.max(1, prevScale * (1 + delta)), 5);
-      
-      // Reset position when fully zoomed out
-      if (newScale === 1) {
-        setPosition({ x: 0, y: 0 });
-      }
-      
-      return newScale;
+    // Request animation frame for smooth rendering
+    animationFrameRef.current = requestAnimationFrame(() => {
+      setScale(prevScale => {
+        // Smoother calculation - smaller steps for finer control
+        const delta = -e.deltaY;
+        const sensitivity = 0.002; // Adjust this for zoom speed (lower = slower/smoother)
+        const zoomFactor = 1 + (delta * sensitivity);
+        
+        const newScale = prevScale * zoomFactor;
+        const clampedScale = Math.min(Math.max(1, newScale), 5);
+        
+        // Reset position when fully zoomed out
+        if (clampedScale === 1) {
+          setPosition({ x: 0, y: 0 });
+        }
+        
+        return clampedScale;
+      });
     });
   };
 
   // Mouse drag handlers
   const handleMouseDown = (e) => {
-    // Only allow dragging when zoomed in and clicking on the image
     if (scale > 1 && (e.target.tagName === 'IMG' || e.target === imageContainerRef.current)) {
       e.preventDefault();
       e.stopPropagation();
@@ -3384,11 +3394,9 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
 
   const handleTouchStart = (e) => {
     if (e.touches.length === 2) {
-      // Pinch zoom
       e.preventDefault();
       setLastTouchDistance(getTouchDistance(e.touches));
     } else if (e.touches.length === 1 && scale > 1) {
-      // Single touch drag when zoomed
       const touch = e.touches[0];
       setIsDragging(true);
       setDragStart({
@@ -3400,7 +3408,6 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
 
   const handleTouchMove = (e) => {
     if (e.touches.length === 2 && lastTouchDistance) {
-      // Pinch zoom
       e.preventDefault();
       const newDistance = getTouchDistance(e.touches);
       const scaleChange = newDistance / lastTouchDistance;
@@ -3415,7 +3422,6 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
       
       setLastTouchDistance(newDistance);
     } else if (e.touches.length === 1 && isDragging && scale > 1) {
-      // Drag when zoomed
       const touch = e.touches[0];
       setPosition({
         x: touch.clientX - dragStart.x,
@@ -3435,10 +3441,8 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
       e.stopPropagation();
       
       if (scale === 1) {
-        // Zoom in to 2x
         setScale(2);
       } else {
-        // Reset zoom
         setScale(1);
         setPosition({ x: 0, y: 0 });
       }
@@ -3446,7 +3450,6 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
   };
 
   const handleOverlayClick = (e) => {
-    // Only close if clicking the overlay background
     if (e.target === overlayRef.current) {
       onClose();
     }
@@ -3478,7 +3481,7 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
     setPosition({ x: 0, y: 0 });
   };
 
-  // Add global mouse up listener to handle dragging outside container
+  // Global mouse tracking
   React.useEffect(() => {
     const handleGlobalMouseUp = () => {
       setIsDragging(false);
@@ -3493,7 +3496,16 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
       window.removeEventListener('mouseup', handleGlobalMouseUp);
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [isDragging]);
+  }, [isDragging, dragStart, position]);
+
+  // Cleanup animation frame on unmount
+  React.useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div 
@@ -3589,7 +3601,7 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: 'bold',
-            transition: 'all 0.2s'
+            transition: 'background 0.2s'
           }}
           onMouseEnter={(e) => {
             if (scale < 5) e.target.style.background = '#059669';
@@ -3629,7 +3641,7 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: 'bold',
-            transition: 'all 0.2s'
+            transition: 'background 0.2s'
           }}
           onMouseEnter={(e) => {
             if (scale > 1) e.target.style.background = '#059669';
@@ -3658,7 +3670,7 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: 'bold',
-            transition: 'all 0.2s'
+            transition: 'background 0.2s'
           }}
           title="Reset zoom"
           onMouseEnter={(e) => {
@@ -3732,8 +3744,8 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
             height: 'auto',
             objectFit: 'contain',
             borderRadius: '8px',
-            transform: `translate(${position.x}px, ${position.y}px) scale(1)`,
-            transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+            transform: `translate(${position.x}px, ${position.y}px)`,
+            willChange: 'transform',
             pointerEvents: 'none',
             userSelect: 'none',
             WebkitUserSelect: 'none',
