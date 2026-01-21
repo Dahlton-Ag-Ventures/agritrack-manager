@@ -2086,12 +2086,31 @@ dropdownItem: {
                   <div key={record.id} style={styles.itemCard}>
                     {editingServiceId === record.id ? (
                       <div style={{ flex: 1 }}>
-                        <input
-                          style={styles.input}
-                          placeholder="Machine Name"
-                          value={serviceForm.machineName}
-                          onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
-                        />
+                       <div style={{ marginBottom: '16px' }}>
+  <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+    Select Machine
+  </label>
+  <select
+    style={styles.input}
+    value={serviceForm.machineName}
+    onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
+    required
+  >
+    <option value="">-- Select a machine --</option>
+    {machinery
+      .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+      .map(machine => (
+        <option key={machine.id} value={machine.name}>
+          {machine.name} {machine.category ? `(${machine.category})` : ''}
+        </option>
+      ))}
+  </select>
+  {machinery.length === 0 && (
+    <p style={{ color: '#ef4444', fontSize: '0.875rem', marginTop: '8px' }}>
+      ⚠️ No machinery available. Please add machinery first.
+    </p>
+  )}
+</div>
                         <input
                           style={styles.input}
                           placeholder="Service Type (e.g., Oil Change, Repair)"
@@ -2709,12 +2728,26 @@ dropdownItem: {
       value={serviceForm.machineName}
       onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
     />
-    <input
-      style={styles.input}
-      placeholder="Service Type (e.g., Oil Change, Repair, Inspection)"
-      value={serviceForm.serviceType}
-      onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
-    />
+<div style={{ marginBottom: '16px' }}>
+  <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+    Select Machine
+  </label>
+  <select
+    style={styles.input}
+    value={serviceForm.machineName}
+    onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
+    required
+  >
+    <option value="">-- Select a machine --</option>
+    {machinery
+      .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+      .map(machine => (
+        <option key={machine.id} value={machine.name}>
+          {machine.name} {machine.category ? `(${machine.category})` : ''}
+        </option>
+      ))}
+  </select>
+</div>
     <input
       style={styles.input}
       type="date"
@@ -2757,7 +2790,17 @@ dropdownItem: {
       )}
     </div>
     <div style={{ display: 'flex', gap: '12px' }}>
-      <button onClick={addServiceRecord} style={styles.primaryButton}>Add Record</button>
+      <button 
+  onClick={addServiceRecord} 
+  style={{
+    ...styles.primaryButton,
+    opacity: !serviceForm.machineName || machinery.length === 0 ? 0.5 : 1,
+    cursor: !serviceForm.machineName || machinery.length === 0 ? 'not-allowed' : 'pointer'
+  }}
+  disabled={!serviceForm.machineName || machinery.length === 0}
+>
+  Add Record
+</button>
       <button onClick={() => setShowServiceModal(false)} style={styles.secondaryButton}>Cancel</button>
     </div>
   </Modal>
