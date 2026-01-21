@@ -2546,8 +2546,6 @@ dropdownItem: {
   }}
   style={{...styles.secondaryButton, background: '#0891b2'}}
 >
-  Import Service Records from CSV
-</button>
                         Import Service Records from CSV
                       </button>
                     </div>
