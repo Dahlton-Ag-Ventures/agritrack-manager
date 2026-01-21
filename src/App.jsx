@@ -3320,27 +3320,30 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
   const imageRef = React.useRef(null);
   const containerRef = React.useRef(null);
 
-  const handleWheel = (e) => {
+  const handleWheel = React.useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
-    const delta = e.deltaY * -0.001;
+    
+    // Smoother zoom with smaller increments
+    const delta = e.deltaY * -0.003;
     const newScale = Math.min(Math.max(1, scale + delta), 5);
     setScale(newScale);
+    
     if (newScale === 1) {
       setPosition({ x: 0, y: 0 });
     }
-  };
+  }, [scale]);
 
-  const handleMouseDown = (e) => {
+  const handleMouseDown = React.useCallback((e) => {
     if (scale > 1 && e.target.tagName === 'IMG') {
       e.preventDefault();
       e.stopPropagation();
       setIsDragging(true);
       setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
     }
-  };
+  }, [scale, position]);
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = React.useCallback((e) => {
     if (isDragging && scale > 1) {
       e.preventDefault();
       e.stopPropagation();
@@ -3349,11 +3352,11 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
         y: e.clientY - dragStart.y
       });
     }
-  };
+  }, [isDragging, scale, dragStart]);
 
-  const handleMouseUp = () => {
+  const handleMouseUp = React.useCallback(() => {
     setIsDragging(false);
-  };
+  }, []);
 
   const getTouchDistance = (touches) => {
     const dx = touches[0].clientX - touches[1].clientX;
@@ -3408,10 +3411,34 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
   };
 
   const handleOverlayClick = (e) => {
-    // Only close if clicking the dark overlay itself, not the content
+    // Only close if clicking the dark overlay itself
     if (e.target === containerRef.current) {
       onClose();
     }
+  };
+
+  const zoomIn = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const newScale = Math.min(scale + 0.5, 5);
+    setScale(newScale);
+  };
+
+  const zoomOut = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const newScale = Math.max(scale - 0.5, 1);
+    setScale(newScale);
+    if (newScale === 1) {
+      setPosition({ x: 0, y: 0 });
+    }
+  };
+
+  const resetZoom = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
   };
 
   return (
@@ -3451,7 +3478,10 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
       >
         <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{title}</h3>
         <button
-          onClick={onClose}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
           style={{
             padding: '8px 16px',
             background: '#2563eb',
@@ -3484,11 +3514,8 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
       onClick={(e) => e.stopPropagation()}
       >
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            const newScale = Math.min(scale + 0.5, 5);
-            setScale(newScale);
-          }}
+          onClick={zoomIn}
+          onMouseDown={(e) => e.stopPropagation()}
           style={{
             width: '40px',
             height: '40px',
@@ -3500,7 +3527,8 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
             fontSize: '1.5rem',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            fontWeight: 'bold'
           }}
         >
           +
@@ -3509,19 +3537,14 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
           color: 'white',
           fontSize: '0.875rem',
           textAlign: 'center',
-          padding: '4px'
+          padding: '4px',
+          fontWeight: 'bold'
         }}>
           {Math.round(scale * 100)}%
         </div>
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            const newScale = Math.max(scale - 0.5, 1);
-            setScale(newScale);
-            if (newScale === 1) {
-              setPosition({ x: 0, y: 0 });
-            }
-          }}
+          onClick={zoomOut}
+          onMouseDown={(e) => e.stopPropagation()}
           style={{
             width: '40px',
             height: '40px',
@@ -3533,17 +3556,15 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
             fontSize: '1.5rem',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            fontWeight: 'bold'
           }}
         >
           −
         </button>
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setScale(1);
-            setPosition({ x: 0, y: 0 });
-          }}
+          onClick={resetZoom}
+          onMouseDown={(e) => e.stopPropagation()}
           style={{
             width: '40px',
             height: '40px',
@@ -3555,7 +3576,8 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
             fontSize: '0.75rem',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            fontWeight: 'bold'
           }}
           title="Reset zoom"
         >
@@ -3617,7 +3639,7 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
             objectFit: 'contain',
             borderRadius: '8px',
             transform: `translate(${position.x}px, ${position.y}px)`,
-            transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+            transition: isDragging ? 'none' : 'transform 0.2s ease-out',
             pointerEvents: 'none'
           }}
           draggable="false"
