@@ -64,6 +64,8 @@ export default function App() {
   const [activeSettingsSection, setActiveSettingsSection] = useState('general');
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
   const settingsDropdownRef = useRef(null);
+  const [viewingImage, setViewingImage] = useState(null);
+  const [imageModalTitle, setImageModalTitle] = useState('');
 
   const [activeTab, setActiveTab] = useState('home');
   const [inventory, setInventory] = useState([]);
@@ -1946,20 +1948,21 @@ dropdownItem: {
                           <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
                             📸 Upload Photo
                           </label>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={async (e) => {
-                              const file = e.target.files[0];
-                              if (file) {
-                                const photoUrl = await handlePhotoUpload(file, 'inventory');
-                                if (photoUrl) {
-                                  setInventoryForm({ ...inventoryForm, photoUrl });
-                                }
-                              }
-                            }}
-                            style={{ ...styles.input, padding: '8px' }}
-                          />
+                         <input
+  type="file"
+  accept="image/*"
+  onChange={async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const photoUrl = await handlePhotoUpload(file, 'inventory');
+      if (photoUrl) {
+        setInventoryForm({ ...inventoryForm, photoUrl });
+      }
+    }
+    e.target.value = '';
+  }}
+  style={{ ...styles.input, padding: '8px' }}
+/>
                           {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
                           {inventoryForm.photoUrl && (
                             <img src={inventoryForm.photoUrl} alt="Preview" style={{ maxWidth: '100px', marginTop: '8px', borderRadius: '8px' }} />
@@ -1976,7 +1979,7 @@ dropdownItem: {
                       </div>
                     ) : (
                       <>
-                        {item.photoUrl && (
+ {item.photoUrl && (
                           <img 
                             src={item.photoUrl} 
                             alt={item.name} 
@@ -1985,8 +1988,23 @@ dropdownItem: {
                               height: '100px', 
                               objectFit: 'cover', 
                               borderRadius: '8px',
-                              marginRight: '16px'
-                            }} 
+                              marginRight: '16px',
+                              cursor: 'pointer',
+                              transition: 'transform 0.2s ease',
+                              border: '2px solid transparent'
+                            }}
+                            onClick={() => {
+                              setViewingImage(item.photoUrl);
+                              setImageModalTitle(item.name);
+                            }}
+                            onMouseEnter={(e) => {
+                              e.target.style.transform = 'scale(1.05)';
+                              e.target.style.borderColor = '#10b981';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.target.style.transform = 'scale(1)';
+                              e.target.style.borderColor = 'transparent';
+                            }}
                           />
                         )}
                         <div style={{ flex: 1 }}>
@@ -2154,6 +2172,7 @@ dropdownItem: {
                                   setMachineryForm({ ...machineryForm, photoUrl });
                                 }
                               }
+                              e.target.value = '';
                             }}
                             style={{ ...styles.input, padding: '8px' }}
                           />
@@ -2173,7 +2192,7 @@ dropdownItem: {
                       </div>
                     ) : (
                       <>
-                        {item.photoUrl && (
+                      {item.photoUrl && (
                           <img 
                             src={item.photoUrl} 
                             alt={item.name} 
@@ -2182,8 +2201,23 @@ dropdownItem: {
                               height: '100px', 
                               objectFit: 'cover', 
                               borderRadius: '8px',
-                              marginRight: '16px'
-                            }} 
+                              marginRight: '16px',
+                              cursor: 'pointer',
+                              transition: 'transform 0.2s ease',
+                              border: '2px solid transparent'
+                            }}
+                            onClick={() => {
+                              setViewingImage(item.photoUrl);
+                              setImageModalTitle(item.name);
+                            }}
+                            onMouseEnter={(e) => {
+                              e.target.style.transform = 'scale(1.05)';
+                              e.target.style.borderColor = '#10b981';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.target.style.transform = 'scale(1)';
+                              e.target.style.borderColor = 'transparent';
+                            }}
                           />
                         )}
                         <div style={{ flex: 1 }}>
@@ -2371,19 +2405,21 @@ dropdownItem: {
                             📎 Upload Photo/File
                           </label>
                           <input
-                            type="file"
-                            accept="image/*"
-                            onChange={async (e) => {
-                              const file = e.target.files[0];
-                              if (file) {
-                                const photoUrl = await handlePhotoUpload(file, 'service');
-                                if (photoUrl) {
-                                  setServiceForm({ ...serviceForm, photoUrl });
-                                }
-                              }
-                            }}
-                            style={{ ...styles.input, padding: '8px' }}
-                          />
+        type="file"
+        accept="image/*"
+        onChange={async (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const photoUrl = await handlePhotoUpload(file, 'service');
+            if (photoUrl) {
+              setServiceForm({ ...serviceForm, photoUrl });
+            }
+          }
+          // Clear the input so the same file can be selected again
+          e.target.value = '';
+        }}
+        style={{ ...styles.input, padding: '8px' }}
+      />
                           {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
                           {serviceForm.photoUrl && (
                             <img src={serviceForm.photoUrl} alt="Preview" style={{ maxWidth: '200px', marginTop: '8px', borderRadius: '8px' }} />
@@ -2402,7 +2438,7 @@ dropdownItem: {
                       <>
                         <div style={{ flex: 1 }}>
                           <div style={{ display: 'flex', alignItems: 'start', gap: '16px' }}>
-                            {record.photoUrl && (
+                          {record.photoUrl && (
                               <img 
                                 src={record.photoUrl} 
                                 alt="Service record" 
@@ -2411,8 +2447,23 @@ dropdownItem: {
                                   height: '120px', 
                                   objectFit: 'cover', 
                                   borderRadius: '8px',
-                                  flexShrink: 0
-                                }} 
+                                  flexShrink: 0,
+                                  cursor: 'pointer',
+                                  transition: 'transform 0.2s ease',
+                                  border: '2px solid transparent'
+                                }}
+                                onClick={() => {
+                                  setViewingImage(record.photoUrl);
+                                  setImageModalTitle(`${record.machineName} - ${record.serviceType}`);
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.target.style.transform = 'scale(1.05)';
+                                  e.target.style.borderColor = '#10b981';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.target.style.transform = 'scale(1)';
+                                  e.target.style.borderColor = 'transparent';
+                                }}
                               />
                             )}
                             <div style={{ flex: 1 }}>
@@ -3055,6 +3106,7 @@ dropdownItem: {
                       setInventoryForm({ ...inventoryForm, photoUrl });
                     }
                   }
+                  e.target.value = ''; 
                 }}
                 style={{ ...styles.input, padding: '8px' }}
               />
@@ -3109,6 +3161,7 @@ dropdownItem: {
                       setMachineryForm({ ...machineryForm, photoUrl });
                     }
                   }
+                 e.target.value = ''; 
                 }}
                 style={{ ...styles.input, padding: '8px' }}
               />
@@ -3170,7 +3223,7 @@ dropdownItem: {
       value={serviceForm.notes}
       onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
     />
-    <div style={{ marginBottom: '16px' }}>
+   <div style={{ marginBottom: '16px' }}>
       <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
         📎 Upload Photo/File (Optional)
       </label>
@@ -3185,6 +3238,8 @@ dropdownItem: {
               setServiceForm({ ...serviceForm, photoUrl });
             }
           }
+          // Clear the input so the same file can be selected again
+          e.target.value = '';
         }}
         style={{ ...styles.input, padding: '8px' }}
       />
@@ -3224,7 +3279,66 @@ dropdownItem: {
             </button>
           </Modal>
         )}
-
+{/* Image Viewer Modal */}
+        {viewingImage && (
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.9)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '24px',
+              zIndex: 100,
+            }}
+            onClick={() => setViewingImage(null)}
+          >
+            <div style={{
+              background: currentTheme.cardBackground,
+              padding: '16px',
+              borderRadius: '12px',
+              marginBottom: '16px',
+              maxWidth: '90%'
+            }}>
+              <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{imageModalTitle}</h3>
+            </div>
+            <img 
+              src={viewingImage} 
+              alt="Full size view"
+              style={{
+                maxWidth: '90vw',
+                maxHeight: '80vh',
+                objectFit: 'contain',
+                borderRadius: '8px',
+                cursor: 'zoom-out'
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setViewingImage(null);
+              }}
+            />
+            <button
+              onClick={() => setViewingImage(null)}
+              style={{
+                marginTop: '16px',
+                padding: '12px 24px',
+                background: '#2563eb',
+                border: 'none',
+                borderRadius: '8px',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '1rem'
+              }}
+            >
+              Close
+            </button>
+          </div>
+        )}
         <style>{`
           @keyframes spin {
             to { transform: rotate(360deg); }
