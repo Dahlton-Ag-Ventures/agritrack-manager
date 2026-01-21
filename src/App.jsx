@@ -3294,71 +3294,308 @@ dropdownItem: {
             </button>
           </Modal>
         )}
-{/* Image Viewer Modal */}
-        {viewingImage && (
-          <div 
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'rgba(0, 0, 0, 0.9)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '24px',
-              zIndex: 100,
-            }}
-            onClick={() => setViewingImage(null)}
-          >
-            <div style={{
-              background: currentTheme.cardBackground,
-              padding: '16px',
-              borderRadius: '12px',
-              marginBottom: '16px',
-              maxWidth: '90%'
-            }}>
-              <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{imageModalTitle}</h3>
-            </div>
-            <img 
-              src={viewingImage} 
-              alt="Full size view"
-              style={{
-                maxWidth: '90vw',
-                maxHeight: '80vh',
-                objectFit: 'contain',
-                borderRadius: '8px',
-                cursor: 'zoom-out'
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                setViewingImage(null);
-              }}
-            />
-            <button
-              onClick={() => setViewingImage(null)}
-              style={{
-                marginTop: '16px',
-                padding: '12px 24px',
-                background: '#2563eb',
-                border: 'none',
-                borderRadius: '8px',
-                color: 'white',
-                cursor: 'pointer',
-                fontSize: '1rem'
-              }}
-            >
-              Close
-            </button>
-          </div>
-        )}
+{/* Zoomable Image Viewer Modal */}
+        {viewingImage && <ZoomableImageViewer 
+          imageUrl={viewingImage} 
+          title={imageModalTitle} 
+          onClose={() => setViewingImage(null)}
+          theme={currentTheme}
+        />}
         <style>{`
           @keyframes spin {
             to { transform: rotate(360deg); }
           }
         `}</style>
+      </div>
+    </div>
+  );
+}
+// Zoomable Image Viewer Component
+function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
+  const [scale, setScale] = React.useState(1);
+  const [position, setPosition] = React.useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
+  const [lastTouchDistance, setLastTouchDistance] = React.useState(null);
+  const imageRef = React.useRef(null);
+
+  const handleWheel = (e) => {
+    e.preventDefault();
+    const delta = e.deltaY * -0.001;
+    const newScale = Math.min(Math.max(1, scale + delta), 5);
+    setScale(newScale);
+    if (newScale === 1) {
+      setPosition({ x: 0, y: 0 });
+    }
+  };
+
+  const handleMouseDown = (e) => {
+    if (scale > 1) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    if (isDragging && scale > 1) {
+      setPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const getTouchDistance = (touches) => {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      setLastTouchDistance(getTouchDistance(e.touches));
+    } else if (e.touches.length === 1 && scale > 1) {
+      setIsDragging(true);
+      setDragStart({ 
+        x: e.touches[0].clientX - position.x, 
+        y: e.touches[0].clientY - position.y 
+      });
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 2 && lastTouchDistance) {
+      e.preventDefault();
+      const newDistance = getTouchDistance(e.touches);
+      const delta = (newDistance - lastTouchDistance) * 0.01;
+      const newScale = Math.min(Math.max(1, scale + delta), 5);
+      setScale(newScale);
+      setLastTouchDistance(newDistance);
+      if (newScale === 1) {
+        setPosition({ x: 0, y: 0 });
+      }
+    } else if (e.touches.length === 1 && isDragging && scale > 1) {
+      setPosition({
+        x: e.touches[0].clientX - dragStart.x,
+        y: e.touches[0].clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setLastTouchDistance(null);
+    setIsDragging(false);
+  };
+
+  const handleDoubleClick = () => {
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  };
+
+  const handleBackgroundClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  return (
+    <div 
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0, 0, 0, 0.95)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+        zIndex: 100,
+        overflow: 'hidden'
+      }}
+      onClick={handleBackgroundClick}
+    >
+      {/* Title Bar */}
+      <div style={{
+        background: theme.cardBackground,
+        padding: '16px',
+        borderRadius: '12px',
+        marginBottom: '16px',
+        maxWidth: '90%',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: '16px'
+      }}>
+        <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{title}</h3>
+        <button
+          onClick={onClose}
+          style={{
+            padding: '8px 16px',
+            background: '#2563eb',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: 'pointer',
+            fontSize: '0.875rem',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          Close ✕
+        </button>
+      </div>
+
+      {/* Zoom Controls */}
+      <div style={{
+        position: 'absolute',
+        top: '100px',
+        right: '24px',
+        background: theme.cardBackground,
+        padding: '8px',
+        borderRadius: '12px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        zIndex: 101
+      }}>
+        <button
+          onClick={() => {
+            const newScale = Math.min(scale + 0.5, 5);
+            setScale(newScale);
+          }}
+          style={{
+            width: '40px',
+            height: '40px',
+            background: '#10b981',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: 'pointer',
+            fontSize: '1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          +
+        </button>
+        <div style={{
+          color: 'white',
+          fontSize: '0.875rem',
+          textAlign: 'center',
+          padding: '4px'
+        }}>
+          {Math.round(scale * 100)}%
+        </div>
+        <button
+          onClick={() => {
+            const newScale = Math.max(scale - 0.5, 1);
+            setScale(newScale);
+            if (newScale === 1) {
+              setPosition({ x: 0, y: 0 });
+            }
+          }}
+          style={{
+            width: '40px',
+            height: '40px',
+            background: '#10b981',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: 'pointer',
+            fontSize: '1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          −
+        </button>
+        <button
+          onClick={handleDoubleClick}
+          style={{
+            width: '40px',
+            height: '40px',
+            background: '#2563eb',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: 'pointer',
+            fontSize: '0.75rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+          title="Reset zoom"
+        >
+          ⟲
+        </button>
+      </div>
+
+      {/* Help Text */}
+      <div style={{
+        position: 'absolute',
+        bottom: '24px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: 'rgba(0, 0, 0, 0.7)',
+        padding: '12px 24px',
+        borderRadius: '8px',
+        color: 'white',
+        fontSize: '0.875rem',
+        textAlign: 'center',
+        pointerEvents: 'none'
+      }}>
+        🖱️ Scroll to zoom • 👆 Pinch to zoom • ✋ Drag to pan • 2️⃣ Double-click to reset
+      </div>
+
+      {/* Zoomable Image */}
+      <div
+        ref={imageRef}
+        style={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+          cursor: scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-in',
+          touchAction: 'none',
+          userSelect: 'none',
+          WebkitUserSelect: 'none'
+        }}
+        onWheel={handleWheel}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onDoubleClick={handleDoubleClick}
+      >
+        <img 
+          src={imageUrl} 
+          alt="Zoomable view"
+          style={{
+            maxWidth: scale === 1 ? '90vw' : 'none',
+            maxHeight: scale === 1 ? '70vh' : 'none',
+            width: scale > 1 ? `${scale * 100}%` : 'auto',
+            height: 'auto',
+            objectFit: 'contain',
+            borderRadius: '8px',
+            transform: `translate(${position.x}px, ${position.y}px)`,
+            transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+            pointerEvents: 'none'
+          }}
+          draggable="false"
+        />
       </div>
     </div>
   );
