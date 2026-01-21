@@ -3326,23 +3326,19 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
     e.preventDefault();
     e.stopPropagation();
     
-    // Cancel any pending animation frame
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
     
-    // Request animation frame for smooth rendering
     animationFrameRef.current = requestAnimationFrame(() => {
       setScale(prevScale => {
-        // Smoother calculation - smaller steps for finer control
         const delta = -e.deltaY;
-        const sensitivity = 0.002; // Adjust this for zoom speed (lower = slower/smoother)
+        const sensitivity = 0.002;
         const zoomFactor = 1 + (delta * sensitivity);
         
         const newScale = prevScale * zoomFactor;
         const clampedScale = Math.min(Math.max(1, newScale), 5);
         
-        // Reset position when fully zoomed out
         if (clampedScale === 1) {
           setPosition({ x: 0, y: 0 });
         }
@@ -3352,7 +3348,6 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
     });
   };
 
-  // Mouse drag handlers
   const handleMouseDown = (e) => {
     if (scale > 1 && (e.target.tagName === 'IMG' || e.target === imageContainerRef.current)) {
       e.preventDefault();
@@ -3385,7 +3380,6 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
     setIsDragging(false);
   };
 
-  // Touch handlers for mobile
   const getTouchDistance = (touches) => {
     const dx = touches[0].clientX - touches[1].clientX;
     const dy = touches[0].clientY - touches[1].clientY;
@@ -3455,7 +3449,6 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
     }
   };
 
-  // Button handlers
   const zoomIn = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -3481,7 +3474,6 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
     setPosition({ x: 0, y: 0 });
   };
 
-  // Global mouse tracking
   React.useEffect(() => {
     const handleGlobalMouseUp = () => {
       setIsDragging(false);
@@ -3498,7 +3490,6 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
     };
   }, [isDragging, dragStart, position]);
 
-  // Cleanup animation frame on unmount
   React.useEffect(() => {
     return () => {
       if (animationFrameRef.current) {
@@ -3668,95 +3659,6 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
             fontSize: '1.25rem',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 'bold',
-            transition: 'background 0.2s'
-          }}
-          title="Reset zoom"
-          onMouseEnter={(e) => {
-            if (scale !== 1) e.target.style.background = '#1d4ed8';
-          }}
-          onMouseLeave={(e) => {
-            if (scale !== 1) e.target.style.background = '#2563eb';
-          }}
-        >
-          ⟲
-        </button>
-      </div>
-
-      {/* Help Text */}
-      <div style={{
-        position: 'absolute',
-        bottom: '24px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        background: 'rgba(0, 0, 0, 0.8)',
-        padding: '12px 24px',
-        borderRadius: '8px',
-        color: 'white',
-        fontSize: '0.875rem',
-        textAlign: 'center',
-        pointerEvents: 'none',
-        zIndex: 101,
-        maxWidth: '90%'
-      }}>
-        🖱️ Scroll to zoom • ✋ Click & drag to pan • 2️⃣ Double-click to {scale === 1 ? 'zoom in' : 'reset'}
-      </div>
-
-      {/* Zoomable Image Container */}
-      <div
-        ref={imageContainerRef}
-        style={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden',
-          cursor: scale > 1 
-            ? (isDragging ? 'grabbing' : 'grab') 
-            : 'zoom-in',
-          touchAction: 'none',
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          MozUserSelect: 'none',
-          msUserSelect: 'none',
-          pointerEvents: 'auto',
-          width: '100%',
-          position: 'relative'
-        }}
-        onWheel={handleWheel}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onDoubleClick={handleDoubleClick}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <img 
-          src={imageUrl} 
-          alt="Zoomable view"
-          style={{
-            maxWidth: scale === 1 ? '90vw' : 'none',
-            maxHeight: scale === 1 ? '70vh' : 'none',
-            width: scale > 1 ? `${scale * 100}%` : 'auto',
-            height: 'auto',
-            objectFit: 'contain',
-            borderRadius: '8px',
-            transform: `translate(${position.x}px, ${position.y}px)`,
-            willChange: 'transform',
-            pointerEvents: 'none',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-            WebkitUserDrag: 'none'
-          }}
-          draggable="false"
-        />
-      </div>
-    </div>
-  );
-}
 // Modal component - defined outside to avoid recreation on each render
 function Modal({ children, onClose, title }) {
   // Inline styles for modal since it's outside the main component
