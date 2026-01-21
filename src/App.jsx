@@ -1979,7 +1979,7 @@ dropdownItem: {
                       </div>
                     ) : (
                       <>
- {item.photoUrl && (
+{item.photoUrl && (
                           <img 
                             src={item.photoUrl} 
                             alt={item.name} 
@@ -1991,19 +1991,24 @@ dropdownItem: {
                               marginRight: '16px',
                               cursor: 'pointer',
                               transition: 'transform 0.2s ease',
-                              border: '2px solid transparent'
+                              border: '2px solid transparent',
+                              userSelect: 'none',
+                              WebkitUserSelect: 'none',
+                              pointerEvents: 'auto'
                             }}
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
                               setViewingImage(item.photoUrl);
                               setImageModalTitle(item.name);
                             }}
                             onMouseEnter={(e) => {
-                              e.target.style.transform = 'scale(1.05)';
-                              e.target.style.borderColor = '#10b981';
+                              e.currentTarget.style.transform = 'scale(1.05)';
+                              e.currentTarget.style.borderColor = '#10b981';
                             }}
                             onMouseLeave={(e) => {
-                              e.target.style.transform = 'scale(1)';
-                              e.target.style.borderColor = 'transparent';
+                              e.currentTarget.style.transform = 'scale(1)';
+                              e.currentTarget.style.borderColor = 'transparent';
                             }}
                           />
                         )}
@@ -2192,7 +2197,7 @@ dropdownItem: {
                       </div>
                     ) : (
                       <>
-                      {item.photoUrl && (
+                    {item.photoUrl && (
                           <img 
                             src={item.photoUrl} 
                             alt={item.name} 
@@ -2204,19 +2209,24 @@ dropdownItem: {
                               marginRight: '16px',
                               cursor: 'pointer',
                               transition: 'transform 0.2s ease',
-                              border: '2px solid transparent'
+                              border: '2px solid transparent',
+                              userSelect: 'none',
+                              WebkitUserSelect: 'none',
+                              pointerEvents: 'auto'
                             }}
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
                               setViewingImage(item.photoUrl);
                               setImageModalTitle(item.name);
                             }}
                             onMouseEnter={(e) => {
-                              e.target.style.transform = 'scale(1.05)';
-                              e.target.style.borderColor = '#10b981';
+                              e.currentTarget.style.transform = 'scale(1.05)';
+                              e.currentTarget.style.borderColor = '#10b981';
                             }}
                             onMouseLeave={(e) => {
-                              e.target.style.transform = 'scale(1)';
-                              e.target.style.borderColor = 'transparent';
+                              e.currentTarget.style.transform = 'scale(1)';
+                              e.currentTarget.style.borderColor = 'transparent';
                             }}
                           />
                         )}
@@ -2438,34 +2448,39 @@ dropdownItem: {
                       <>
                         <div style={{ flex: 1 }}>
                           <div style={{ display: 'flex', alignItems: 'start', gap: '16px' }}>
-                          {record.photoUrl && (
-                              <img 
-                                src={record.photoUrl} 
-                                alt="Service record" 
-                                style={{ 
-                                  width: '120px', 
-                                  height: '120px', 
-                                  objectFit: 'cover', 
-                                  borderRadius: '8px',
-                                  flexShrink: 0,
-                                  cursor: 'pointer',
-                                  transition: 'transform 0.2s ease',
-                                  border: '2px solid transparent'
-                                }}
-                                onClick={() => {
-                                  setViewingImage(record.photoUrl);
-                                  setImageModalTitle(`${record.machineName} - ${record.serviceType}`);
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.target.style.transform = 'scale(1.05)';
-                                  e.target.style.borderColor = '#10b981';
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.target.style.transform = 'scale(1)';
-                                  e.target.style.borderColor = 'transparent';
-                                }}
-                              />
-                            )}
+ {record.photoUrl && (
+  <img 
+    src={record.photoUrl} 
+    alt="Service record" 
+    style={{ 
+      width: '120px', 
+      height: '120px', 
+      objectFit: 'cover', 
+      borderRadius: '8px',
+      flexShrink: 0,
+      cursor: 'pointer',
+      transition: 'transform 0.2s ease',
+      border: '2px solid transparent',
+      userSelect: 'none',
+      WebkitUserSelect: 'none',
+      pointerEvents: 'auto'
+    }}
+    onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setViewingImage(record.photoUrl);
+      setImageModalTitle(`${record.machineName} - ${record.serviceType}`);
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.transform = 'scale(1.05)';
+      e.currentTarget.style.borderColor = '#10b981';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.transform = 'scale(1)';
+      e.currentTarget.style.borderColor = 'transparent';
+    }}
+  />
+)}
                             <div style={{ flex: 1 }}>
                               <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
                               <p style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '12px' }}>{record.serviceType}</p>
