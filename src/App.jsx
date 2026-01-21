@@ -105,6 +105,7 @@ export default function App() {
   const [machinerySort, setMachinerySort] = useState('name-asc');
   const [serviceSearch, setServiceSearch] = useState('');
   const [serviceSort, setServiceSort] = useState('date-desc');
+  const [serviceFilter, setServiceFilter] = useState('');
 
   // Get current theme object
   const currentTheme = themes[theme];
@@ -403,16 +404,22 @@ export default function App() {
     });
   };
 
-  const getFilteredAndSortedService = () => {
-    let filtered = serviceHistory.filter(record => {
-      const searchLower = serviceSearch.toLowerCase();
-      return (
-        record.machineName?.toLowerCase().includes(searchLower) ||
-        record.serviceType?.toLowerCase().includes(searchLower) ||
-        record.technician?.toLowerCase().includes(searchLower) ||
-        record.notes?.toLowerCase().includes(searchLower)
-      );
-    });
+const getFilteredAndSortedService = () => {
+  let filtered = serviceHistory.filter(record => {
+    // First apply machine filter if set
+    if (serviceFilter && record.machineName !== serviceFilter) {
+      return false;
+    }
+    
+    // Then apply search filter
+    const searchLower = serviceSearch.toLowerCase();
+    return (
+      record.machineName?.toLowerCase().includes(searchLower) ||
+      record.serviceType?.toLowerCase().includes(searchLower) ||
+      record.technician?.toLowerCase().includes(searchLower) ||
+      record.notes?.toLowerCase().includes(searchLower)
+    );
+  });
 
     return filtered.sort((a, b) => {
       switch (serviceSort) {
@@ -598,8 +605,15 @@ export default function App() {
     setEditingMachineryId(null);
     setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '' });
   };
-
-  // Service Record Functions
+  
+const viewMachineServiceHistory = (machineName) => {
+  setServiceFilter(machineName);
+  setServiceSearch('');
+  setActiveTab('service');
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+  
  const addServiceRecord = async () => {
   const newRecord = { 
     ...serviceForm, 
@@ -2021,18 +2035,36 @@ dropdownItem: {
                             </div>
                           </div>
                         </div>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          {userRole !== 'employee' && (
-                            <button onClick={() => startEditMachinery(item)} style={styles.editButton}>
-                              <Edit2 size={16} />
-                            </button>
-                          )}
-                          {userRole !== 'employee' && (
-                            <button onClick={() => deleteMachineryItem(item.id)} style={styles.deleteButton}>
-                              <Trash2 size={16} />
-                            </button>
-                          )}
-                        </div>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+  <button 
+    onClick={() => viewMachineServiceHistory(item.name)} 
+    style={{
+      ...styles.editButton,
+      background: '#8b5cf6',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px',
+      padding: '8px 12px',
+      whiteSpace: 'nowrap'
+    }}
+    title="View service history for this machine"
+  >
+    <AlertCircle size={16} />
+    <span style={{ fontSize: '0.875rem' }}>
+      {serviceHistory.filter(r => r.machineName === item.name).length} Services
+    </span>
+  </button>
+  {userRole !== 'employee' && (
+    <button onClick={() => startEditMachinery(item)} style={styles.editButton}>
+      <Edit2 size={16} />
+    </button>
+  )}
+  {userRole !== 'employee' && (
+    <button onClick={() => deleteMachineryItem(item.id)} style={styles.deleteButton}>
+      <Trash2 size={16} />
+    </button>
+  )}
+</div>
                       </>
                     )}
                   </div>
@@ -2044,14 +2076,48 @@ dropdownItem: {
 {activeTab === 'service' && (
           <div>
             <div style={styles.tabHeader}>
-              <h2 style={{ fontSize: '1.5rem' }}>Service Records</h2>
-              {userRole !== 'employee' && (
-                <button onClick={() => setShowServiceModal(true)} style={styles.addButton}>
-                  <Plus size={20} /> Add Service Record
-                </button>
-              )}
-            </div>
-
+  <div>
+    <h2 style={{ fontSize: '1.5rem' }}>Service Records</h2>
+    {serviceFilter && (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        marginTop: '8px',
+        padding: '8px 12px',
+        background: 'rgba(139, 92, 246, 0.2)',
+        border: '1px solid #8b5cf6',
+        borderRadius: '8px',
+        fontSize: '0.875rem',
+        color: '#a78bfa'
+      }}>
+        <AlertCircle size={16} />
+        Showing records for: <strong>{serviceFilter}</strong>
+        <button
+          onClick={() => setServiceFilter('')}
+          style={{
+            marginLeft: '8px',
+            padding: '4px 8px',
+            background: '#8b5cf6',
+            border: 'none',
+            borderRadius: '6px',
+            color: 'white',
+            cursor: 'pointer',
+            fontSize: '0.75rem',
+            fontWeight: 'bold'
+          }}
+        >
+          Clear Filter
+        </button>
+      </div>
+    )}
+  </div>
+  {userRole !== 'employee' && (
+    <button onClick={() => setShowServiceModal(true)} style={styles.addButton}>
+      <Plus size={20} /> Add Service Record
+    </button>
+  )}
+</div>
             <div style={styles.searchSortContainer}>
               <input
                 type="text"
