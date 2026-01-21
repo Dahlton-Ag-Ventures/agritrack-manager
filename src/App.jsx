@@ -1464,7 +1464,7 @@ dropdownItem: {
                 <strong>• Search & Filter:</strong> Use the search bar to quickly find specific items by name, part number, or location
               </p>
               <p style={{ marginBottom: '12px' }}>
-                <strong>• Update Quantities:</strong> Click the + and - buttons to adjust stock levels in real-time
+                <strong>• View Quantities:</strong> See current stock levels for all items
               </p>
               <p style={{ marginBottom: '12px' }}>
                 <strong>• Stock Alerts:</strong> Low stock items are marked with a red warning badge, overstocked items show yellow
@@ -1826,24 +1826,28 @@ dropdownItem: {
                               <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Part Number</p>
                               <p>{item.partNumber || 'N/A'}</p>
                             </div>
-                            <div>
-                              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Quantity</p>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <button 
-                                  onClick={() => quickUpdateQuantity(item.id, -1)}
-                                  style={styles.quantityButton}
-                                >
-                                  −
-                                </button>
-                                <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
-                                <button 
-                                  onClick={() => quickUpdateQuantity(item.id, 1)}
-                                  style={styles.quantityButton}
-                                >
-                                  +
-                                </button>
-                              </div>
-                            </div>
+<div>
+  <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Quantity</p>
+  {userRole === 'employee' ? (
+    <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
+  ) : (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <button 
+        onClick={() => quickUpdateQuantity(item.id, -1)}
+        style={styles.quantityButton}
+      >
+        −
+      </button>
+      <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
+      <button 
+        onClick={() => quickUpdateQuantity(item.id, 1)}
+        style={styles.quantityButton}
+      >
+        +
+      </button>
+    </div>
+  )}
+</div>
                             <div>
                               <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Location</p>
                               <p>{item.location || 'N/A'}</p>
