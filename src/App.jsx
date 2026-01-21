@@ -1330,19 +1330,52 @@ dropdownItem: {
             <p style={styles.stats}>
               {inventory.length} Inventory • {machinery.length} Machines • {serviceHistory.length} Service Records
               {userRole && (
-                <span style={{ 
-                  marginLeft: '12px', 
-                  padding: '4px 12px', 
-                  background: userRole === 'employee' ? 'rgba(107, 114, 128, 0.2)' : 'rgba(16, 185, 129, 0.2)',
-                  border: `1px solid ${userRole === 'employee' ? '#6b7280' : '#10b981'}`,
-                  borderRadius: '12px',
-                  fontSize: '0.75rem',
-                  fontWeight: 'bold',
-                  textTransform: 'uppercase'
-                }}>
-                  {userRole}
-                </span>
-              )}
+  userRole === 'employee' ? (
+    <span style={{ 
+      marginLeft: '12px', 
+      padding: '4px 12px', 
+      background: 'rgba(107, 114, 128, 0.2)',
+      border: '1px solid #6b7280',
+      borderRadius: '12px',
+      fontSize: '0.75rem',
+      fontWeight: 'bold',
+      textTransform: 'uppercase'
+    }}>
+      {userRole}
+    </span>
+  ) : (
+    <button
+      onClick={() => setActiveTab('admin')}
+      style={{ 
+        marginLeft: '12px', 
+        padding: '4px 12px', 
+        background: activeTab === 'admin' ? 'linear-gradient(to right, #10b981, #06b6d4)' : 'rgba(16, 185, 129, 0.2)',
+        border: `1px solid ${activeTab === 'admin' ? '#06b6d4' : '#10b981'}`,
+        borderRadius: '12px',
+        fontSize: '0.75rem',
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+        color: 'white',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease'
+      }}
+      onMouseEnter={(e) => {
+        if (activeTab !== 'admin') {
+          e.target.style.background = 'rgba(16, 185, 129, 0.3)';
+          e.target.style.transform = 'scale(1.05)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (activeTab !== 'admin') {
+          e.target.style.background = 'rgba(16, 185, 129, 0.2)';
+          e.target.style.transform = 'scale(1)';
+        }
+      }}
+    >
+      {userRole}
+    </button>
+  )
+)}
             </p>
           </div>
           <div style={styles.statusContainer}>
@@ -1375,7 +1408,7 @@ dropdownItem: {
         )}
 
         <div style={styles.tabs}>
-          {['home', 'inventory', 'machinery', 'service', ...(userRole !== 'employee' ? ['admin'] : [])].map(tab => (
+          {['home', 'inventory', 'machinery', 'service'].map(tab => (
   <button
               key={tab}
               onClick={() => setActiveTab(tab)}
