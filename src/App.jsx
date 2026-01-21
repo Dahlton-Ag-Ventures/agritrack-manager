@@ -3321,7 +3321,6 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
   const overlayRef = React.useRef(null);
   const animationFrameRef = React.useRef(null);
 
-  // SUPER SMOOTH wheel zoom handler with animation frame
   const handleWheel = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -3659,6 +3658,145 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
             fontSize: '1.25rem',
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 'bold',
+            transition: 'background 0.2s'
+          }}
+          title="Reset zoom"
+          onMouseEnter={(e) => {
+            if (scale !== 1) e.target.style.background = '#1d4ed8';
+          }}
+          onMouseLeave={(e) => {
+            if (scale !== 1) e.target.style.background = '#2563eb';
+          }}
+        >
+          ⟲
+        </button>
+      </div>
+
+      {/* Help Text */}
+      <div style={{
+        position: 'absolute',
+        bottom: '24px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: 'rgba(0, 0, 0, 0.8)',
+        padding: '12px 24px',
+        borderRadius: '8px',
+        color: 'white',
+        fontSize: '0.875rem',
+        textAlign: 'center',
+        pointerEvents: 'none',
+        zIndex: 101,
+        maxWidth: '90%'
+      }}>
+        🖱️ Scroll to zoom • ✋ Click & drag to pan • 2️⃣ Double-click to {scale === 1 ? 'zoom in' : 'reset'}
+      </div>
+
+      {/* Zoomable Image Container */}
+      <div
+        ref={imageContainerRef}
+        style={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+          cursor: scale > 1 
+            ? (isDragging ? 'grabbing' : 'grab') 
+            : 'zoom-in',
+          touchAction: 'none',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          MozUserSelect: 'none',
+          msUserSelect: 'none',
+          pointerEvents: 'auto',
+          width: '100%',
+          position: 'relative'
+        }}
+        onWheel={handleWheel}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onDoubleClick={handleDoubleClick}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <img 
+          src={imageUrl} 
+          alt="Zoomable view"
+          style={{
+            maxWidth: '90vw',
+            maxHeight: '70vh',
+            objectFit: 'contain',
+            borderRadius: '8px',
+            transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+            transformOrigin: 'center center',
+            transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+            willChange: 'transform',
+            pointerEvents: 'none',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            WebkitUserDrag: 'none'
+          }}
+          draggable="false"
+        />
+      </div>
+    </div>
+  );
+}
+
+// Modal component - defined outside to avoid recreation on each render
+function Modal({ children, onClose, title }) {
+  const modalStyles = {
+    modalOverlay: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0, 0, 0, 0.75)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '16px',
+      zIndex: 50,
+    },
+    modal: {
+      background: '#1e3a5f',
+      border: '1px solid #2563eb',
+      borderRadius: '12px',
+      padding: '24px',
+      maxWidth: '500px',
+      width: '100%',
+      maxHeight: '90vh',
+      overflowY: 'auto',
+      color: 'white',
+    },
+    closeButton: {
+      background: '#2563eb',
+      border: 'none',
+      borderRadius: '8px',
+      padding: '8px 16px',
+      color: 'white',
+      cursor: 'pointer',
+    },
+  };
+
+  return (
+    <div style={modalStyles.modalOverlay}>
+      <div style={modalStyles.modal}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
+          <h3 style={{ fontSize: '1.5rem' }}>{title}</h3>
+          <button onClick={onClose} style={modalStyles.closeButton}>✕</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
 // Modal component - defined outside to avoid recreation on each render
 function Modal({ children, onClose, title }) {
   // Inline styles for modal since it's outside the main component
