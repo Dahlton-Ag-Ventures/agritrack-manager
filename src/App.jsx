@@ -1445,7 +1445,7 @@ dropdownItem: {
       </p>
     </div>
 
-    {/* How to Use Guide */}
+{/* How to Use Guide */}
     <div style={{ 
       background: 'rgba(6, 182, 212, 0.2)', 
       border: '1px solid rgba(6, 182, 212, 0.5)',
@@ -1489,7 +1489,7 @@ dropdownItem: {
                 <strong>• Search & Filter:</strong> Use the search bar to quickly find specific items by name, part number, or location
               </p>
               <p style={{ marginBottom: '12px' }}>
-                <strong>• View Quantities:</strong> See current stock levels for all items
+                <strong>• View Quantities:</strong> See current stock levels for all items (read-only)
               </p>
               <p style={{ marginBottom: '12px' }}>
                 <strong>• Stock Alerts:</strong> Low stock items are marked with a red warning badge, overstocked items show yellow
@@ -1543,6 +1543,9 @@ dropdownItem: {
                 <strong>• Search Records:</strong> Find specific machines by name, VIN/serial number, or category
               </p>
               <p style={{ marginBottom: '12px' }}>
+                <strong>• View Service History:</strong> Click the purple "Services" button on any machine to see its complete maintenance history
+              </p>
+              <p style={{ marginBottom: '12px' }}>
                 <strong>• Check Details:</strong> View VIN numbers, categories, and photos for each piece of equipment
               </p>
             </>
@@ -1553,6 +1556,9 @@ dropdownItem: {
               </p>
               <p style={{ marginBottom: '12px' }}>
                 <strong>• Categorize:</strong> Organize equipment by type (tractors, combines, sprayers, etc.)
+              </p>
+              <p style={{ marginBottom: '12px' }}>
+                <strong>• View Service History:</strong> Click the purple "Services" button to jump to that machine's maintenance records
               </p>
               <p style={{ marginBottom: '12px' }}>
                 <strong>• Edit Records:</strong> Update machine information, categories, or add photos anytime
@@ -1588,25 +1594,31 @@ dropdownItem: {
                 <strong>• View Records:</strong> See complete service history for all equipment
               </p>
               <p style={{ marginBottom: '12px' }}>
+                <strong>• Machine Filter:</strong> When viewing from Machinery tab, records are automatically filtered to that specific machine
+              </p>
+              <p style={{ marginBottom: '12px' }}>
                 <strong>• Search History:</strong> Find services by machine name, type, technician, or notes
               </p>
               <p style={{ marginBottom: '12px' }}>
-                <strong>• Sort Records:</strong> Organize by date or cost to track maintenance patterns
+                <strong>• Sort Records:</strong> Organize by date to track maintenance patterns
               </p>
               <p style={{ marginBottom: '12px' }}>
-                <strong>• Review Details:</strong> Check service dates, costs, technicians, and detailed notes
+                <strong>• Review Details:</strong> Check service dates, technicians, detailed notes, and attached photos
               </p>
             </>
           ) : (
             <>
               <p style={{ marginBottom: '12px' }}>
-                <strong>• Log Services:</strong> Click "Add Service Record" to document maintenance, repairs, and inspections
+                <strong>• Log Services:</strong> Click "Add Service Record" and select a machine from the dropdown menu
               </p>
               <p style={{ marginBottom: '12px' }}>
-                <strong>• Track Costs:</strong> Record service expenses to monitor maintenance budgets
+                <strong>• Select Machine:</strong> Choose from your machinery list to ensure accurate tracking
               </p>
               <p style={{ marginBottom: '12px' }}>
-                <strong>• Add Details:</strong> Include technician names, service types, and detailed notes
+                <strong>• Add Details:</strong> Include service type, date, technician names, and detailed notes
+              </p>
+              <p style={{ marginBottom: '12px' }}>
+                <strong>• Attach Photos:</strong> Upload service photos or receipts for complete documentation
               </p>
               <p style={{ marginBottom: '12px' }}>
                 <strong>• Edit History:</strong> Update service records if details change or need correction
