@@ -708,7 +708,7 @@ const cancelServiceEdit = () => {
       alert('Error updating quantity: ' + error.message);
     }
   };
-
+ const currentTheme = themes[theme];
   // Styles object - NOW USES currentTheme WHICH IS DEFINED
   const styles = {
     loginContainer: {
