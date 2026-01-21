@@ -555,21 +555,52 @@ const getFilteredAndSortedService = () => {
     }
   };
 
-  const deleteMachineryItem = async (id) => {
-    if (!confirm('Are you sure you want to delete this machine?')) return;
+const deleteMachineryItem = async (id) => {
+  // Find the machine we're about to delete
+  const machineToDelete = machinery.find(item => item.id === id);
+  
+  if (!machineToDelete) {
+    alert('Machine not found');
+    return;
+  }
 
-    const newMachinery = machinery.filter(item => item.id !== id);
+  // Count how many service records will be deleted
+  const relatedServiceRecords = serviceHistory.filter(
+    record => record.machineName === machineToDelete.name
+  );
+  const serviceCount = relatedServiceRecords.length;
 
-    try {
-      await supabase
-        .from('agritrack_data')
-        .update({ machinery: newMachinery })
-        .eq('id', 1);
-    } catch (error) {
-      console.error('Delete error:', error);
-      alert('Error: ' + error.message);
-    }
-  };
+  // Show detailed confirmation
+  const confirmMessage = serviceCount > 0
+    ? `Are you sure you want to delete "${machineToDelete.name}"?\n\nThis will also delete ${serviceCount} service record${serviceCount === 1 ? '' : 's'} associated with this machine.`
+    : `Are you sure you want to delete "${machineToDelete.name}"?`;
+
+  if (!confirm(confirmMessage)) return;
+
+  // Remove the machine
+  const newMachinery = machinery.filter(item => item.id !== id);
+
+  // Remove all service records for this machine
+  const newServiceHistory = serviceHistory.filter(
+    record => record.machineName !== machineToDelete.name
+  );
+
+  try {
+    // Update both machinery AND service_history in the database
+    await supabase
+      .from('agritrack_data')
+      .update({ 
+        machinery: newMachinery,
+        service_history: newServiceHistory 
+      })
+      .eq('id', 1);
+
+    console.log(`✅ Deleted machine "${machineToDelete.name}" and ${serviceCount} service record(s)`);
+  } catch (error) {
+    console.error('Delete error:', error);
+    alert('Error: ' + error.message);
+  }
+};
 
   const startEditMachinery = (item) => {
     setEditingMachineryId(item.id);
