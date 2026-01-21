@@ -378,11 +378,20 @@ export default function App() {
         base64Result = canvas.toDataURL('image/jpeg', quality);
       }
 
-      // Final check
+      // Final check - if STILL too large, try even more aggressive compression
       if (base64Result.length > 4 * 1024 * 1024) {
-        alert('Image is too complex to compress sufficiently. Please use a smaller or simpler image.');
-        setUploadingPhoto(false);
-        return null;
+        // Try reducing dimensions even more
+        canvas.width = width * 0.7;
+        canvas.height = height * 0.7;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        base64Result = canvas.toDataURL('image/jpeg', 0.5);
+        
+        if (base64Result.length > 4 * 1024 * 1024) {
+          alert('Image is extremely large and could not be compressed enough. Please try a different image.');
+          setUploadingPhoto(false);
+          URL.revokeObjectURL(objectUrl);
+          return null;
+        }
       }
 
       // Clean up
@@ -390,7 +399,7 @@ export default function App() {
       setUploadingPhoto(false);
 
       const finalSizeMB = (base64Result.length / (1024 * 1024)).toFixed(2);
-      console.log(`Image compressed to ${finalSizeMB}MB at ${Math.round(quality * 100)}% quality`);
+      console.log(`✅ Image compressed to ${finalSizeMB}MB at ${Math.round(quality * 100)}% quality`);
 
       return base64Result;
 
