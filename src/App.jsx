@@ -3318,9 +3318,11 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
   const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
   const [lastTouchDistance, setLastTouchDistance] = React.useState(null);
   const imageRef = React.useRef(null);
+  const containerRef = React.useRef(null);
 
   const handleWheel = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     const delta = e.deltaY * -0.001;
     const newScale = Math.min(Math.max(1, scale + delta), 5);
     setScale(newScale);
@@ -3330,7 +3332,9 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
   };
 
   const handleMouseDown = (e) => {
-    if (scale > 1) {
+    if (scale > 1 && e.target.tagName === 'IMG') {
+      e.preventDefault();
+      e.stopPropagation();
       setIsDragging(true);
       setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
     }
@@ -3338,6 +3342,8 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
 
   const handleMouseMove = (e) => {
     if (isDragging && scale > 1) {
+      e.preventDefault();
+      e.stopPropagation();
       setPosition({
         x: e.clientX - dragStart.x,
         y: e.clientY - dragStart.y
@@ -3392,19 +3398,25 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
     setIsDragging(false);
   };
 
-  const handleDoubleClick = () => {
-    setScale(1);
-    setPosition({ x: 0, y: 0 });
+  const handleDoubleClick = (e) => {
+    if (e.target.tagName === 'IMG') {
+      e.preventDefault();
+      e.stopPropagation();
+      setScale(1);
+      setPosition({ x: 0, y: 0 });
+    }
   };
 
-  const handleBackgroundClick = (e) => {
-    if (e.target === e.currentTarget) {
+  const handleOverlayClick = (e) => {
+    // Only close if clicking the dark overlay itself, not the content
+    if (e.target === containerRef.current) {
       onClose();
     }
   };
 
   return (
     <div 
+      ref={containerRef}
       style={{
         position: 'fixed',
         top: 0,
@@ -3420,7 +3432,7 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
         zIndex: 100,
         overflow: 'hidden'
       }}
-      onClick={handleBackgroundClick}
+      onClick={handleOverlayClick}
     >
       {/* Title Bar */}
       <div style={{
@@ -3432,8 +3444,11 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        gap: '16px'
-      }}>
+        gap: '16px',
+        pointerEvents: 'auto'
+      }}
+      onClick={(e) => e.stopPropagation()}
+      >
         <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{title}</h3>
         <button
           onClick={onClose}
@@ -3463,10 +3478,14 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
         display: 'flex',
         flexDirection: 'column',
         gap: '8px',
-        zIndex: 101
-      }}>
+        zIndex: 101,
+        pointerEvents: 'auto'
+      }}
+      onClick={(e) => e.stopPropagation()}
+      >
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             const newScale = Math.min(scale + 0.5, 5);
             setScale(newScale);
           }}
@@ -3495,7 +3514,8 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
           {Math.round(scale * 100)}%
         </div>
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             const newScale = Math.max(scale - 0.5, 1);
             setScale(newScale);
             if (newScale === 1) {
@@ -3519,7 +3539,11 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
           −
         </button>
         <button
-          onClick={handleDoubleClick}
+          onClick={(e) => {
+            e.stopPropagation();
+            setScale(1);
+            setPosition({ x: 0, y: 0 });
+          }}
           style={{
             width: '40px',
             height: '40px',
@@ -3556,7 +3580,7 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
         🖱️ Scroll to zoom • 👆 Pinch to zoom • ✋ Drag to pan • 2️⃣ Double-click to reset
       </div>
 
-      {/* Zoomable Image */}
+      {/* Zoomable Image Container */}
       <div
         ref={imageRef}
         style={{
@@ -3568,7 +3592,8 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
           cursor: scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-in',
           touchAction: 'none',
           userSelect: 'none',
-          WebkitUserSelect: 'none'
+          WebkitUserSelect: 'none',
+          pointerEvents: 'auto'
         }}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
@@ -3579,6 +3604,7 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onDoubleClick={handleDoubleClick}
+        onClick={(e) => e.stopPropagation()}
       >
         <img 
           src={imageUrl} 
