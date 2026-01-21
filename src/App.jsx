@@ -314,13 +314,17 @@ export default function App() {
       });
   };
 
-  // Photo Upload Function (converts to base64 for storage in JSON)
+// Photo Upload Function (converts to base64 for storage in JSON)
   const handlePhotoUpload = async (file, formType) => {
     if (!file) return null;
 
-    // Check file size (limit to 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image too large. Please use an image under 5MB.');
+    // Check file size (limit to 3MB to account for base64 expansion)
+    // Base64 encoding increases size by ~33%, so 3MB becomes ~4MB
+    const maxSizeBytes = 3 * 1024 * 1024; // 3MB
+    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+    
+    if (file.size > maxSizeBytes) {
+      alert(`Image too large (${fileSizeMB}MB). Please use an image under 3MB.\n\nTip: You can resize images using your phone's photo editor or online tools.`);
       return null;
     }
 
@@ -334,12 +338,12 @@ export default function App() {
       };
       reader.onerror = () => {
         setUploadingPhoto(false);
+        alert('Failed to read image file. Please try again.');
         reject(new Error('Failed to read file'));
       };
       reader.readAsDataURL(file);
     });
   };
-
   // Check inventory stock levels
   const getStockStatus = (item) => {
     const qty = parseInt(item.quantity) || 0;
