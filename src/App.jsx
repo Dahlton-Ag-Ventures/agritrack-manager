@@ -1309,19 +1309,19 @@ dropdownItem: {
 // This continues from: if (!user) { return ( ... login screen ... ); }
 
  return (
-  <div 
-    key={theme}
-    style={{
-      minHeight: '100vh',
-      color: currentTheme.text,
-      padding: '24px',
-      background: theme === 'dark' ? '#0d1117' : '#f3f4f6',
-      backgroundImage: theme === 'dark' 
-        ? 'linear-gradient(rgba(37, 99, 235, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(37, 99, 235, 0.15) 1px, transparent 1px), radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.1) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(6, 182, 212, 0.1) 0%, transparent 50%)'
-        : 'linear-gradient(rgba(17, 24, 39, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(17, 24, 39, 0.15) 1px, transparent 1px), radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.08) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(6, 182, 212, 0.08) 0%, transparent 50%)',
-      backgroundSize: '50px 50px, 50px 50px, 100% 100%, 100% 100%'
-    }}
-  >
+ <div 
+  key={theme}
+  style={{
+    minHeight: '100vh',
+    color: currentTheme.text,
+    padding: '24px',
+    background: theme === 'dark' ? '#0d1117' : '#f3f4f6',
+    backgroundImage: theme === 'dark' 
+      ? 'linear-gradient(rgba(37, 99, 235, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(37, 99, 235, 0.15) 1px, transparent 1px), radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.1) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(6, 182, 212, 0.1) 0%, transparent 50%)'
+      : 'repeating-radial-gradient(circle at 0 0, transparent 0, #f3f4f6 40px), repeating-linear-gradient(rgba(6, 182, 212, 0.03), rgba(16, 185, 129, 0.03))',
+    backgroundSize: theme === 'dark' ? '50px 50px, 50px 50px, 100% 100%, 100% 100%' : 'auto'
+  }}
+>
     <div style={styles.content}>
       <div style={styles.header}>
         <div>
