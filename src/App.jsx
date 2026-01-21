@@ -1259,7 +1259,7 @@ dropdownItem: {
       <div style={styles.loginContainer}>
         <div style={styles.loginCard}>
           <h2 style={styles.loginTitle}>Welcome to</h2>
-          <h1 style={styles.title}>AgriTrack Manager v2.0</h1>
+          <h1 style={styles.title}>AgriTrack Manager</h1>
 
           <form onSubmit={handleLogin} style={styles.loginForm}>
             <input
@@ -1325,7 +1325,7 @@ dropdownItem: {
     <div style={styles.content}>
       <div style={styles.header}>
         <div>
-            <h1 style={styles.title}>AgriTrack Manager v2.0</h1>
+            <h1 style={styles.title}>AgriTrack Manager</h1>
             <p style={styles.subtitle}>Dahlton Ag Ventures</p>
             <p style={styles.stats}>
               {inventory.length} Inventory • {machinery.length} Machines • {serviceHistory.length} Service Records
@@ -1375,8 +1375,8 @@ dropdownItem: {
         )}
 
         <div style={styles.tabs}>
-          {['home', 'inventory', 'machinery', 'service'].map(tab => (
-            <button
+          {['home', 'inventory', 'machinery', 'service', ...(userRole !== 'employee' ? ['admin'] : [])].map(tab => (
+  <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               style={{
@@ -2712,7 +2712,181 @@ dropdownItem: {
             </div>
           </div>
         )}
+{activeTab === 'admin' && (
+          <div>
+            <div style={styles.tabHeader}>
+              <h2 style={{ fontSize: '1.5rem' }}>👑 Admin Dashboard</h2>
+            </div>
 
+            {/* Admin Overview Card */}
+            <div style={{
+              ...styles.itemCard,
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%)',
+              border: '1px solid #10b981',
+              marginBottom: '24px'
+            }}>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ 
+                  fontSize: '1.5rem', 
+                  marginBottom: '16px',
+                  background: 'linear-gradient(to right, #10b981, #06b6d4)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>
+                  Administrative Access & Permissions
+                </h3>
+                <p style={{ color: currentTheme.textSecondary, marginBottom: '24px', fontSize: '1rem' }}>
+                  As an administrator, you have full control over AgriTrack Manager. Below is a comparison of what you can do versus what employees can access.
+                </p>
+              </div>
+            </div>
+
+            {/* Permissions Comparison Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '20px' }}>
+              
+              {/* Admin Permissions Card */}
+              <div style={styles.itemCard}>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ 
+                    fontSize: '1.25rem', 
+                    marginBottom: '16px',
+                    color: '#10b981',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    ✅ Admin / Manager Permissions
+                  </h3>
+                  
+                  <div style={{ marginBottom: '20px' }}>
+                    <h4 style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '8px' }}>📦 Inventory</h4>
+                    <ul style={{ paddingLeft: '20px', color: currentTheme.text, lineHeight: '1.8' }}>
+                      <li>Add new inventory items</li>
+                      <li>Edit item details and locations</li>
+                      <li>Delete inventory items</li>
+                      <li>Adjust quantities with +/- buttons</li>
+                      <li>Set min/max stock alerts</li>
+                      <li>Upload and manage photos</li>
+                    </ul>
+                  </div>
+
+                  <div style={{ marginBottom: '20px' }}>
+                    <h4 style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '8px' }}>🚜 Machinery</h4>
+                    <ul style={{ paddingLeft: '20px', color: currentTheme.text, lineHeight: '1.8' }}>
+                      <li>Add new machines</li>
+                      <li>Edit machine details</li>
+                      <li>Delete machines (and their service records)</li>
+                      <li>View service history</li>
+                      <li>Upload and manage photos</li>
+                    </ul>
+                  </div>
+
+                  <div style={{ marginBottom: '20px' }}>
+                    <h4 style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '8px' }}>🔧 Service Records</h4>
+                    <ul style={{ paddingLeft: '20px', color: currentTheme.text, lineHeight: '1.8' }}>
+                      <li>Create new service records</li>
+                      <li>Edit existing records</li>
+                      <li>Delete service records</li>
+                      <li>Attach photos and files</li>
+                      <li>Export service history</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4 style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '8px' }}>⚙️ Settings Access</h4>
+                    <ul style={{ paddingLeft: '20px', color: currentTheme.text, lineHeight: '1.8' }}>
+                      <li>Full Settings tab access</li>
+                      <li>Import/Export CSV data</li>
+                      <li>Change theme (Dark/Light mode)</li>
+                      <li>View application info</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Employee Permissions Card */}
+              <div style={styles.itemCard}>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ 
+                    fontSize: '1.25rem', 
+                    marginBottom: '16px',
+                    color: '#9ca3af',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    👁️ Employee Permissions (View Only)
+                  </h3>
+                  
+                  <div style={{ marginBottom: '20px' }}>
+                    <h4 style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '8px' }}>📦 Inventory</h4>
+                    <ul style={{ paddingLeft: '20px', color: currentTheme.text, lineHeight: '1.8' }}>
+                      <li>✅ View all inventory items</li>
+                      <li>✅ Search and filter items</li>
+                      <li>✅ See stock levels and alerts</li>
+                      <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>Cannot add items</span></li>
+                      <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>Cannot edit items</span></li>
+                      <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>Cannot delete items</span></li>
+                      <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>Cannot adjust quantities</span></li>
+                    </ul>
+                  </div>
+
+                  <div style={{ marginBottom: '20px' }}>
+                    <h4 style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '8px' }}>🚜 Machinery</h4>
+                    <ul style={{ paddingLeft: '20px', color: currentTheme.text, lineHeight: '1.8' }}>
+                      <li>✅ View all machinery</li>
+                      <li>✅ Search and filter machines</li>
+                      <li>✅ View service history</li>
+                      <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>Cannot add machines</span></li>
+                      <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>Cannot edit machines</span></li>
+                      <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>Cannot delete machines</span></li>
+                    </ul>
+                  </div>
+
+                  <div style={{ marginBottom: '20px' }}>
+                    <h4 style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '8px' }}>🔧 Service Records</h4>
+                    <ul style={{ paddingLeft: '20px', color: currentTheme.text, lineHeight: '1.8' }}>
+                      <li>✅ View all service records</li>
+                      <li>✅ Search and filter records</li>
+                      <li>✅ View attached photos</li>
+                      <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>Cannot create records</span></li>
+                      <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>Cannot edit records</span></li>
+                      <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>Cannot delete records</span></li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4 style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '8px' }}>⚙️ Settings Access</h4>
+                    <ul style={{ paddingLeft: '20px', color: currentTheme.text, lineHeight: '1.8' }}>
+                      <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>No Settings tab access</span></li>
+                      <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>Cannot import/export data</span></li>
+                      <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>Cannot change theme</span></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Key Differences Highlight */}
+            <div style={{
+              ...styles.itemCard,
+              marginTop: '24px',
+              background: 'rgba(139, 92, 246, 0.1)',
+              border: '1px solid #8b5cf6'
+            }}>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px', color: '#a78bfa' }}>
+                  💡 Key Takeaway
+                </h3>
+                <p style={{ color: currentTheme.text, lineHeight: '1.8' }}>
+                  <strong>Employees have read-only access</strong> to all data, allowing them to view and search everything but not make changes. 
+                  As an admin, you have full control to add, edit, and delete all records across the entire system. 
+                  This ensures data integrity while giving your team the information they need.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
         {showInventoryModal && (
           <Modal title="Add Inventory Item" onClose={() => setShowInventoryModal(false)}>
             <input
