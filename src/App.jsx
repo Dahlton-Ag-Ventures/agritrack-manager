@@ -646,10 +646,17 @@ const viewMachineServiceHistory = (machineName) => {
 };
   
  const addServiceRecord = async () => {
+  // Wait for any ongoing photo upload to complete
+  if (uploadingPhoto) {
+    alert('Please wait for the photo upload to complete before saving.');
+    return;
+  }
+
   const newRecord = { 
     ...serviceForm, 
     id: Date.now(),
-    date: serviceForm.date || new Date().toISOString().split('T')[0]
+    date: serviceForm.date || new Date().toISOString().split('T')[0],
+    photoUrl: serviceForm.photoUrl || '' // Explicitly include photoUrl
   };
   const newServiceHistory = [...serviceHistory, newRecord];
 
@@ -666,7 +673,6 @@ const viewMachineServiceHistory = (machineName) => {
     alert('Error: ' + error.message);
   }
 };
-
   const deleteServiceRecord = async (id) => {
     if (!confirm('Are you sure you want to delete this service record?')) return;
 
@@ -3116,17 +3122,17 @@ dropdownItem: {
         <img src={serviceForm.photoUrl} alt="Preview" style={{ maxWidth: '200px', marginTop: '8px', borderRadius: '8px' }} />
       )}
     </div>
-    <div style={{ display: 'flex', gap: '12px' }}>
+<div style={{ display: 'flex', gap: '12px' }}>
       <button 
         onClick={addServiceRecord} 
         style={{
           ...styles.primaryButton,
-          opacity: !serviceForm.machineName || machinery.length === 0 ? 0.5 : 1,
-          cursor: !serviceForm.machineName || machinery.length === 0 ? 'not-allowed' : 'pointer'
+          opacity: !serviceForm.machineName || machinery.length === 0 || uploadingPhoto ? 0.5 : 1,
+          cursor: !serviceForm.machineName || machinery.length === 0 || uploadingPhoto ? 'not-allowed' : 'pointer'
         }}
-        disabled={!serviceForm.machineName || machinery.length === 0}
+        disabled={!serviceForm.machineName || machinery.length === 0 || uploadingPhoto}
       >
-        Add Record
+        {uploadingPhoto ? 'Uploading Photo...' : 'Add Record'}
       </button>
       <button onClick={() => setShowServiceModal(false)} style={styles.secondaryButton}>Cancel</button>
     </div>
