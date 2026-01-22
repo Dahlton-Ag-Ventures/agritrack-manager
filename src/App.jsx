@@ -3309,6 +3309,12 @@ dropdownItem: {
             />
             <input
               style={styles.input}
+              placeholder="Category"
+              value={inventoryForm.category}
+              onChange={(e) => setInventoryForm({ ...inventoryForm, category: e.target.value })}
+            />
+            <input
+              style={styles.input}
               placeholder="Part Number"
               value={inventoryForm.partNumber}
               onChange={(e) => setInventoryForm({ ...inventoryForm, partNumber: e.target.value })}
