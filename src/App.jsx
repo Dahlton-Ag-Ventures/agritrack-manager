@@ -2207,30 +2207,45 @@ dropdownItem: {
                               <span style={styles.stockBadgeHigh}>⚠️ Overstocked</span>
                             )}
                           </div>
-                          <div style={styles.itemDetails}>
-                            <div>
-                              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Part Number</p>
-                              <p>{item.partNumber || 'N/A'}</p>
-                            </div>
-<div>
-  <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Quantity</p>
-  {userRole === 'employee' ? (
-    <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
-  ) : (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      <button 
-        onClick={() => quickUpdateQuantity(item.id, -1)}
-        style={styles.quantityButton}
-      >
-        −
-      </button>
+<div style={styles.itemDetails}>
+  <div>
+    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Part Number</p>
+    <p>{item.partNumber || 'N/A'}</p>
+  </div>
+  <div>
+    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Category</p>
+    <p>{item.category || 'N/A'}</p>
+  </div>
+  <div>
+    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Quantity</p>
+    {userRole === 'employee' ? (
       <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
-      <button 
-        onClick={() => quickUpdateQuantity(item.id, 1)}
-        style={styles.quantityButton}
-      >
-        +
-      </button>
+    ) : (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <button 
+          onClick={() => quickUpdateQuantity(item.id, -1)}
+          style={styles.quantityButton}
+        >
+          −
+        </button>
+        <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
+        <button 
+          onClick={() => quickUpdateQuantity(item.id, 1)}
+          style={styles.quantityButton}
+        >
+          +
+        </button>
+      </div>
+    )}
+  </div>
+  <div>
+    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Location</p>
+    <p>{item.location || 'N/A'}</p>
+  </div>
+  {(item.minQuantity || item.maxQuantity) && (
+    <div>
+      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Min / Max</p>
+      <p>{item.minQuantity || '—'} / {item.maxQuantity || '—'}</p>
     </div>
   )}
 </div>
