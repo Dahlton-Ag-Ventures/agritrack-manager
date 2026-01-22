@@ -110,7 +110,8 @@ export default function App() {
   const [serviceSearch, setServiceSearch] = useState('');
   const [serviceSort, setServiceSort] = useState('date-desc');
   const [serviceFilter, setServiceFilter] = useState('');
-
+  const [machineSearchModal, setMachineSearchModal] = useState('');
+  
   // Get current theme object
   const currentTheme = themes[theme];
 
@@ -894,6 +895,7 @@ const saveServiceEdit = async (id) => {
 const cancelServiceEdit = () => {
   setEditingServiceId(null);
   setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
+  setMachineSearchModal('');
 };
 
   const quickUpdateQuantity = async (id, delta) => {
@@ -2472,33 +2474,70 @@ dropdownItem: {
               <div style={styles.itemsList}>
                 {getFilteredAndSortedService().map(record => (
                   <div key={record.id} style={styles.itemCard}>
-                    {editingServiceId === record.id ? (
-                      <div style={{ flex: 1 }}>
-                       <div style={{ marginBottom: '16px' }}>
-  <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
-    Select Machine
-  </label>
-  <select
-    style={styles.input}
-    value={serviceForm.machineName}
-    onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
-    required
-  >
-    <option value="">-- Select a machine --</option>
-    {machinery
-      .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
-      .map(machine => (
-        <option key={machine.id} value={machine.name}>
-          {machine.name} {machine.category ? `(${machine.category})` : ''}
-        </option>
-      ))}
-  </select>
-  {machinery.length === 0 && (
-    <p style={{ color: '#ef4444', fontSize: '0.875rem', marginTop: '8px' }}>
-      ⚠️ No machinery available. Please add machinery first.
-    </p>
-  )}
-</div>
+{editingServiceId === record.id ? (
+  <div style={{ flex: 1 }}>
+    <div style={{ marginBottom: '16px' }}>
+      <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+        Select Machine
+      </label>
+      
+      {/* ✅ SEARCH INPUT */}
+      <input
+        type="text"
+        placeholder="🔍 Search machines..."
+        value={machineSearchModal}
+        onChange={(e) => setMachineSearchModal(e.target.value)}
+        style={{
+          ...styles.input,
+          marginBottom: '8px'
+        }}
+      />
+      
+      {/* ✅ FILTERED DROPDOWN */}
+      <select
+        style={styles.input}
+        value={serviceForm.machineName}
+        onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
+        required
+      >
+        <option value="">-- Select a machine --</option>
+        {machinery
+          .filter(machine => {
+            const searchLower = machineSearchModal.toLowerCase();
+            return (
+              machine.name?.toLowerCase().includes(searchLower) ||
+              machine.category?.toLowerCase().includes(searchLower) ||
+              machine.vinSerial?.toLowerCase().includes(searchLower)
+            );
+          })
+          .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+          .map(machine => (
+            <option key={machine.id} value={machine.name}>
+              {machine.name} {machine.category ? `(${machine.category})` : ''}
+            </option>
+          ))}
+      </select>
+      
+      {/* ✅ SHOW COUNT OF FILTERED RESULTS */}
+      {machineSearchModal && (
+        <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginTop: '4px' }}>
+          Showing {machinery.filter(m => {
+            const searchLower = machineSearchModal.toLowerCase();
+            return (
+              m.name?.toLowerCase().includes(searchLower) ||
+              m.category?.toLowerCase().includes(searchLower) ||
+              m.vinSerial?.toLowerCase().includes(searchLower)
+            );
+          }).length} of {machinery.length} machines
+        </p>
+      )}
+      
+      {machinery.length === 0 && (
+        <p style={{ color: '#ef4444', fontSize: '0.875rem', marginTop: '8px' }}>
+          ⚠️ No machinery available. Please add machinery first.
+        </p>
+      )}
+    </div>
                         <input
                           style={styles.input}
                           placeholder="Service Type (e.g., Oil Change, Repair)"
@@ -3307,11 +3346,28 @@ dropdownItem: {
         )}
 
 {showServiceModal && (
-  <Modal title="Add Service Record" onClose={() => setShowServiceModal(false)}>
+  <Modal title="Add Service Record" onClose={() => {
+    setShowServiceModal(false);
+    setMachineSearchModal(''); // Clear search when closing
+  }}>
     <div style={{ marginBottom: '16px' }}>
       <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
         Select Machine
       </label>
+      
+      {/* ✅ SEARCH INPUT */}
+      <input
+        type="text"
+        placeholder="🔍 Search machines..."
+        value={machineSearchModal}
+        onChange={(e) => setMachineSearchModal(e.target.value)}
+        style={{
+          ...styles.input,
+          marginBottom: '8px'
+        }}
+      />
+      
+      {/* ✅ FILTERED DROPDOWN */}
       <select
         style={styles.input}
         value={serviceForm.machineName}
@@ -3320,6 +3376,14 @@ dropdownItem: {
       >
         <option value="">-- Select a machine --</option>
         {machinery
+          .filter(machine => {
+            const searchLower = machineSearchModal.toLowerCase();
+            return (
+              machine.name?.toLowerCase().includes(searchLower) ||
+              machine.category?.toLowerCase().includes(searchLower) ||
+              machine.vinSerial?.toLowerCase().includes(searchLower)
+            );
+          })
           .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
           .map(machine => (
             <option key={machine.id} value={machine.name}>
@@ -3327,6 +3391,20 @@ dropdownItem: {
             </option>
           ))}
       </select>
+      
+      {/* ✅ SHOW COUNT OF FILTERED RESULTS */}
+      {machineSearchModal && (
+        <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginTop: '4px' }}>
+          Showing {machinery.filter(m => {
+            const searchLower = machineSearchModal.toLowerCase();
+            return (
+              m.name?.toLowerCase().includes(searchLower) ||
+              m.category?.toLowerCase().includes(searchLower) ||
+              m.vinSerial?.toLowerCase().includes(searchLower)
+            );
+          }).length} of {machinery.length} machines
+        </p>
+      )}
     </div>
     <input
       style={styles.input}
