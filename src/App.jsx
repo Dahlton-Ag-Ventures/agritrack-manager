@@ -561,16 +561,28 @@ const getFilteredAndSortedService = () => {
 
 const addInventoryItem = async () => {
   lastLocalUpdateRef.current = Date.now();
-  const newItem = { ...inventoryForm, id: Date.now() };
-  const newInventory = [...inventory, newItem];
-
-  // ✅ UPDATE LOCAL STATE IMMEDIATELY
-  setInventory(newInventory);
   
-  setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
-  setShowInventoryModal(false);
-
   try {
+    // ✅ FETCH CURRENT DATA FROM DATABASE FIRST
+    const { data: currentData, error: fetchError } = await supabase
+      .from('agritrack_data')
+      .select('inventory')
+      .eq('id', 1)
+      .single();
+    
+    if (fetchError) throw fetchError;
+    
+    const currentInventory = currentData?.inventory || [];
+    const newItem = { ...inventoryForm, id: Date.now() };
+    const newInventory = [...currentInventory, newItem];
+
+    // ✅ UPDATE LOCAL STATE IMMEDIATELY
+    setInventory(newInventory);
+    
+    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
+    setShowInventoryModal(false);
+
+    // ✅ NOW SAVE BACK TO DATABASE
     const { error } = await supabase
       .from('agritrack_data')
       .update({ inventory: newInventory })
@@ -672,8 +684,20 @@ const addInventoryItem = async () => {
 
 const addMachineryItem = async () => {
   lastLocalUpdateRef.current = Date.now();
-  const newItem = { ...machineryForm, id: Date.now() };
-  const newMachinery = [...machinery, newItem];
+  
+  try {
+    // ✅ FETCH CURRENT DATA FROM DATABASE FIRST
+    const { data: currentData, error: fetchError } = await supabase
+      .from('agritrack_data')
+      .select('machinery')
+      .eq('id', 1)
+      .single();
+    
+    if (fetchError) throw fetchError;
+    
+    const currentMachinery = currentData?.machinery || [];
+    const newItem = { ...machineryForm, id: Date.now() };
+    const newMachinery = [...currentMachinery, newItem];
 
   // ✅ UPDATE LOCAL STATE IMMEDIATELY
   setMachinery(newMachinery);
@@ -820,15 +844,25 @@ const viewMachineServiceHistory = (machineName) => {
 const addServiceRecord = async () => {
   // ✅ REMOVED BLOCKING uploadingPhoto check for mobile compatibility
   lastLocalUpdateRef.current = Date.now();
-  // Photo will be included if already uploaded, or empty string if not
   
-  const newRecord = { 
-    ...serviceForm, 
-    id: Date.now(),
-    date: serviceForm.date || new Date().toISOString().split('T')[0],
-    photoUrl: serviceForm.photoUrl || ''
-  };
-  const newServiceHistory = [...serviceHistory, newRecord];
+  try {
+    // ✅ FETCH CURRENT DATA FROM DATABASE FIRST
+    const { data: currentData, error: fetchError } = await supabase
+      .from('agritrack_data')
+      .select('service_history')
+      .eq('id', 1)
+      .single();
+    
+    if (fetchError) throw fetchError;
+    
+    const currentServiceHistory = currentData?.service_history || [];
+    const newRecord = { 
+      ...serviceForm, 
+      id: Date.now(),
+      date: serviceForm.date || new Date().toISOString().split('T')[0],
+      photoUrl: serviceForm.photoUrl || ''
+    };
+    const newServiceHistory = [...currentServiceHistory, newRecord];
 
   // ✅ UPDATE LOCAL STATE IMMEDIATELY
   setServiceHistory(newServiceHistory);
