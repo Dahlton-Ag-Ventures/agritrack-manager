@@ -532,24 +532,31 @@ const getFilteredAndSortedService = () => {
     }
   };
 
-  const addInventoryItem = async () => {
-    const newItem = { ...inventoryForm, id: Date.now() };
-    const newInventory = [...inventory, newItem];
+const addInventoryItem = async () => {
+  const newItem = { ...inventoryForm, id: Date.now() };
+  const newInventory = [...inventory, newItem];
 
-    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
-    setShowInventoryModal(false);
+  // ✅ UPDATE LOCAL STATE IMMEDIATELY
+  setInventory(newInventory);
+  
+  setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
+  setShowInventoryModal(false);
 
-    try {
-      await supabase
-        .from('agritrack_data')
-        .update({ inventory: newInventory })
-        .eq('id', 1);
-    } catch (error) {
-      console.error('Add error:', error);
-      alert('Error: ' + error.message);
-    }
-  };
-
+  try {
+    const { error } = await supabase
+      .from('agritrack_data')
+      .update({ inventory: newInventory })
+      .eq('id', 1);
+    
+    if (error) throw error;
+    console.log('✅ Inventory item added successfully');
+  } catch (error) {
+    console.error('Add error:', error);
+    alert('Error: ' + error.message);
+    // ❌ ROLLBACK ON ERROR
+    loadData();
+  }
+};
   const deleteInventoryItem = async (id) => {
     const shouldDelete = window.confirm('Are you sure you want to delete this item?');
     if (!shouldDelete) return;
@@ -611,23 +618,31 @@ const getFilteredAndSortedService = () => {
     setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
   };
 
-  const addMachineryItem = async () => {
-    const newItem = { ...machineryForm, id: Date.now() };
-    const newMachinery = [...machinery, newItem];
+const addMachineryItem = async () => {
+  const newItem = { ...machineryForm, id: Date.now() };
+  const newMachinery = [...machinery, newItem];
 
-    setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '' });
-    setShowMachineryModal(false);
+  // ✅ UPDATE LOCAL STATE IMMEDIATELY
+  setMachinery(newMachinery);
+  
+  setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '' });
+  setShowMachineryModal(false);
 
-    try {
-      await supabase
-        .from('agritrack_data')
-        .update({ machinery: newMachinery })
-        .eq('id', 1);
-    } catch (error) {
-      console.error('Add error:', error);
-      alert('Error: ' + error.message);
-    }
-  };
+  try {
+    const { error } = await supabase
+      .from('agritrack_data')
+      .update({ machinery: newMachinery })
+      .eq('id', 1);
+    
+    if (error) throw error;
+    console.log('✅ Machinery item added successfully');
+  } catch (error) {
+    console.error('Add error:', error);
+    alert('Error: ' + error.message);
+    // ❌ ROLLBACK ON ERROR
+    loadData();
+  }
+};
 
 const deleteMachineryItem = async (id) => {
   // Find the machine we're about to delete
@@ -719,32 +734,37 @@ const viewMachineServiceHistory = (machineName) => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
   
- const addServiceRecord = async () => {
-  // Wait for any ongoing photo upload to complete
-  if (uploadingPhoto) {
-    alert('Please wait for the photo upload to complete before saving.');
-    return;
-  }
-
+const addServiceRecord = async () => {
+  // ✅ REMOVED BLOCKING uploadingPhoto check for mobile compatibility
+  // Photo will be included if already uploaded, or empty string if not
+  
   const newRecord = { 
     ...serviceForm, 
     id: Date.now(),
     date: serviceForm.date || new Date().toISOString().split('T')[0],
-    photoUrl: serviceForm.photoUrl || '' // Explicitly include photoUrl
+    photoUrl: serviceForm.photoUrl || ''
   };
   const newServiceHistory = [...serviceHistory, newRecord];
 
+  // ✅ UPDATE LOCAL STATE IMMEDIATELY
+  setServiceHistory(newServiceHistory);
+  
   setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
   setShowServiceModal(false);
 
   try {
-    await supabase
+    const { error } = await supabase
       .from('agritrack_data')
       .update({ service_history: newServiceHistory })
       .eq('id', 1);
+    
+    if (error) throw error;
+    console.log('✅ Service record added successfully');
   } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
+    // ❌ ROLLBACK ON ERROR
+    loadData();
   }
 };
   const deleteServiceRecord = async (id) => {
@@ -3265,17 +3285,17 @@ dropdownItem: {
       )}
     </div>
 <div style={{ display: 'flex', gap: '12px' }}>
-      <button 
-        onClick={addServiceRecord} 
-        style={{
-          ...styles.primaryButton,
-          opacity: !serviceForm.machineName || machinery.length === 0 || uploadingPhoto ? 0.5 : 1,
-          cursor: !serviceForm.machineName || machinery.length === 0 || uploadingPhoto ? 'not-allowed' : 'pointer'
-        }}
-        disabled={!serviceForm.machineName || machinery.length === 0 || uploadingPhoto}
-      >
-        {uploadingPhoto ? 'Uploading Photo...' : 'Add Record'}
-      </button>
+<button 
+  onClick={addServiceRecord} 
+  style={{
+    ...styles.primaryButton,
+    opacity: !serviceForm.machineName || machinery.length === 0 ? 0.5 : 1,
+    cursor: !serviceForm.machineName || machinery.length === 0 ? 'not-allowed' : 'pointer'
+  }}
+  disabled={!serviceForm.machineName || machinery.length === 0}
+>
+  Add Record
+</button>
       <button onClick={() => setShowServiceModal(false)} style={styles.secondaryButton}>Cancel</button>
     </div>
   </Modal>
