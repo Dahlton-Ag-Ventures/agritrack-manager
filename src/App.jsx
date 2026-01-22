@@ -860,14 +860,13 @@ const addServiceRecord = async () => {
       photoUrl: serviceForm.photoUrl || ''
     };
     const newServiceHistory = [...currentServiceHistory, newRecord];
-
-  // ✅ UPDATE LOCAL STATE IMMEDIATELY
-  setServiceHistory(newServiceHistory);
-  
-  setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
-  setShowServiceModal(false);
-
-  try {
+    
+    // ✅ UPDATE LOCAL STATE IMMEDIATELY
+    setServiceHistory(newServiceHistory);
+    
+    setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
+    setShowServiceModal(false);
+    
     const { error } = await supabase
       .from('agritrack_data')
       .update({ service_history: newServiceHistory })
