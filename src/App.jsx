@@ -2249,7 +2249,6 @@ dropdownItem: {
     </div>
   )}
 </div>
-                            <div>
                               <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Location</p>
                               <p>{item.location || 'N/A'}</p>
                             </div>
