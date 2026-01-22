@@ -1893,6 +1893,8 @@ dropdownItem: {
     </p>
   </div>
 </div>
+  </div>
+)}
         
         {activeTab === 'inventory' && (
           <div>
@@ -3349,6 +3351,7 @@ dropdownItem: {
     </div>
   );
 }
+
 // Zoomable Image Viewer Component
 function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
   const [scale, setScale] = React.useState(1);
