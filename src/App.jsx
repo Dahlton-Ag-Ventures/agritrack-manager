@@ -156,37 +156,40 @@ export default function App() {
     }
   }, [theme, user]);
 
-  const checkUser = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log('🔐 Session user:', session?.user?.id);
-      setUser(session?.user ?? null);
+const checkUser = async () => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    console.log('🔐 Session user:', session?.user?.id);
+    setUser(session?.user ?? null);
+    
+    if (session?.user) {
+      // Fetch user role
+      const { data: roleData, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .single();
       
-      if (session?.user) {
-        // Fetch user role
-        const { data: roleData, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .single();
-        
-        console.log('👤 Role query result:', roleData);
-        console.log('❌ Role query error:', error);
-        
-        if (!error && roleData) {
-          console.log('✅ Setting role to:', roleData.role);
-          setUserRole(roleData.role);
-        } else {
-          console.log('⚠️ No role found, defaulting to employee');
-          setUserRole('employee'); // Default role
-        }
+      console.log('👤 Role query result:', roleData);
+      console.log('❌ Role query error:', error);
+      
+      if (!error && roleData) {
+        console.log('✅ Setting role to:', roleData.role);
+        setUserRole(roleData.role);
+      } else {
+        console.log('⚠️ No role found, defaulting to employee');
+        setUserRole('employee'); // Default role
       }
-    } catch (error) {
-      console.error('Error checking user:', error);
-    } finally {
+      // ✅ DON'T SET LOADING FALSE HERE - wait for data to load
+    } else {
+      // ✅ Only set loading false if there's no user (show login screen)
       setLoading(false);
     }
-  };
+  } catch (error) {
+    console.error('Error checking user:', error);
+    setLoading(false);
+  }
+};
 
   const handleLogin = async (e) => {
     e.preventDefault();
