@@ -1893,7 +1893,6 @@ dropdownItem: {
     </p>
   </div>
 </div>
-)}
         
         {activeTab === 'inventory' && (
           <div>
