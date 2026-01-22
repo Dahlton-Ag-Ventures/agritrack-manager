@@ -67,6 +67,7 @@ export default function App() {
   const settingsDropdownRef = useRef(null);
   const [viewingImage, setViewingImage] = useState(null);
   const [imageModalTitle, setImageModalTitle] = useState('');
+  const lastLocalUpdateRef = useRef(0);
 
   const [activeTab, setActiveTab] = useState('home');
   const [inventory, setInventory] = useState([]);
@@ -288,39 +289,47 @@ export default function App() {
 };
 
   const setupRealtime = () => {
-    console.log('🔔 Setting up real-time subscription...');
+  console.log('🔔 Setting up real-time subscription...');
 
-    const channel = supabase
-      .channel('agritrack-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'agritrack_data',
-          filter: 'id=eq.1'
-        },
-        (payload) => {
-          console.log('🔔 Real-time update received!', payload);
-          if (payload.new) {
-            setInventory(payload.new.inventory || []);
-            setMachinery(payload.new.machinery || []);
-            setServiceHistory(payload.new.service_history || []);
-            setLastSync(new Date());
-            setRealtimeStatus('connected');
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('🔔 Real-time status:', status);
-        if (status === 'SUBSCRIBED') {
+  const channel = supabase
+    .channel('agritrack-changes')
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'agritrack_data',
+        filter: 'id=eq.1'
+      },
+      (payload) => {
+        console.log('🔔 Real-time update received!', payload);
+        
+        // ✅ DEBOUNCE: Only apply if no recent local changes (within 3 seconds)
+        const now = Date.now();
+        const timeSinceLastUpdate = now - lastLocalUpdateRef.current;
+        
+        if (timeSinceLastUpdate > 3000 && payload.new) {
+          console.log('✅ Applying real-time update (no recent local changes)');
+          setInventory(payload.new.inventory || []);
+          setMachinery(payload.new.machinery || []);
+          setServiceHistory(payload.new.service_history || []);
+          setLastSync(new Date());
           setRealtimeStatus('connected');
-          console.log('✅ Real-time subscription active!');
-        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          setRealtimeStatus('error');
+        } else {
+          console.log('⏸️ Skipping real-time update (recent local change detected)');
         }
-      });
-  };
+      }
+    )
+    .subscribe((status) => {
+      console.log('🔔 Real-time status:', status);
+      if (status === 'SUBSCRIBED') {
+        setRealtimeStatus('connected');
+        console.log('✅ Real-time subscription active!');
+      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        setRealtimeStatus('error');
+      }
+    });
+};
 
 // Photo Upload Function with automatic compression
   const handlePhotoUpload = async (file, formType) => {
@@ -538,6 +547,7 @@ const getFilteredAndSortedService = () => {
   };
 
 const addInventoryItem = async () => {
+  lastLocalUpdateRef.current = Date.now();
   const newItem = { ...inventoryForm, id: Date.now() };
   const newInventory = [...inventory, newItem];
 
@@ -597,6 +607,8 @@ const addInventoryItem = async () => {
 
   const saveInventoryEdit = async (id) => {
   try {
+    lastLocalUpdateRef.current = Date.now(); // ✅ ADD THIS LINE
+    
     const newInventory = inventory.map(item => 
       item.id === id ? { ...item, ...inventoryForm } : item
     );
@@ -629,6 +641,7 @@ const addInventoryItem = async () => {
   };
 
 const addMachineryItem = async () => {
+  lastLocalUpdateRef.current = Date.now();
   const newItem = { ...machineryForm, id: Date.now() };
   const newMachinery = [...machinery, newItem];
 
@@ -714,6 +727,8 @@ const deleteMachineryItem = async (id) => {
 
   const saveMachineryEdit = async (id) => {
   try {
+    lastLocalUpdateRef.current = Date.now();
+    
     const newMachinery = machinery.map(item => 
       item.id === id ? { ...item, ...machineryForm } : item
     );
@@ -756,6 +771,7 @@ const viewMachineServiceHistory = (machineName) => {
   
 const addServiceRecord = async () => {
   // ✅ REMOVED BLOCKING uploadingPhoto check for mobile compatibility
+  lastLocalUpdateRef.current = Date.now();
   // Photo will be included if already uploaded, or empty string if not
   
   const newRecord = { 
@@ -817,6 +833,8 @@ const startEditService = (record) => {
 
 const saveServiceEdit = async (id) => {
   try {
+    lastLocalUpdateRef.current = Date.now();
+    
     const newServiceHistory = serviceHistory.map(record => 
       record.id === id ? { ...record, ...serviceForm } : record
     );
@@ -850,6 +868,7 @@ const cancelServiceEdit = () => {
 };
 
   const quickUpdateQuantity = async (id, delta) => {
+    lastLocalUpdateRef.current = Date.now();
     const newInventory = inventory.map(item => 
       item.id === id ? { ...item, quantity: Math.max(0, (parseInt(item.quantity) || 0) + delta).toString() } : item
     );
