@@ -569,7 +569,6 @@ const addInventoryItem = async () => {
   
   setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
   setShowInventoryModal(false);
-  isEditingRef.current = false;
 
   try {
     const { error } = await supabase
@@ -579,9 +578,15 @@ const addInventoryItem = async () => {
     
     if (error) throw error;
     console.log('✅ Inventory item added successfully');
+    
+    // ✅ Clear editing flag AFTER successful save with delay
+    setTimeout(() => {
+      isEditingRef.current = false;
+    }, 1000);
   } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
+    isEditingRef.current = false;
     // ❌ ROLLBACK ON ERROR
     loadData();
   }
@@ -675,7 +680,6 @@ const addMachineryItem = async () => {
   
   setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '' });
   setShowMachineryModal(false);
-  isEditingRef.current = false;
 
   try {
     const { error } = await supabase
@@ -685,14 +689,20 @@ const addMachineryItem = async () => {
     
     if (error) throw error;
     console.log('✅ Machinery item added successfully');
+    
+    // ✅ Clear editing flag AFTER successful save with delay
+    setTimeout(() => {
+      isEditingRef.current = false;
+    }, 1000);
   } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
+    isEditingRef.current = false;
     // ❌ ROLLBACK ON ERROR
     loadData();
   }
 };
-
+  
 const deleteMachineryItem = async (id) => {
   // Find the machine we're about to delete
   const machineToDelete = machinery.find(item => item.id === id);
@@ -834,9 +844,15 @@ const addServiceRecord = async () => {
     
     if (error) throw error;
     console.log('✅ Service record added successfully');
+    
+    // ✅ Clear editing flag AFTER successful save with delay
+    setTimeout(() => {
+      isEditingRef.current = false;
+    }, 1000);
   } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
+    isEditingRef.current = false;
     // ❌ ROLLBACK ON ERROR
     loadData();
   }
