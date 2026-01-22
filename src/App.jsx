@@ -265,10 +265,10 @@ const checkUser = async () => {
     setActiveTab('settings');
   };
   
-  const loadData = async () => {
+ const loadData = async () => {
   try {
     console.log('📥 Loading data from Supabase...');
-    setLoading(true); // ✅ Show loading state
+    setLoading(true);
     
     const { data, error } = await supabase
       .from('agritrack_data')
@@ -280,6 +280,9 @@ const checkUser = async () => {
 
     if (data) {
       console.log('✅ Data loaded');
+      console.log('📦 Inventory array length:', data.inventory?.length); // ADD THIS
+      console.log('📦 First 3 items:', data.inventory?.slice(0, 3)); // ADD THIS
+      
       setInventory(data.inventory || []);
       setMachinery(data.machinery || []);
       setServiceHistory(data.service_history || []);
@@ -289,7 +292,7 @@ const checkUser = async () => {
     console.error('❌ Load error:', error);
     alert('Failed to load data. Please refresh the page.');
   } finally {
-    setLoading(false); // ✅ Clear loading state
+    setLoading(false);
   }
 };
 
