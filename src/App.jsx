@@ -260,27 +260,32 @@ export default function App() {
   };
   
   const loadData = async () => {
-    try {
-      console.log('📥 Loading data from Supabase...');
-      const { data, error } = await supabase
-        .from('agritrack_data')
-        .select('*')
-        .eq('id', 1)
-        .single();
+  try {
+    console.log('📥 Loading data from Supabase...');
+    setLoading(true); // ✅ Show loading state
+    
+    const { data, error } = await supabase
+      .from('agritrack_data')
+      .select('*')
+      .eq('id', 1)
+      .single();
 
-      if (error) throw error;
+    if (error) throw error;
 
-      if (data) {
-        console.log('✅ Data loaded');
-        setInventory(data.inventory || []);
-        setMachinery(data.machinery || []);
-        setServiceHistory(data.service_history || []);
-        setLastSync(new Date());
-      }
-    } catch (error) {
-      console.error('❌ Load error:', error);
+    if (data) {
+      console.log('✅ Data loaded');
+      setInventory(data.inventory || []);
+      setMachinery(data.machinery || []);
+      setServiceHistory(data.service_history || []);
+      setLastSync(new Date());
     }
-  };
+  } catch (error) {
+    console.error('❌ Load error:', error);
+    alert('Failed to load data. Please refresh the page.');
+  } finally {
+    setLoading(false); // ✅ Clear loading state
+  }
+};
 
   const setupRealtime = () => {
     console.log('🔔 Setting up real-time subscription...');
@@ -1427,9 +1432,17 @@ dropdownItem: {
         <div>
             <h1 style={styles.title}>AgriTrack Manager</h1>
             <p style={styles.subtitle}>Dahlton Ag Ventures</p>
-            <p style={styles.stats}>
-              {inventory.length} Inventory • {machinery.length} Machines • {serviceHistory.length} Service Records
-              {userRole && (
+<p style={styles.stats}>
+  {loading ? (
+    <>
+      <span style={{ opacity: 0.6 }}>Loading data...</span>
+    </>
+  ) : (
+    <>
+      {inventory.length} Inventory • {machinery.length} Machines • {serviceHistory.length} Service Records
+    </>
+  )}
+  {userRole && !loading && (
   userRole === 'employee' ? (
     <span style={{ 
       marginLeft: '12px', 
@@ -1508,21 +1521,22 @@ dropdownItem: {
         )}
 
         <div style={styles.tabs}>
-          {['home', 'inventory', 'machinery', 'service'].map(tab => (
-  <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              style={{
-                ...styles.tab,
-                background: activeTab === tab ? 'linear-gradient(to right, #10b981, #06b6d4)' : currentTheme.tabInactive
-              }}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              {tab === 'inventory' && ` (${inventory.length})`}
-              {tab === 'machinery' && ` (${machinery.length})`}
-              {tab === 'service' && ` (${serviceHistory.length})`}
-            </button>
-          ))}
+  {['home', 'inventory', 'machinery', 'service'].map(tab => (
+    <button
+      key={tab}
+      onClick={() => setActiveTab(tab)}
+      style={{
+        ...styles.tab,
+        background: activeTab === tab ? 'linear-gradient(to right, #10b981, #06b6d4)' : currentTheme.tabInactive
+      }}
+    >
+      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+      {!loading && tab === 'inventory' && ` (${inventory.length})`}
+      {!loading && tab === 'machinery' && ` (${machinery.length})`}
+      {!loading && tab === 'service' && ` (${serviceHistory.length})`}
+      {loading && (tab === 'inventory' || tab === 'machinery' || tab === 'service') && ' (...)'}
+    </button>
+  ))}
           {userRole !== 'employee' && (
             <div style={styles.settingsDropdownWrapper} ref={settingsDropdownRef}>
               <button
@@ -1836,44 +1850,49 @@ dropdownItem: {
     </div>
 
     {/* Quick Stats Footer */}
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-      gap: '16px',
-      marginTop: '24px'
-    }}>
-      <div style={{
-        background: 'rgba(6, 182, 212, 0.15)',
-        border: '1px solid rgba(6, 182, 212, 0.3)',
-        borderRadius: '8px',
-        padding: '16px',
-        textAlign: 'center'
-      }}>
-        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Inventory</p>
-        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>{inventory.length}</p>
-      </div>
-      <div style={{
-        background: 'rgba(6, 182, 212, 0.15)',
-        border: '1px solid rgba(6, 182, 212, 0.3)',
-        borderRadius: '8px',
-        padding: '16px',
-        textAlign: 'center'
-      }}>
-        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Machinery</p>
-        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>{machinery.length}</p>
-      </div>
-      <div style={{
-        background: 'rgba(6, 182, 212, 0.15)',
-        border: '1px solid rgba(6, 182, 212, 0.3)',
-        borderRadius: '8px',
-        padding: '16px',
-        textAlign: 'center'
-      }}>
-        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Service Records</p>
-        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>{serviceHistory.length}</p>
-      </div>
-    </div>
+   <div style={{
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+  gap: '16px',
+  marginTop: '24px'
+}}>
+  <div style={{
+    background: 'rgba(6, 182, 212, 0.15)',
+    border: '1px solid rgba(6, 182, 212, 0.3)',
+    borderRadius: '8px',
+    padding: '16px',
+    textAlign: 'center'
+  }}>
+    <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Inventory</p>
+    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+      {loading ? '...' : inventory.length}
+    </p>
   </div>
+  <div style={{
+    background: 'rgba(6, 182, 212, 0.15)',
+    border: '1px solid rgba(6, 182, 212, 0.3)',
+    borderRadius: '8px',
+    padding: '16px',
+    textAlign: 'center'
+  }}>
+    <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Machinery</p>
+    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+      {loading ? '...' : machinery.length}
+    </p>
+  </div>
+  <div style={{
+    background: 'rgba(6, 182, 212, 0.15)',
+    border: '1px solid rgba(6, 182, 212, 0.3)',
+    borderRadius: '8px',
+    padding: '16px',
+    textAlign: 'center'
+  }}>
+    <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Service Records</p>
+    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+      {loading ? '...' : serviceHistory.length}
+    </p>
+  </div>
+</div>
 )}
         
         {activeTab === 'inventory' && (
