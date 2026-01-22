@@ -573,23 +573,31 @@ const addInventoryItem = async () => {
   }
 };
   const deleteInventoryItem = async (id) => {
-    const shouldDelete = window.confirm('Are you sure you want to delete this item?');
-    if (!shouldDelete) return;
+  const shouldDelete = window.confirm('Are you sure you want to delete this item?');
+  if (!shouldDelete) return;
 
-    try {
-      const newInventory = inventory.filter(item => item.id !== id);
-      const { error } = await supabase
-        .from('agritrack_data')
-        .update({ inventory: newInventory })
-        .eq('id', 1);
+  try {
+    lastLocalUpdateRef.current = Date.now(); // ✅ ADD THIS LINE
+    
+    const newInventory = inventory.filter(item => item.id !== id);
+    
+    // ✅ UPDATE LOCAL STATE IMMEDIATELY
+    setInventory(newInventory);
 
-      if (error) throw error;
-      console.log('✅ Item deleted successfully');
-    } catch (error) {
-      console.error('Error deleting inventory item:', error);
-      alert('Failed to delete item. Please try again.');
-    }
-  };
+    const { error } = await supabase
+      .from('agritrack_data')
+      .update({ inventory: newInventory })
+      .eq('id', 1);
+
+    if (error) throw error;
+    console.log('✅ Item deleted successfully');
+  } catch (error) {
+    console.error('Error deleting inventory item:', error);
+    alert('Failed to delete item. Please try again.');
+    // ❌ ROLLBACK ON ERROR
+    loadData();
+  }
+};
 
   const startEditInventory = (item) => {
     setEditingInventoryId(item.id);
@@ -689,17 +697,22 @@ const deleteMachineryItem = async (id) => {
 
   if (!confirm(confirmMessage)) return;
 
-  // Remove the machine
-  const newMachinery = machinery.filter(item => item.id !== id);
-
-  // Remove all service records for this machine
-  const newServiceHistory = serviceHistory.filter(
-    record => record.machineName !== machineToDelete.name
-  );
-
   try {
-    // Update both machinery AND service_history in the database
-    await supabase
+    lastLocalUpdateRef.current = Date.now(); // ✅ ADD THIS LINE
+    
+    // Remove the machine
+    const newMachinery = machinery.filter(item => item.id !== id);
+
+    // Remove all service records for this machine
+    const newServiceHistory = serviceHistory.filter(
+      record => record.machineName !== machineToDelete.name
+    );
+
+    // ✅ UPDATE LOCAL STATE IMMEDIATELY
+    setMachinery(newMachinery);
+    setServiceHistory(newServiceHistory);
+
+    const { error } = await supabase
       .from('agritrack_data')
       .update({ 
         machinery: newMachinery,
@@ -707,10 +720,14 @@ const deleteMachineryItem = async (id) => {
       })
       .eq('id', 1);
 
+    if (error) throw error;
+
     console.log(`✅ Deleted machine "${machineToDelete.name}" and ${serviceCount} service record(s)`);
   } catch (error) {
     console.error('Delete error:', error);
     alert('Error: ' + error.message);
+    // ❌ ROLLBACK ON ERROR
+    loadData();
   }
 };
 
@@ -804,21 +821,30 @@ const addServiceRecord = async () => {
   }
 };
   const deleteServiceRecord = async (id) => {
-    if (!confirm('Are you sure you want to delete this service record?')) return;
+  if (!confirm('Are you sure you want to delete this service record?')) return;
 
+  try {
+    lastLocalUpdateRef.current = Date.now(); // ✅ ADD THIS LINE
+    
     const newServiceHistory = serviceHistory.filter(record => record.id !== id);
 
-    try {
-      await supabase
-        .from('agritrack_data')
-        .update({ service_history: newServiceHistory })
-        .eq('id', 1);
-    } catch (error) {
-      console.error('Delete error:', error);
-      alert('Error: ' + error.message);
-    }
-  };
+    // ✅ UPDATE LOCAL STATE IMMEDIATELY
+    setServiceHistory(newServiceHistory);
 
+    const { error } = await supabase
+      .from('agritrack_data')
+      .update({ service_history: newServiceHistory })
+      .eq('id', 1);
+
+    if (error) throw error;
+    console.log('✅ Service record deleted successfully');
+  } catch (error) {
+    console.error('Delete error:', error);
+    alert('Error: ' + error.message);
+    // ❌ ROLLBACK ON ERROR
+    loadData();
+  }
+};
 const startEditService = (record) => {
   setEditingServiceId(record.id);
   setServiceForm({
