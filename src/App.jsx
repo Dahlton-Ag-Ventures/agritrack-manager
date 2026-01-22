@@ -453,7 +453,6 @@ if (payload.new) {
       return null;
     }
   };
-  };
 
   // NEW: Handle multiple photo uploads for service records
   const handleMultiplePhotoUpload = async (files) => {
@@ -494,18 +493,15 @@ if (payload.new) {
     setImageModalTitle('');
   };
   
-  // Check inventory stock levels
-  const getStockStatus = (item) => {
-  // Check inventory stock levels
-  const getStockStatus = (item) => {
-    const qty = parseInt(item.quantity) || 0;
-    const min = parseInt(item.minQuantity) || 0;
-    const max = parseInt(item.maxQuantity) || Infinity;
+const getStockStatus = (item) => {
+  const qty = parseInt(item.quantity) || 0;
+  const min = parseInt(item.minQuantity) || 0;
+  const max = parseInt(item.maxQuantity) || Infinity;
 
-    if (min > 0 && qty <= min) return 'low';
-    if (max < Infinity && qty >= max) return 'high';
-    return 'normal';
-  };
+  if (min > 0 && qty <= min) return 'low';
+  if (max < Infinity && qty >= max) return 'high';
+  return 'normal';
+};
 
   // Filter and sort functions
   const getFilteredAndSortedInventory = () => {
@@ -2415,284 +2411,7 @@ dropdownItem: {
 {activeTab === 'service' && (
   <div>
     <div style={styles.tabHeader}>
-      <div>
-        <h2 style={{ fontSize: '1.5rem' }}>Service Records</h2>
-        {serviceFilter && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            marginTop: '8px',
-            padding: '8px 12px',
-            background: 'rgba(139, 92, 246, 0.2)',
-            border: '1px solid #8b5cf6',
-            borderRadius: '8px',
-            fontSize: '0.875rem',
-            color: '#a78bfa'
-          }}>
-            <AlertCircle size={16} />
-            Showing records for: <strong>{serviceFilter}</strong>
-            <button
-              onClick={() => setServiceFilter('')}
-              style={{
-                marginLeft: '8px',
-                padding: '4px 8px',
-                background: '#8b5cf6',
-                border: 'none',
-                borderRadius: '6px',
-                color: 'white',
-                cursor: 'pointer',
-                fontSize: '0.75rem',
-                fontWeight: 'bold'
-              }}
-            >
-              Clear Filter
-            </button>
-          </div>
-        )}
-      </div>
-      {userRole !== 'employee' && (
-        <button onClick={() => setShowServiceModal(true)} style={styles.addButton}>
-          <Plus size={20} /> Add Service Record
-        </button>
-      )}
-    </div>
-
-    <div style={styles.searchSortContainer}>
-      <input
-        type="text"
-        placeholder="🔍 Search service records (machine, service type, technician, notes)..."
-        value={serviceSearch}
-        onChange={(e) => setServiceSearch(e.target.value)}
-        style={styles.searchInput}
-      />
-      <select
-        value={serviceSort}
-        onChange={(e) => setServiceSort(e.target.value)}
-        style={styles.sortSelect}
-      >
-        <option value="date-desc">Date (Newest First)</option>
-        <option value="date-asc">Date (Oldest First)</option>
-      </select>
-    </div>
-
-    {serviceHistory.length === 0 ? (
-      <div style={styles.emptyState}>
-        <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
-        <p>No service records yet</p>
-      </div>
-    ) : getFilteredAndSortedService().length === 0 ? (
-      <div style={styles.emptyState}>
-        <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
-        <p>No records match your search</p>
-      </div>
-    ) : (
-      <div style={styles.itemsList}>
-        {getFilteredAndSortedService().map(record => (
-          <div key={record.id} style={styles.itemCard}>
-            {editingServiceId === record.id ? (
-              /* EDITING MODE */
-              <div style={{ flex: 1 }}>
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
-                    Select Machine
-                  </label>
-                  <select
-                    style={styles.input}
-                    value={serviceForm.machineName}
-                    onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
-                    required
-                  >
-                    <option value="">-- Select a machine --</option>
-                    {machinery
-                      .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
-                      .map(machine => (
-                        <option key={machine.id} value={machine.name}>
-                          {machine.name} {machine.category ? `(${machine.category})` : ''}
-                        </option>
-                      ))}
-                  </select>
-                  {machinery.length === 0 && (
-                    <p style={{ color: '#ef4444', fontSize: '0.875rem', marginTop: '8px' }}>
-                      ⚠️ No machinery available. Please add machinery first.
-                    </p>
-                  )}
-                </div>
-                <input
-                  style={styles.input}
-                  placeholder="Service Type (e.g., Oil Change, Repair)"
-                  value={serviceForm.serviceType}
-                  onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
-                />
-                <input
-                  style={styles.input}
-                  type="date"
-                  placeholder="Date"
-                  value={serviceForm.date}
-                  onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
-                />
-                <input
-                  style={styles.input}
-                  placeholder="Technician"
-                  value={serviceForm.technician}
-                  onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
-                />
-                <textarea
-                  style={{ ...styles.input, minHeight: '80px', resize: 'vertical' }}
-                  placeholder="Notes"
-                  value={serviceForm.notes}
-                  onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
-                />
-                
-                {/* MULTI-PHOTO UPLOAD */}
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
-                    📎 Upload Photos (Multiple)
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={async (e) => {
-                      const files = Array.from(e.target.files);
-                      if (files.length > 0) {
-                        const newPhotoUrls = await handleMultiplePhotoUpload(files);
-                        if (newPhotoUrls.length > 0) {
-                          setServiceForm(prev => ({
-                            ...prev,
-                            photoUrls: [...(prev.photoUrls || []), ...newPhotoUrls]
-                          }));
-                        }
-                      }
-                      e.target.value = '';
-                    }}
-                    style={{ ...styles.input, padding: '8px' }}
-                  />
-                  {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading photos...</p>}
-                  
-                  {/* Photo Previews with Remove Buttons */}
-                  {serviceForm.photoUrls && serviceForm.photoUrls.length > 0 && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
-                      {serviceForm.photoUrls.map((url, idx) => (
-                        <div key={idx} style={styles.photoUploadPreview}>
-                          <img 
-                            src={url} 
-                            alt={`Preview ${idx + 1}`} 
-                            style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px' }} 
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removePhotoFromServiceForm(idx)}
-                            style={styles.removePhotoButton}
-                            title="Remove photo"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                  <button onClick={() => saveServiceEdit(record.id)} style={styles.saveButton}>
-                    <Save size={16} /> Save
-                  </button>
-                  <button onClick={cancelServiceEdit} style={styles.cancelButton}>
-                    <X size={16} /> Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* VIEW MODE */
-              <>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
-                  <p style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '12px' }}>{record.serviceType}</p>
-                  
-                  <div style={styles.itemDetails}>
-                    <div>
-                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Date</p>
-                      <p>{record.date || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Technician</p>
-                      <p>{record.technician || 'N/A'}</p>
-                    </div>
-                  </div>
-
-                  {record.notes && (
-                    <div style={{ marginTop: '12px', padding: '12px', background: '#1f2937', borderRadius: '8px' }}>
-                      <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Notes:</p>
-                      <p style={{ fontSize: '0.875rem' }}>{record.notes}</p>
-                    </div>
-                  )}
-
-                  {/* MULTI-PHOTO GALLERY */}
-                  {record.photoUrls && record.photoUrls.length > 0 && (
-                    <div style={{ marginTop: '16px' }}>
-                      <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '8px', 
-                        marginBottom: '8px',
-                        color: '#9ca3af',
-                        fontSize: '0.875rem'
-                      }}>
-                        <ImageIcon size={16} />
-                        <span>{record.photoUrls.length} Photo{record.photoUrls.length !== 1 ? 's' : ''}</span>
-                      </div>
-                      <div style={styles.photoGallery}>
-                        {record.photoUrls.map((url, idx) => (
-                          <img
-                            key={idx}
-                            src={url}
-                            alt={`Service photo ${idx + 1}`}
-                            style={styles.photoThumbnail}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              openImageGallery(
-                                record.photoUrls, 
-                                idx, 
-                                `${record.machineName} - ${record.serviceType}`
-                              );
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.transform = 'scale(1.05)';
-                              e.currentTarget.style.borderColor = '#10b981';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.transform = 'scale(1)';
-                              e.currentTarget.style.borderColor = 'transparent';
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  {userRole !== 'employee' && (
-                    <button onClick={() => startEditService(record)} style={styles.editButton}>
-                      <Edit2 size={16} />
-                    </button>
-                  )}
-                  {userRole !== 'employee' && (
-                    <button onClick={() => deleteServiceRecord(record.id)} style={styles.deleteButton}>
-                      <Trash2 size={16} />
-                    </button>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
-)}
+      
   <div>
     <h2 style={{ fontSize: '1.5rem' }}>Service Records</h2>
     {serviceFilter && (
@@ -2775,8 +2494,8 @@ dropdownItem: {
   </label>
   <select
     style={styles.input}
-    value={.machineName}
-    onChange={(e) => set({ ..., machineName: e.target.value })}
+    value={serviceForm.machineName}
+    onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
     required
   >
     <option value="">-- Select a machine --</option>
@@ -2794,56 +2513,31 @@ dropdownItem: {
     </p>
   )}
 </div>
-                        <input
+<input
                           style={styles.input}
                           placeholder="Service Type (e.g., Oil Change, Repair)"
-                          value={.serviceType}
-                          onChange={(e) => set({ ..., serviceType: e.target.value })}
+                          value={serviceForm.serviceType}
+                          onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
                         />
                         <input
                           style={styles.input}
                           type="date"
                           placeholder="Date"
-                          value={.date}
-                          onChange={(e) => set({ ..., date: e.target.value })}
+                          value={serviceForm.date}
+                          onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
                         />
                         <input
                           style={styles.input}
                           placeholder="Technician"
-                          value={.technician}
-                          onChange={(e) => set({ ..., technician: e.target.value })}
+                          value={serviceForm.technician}
+                          onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
                         />
                         <textarea
                           style={{ ...styles.input, minHeight: '80px', resize: 'vertical' }}
                           placeholder="Notes"
-                          value={.notes}
-                          onChange={(e) => set({ ..., notes: e.target.value })}
+                          value={serviceForm.notes}
+                          onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
                         />
-                        <div style={{ marginBottom: '12px' }}>
-                          <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
-                            📎 Upload Photo/File
-                          </label>
-                          <input
-        type="file"
-        accept="image/*"
-        onChange={async (e) => {
-          const file = e.target.files[0];
-          if (file) {
-            const photoUrl = await handlePhotoUpload(file, 'service');
-            if (photoUrl) {
-              set({ ..., photoUrl });
-            }
-          }
-          // Clear the input so the same file can be selected again
-          e.target.value = '';
-        }}
-        style={{ ...styles.input, padding: '8px' }}
-      />
-                          {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
-                          {serviceForm.photoUrl && (
-                            <img src={serviceForm.photoUrl} alt="Preview" style={{ maxWidth: '200px', marginTop: '8px', borderRadius: '8px' }} />
-                          )}
-                        </div>
                         <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                           <button onClick={() => saveServiceEdit(record.id)} style={styles.saveButton}>
                             <Save size={16} /> Save
@@ -3835,7 +3529,7 @@ dropdownItem: {
   );
 }
 // Zoomable Image Viewer Component
-function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
+function ZoomableImageViewer({ imageUrl, title, onClose, theme, showNavigation = false, canGoPrevious = false, canGoNext = false, onPrevious = null, onNext = null }) {
   const [scale, setScale] = React.useState(1);
   const [position, setPosition] = React.useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = React.useState(false);
@@ -4216,6 +3910,82 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
       }}>
         🖱️ Scroll to zoom • ✋ Click & drag to pan • 2️⃣ Double-click to {scale === 1 ? 'zoom in' : 'reset'}
       </div>
+      {/* Navigation Arrows */}
+      {showNavigation && (
+        <>
+          {canGoPrevious && (
+            <button
+              onClick={onPrevious}
+              style={{
+                position: 'absolute',
+                left: '24px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '64px',
+                height: '64px',
+                background: 'rgba(37, 99, 235, 0.9)',
+                border: 'none',
+                borderRadius: '50%',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '2rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 102,
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.5)',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'rgba(29, 78, 216, 1)';
+                e.target.style.transform = 'translateY(-50%) scale(1.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'rgba(37, 99, 235, 0.9)';
+                e.target.style.transform = 'translateY(-50%) scale(1)';
+              }}
+            >
+              ‹
+            </button>
+          )}
+          
+          {canGoNext && (
+            <button
+              onClick={onNext}
+              style={{
+                position: 'absolute',
+                right: '24px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '64px',
+                height: '64px',
+                background: 'rgba(37, 99, 235, 0.9)',
+                border: 'none',
+                borderRadius: '50%',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '2rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 102,
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.5)',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'rgba(29, 78, 216, 1)';
+                e.target.style.transform = 'translateY(-50%) scale(1.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'rgba(37, 99, 235, 0.9)';
+                e.target.style.transform = 'translateY(-50%) scale(1)';
+              }}
+            >
+              ›
+            </button>
+          )}
+        </>
+      )}
 
       {/* Zoomable Image Container */}
       <div
@@ -4308,7 +4078,6 @@ function Modal({ children, onClose, title }) {
       cursor: 'pointer',
     },
   };
-
   return (
     <div style={modalStyles.modalOverlay}>
       <div style={modalStyles.modal}>
@@ -4321,4 +4090,52 @@ function Modal({ children, onClose, title }) {
     </div>
   );
 }
-// Modal component - defined outside to avoid recreation on each render
+
+// Multi-Image Gallery Viewer Component
+function MultiImageGalleryViewer({ images, currentIndex, setCurrentIndex, title, onClose, theme }) {
+  const canGoPrevious = currentIndex > 0;
+  const canGoNext = currentIndex < images.length - 1;
+
+  const handlePrevious = (e) => {
+    e.stopPropagation();
+    if (canGoPrevious) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  const handleNext = (e) => {
+    e.stopPropagation();
+    if (canGoNext) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'ArrowLeft' && canGoPrevious) {
+      handlePrevious(e);
+    } else if (e.key === 'ArrowRight' && canGoNext) {
+      handleNext(e);
+    } else if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
+  React.useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentIndex, images.length]);
+
+  return (
+    <ZoomableImageViewer
+      imageUrl={images[currentIndex]}
+      title={`${title} (${currentIndex + 1}/${images.length})`}
+      onClose={onClose}
+      theme={theme}
+      showNavigation={images.length > 1}
+      canGoPrevious={canGoPrevious}
+      canGoNext={canGoNext}
+      onPrevious={handlePrevious}
+      onNext={handleNext}
+    />
+  );
+}
