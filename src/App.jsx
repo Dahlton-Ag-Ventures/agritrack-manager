@@ -68,6 +68,7 @@ export default function App() {
   const [viewingImage, setViewingImage] = useState(null);
   const [imageModalTitle, setImageModalTitle] = useState('');
   const lastLocalUpdateRef = useRef(0);
+  const isEditingRef = useRef(false);
 
   const [activeTab, setActiveTab] = useState('home');
   const [inventory, setInventory] = useState([]);
@@ -292,7 +293,7 @@ const checkUser = async () => {
   }
 };
 
-  const setupRealtime = () => {
+ const setupRealtime = () => {
   console.log('🔔 Setting up real-time subscription...');
 
   const channel = supabase
@@ -308,19 +309,27 @@ const checkUser = async () => {
       (payload) => {
         console.log('🔔 Real-time update received!', payload);
         
-        // ✅ DEBOUNCE: Only apply if no recent local changes (within 3 seconds)
+        // ✅ BLOCK: Don't apply updates if user is actively editing OR recent local change
         const now = Date.now();
         const timeSinceLastUpdate = now - lastLocalUpdateRef.current;
         
-        if (timeSinceLastUpdate > 3000 && payload.new) {
-          console.log('✅ Applying real-time update (no recent local changes)');
+        if (isEditingRef.current) {
+          console.log('⏸️ Skipping real-time update (user is editing)');
+          return;
+        }
+        
+        if (timeSinceLastUpdate <= 5000) {
+          console.log('⏸️ Skipping real-time update (recent local change)');
+          return;
+        }
+        
+        if (payload.new) {
+          console.log('✅ Applying real-time update');
           setInventory(payload.new.inventory || []);
           setMachinery(payload.new.machinery || []);
           setServiceHistory(payload.new.service_history || []);
           setLastSync(new Date());
           setRealtimeStatus('connected');
-        } else {
-          console.log('⏸️ Skipping real-time update (recent local change detected)');
         }
       }
     )
@@ -560,6 +569,7 @@ const addInventoryItem = async () => {
   
   setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
   setShowInventoryModal(false);
+  isEditingRef.current = false;
 
   try {
     const { error } = await supabase
@@ -604,6 +614,7 @@ const addInventoryItem = async () => {
 };
 
   const startEditInventory = (item) => {
+    isEditingRef.current = true;
     setEditingInventoryId(item.id);
     setInventoryForm({
       name: item.name || '',
@@ -630,6 +641,7 @@ const addInventoryItem = async () => {
     
     // Clear editing state right away for better UX
     setEditingInventoryId(null);
+    isEditingRef.current = false;
     setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
 
     const { error } = await supabase
@@ -649,6 +661,7 @@ const addInventoryItem = async () => {
 };
   const cancelInventoryEdit = () => {
     setEditingInventoryId(null);
+    isEditingRef.current = false;
     setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
   };
 
@@ -662,6 +675,7 @@ const addMachineryItem = async () => {
   
   setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '' });
   setShowMachineryModal(false);
+  isEditingRef.current = false;
 
   try {
     const { error } = await supabase
@@ -736,6 +750,7 @@ const deleteMachineryItem = async (id) => {
 };
 
   const startEditMachinery = (item) => {
+    isEditingRef.current = true;
     setEditingMachineryId(item.id);
     setMachineryForm({
       name: item.name || '',
@@ -758,7 +773,8 @@ const deleteMachineryItem = async (id) => {
     setMachinery(newMachinery);
     
     // Clear editing state right away
-    setEditingMachineryId(null);
+    setEditingMachineryId(null);  // ✅ Correct
+    isEditingRef.current = false;
     setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '' });
 
     const { error } = await supabase
@@ -779,6 +795,7 @@ const deleteMachineryItem = async (id) => {
 
   const cancelMachineryEdit = () => {
     setEditingMachineryId(null);
+    isEditingRef.current = false;
     setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '' });
   };
   
@@ -850,6 +867,7 @@ const addServiceRecord = async () => {
   }
 };
 const startEditService = (record) => {
+  isEditingRef.current = true;
   setEditingServiceId(record.id);
   setServiceForm({
     machineName: record.machineName || '',
@@ -874,6 +892,7 @@ const saveServiceEdit = async (id) => {
     
     // Clear editing state right away
     setEditingServiceId(null);
+    isEditingRef.current = false;
     setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
 
     const { error } = await supabase
@@ -1976,7 +1995,10 @@ dropdownItem: {
             <div style={styles.tabHeader}>
               <h2 style={{ fontSize: '1.5rem' }}>Inventory Items</h2>
               {userRole !== 'employee' && (
-                <button onClick={() => setShowInventoryModal(true)} style={styles.addButton}>
+                <button onClick={() => {
+  setShowInventoryModal(true);
+  isEditingRef.current = true; // ✅ ADD THIS
+}} style={styles.addButton}>
                   <Plus size={20} /> Add Item
                 </button>
               )}
@@ -2088,7 +2110,7 @@ dropdownItem: {
                           <button onClick={() => saveInventoryEdit(item.id)} style={styles.saveButton}>
                             <Save size={16} /> Save
                           </button>
-                          <button onClick={cancelInventoryEdit} style={styles.cancelButton}>
+                          <button onClick={} style={styles.cancelButton}>
                             <X size={16} /> Cancel
                           </button>
                         </div>
@@ -2215,7 +2237,10 @@ dropdownItem: {
             <div style={styles.tabHeader}>
               <h2 style={{ fontSize: '1.5rem' }}>Machinery</h2>
               {userRole !== 'employee' && (
-                <button onClick={() => setShowMachineryModal(true)} style={styles.addButton}>
+              <button onClick={() => {
+  setShowMachineryModal(true);
+  isEditingRef.current = true; // ✅ ADD THIS
+}} style={styles.addButton}>
                   <Plus size={20} /> Add Machine
                 </button>
               )}
@@ -2437,7 +2462,10 @@ dropdownItem: {
     )}
   </div>
   {userRole !== 'employee' && (
-    <button onClick={() => setShowServiceModal(true)} style={styles.addButton}>
+    <button onClick={() => {
+  setShowServiceModal(true);
+  isEditingRef.current = true;
+}} style={styles.addButton}>
       <Plus size={20} /> Add Service Record
     </button>
   )}
@@ -3217,7 +3245,10 @@ dropdownItem: {
           </div>
         )}
         {showInventoryModal && (
-          <Modal title="Add Inventory Item" onClose={() => setShowInventoryModal(false)}>
+          <Modal title="Add Inventory Item" onClose={() => {
+  setShowInventoryModal(false);
+  isEditingRef.current = false; // ✅ ADD THIS
+}}>
             <input
               style={styles.input}
               placeholder="Item Name"
@@ -3291,7 +3322,10 @@ dropdownItem: {
         )}
 
         {showMachineryModal && (
-          <Modal title="Add Machinery" onClose={() => setShowMachineryModal(false)}>
+          <Modal title="Add Machinery" onClose={() => {
+  setShowMachineryModal(false);
+  isEditingRef.current = false; // ✅ ADD THIS
+}}>
             <input
               style={styles.input}
               placeholder="Machine Name"
@@ -3346,10 +3380,11 @@ dropdownItem: {
         )}
 
 {showServiceModal && (
-  <Modal title="Add Service Record" onClose={() => {
-    setShowServiceModal(false);
-    setMachineSearchModal(''); // Clear search when closing
-  }}>
+<Modal title="Add Service Record" onClose={() => {
+  setShowServiceModal(false);
+  setMachineSearchModal('');
+  isEditingRef.current = false; // ✅ ADD THIS
+}}>
     <div style={{ marginBottom: '16px' }}>
       <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
         Select Machine
