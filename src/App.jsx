@@ -1,7 +1,8 @@
+
 // BUILD VERSION: 2025-01-21-v2-FIXED
 import React, { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut, ChevronDown, Image as ImageIcon } from 'lucide-react';
+import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut, ChevronDown } from 'lucide-react';
 
 // Theme configurations
 const themes = {
@@ -66,8 +67,6 @@ export default function App() {
   const settingsDropdownRef = useRef(null);
   const [viewingImage, setViewingImage] = useState(null);
   const [imageModalTitle, setImageModalTitle] = useState('');
-  const [viewingImages, setViewingImages] = useState([]);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const [activeTab, setActiveTab] = useState('home');
   const [inventory, setInventory] = useState([]);
@@ -95,9 +94,9 @@ export default function App() {
   const [machineryForm, setMachineryForm] = useState({ 
     name: '', vinSerial: '', category: '', status: 'Active', photoUrl: ''
   });
-const [serviceForm, setServiceForm] = useState({
-  machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrls: []
-});
+  const [serviceForm, setServiceForm] = useState({
+    machineName: '', serviceType: '', date: '', notes: '', technician: ''
+  });
 
   // Photo upload state
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -271,34 +270,13 @@ const [serviceForm, setServiceForm] = useState({
 
       if (error) throw error;
 
-if (data) {
-  console.log('✅ Data loaded');
-  setInventory(data.inventory || []);
-  setMachinery(data.machinery || []);
-  
-  // MIGRATION: Convert old single photoUrl to photoUrls array
-  const migratedServiceHistory = (data.service_history || []).map(record => {
-    if (record.photoUrl && !record.photoUrls) {
-      // Old format: has photoUrl but no photoUrls
-      return {
-        ...record,
-        photoUrls: [record.photoUrl],
-        photoUrl: undefined // Remove old field
-      };
-    } else if (!record.photoUrls) {
-      // No photos at all
-      return {
-        ...record,
-        photoUrls: []
-      };
-    }
-    // Already has photoUrls
-    return record;
-  });
-  
-  setServiceHistory(migratedServiceHistory);
-  setLastSync(new Date());
-}
+      if (data) {
+        console.log('✅ Data loaded');
+        setInventory(data.inventory || []);
+        setMachinery(data.machinery || []);
+        setServiceHistory(data.service_history || []);
+        setLastSync(new Date());
+      }
     } catch (error) {
       console.error('❌ Load error:', error);
     }
@@ -319,31 +297,13 @@ if (data) {
         },
         (payload) => {
           console.log('🔔 Real-time update received!', payload);
-if (payload.new) {
-  setInventory(payload.new.inventory || []);
-  setMachinery(payload.new.machinery || []);
-  
-  // MIGRATION: Convert old single photoUrl to photoUrls array for realtime updates
-  const migratedServiceHistory = (payload.new.service_history || []).map(record => {
-    if (record.photoUrl && !record.photoUrls) {
-      return {
-        ...record,
-        photoUrls: [record.photoUrl],
-        photoUrl: undefined
-      };
-    } else if (!record.photoUrls) {
-      return {
-        ...record,
-        photoUrls: []
-      };
-    }
-    return record;
-  });
-  
-  setServiceHistory(migratedServiceHistory);
-  setLastSync(new Date());
-  setRealtimeStatus('connected');
-}
+          if (payload.new) {
+            setInventory(payload.new.inventory || []);
+            setMachinery(payload.new.machinery || []);
+            setServiceHistory(payload.new.service_history || []);
+            setLastSync(new Date());
+            setRealtimeStatus('connected');
+          }
         }
       )
       .subscribe((status) => {
@@ -453,55 +413,17 @@ if (payload.new) {
       return null;
     }
   };
-
-  // NEW: Handle multiple photo uploads for service records
-  const handleMultiplePhotoUpload = async (files) => {
-    if (!files || files.length === 0) return [];
-
-    const uploadedUrls = [];
-    
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const photoUrl = await handlePhotoUpload(file, 'service');
-      if (photoUrl) {
-        uploadedUrls.push(photoUrl);
-      }
-    }
-
-    return uploadedUrls;
-  };
-
-  // NEW: Remove a photo from service form
-  const removePhotoFromServiceForm = (index) => {
-    setServiceForm(prev => ({
-      ...prev,
-      photoUrls: prev.photoUrls.filter((_, i) => i !== index)
-    }));
-  };
-
-  // NEW: Open gallery viewer with multiple images
-  const openImageGallery = (images, startIndex = 0, title = '') => {
-    setViewingImages(images);
-    setCurrentImageIndex(startIndex);
-    setImageModalTitle(title);
-  };
-
-  // NEW: Close gallery viewer
-  const closeImageGallery = () => {
-    setViewingImages([]);
-    setCurrentImageIndex(0);
-    setImageModalTitle('');
-  };
   
-const getStockStatus = (item) => {
-  const qty = parseInt(item.quantity) || 0;
-  const min = parseInt(item.minQuantity) || 0;
-  const max = parseInt(item.maxQuantity) || Infinity;
+  // Check inventory stock levels
+  const getStockStatus = (item) => {
+    const qty = parseInt(item.quantity) || 0;
+    const min = parseInt(item.minQuantity) || 0;
+    const max = parseInt(item.maxQuantity) || Infinity;
 
-  if (min > 0 && qty <= min) return 'low';
-  if (max < Infinity && qty >= max) return 'high';
-  return 'normal';
-};
+    if (min > 0 && qty <= min) return 'low';
+    if (max < Infinity && qty >= max) return 'high';
+    return 'normal';
+  };
 
   // Filter and sort functions
   const getFilteredAndSortedInventory = () => {
@@ -808,11 +730,11 @@ const viewMachineServiceHistory = (machineName) => {
     ...serviceForm, 
     id: Date.now(),
     date: serviceForm.date || new Date().toISOString().split('T')[0],
-    photoUrls: serviceForm.photoUrls || []
+    photoUrl: serviceForm.photoUrl || '' // Explicitly include photoUrl
   };
   const newServiceHistory = [...serviceHistory, newRecord];
 
-  setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrls: [] });
+  setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
   setShowServiceModal(false);
 
   try {
@@ -849,7 +771,7 @@ const startEditService = (record) => {
     date: record.date || '',
     notes: record.notes || '',
     technician: record.technician || '',
-    photoUrls: record.photoUrls || []
+    photoUrl: record.photoUrl || ''
   });
 };
 
@@ -859,7 +781,7 @@ const saveServiceEdit = async (id) => {
   );
 
   setEditingServiceId(null);
-  setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrls: [] });
+  setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
 
   try {
     await supabase
@@ -874,7 +796,7 @@ const saveServiceEdit = async (id) => {
 
 const cancelServiceEdit = () => {
   setEditingServiceId(null);
-  setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrls: [] }); // CHANGED: Reset to empty array
+  setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
 };
 
   const quickUpdateQuantity = async (id, delta) => {
@@ -1399,54 +1321,6 @@ dropdownItem: {
       borderRadius: '12px',
       fontSize: '0.75rem',
       color: '#fbbf24',
-      fontWeight: 'bold',
-    },
-    stockBadgeHigh: {
-      padding: '4px 12px',
-      background: 'rgba(251, 191, 36, 0.2)',
-      border: '1px solid #fbbf24',
-      borderRadius: '12px',
-      fontSize: '0.75rem',
-      color: '#fbbf24',
-      fontWeight: 'bold',
-    },
-
-    photoGallery: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))',
-      gap: '8px',
-      marginTop: '12px',
-    },
-    photoThumbnail: {
-      width: '100%',
-      aspectRatio: '1',
-      objectFit: 'cover',
-      borderRadius: '6px',
-      cursor: 'pointer',
-      transition: 'transform 0.2s ease',
-      border: '2px solid transparent',
-    },
-    photoUploadPreview: {
-      position: 'relative',
-      display: 'inline-block',
-      marginRight: '8px',
-      marginBottom: '8px',
-    },
-    removePhotoButton: {
-      position: 'absolute',
-      top: '-8px',
-      right: '-8px',
-      width: '24px',
-      height: '24px',
-      borderRadius: '50%',
-      background: '#ef4444',
-      border: 'none',
-      color: 'white',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '14px',
       fontWeight: 'bold',
     },
   };
@@ -2409,9 +2283,8 @@ dropdownItem: {
           </div>
         )}
 {activeTab === 'service' && (
-  <div>
-    <div style={styles.tabHeader}>
-      
+          <div>
+            <div style={styles.tabHeader}>
   <div>
     <h2 style={{ fontSize: '1.5rem' }}>Service Records</h2>
     {serviceFilter && (
@@ -2513,7 +2386,7 @@ dropdownItem: {
     </p>
   )}
 </div>
-<input
+                        <input
                           style={styles.input}
                           placeholder="Service Type (e.g., Oil Change, Repair)"
                           value={serviceForm.serviceType}
@@ -2538,6 +2411,31 @@ dropdownItem: {
                           value={serviceForm.notes}
                           onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
                         />
+                        <div style={{ marginBottom: '12px' }}>
+                          <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+                            📎 Upload Photo/File
+                          </label>
+                          <input
+        type="file"
+        accept="image/*"
+        onChange={async (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const photoUrl = await handlePhotoUpload(file, 'service');
+            if (photoUrl) {
+              setServiceForm({ ...serviceForm, photoUrl });
+            }
+          }
+          // Clear the input so the same file can be selected again
+          e.target.value = '';
+        }}
+        style={{ ...styles.input, padding: '8px' }}
+      />
+                          {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
+                          {serviceForm.photoUrl && (
+                            <img src={serviceForm.photoUrl} alt="Preview" style={{ maxWidth: '200px', marginTop: '8px', borderRadius: '8px' }} />
+                          )}
+                        </div>
                         <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                           <button onClick={() => saveServiceEdit(record.id)} style={styles.saveButton}>
                             <Save size={16} /> Save
@@ -3341,117 +3239,6 @@ dropdownItem: {
       value={serviceForm.notes}
       onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
     />
-    
-    {/* MULTI-PHOTO UPLOAD */}
-    <div style={{ marginBottom: '16px' }}>
-      <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
-        📎 Upload Photos (Multiple - Optional)
-      </label>
-      <input
-        type="file"
-        accept="image/*"
-        multiple
-        onChange={async (e) => {
-          const files = Array.from(e.target.files);
-          if (files.length > 0) {
-            const newPhotoUrls = await handleMultiplePhotoUpload(files);
-            if (newPhotoUrls.length > 0) {
-              setServiceForm(prev => ({
-                ...prev,
-                photoUrls: [...(prev.photoUrls || []), ...newPhotoUrls]
-              }));
-            }
-          }
-          e.target.value = '';
-        }}
-        style={{ ...styles.input, padding: '8px' }}
-      />
-      {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading photos...</p>}
-      
-      {/* Photo Previews with Remove Buttons */}
-      {serviceForm.photoUrls && serviceForm.photoUrls.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
-          {serviceForm.photoUrls.map((url, idx) => (
-            <div key={idx} style={styles.photoUploadPreview}>
-              <img 
-                src={url} 
-                alt={`Preview ${idx + 1}`} 
-                style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px' }} 
-              />
-              <button
-                type="button"
-                onClick={() => removePhotoFromServiceForm(idx)}
-                style={styles.removePhotoButton}
-                title="Remove photo"
-              >
-                ✕
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-
-    <div style={{ display: 'flex', gap: '12px' }}>
-      <button 
-        onClick={addServiceRecord} 
-        style={{
-          ...styles.primaryButton,
-          opacity: !serviceForm.machineName || machinery.length === 0 || uploadingPhoto ? 0.5 : 1,
-          cursor: !serviceForm.machineName || machinery.length === 0 || uploadingPhoto ? 'not-allowed' : 'pointer'
-        }}
-        disabled={!serviceForm.machineName || machinery.length === 0 || uploadingPhoto}
-      >
-        {uploadingPhoto ? 'Uploading Photos...' : 'Add Record'}
-      </button>
-      <button onClick={() => setShowServiceModal(false)} style={styles.secondaryButton}>Cancel</button>
-    </div>
-  </Modal>
-)}
-    <div style={{ marginBottom: '16px' }}>
-      <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
-        Select Machine
-      </label>
-      <select
-        style={styles.input}
-        value={serviceForm.machineName}
-        onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
-        required
-      >
-        <option value="">-- Select a machine --</option>
-        {machinery
-          .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
-          .map(machine => (
-            <option key={machine.id} value={machine.name}>
-              {machine.name} {machine.category ? `(${machine.category})` : ''}
-            </option>
-          ))}
-      </select>
-    </div>
-    <input
-      style={styles.input}
-      placeholder="Service Type (e.g., Oil Change, Repair, Inspection)"
-      value={serviceForm.serviceType}
-      onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
-    />
-    <input
-      style={styles.input}
-      type="date"
-      value={serviceForm.date}
-      onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
-    />
-    <input
-      style={styles.input}
-      placeholder="Technician Name"
-      value={serviceForm.technician}
-      onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
-    />
-    <textarea
-      style={{ ...styles.input, minHeight: '100px', resize: 'vertical' }}
-      placeholder="Service notes and details..."
-      value={serviceForm.notes}
-      onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
-    />
    <div style={{ marginBottom: '16px' }}>
       <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
         📎 Upload Photo/File (Optional)
@@ -3508,17 +3295,13 @@ dropdownItem: {
             </button>
           </Modal>
         )}
-{/* Image Gallery Viewer */}
-      {viewingImages.length > 0 && (
-        <MultiImageGalleryViewer 
-          images={viewingImages}
-          currentIndex={currentImageIndex}
-          setCurrentIndex={setCurrentImageIndex}
-          title={imageModalTitle}
-          onClose={closeImageGallery}
+{/* Zoomable Image Viewer Modal */}
+        {viewingImage && <ZoomableImageViewer 
+          imageUrl={viewingImage} 
+          title={imageModalTitle} 
+          onClose={() => setViewingImage(null)}
           theme={currentTheme}
-        />
-      )}
+        />}
         <style>{`
           @keyframes spin {
             to { transform: rotate(360deg); }
@@ -3529,7 +3312,7 @@ dropdownItem: {
   );
 }
 // Zoomable Image Viewer Component
-function ZoomableImageViewer({ imageUrl, title, onClose, theme, showNavigation = false, canGoPrevious = false, canGoNext = false, onPrevious = null, onNext = null }) {
+function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
   const [scale, setScale] = React.useState(1);
   const [position, setPosition] = React.useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = React.useState(false);
@@ -3910,82 +3693,6 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, showNavigation =
       }}>
         🖱️ Scroll to zoom • ✋ Click & drag to pan • 2️⃣ Double-click to {scale === 1 ? 'zoom in' : 'reset'}
       </div>
-      {/* Navigation Arrows */}
-      {showNavigation && (
-        <>
-          {canGoPrevious && (
-            <button
-              onClick={onPrevious}
-              style={{
-                position: 'absolute',
-                left: '24px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: '64px',
-                height: '64px',
-                background: 'rgba(37, 99, 235, 0.9)',
-                border: 'none',
-                borderRadius: '50%',
-                color: 'white',
-                cursor: 'pointer',
-                fontSize: '2rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 102,
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.5)',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = 'rgba(29, 78, 216, 1)';
-                e.target.style.transform = 'translateY(-50%) scale(1.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = 'rgba(37, 99, 235, 0.9)';
-                e.target.style.transform = 'translateY(-50%) scale(1)';
-              }}
-            >
-              ‹
-            </button>
-          )}
-          
-          {canGoNext && (
-            <button
-              onClick={onNext}
-              style={{
-                position: 'absolute',
-                right: '24px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: '64px',
-                height: '64px',
-                background: 'rgba(37, 99, 235, 0.9)',
-                border: 'none',
-                borderRadius: '50%',
-                color: 'white',
-                cursor: 'pointer',
-                fontSize: '2rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 102,
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.5)',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = 'rgba(29, 78, 216, 1)';
-                e.target.style.transform = 'translateY(-50%) scale(1.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = 'rgba(37, 99, 235, 0.9)';
-                e.target.style.transform = 'translateY(-50%) scale(1)';
-              }}
-            >
-              ›
-            </button>
-          )}
-        </>
-      )}
 
       {/* Zoomable Image Container */}
       <div
@@ -4078,6 +3785,7 @@ function Modal({ children, onClose, title }) {
       cursor: 'pointer',
     },
   };
+
   return (
     <div style={modalStyles.modalOverlay}>
       <div style={modalStyles.modal}>
@@ -4090,52 +3798,4 @@ function Modal({ children, onClose, title }) {
     </div>
   );
 }
-
-// Multi-Image Gallery Viewer Component
-function MultiImageGalleryViewer({ images, currentIndex, setCurrentIndex, title, onClose, theme }) {
-  const canGoPrevious = currentIndex > 0;
-  const canGoNext = currentIndex < images.length - 1;
-
-  const handlePrevious = (e) => {
-    e.stopPropagation();
-    if (canGoPrevious) {
-      setCurrentIndex(currentIndex - 1);
-    }
-  };
-
-  const handleNext = (e) => {
-    e.stopPropagation();
-    if (canGoNext) {
-      setCurrentIndex(currentIndex + 1);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'ArrowLeft' && canGoPrevious) {
-      handlePrevious(e);
-    } else if (e.key === 'ArrowRight' && canGoNext) {
-      handleNext(e);
-    } else if (e.key === 'Escape') {
-      onClose();
-    }
-  };
-
-  React.useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, images.length]);
-
-  return (
-    <ZoomableImageViewer
-      imageUrl={images[currentIndex]}
-      title={`${title} (${currentIndex + 1}/${images.length})`}
-      onClose={onClose}
-      theme={theme}
-      showNavigation={images.length > 1}
-      canGoPrevious={canGoPrevious}
-      canGoNext={canGoNext}
-      onPrevious={handlePrevious}
-      onNext={handleNext}
-    />
-  );
-}
+// Modal component - defined outside to avoid recreation on each render
