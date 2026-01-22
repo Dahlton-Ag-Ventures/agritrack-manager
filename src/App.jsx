@@ -3798,4 +3798,3 @@ function Modal({ children, onClose, title }) {
     </div>
   );
 }
-// Modal component - defined outside to avoid recreation on each render
