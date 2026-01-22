@@ -698,14 +698,13 @@ const addMachineryItem = async () => {
     const currentMachinery = currentData?.machinery || [];
     const newItem = { ...machineryForm, id: Date.now() };
     const newMachinery = [...currentMachinery, newItem];
-
-  // ✅ UPDATE LOCAL STATE IMMEDIATELY
-  setMachinery(newMachinery);
-  
-  setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '' });
-  setShowMachineryModal(false);
-
-  try {
+    
+    // ✅ UPDATE LOCAL STATE IMMEDIATELY
+    setMachinery(newMachinery);
+    
+    setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '' });
+    setShowMachineryModal(false);
+    
     const { error } = await supabase
       .from('agritrack_data')
       .update({ machinery: newMachinery })
@@ -714,7 +713,6 @@ const addMachineryItem = async () => {
     if (error) throw error;
     console.log('✅ Machinery item added successfully');
     
-    // ✅ Clear editing flag AFTER successful save with delay
     setTimeout(() => {
       isEditingRef.current = false;
     }, 1000);
@@ -722,7 +720,6 @@ const addMachineryItem = async () => {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
     isEditingRef.current = false;
-    // ❌ ROLLBACK ON ERROR
     loadData();
   }
 };
