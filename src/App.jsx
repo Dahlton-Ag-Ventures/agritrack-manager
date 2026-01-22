@@ -596,28 +596,33 @@ const addInventoryItem = async () => {
   };
 
   const saveInventoryEdit = async (id) => {
-    try {
-      const newInventory = inventory.map(item => 
-        item.id === id ? { ...item, ...inventoryForm } : item
-      );
+  try {
+    const newInventory = inventory.map(item => 
+      item.id === id ? { ...item, ...inventoryForm } : item
+    );
 
-      const { error } = await supabase
-        .from('agritrack_data')
-        .update({ inventory: newInventory })
-        .eq('id', 1);
+    // ✅ UPDATE LOCAL STATE IMMEDIATELY
+    setInventory(newInventory);
+    
+    // Clear editing state right away for better UX
+    setEditingInventoryId(null);
+    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
 
-      if (error) throw error;
+    const { error } = await supabase
+      .from('agritrack_data')
+      .update({ inventory: newInventory })
+      .eq('id', 1);
 
-      setEditingInventoryId(null);
-      setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
+    if (error) throw error;
 
-      console.log('✅ Item updated successfully');
-    } catch (error) {
-      console.error('Error updating inventory item:', error);
-      alert('Failed to update item. Please try again.');
-    }
-  };
-
+    console.log('✅ Item updated successfully');
+  } catch (error) {
+    console.error('Error updating inventory item:', error);
+    alert('Failed to update item. Please try again.');
+    // ❌ ROLLBACK ON ERROR
+    loadData();
+  }
+};
   const cancelInventoryEdit = () => {
     setEditingInventoryId(null);
     setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
@@ -708,23 +713,33 @@ const deleteMachineryItem = async (id) => {
   };
 
   const saveMachineryEdit = async (id) => {
+  try {
     const newMachinery = machinery.map(item => 
       item.id === id ? { ...item, ...machineryForm } : item
     );
 
+    // ✅ UPDATE LOCAL STATE IMMEDIATELY
+    setMachinery(newMachinery);
+    
+    // Clear editing state right away
     setEditingMachineryId(null);
-    setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active' });
+    setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '' });
 
-    try {
-      await supabase
-        .from('agritrack_data')
-        .update({ machinery: newMachinery })
-        .eq('id', 1);
-    } catch (error) {
-      console.error('Update error:', error);
-      alert('Error: ' + error.message);
-    }
-  };
+    const { error } = await supabase
+      .from('agritrack_data')
+      .update({ machinery: newMachinery })
+      .eq('id', 1);
+
+    if (error) throw error;
+
+    console.log('✅ Machinery updated successfully');
+  } catch (error) {
+    console.error('Update error:', error);
+    alert('Error: ' + error.message);
+    // ❌ ROLLBACK ON ERROR
+    loadData();
+  }
+};
 
   const cancelMachineryEdit = () => {
     setEditingMachineryId(null);
@@ -801,23 +816,33 @@ const startEditService = (record) => {
 };
 
 const saveServiceEdit = async (id) => {
-  const newServiceHistory = serviceHistory.map(record => 
-    record.id === id ? { ...record, ...serviceForm } : record
-  );
-
-  setEditingServiceId(null);
-  setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
-
   try {
-    await supabase
+    const newServiceHistory = serviceHistory.map(record => 
+      record.id === id ? { ...record, ...serviceForm } : record
+    );
+
+    // ✅ UPDATE LOCAL STATE IMMEDIATELY
+    setServiceHistory(newServiceHistory);
+    
+    // Clear editing state right away
+    setEditingServiceId(null);
+    setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
+
+    const { error } = await supabase
       .from('agritrack_data')
       .update({ service_history: newServiceHistory })
       .eq('id', 1);
+
+    if (error) throw error;
+
+    console.log('✅ Service record updated successfully');
   } catch (error) {
     console.error('Update error:', error);
     alert('Error: ' + error.message);
+    // ❌ ROLLBACK ON ERROR
+    loadData();
   }
-};;
+};
 
 const cancelServiceEdit = () => {
   setEditingServiceId(null);
