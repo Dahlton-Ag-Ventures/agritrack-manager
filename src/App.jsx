@@ -913,6 +913,7 @@ const saveServiceEdit = async (id) => {
 
 const cancelServiceEdit = () => {
   setEditingServiceId(null);
+  isEditingRef.current = false;
   setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
   setMachineSearchModal('');
 };
@@ -2110,9 +2111,9 @@ dropdownItem: {
                           <button onClick={() => saveInventoryEdit(item.id)} style={styles.saveButton}>
                             <Save size={16} /> Save
                           </button>
-                          <button onClick={} style={styles.cancelButton}>
-                            <X size={16} /> Cancel
-                          </button>
+                        <button onClick={cancelInventoryEdit} style={styles.cancelButton}>  // ✅ Fixed
+    <X size={16} /> Cancel
+</button>
                         </div>
                       </div>
                     ) : (
