@@ -2160,7 +2160,7 @@ dropdownItem: {
                           <button onClick={() => saveInventoryEdit(item.id)} style={styles.saveButton}>
                             <Save size={16} /> Save
                           </button>
-                        <button onClick={cancelInventoryEdit} style={styles.cancelButton}>  // ✅ Fixed
+                        <button onClick={cancelInventoryEdit} style={styles.cancelButton}>
     <X size={16} /> Cancel
 </button>
                         </div>
