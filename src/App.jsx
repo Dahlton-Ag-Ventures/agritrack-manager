@@ -112,6 +112,8 @@ const [inventoryForm, setInventoryForm] = useState({
   const [serviceSort, setServiceSort] = useState('date-desc');
   const [serviceFilter, setServiceFilter] = useState('');
   const [machineSearchModal, setMachineSearchModal] = useState('');
+  const [inventoryPage, setInventoryPage] = useState(1);
+  const [inventoryItemsPerPage, setInventoryItemsPerPage] = useState(50);
   
   // Get current theme object
   const currentTheme = themes[theme];
@@ -457,33 +459,45 @@ const checkUser = async () => {
 
   // Filter and sort functions
   const getFilteredAndSortedInventory = () => {
-    let filtered = inventory.filter(item => {
-      const searchLower = inventorySearch.toLowerCase();
-      return (
-        item.name?.toLowerCase().includes(searchLower) ||
-        item.partNumber?.toLowerCase().includes(searchLower) ||
-        item.location?.toLowerCase().includes(searchLower)
-      );
-    });
+  let filtered = inventory.filter(item => {
+    const searchLower = inventorySearch.toLowerCase();
+    return (
+      item.name?.toLowerCase().includes(searchLower) ||
+      item.partNumber?.toLowerCase().includes(searchLower) ||
+      item.location?.toLowerCase().includes(searchLower)
+    );
+  });
 
-    return filtered.sort((a, b) => {
-      switch (inventorySort) {
-        case 'name-asc':
-          return (a.name || '').localeCompare(b.name || '');
-        case 'name-desc':
-          return (b.name || '').localeCompare(a.name || '');
-        case 'quantity-asc':
-          return (parseInt(a.quantity) || 0) - (parseInt(b.quantity) || 0);
-        case 'quantity-desc':
-          return (parseInt(b.quantity) || 0) - (parseInt(a.quantity) || 0);
-        case 'location':
-          return (a.location || '').localeCompare(b.location || '');
-        default:
-          return 0;
-      }
-    });
+  return filtered.sort((a, b) => {
+    switch (inventorySort) {
+      case 'name-asc':
+        return (a.name || '').localeCompare(b.name || '');
+      case 'name-desc':
+        return (b.name || '').localeCompare(a.name || '');
+      case 'quantity-asc':
+        return (parseInt(a.quantity) || 0) - (parseInt(b.quantity) || 0);
+      case 'quantity-desc':
+        return (parseInt(b.quantity) || 0) - (parseInt(a.quantity) || 0);
+      case 'location':
+        return (a.location || '').localeCompare(b.location || '');
+      default:
+        return 0;
+    }
+  });
+};
+
+const getPaginatedInventory = () => {
+  const filtered = getFilteredAndSortedInventory();
+  const startIndex = (inventoryPage - 1) * inventoryItemsPerPage;
+  const endIndex = startIndex + inventoryItemsPerPage;
+  return {
+    items: filtered.slice(startIndex, endIndex),
+    totalItems: filtered.length,
+    totalPages: Math.ceil(filtered.length / inventoryItemsPerPage),
+    startIndex: startIndex + 1,
+    endIndex: Math.min(endIndex, filtered.length)
   };
-
+};
   const getFilteredAndSortedMachinery = () => {
     let filtered = machinery.filter(item => {
       const searchLower = machinerySearch.toLowerCase();
@@ -582,7 +596,7 @@ const addInventoryItem = async () => {
     // ✅ UPDATE LOCAL STATE IMMEDIATELY
     setInventory(newInventory);
     
-    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
+   setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
     setShowInventoryModal(false);
 
     // ✅ NOW SAVE BACK TO DATABASE
@@ -661,7 +675,7 @@ const startEditInventory = (item) => {
     // Clear editing state right away for better UX
     setEditingInventoryId(null);
     isEditingRef.current = false;
-    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
+    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
 
     const { error } = await supabase
       .from('agritrack_data')
@@ -2039,248 +2053,448 @@ dropdownItem: {
   </div>
 )}
         
-        {activeTab === 'inventory' && (
-          <div>
-            <div style={styles.tabHeader}>
-              <h2 style={{ fontSize: '1.5rem' }}>Inventory Items</h2>
-              {userRole !== 'employee' && (
-                <button onClick={() => {
-  setShowInventoryModal(true);
-  isEditingRef.current = true; // ✅ ADD THIS
-}} style={styles.addButton}>
-                  <Plus size={20} /> Add Item
-                </button>
-              )}
-            </div>
-
-            <div style={styles.searchSortContainer}>
-              <input
-                type="text"
-                placeholder="🔍 Search inventory (name, part number, location)..."
-                value={inventorySearch}
-                onChange={(e) => setInventorySearch(e.target.value)}
-                style={styles.searchInput}
-              />
-              <select
-                value={inventorySort}
-                onChange={(e) => setInventorySort(e.target.value)}
-                style={styles.sortSelect}
-              >
-                <option value="name-asc">Name (A → Z)</option>
-                <option value="name-desc">Name (Z → A)</option>
-                <option value="quantity-asc">Stock (Low → High)</option>
-                <option value="quantity-desc">Stock (High → Low)</option>
-                <option value="location">Location</option>
-              </select>
-            </div>
-
-            {inventory.length === 0 ? (
-              <div style={styles.emptyState}>
-                <Package size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
-                <p>No inventory items yet</p>
-              </div>
-            ) : getFilteredAndSortedInventory().length === 0 ? (
-              <div style={styles.emptyState}>
-                <Package size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
-                <p>No items match your search</p>
-              </div>
-            ) : (
-              <div style={styles.itemsList}>
-                {getFilteredAndSortedInventory().map(item => (
-                  <div key={item.id} style={styles.itemCard}>
-                    {editingInventoryId === item.id ? (
-                      <div style={{ flex: 1 }}>
-                        <input
-                          style={styles.input}
-                          placeholder="Item Name"
-                          value={inventoryForm.name}
-                          onChange={(e) => setInventoryForm({ ...inventoryForm, name: e.target.value })}
-                        />
-                        <input
-                          style={styles.input}
-                          placeholder="Part Number"
-                          value={inventoryForm.partNumber}
-                          onChange={(e) => setInventoryForm({ ...inventoryForm, partNumber: e.target.value })}
-                        />
-                        <input
-                          style={styles.input}
-                          type="number"
-                          placeholder="Quantity"
-                          value={inventoryForm.quantity}
-                          onChange={(e) => setInventoryForm({ ...inventoryForm, quantity: e.target.value })}
-                        />
-                        <input
-                          style={styles.input}
-                          placeholder="Location"
-                          value={inventoryForm.location}
-                          onChange={(e) => setInventoryForm({ ...inventoryForm, location: e.target.value })}
-                        />
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                          <input
-                            style={styles.input}
-                            type="number"
-                            placeholder="Min Quantity"
-                            value={inventoryForm.minQuantity}
-                            onChange={(e) => setInventoryForm({ ...inventoryForm, minQuantity: e.target.value })}
-                          />
-                          <input
-                            style={styles.input}
-                            type="number"
-                            placeholder="Max Quantity"
-                            value={inventoryForm.maxQuantity}
-                            onChange={(e) => setInventoryForm({ ...inventoryForm, maxQuantity: e.target.value })}
-                          />
-                        </div>
-                        <div style={{ marginBottom: '12px' }}>
-                          <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
-                            📸 Upload Photo
-                          </label>
-                         <input
-  type="file"
-  accept="image/*"
-  onChange={async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const photoUrl = await handlePhotoUpload(file, 'inventory');
-      if (photoUrl) {
-        setInventoryForm({ ...inventoryForm, photoUrl });
-      }
-    }
-    e.target.value = '';
-  }}
-  style={{ ...styles.input, padding: '8px' }}
-/>
-                          {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
-                          {inventoryForm.photoUrl && (
-                            <img src={inventoryForm.photoUrl} alt="Preview" style={{ maxWidth: '100px', marginTop: '8px', borderRadius: '8px' }} />
-                          )}
-                        </div>
-                        <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                          <button onClick={() => saveInventoryEdit(item.id)} style={styles.saveButton}>
-                            <Save size={16} /> Save
-                          </button>
-                        <button onClick={cancelInventoryEdit} style={styles.cancelButton}>
-    <X size={16} /> Cancel
-</button>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-{item.photoUrl && (
-                          <img 
-                            src={item.photoUrl} 
-                            alt={item.name} 
-                            style={{ 
-                              width: '100px', 
-                              height: '100px', 
-                              objectFit: 'cover', 
-                              borderRadius: '8px',
-                              marginRight: '16px',
-                              cursor: 'pointer',
-                              transition: 'transform 0.2s ease',
-                              border: '2px solid transparent',
-                              userSelect: 'none',
-                              WebkitUserSelect: 'none',
-                              pointerEvents: 'auto'
-                            }}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setViewingImage(item.photoUrl);
-                              setImageModalTitle(item.name);
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.transform = 'scale(1.05)';
-                              e.currentTarget.style.borderColor = '#10b981';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.transform = 'scale(1)';
-                              e.currentTarget.style.borderColor = 'transparent';
-                            }}
-                          />
-                        )}
-                        <div style={{ flex: 1 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                            <h3 style={{ fontSize: '1.25rem' }}>{item.name}</h3>
-                            {getStockStatus(item) === 'low' && (
-                              <span style={styles.stockBadgeLow}>⚠️ Low Stock</span>
-                            )}
-                            {getStockStatus(item) === 'high' && (
-                              <span style={styles.stockBadgeHigh}>⚠️ Overstocked</span>
-                            )}
-                          </div>
-<div style={styles.itemDetails}>
+      {activeTab === 'inventory' && (
   <div>
-    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Part Number</p>
-    <p>{item.partNumber || 'N/A'}</p>
-  </div>
-  <div>
-    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Quantity</p>
-    {userRole === 'employee' ? (
-      <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
-    ) : (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <button 
-          onClick={() => quickUpdateQuantity(item.id, -1)}
-          style={styles.quantityButton}
-        >
-          −
+    <div style={styles.tabHeader}>
+      <h2 style={{ fontSize: '1.5rem' }}>Inventory Items</h2>
+      {userRole !== 'employee' && (
+        <button onClick={() => {
+          setShowInventoryModal(true);
+          isEditingRef.current = true;
+        }} style={styles.addButton}>
+          <Plus size={20} /> Add Item
         </button>
-        <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
-        <button 
-          onClick={() => quickUpdateQuantity(item.id, 1)}
-          style={styles.quantityButton}
-        >
-          +
-        </button>
+      )}
+    </div>
+
+    <div style={styles.searchSortContainer}>
+      <input
+        type="text"
+        placeholder="🔍 Search inventory (name, part number, location)..."
+        value={inventorySearch}
+        onChange={(e) => {
+          setInventorySearch(e.target.value);
+          setInventoryPage(1);
+        }}
+        style={styles.searchInput}
+      />
+      <select
+        value={inventorySort}
+        onChange={(e) => {
+          setInventorySort(e.target.value);
+          setInventoryPage(1);
+        }}
+        style={styles.sortSelect}
+      >
+        <option value="name-asc">Name (A → Z)</option>
+        <option value="name-desc">Name (Z → A)</option>
+        <option value="quantity-asc">Stock (Low → High)</option>
+        <option value="quantity-desc">Stock (High → Low)</option>
+        <option value="location">Location</option>
+      </select>
+      <select
+        value={inventoryItemsPerPage}
+        onChange={(e) => {
+          setInventoryItemsPerPage(Number(e.target.value));
+          setInventoryPage(1);
+        }}
+        style={styles.sortSelect}
+      >
+        <option value="25">Show 25</option>
+        <option value="50">Show 50</option>
+        <option value="100">Show 100</option>
+        <option value="200">Show 200</option>
+      </select>
+    </div>
+
+    {inventory.length === 0 ? (
+      <div style={styles.emptyState}>
+        <Package size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+        <p>No inventory items yet</p>
       </div>
-    )}
-  </div>
-  <div>
+    ) : getFilteredAndSortedInventory().length === 0 ? (
+      <div style={styles.emptyState}>
+        <Package size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+        <p>No items match your search</p>
+      </div>
+    ) : (
+      <>
+        {/* TOP PAGINATION CONTROLS */}
+        <div style={{
+          padding: '16px',
+          background: currentTheme.cardBackground,
+          border: `1px solid ${currentTheme.cardBorder}`,
+          borderRadius: '12px',
+          marginBottom: '16px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
+          <div style={{ color: currentTheme.text }}>
+            Showing <strong>{getPaginatedInventory().startIndex}-{getPaginatedInventory().endIndex}</strong> of <strong>{getPaginatedInventory().totalItems}</strong> items
+          </div>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setInventoryPage(1)}
+              disabled={inventoryPage === 1}
+              style={{
+                padding: '8px 16px',
+                background: inventoryPage === 1 ? '#4b5563' : '#10b981',
+                border: 'none',
+                borderRadius: '8px',
+                color: 'white',
+                cursor: inventoryPage === 1 ? 'not-allowed' : 'pointer',
+                fontSize: '0.875rem',
+                opacity: inventoryPage === 1 ? 0.5 : 1
+              }}
+            >
+              First
+            </button>
+            <button
+              onClick={() => setInventoryPage(prev => Math.max(1, prev - 1))}
+              disabled={inventoryPage === 1}
+              style={{
+                padding: '8px 16px',
+                background: inventoryPage === 1 ? '#4b5563' : '#10b981',
+                border: 'none',
+                borderRadius: '8px',
+                color: 'white',
+                cursor: inventoryPage === 1 ? 'not-allowed' : 'pointer',
+                fontSize: '0.875rem',
+                opacity: inventoryPage === 1 ? 0.5 : 1
+              }}
+            >
+              Previous
+            </button>
+            <span style={{ 
+              padding: '8px 16px', 
+              color: currentTheme.text,
+              fontSize: '0.875rem',
+              fontWeight: 'bold'
+            }}>
+              Page {inventoryPage} of {getPaginatedInventory().totalPages}
+            </span>
+            <button
+              onClick={() => setInventoryPage(prev => Math.min(getPaginatedInventory().totalPages, prev + 1))}
+              disabled={inventoryPage === getPaginatedInventory().totalPages}
+              style={{
+                padding: '8px 16px',
+                background: inventoryPage === getPaginatedInventory().totalPages ? '#4b5563' : '#10b981',
+                border: 'none',
+                borderRadius: '8px',
+                color: 'white',
+                cursor: inventoryPage === getPaginatedInventory().totalPages ? 'not-allowed' : 'pointer',
+                fontSize: '0.875rem',
+                opacity: inventoryPage === getPaginatedInventory().totalPages ? 0.5 : 1
+              }}
+            >
+              Next
+            </button>
+            <button
+              onClick={() => setInventoryPage(getPaginatedInventory().totalPages)}
+              disabled={inventoryPage === getPaginatedInventory().totalPages}
+              style={{
+                padding: '8px 16px',
+                background: inventoryPage === getPaginatedInventory().totalPages ? '#4b5563' : '#10b981',
+                border: 'none',
+                borderRadius: '8px',
+                color: 'white',
+                cursor: inventoryPage === getPaginatedInventory().totalPages ? 'not-allowed' : 'pointer',
+                fontSize: '0.875rem',
+                opacity: inventoryPage === getPaginatedInventory().totalPages ? 0.5 : 1
+              }}
+            >
+              Last
+            </button>
+          </div>
+        </div>
 
-                              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Location</p>
-                              <p>{item.location || 'N/A'}</p>
-                            </div>
-                            {(item.minQuantity || item.maxQuantity) && (
-                              <div>
-                                <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Min / Max</p>
-                                <p>{item.minQuantity || '—'} / {item.maxQuantity || '—'}</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          {userRole !== 'employee' && (
-                            <button onClick={() => startEditInventory(item)} style={styles.editButton}>
-                              <Edit2 size={16} />
-                            </button>
-                          )}
-                          {userRole !== 'employee' && (
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                deleteInventoryItem(item.id);
-                              }}
-                              onTouchEnd={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                deleteInventoryItem(item.id);
-                              }}
-                              style={{...styles.deleteButton, touchAction: 'manipulation'}}
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          )}
-                        </div>
-                      </>
+        {/* INVENTORY ITEMS LIST */}
+        <div style={styles.itemsList}>
+          {getPaginatedInventory().items.map(item => (
+            <div key={item.id} style={styles.itemCard}>
+              {editingInventoryId === item.id ? (
+                <div style={{ flex: 1 }}>
+                  <input
+                    style={styles.input}
+                    placeholder="Item Name"
+                    value={inventoryForm.name}
+                    onChange={(e) => setInventoryForm({ ...inventoryForm, name: e.target.value })}
+                  />
+                  <input
+                    style={styles.input}
+                    placeholder="Part Number"
+                    value={inventoryForm.partNumber}
+                    onChange={(e) => setInventoryForm({ ...inventoryForm, partNumber: e.target.value })}
+                  />
+                  <input
+                    style={styles.input}
+                    type="number"
+                    placeholder="Quantity"
+                    value={inventoryForm.quantity}
+                    onChange={(e) => setInventoryForm({ ...inventoryForm, quantity: e.target.value })}
+                  />
+                  <input
+                    style={styles.input}
+                    placeholder="Location"
+                    value={inventoryForm.location}
+                    onChange={(e) => setInventoryForm({ ...inventoryForm, location: e.target.value })}
+                  />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <input
+                      style={styles.input}
+                      type="number"
+                      placeholder="Min Quantity"
+                      value={inventoryForm.minQuantity}
+                      onChange={(e) => setInventoryForm({ ...inventoryForm, minQuantity: e.target.value })}
+                    />
+                    <input
+                      style={styles.input}
+                      type="number"
+                      placeholder="Max Quantity"
+                      value={inventoryForm.maxQuantity}
+                      onChange={(e) => setInventoryForm({ ...inventoryForm, maxQuantity: e.target.value })}
+                    />
+                  </div>
+                  <div style={{ marginBottom: '12px' }}>
+                    <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+                      📸 Upload Photo
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          const photoUrl = await handlePhotoUpload(file, 'inventory');
+                          if (photoUrl) {
+                            setInventoryForm({ ...inventoryForm, photoUrl });
+                          }
+                        }
+                        e.target.value = '';
+                      }}
+                      style={{ ...styles.input, padding: '8px' }}
+                    />
+                    {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
+                    {inventoryForm.photoUrl && (
+                      <img src={inventoryForm.photoUrl} alt="Preview" style={{ maxWidth: '100px', marginTop: '8px', borderRadius: '8px' }} />
                     )}
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                    <button onClick={() => saveInventoryEdit(item.id)} style={styles.saveButton}>
+                      <Save size={16} /> Save
+                    </button>
+                    <button onClick={cancelInventoryEdit} style={styles.cancelButton}>
+                      <X size={16} /> Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {item.photoUrl && (
+                    <img 
+                      src={item.photoUrl} 
+                      alt={item.name} 
+                      style={{ 
+                        width: '100px', 
+                        height: '100px', 
+                        objectFit: 'cover', 
+                        borderRadius: '8px',
+                        marginRight: '16px',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s ease',
+                        border: '2px solid transparent',
+                        userSelect: 'none',
+                        WebkitUserSelect: 'none',
+                        pointerEvents: 'auto'
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setViewingImage(item.photoUrl);
+                        setImageModalTitle(item.name);
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                        e.currentTarget.style.borderColor = '#10b981';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.borderColor = 'transparent';
+                      }}
+                    />
+                  )}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      <h3 style={{ fontSize: '1.25rem' }}>{item.name}</h3>
+                      {getStockStatus(item) === 'low' && (
+                        <span style={styles.stockBadgeLow}>⚠️ Low Stock</span>
+                      )}
+                      {getStockStatus(item) === 'high' && (
+                        <span style={styles.stockBadgeHigh}>⚠️ Overstocked</span>
+                      )}
+                    </div>
+                    <div style={styles.itemDetails}>
+                      <div>
+                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Part Number</p>
+                        <p>{item.partNumber || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Quantity</p>
+                        {userRole === 'employee' ? (
+                          <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
+                        ) : (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <button 
+                              onClick={() => quickUpdateQuantity(item.id, -1)}
+                              style={styles.quantityButton}
+                            >
+                              −
+                            </button>
+                            <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
+                            <button 
+                              onClick={() => quickUpdateQuantity(item.id, 1)}
+                              style={styles.quantityButton}
+                            >
+                              +
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Location</p>
+                        <p>{item.location || 'N/A'}</p>
+                      </div>
+                      {(item.minQuantity || item.maxQuantity) && (
+                        <div>
+                          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Min / Max</p>
+                          <p>{item.minQuantity || '—'} / {item.maxQuantity || '—'}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    {userRole !== 'employee' && (
+                      <button onClick={() => startEditInventory(item)} style={styles.editButton}>
+                        <Edit2 size={16} />
+                      </button>
+                    )}
+                    {userRole !== 'employee' && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          deleteInventoryItem(item.id);
+                        }}
+                        onTouchEnd={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          deleteInventoryItem(item.id);
+                        }}
+                        style={{...styles.deleteButton, touchAction: 'manipulation'}}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* BOTTOM PAGINATION CONTROLS */}
+        <div style={{
+          padding: '16px',
+          background: currentTheme.cardBackground,
+          border: `1px solid ${currentTheme.cardBorder}`,
+          borderRadius: '12px',
+          marginTop: '16px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '8px',
+          flexWrap: 'wrap'
+        }}>
+          <button
+            onClick={() => setInventoryPage(1)}
+            disabled={inventoryPage === 1}
+            style={{
+              padding: '8px 16px',
+              background: inventoryPage === 1 ? '#4b5563' : '#10b981',
+              border: 'none',
+              borderRadius: '8px',
+              color: 'white',
+              cursor: inventoryPage === 1 ? 'not-allowed' : 'pointer',
+              fontSize: '0.875rem',
+              opacity: inventoryPage === 1 ? 0.5 : 1
+            }}
+          >
+            First
+          </button>
+          <button
+            onClick={() => setInventoryPage(prev => Math.max(1, prev - 1))}
+            disabled={inventoryPage === 1}
+            style={{
+              padding: '8px 16px',
+              background: inventoryPage === 1 ? '#4b5563' : '#10b981',
+              border: 'none',
+              borderRadius: '8px',
+              color: 'white',
+              cursor: inventoryPage === 1 ? 'not-allowed' : 'pointer',
+              fontSize: '0.875rem',
+              opacity: inventoryPage === 1 ? 0.5 : 1
+            }}
+          >
+            Previous
+          </button>
+          <span style={{ 
+            padding: '8px 16px', 
+            color: currentTheme.text,
+            fontSize: '0.875rem',
+            fontWeight: 'bold'
+          }}>
+            Page {inventoryPage} of {getPaginatedInventory().totalPages}
+          </span>
+          <button
+            onClick={() => setInventoryPage(prev => Math.min(getPaginatedInventory().totalPages, prev + 1))}
+            disabled={inventoryPage === getPaginatedInventory().totalPages}
+            style={{
+              padding: '8px 16px',
+              background: inventoryPage === getPaginatedInventory().totalPages ? '#4b5563' : '#10b981',
+              border: 'none',
+              borderRadius: '8px',
+              color: 'white',
+              cursor: inventoryPage === getPaginatedInventory().totalPages ? 'not-allowed' : 'pointer',
+              fontSize: '0.875rem',
+              opacity: inventoryPage === getPaginatedInventory().totalPages ? 0.5 : 1
+            }}
+          >
+            Next
+          </button>
+          <button
+            onClick={() => setInventoryPage(getPaginatedInventory().totalPages)}
+            disabled={inventoryPage === getPaginatedInventory().totalPages}
+            style={{
+              padding: '8px 16px',
+              background: inventoryPage === getPaginatedInventory().totalPages ? '#4b5563' : '#10b981',
+              border: 'none',
+              borderRadius: '8px',
+              color: 'white',
+              cursor: inventoryPage === getPaginatedInventory().totalPages ? 'not-allowed' : 'pointer',
+              fontSize: '0.875rem',
+              opacity: inventoryPage === getPaginatedInventory().totalPages ? 0.5 : 1
+            }}
+          >
+            Last
+          </button>
+        </div>
+      </>
+    )}
+  </div>
+)}
 
         {activeTab === 'machinery' && (
           <div>
