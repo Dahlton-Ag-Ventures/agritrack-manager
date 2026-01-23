@@ -89,10 +89,10 @@ export default function App() {
   const [editingMachineryId, setEditingMachineryId] = useState(null);
   const [editingServiceId, setEditingServiceId] = useState(null);
 
-  const [inventoryForm, setInventoryForm] = useState({ 
-    name: '', partNumber: '', quantity: '', location: '', category: '', 
-    minQuantity: '', maxQuantity: '', photoUrl: ''
-  });
+const [inventoryForm, setInventoryForm] = useState({ 
+  name: '', partNumber: '', quantity: '', location: '', 
+  minQuantity: '', maxQuantity: '', photoUrl: ''
+});
   const [machineryForm, setMachineryForm] = useState({ 
     name: '', vinSerial: '', category: '', status: 'Active', photoUrl: ''
   });
@@ -633,20 +633,19 @@ const addInventoryItem = async () => {
   }
 };
 
-  const startEditInventory = (item) => {
-    isEditingRef.current = true;
-    setEditingInventoryId(item.id);
-    setInventoryForm({
-      name: item.name || '',
-      partNumber: item.partNumber || '',
-      quantity: item.quantity || '',
-      location: item.location || '',
-      category: item.category || '',
-      minQuantity: item.minQuantity || '',
-      maxQuantity: item.maxQuantity || '',
-      photoUrl: item.photoUrl || ''
-    });
-  };
+const startEditInventory = (item) => {
+  isEditingRef.current = true;
+  setEditingInventoryId(item.id);
+  setInventoryForm({
+    name: item.name || '',
+    partNumber: item.partNumber || '',
+    quantity: item.quantity || '',
+    location: item.location || '',
+    minQuantity: item.minQuantity || '',
+    maxQuantity: item.maxQuantity || '',
+    photoUrl: item.photoUrl || ''
+  });
+};
 
   const saveInventoryEdit = async (id) => {
   try {
@@ -679,11 +678,11 @@ const addInventoryItem = async () => {
     loadData();
   }
 };
-  const cancelInventoryEdit = () => {
-    setEditingInventoryId(null);
-    isEditingRef.current = false;
-    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', category: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
-  };
+const cancelInventoryEdit = () => {
+  setEditingInventoryId(null);
+  isEditingRef.current = false;
+  setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
+};
 
 const addMachineryItem = async () => {
   lastLocalUpdateRef.current = Date.now();
@@ -2216,10 +2215,6 @@ dropdownItem: {
     <p>{item.partNumber || 'N/A'}</p>
   </div>
   <div>
-    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Category</p>
-    <p>{item.category || 'N/A'}</p>
-  </div>
-  <div>
     <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Quantity</p>
     {userRole === 'employee' ? (
       <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
@@ -3309,12 +3304,6 @@ dropdownItem: {
               placeholder="Item Name"
               value={inventoryForm.name}
               onChange={(e) => setInventoryForm({ ...inventoryForm, name: e.target.value })}
-            />
-            <input
-              style={styles.input}
-              placeholder="Category"
-              value={inventoryForm.category}
-              onChange={(e) => setInventoryForm({ ...inventoryForm, category: e.target.value })}
             />
             <input
               style={styles.input}
