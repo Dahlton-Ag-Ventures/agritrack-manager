@@ -1324,18 +1324,20 @@ dropdownItem: {
       outline: 'none',
       minWidth: '180px',
     },
-    addButton: {
-      padding: '12px 24px',
-      background: '#10b981',
-      border: 'none',
-      borderRadius: '8px',
-      color: 'white',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      fontSize: '1rem',
-    },
+addButton: {
+  padding: '12px 24px',
+  background: '#10b981',
+  border: 'none',
+  borderRadius: '8px',
+  color: 'white',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  fontSize: '1rem',
+  transition: 'all 0.2s ease',
+  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+},
     emptyState: {
       background: currentTheme.cardBackground,
       border: `1px solid ${currentTheme.cardBorder}`,
@@ -1348,16 +1350,18 @@ dropdownItem: {
       flexDirection: 'column',
       gap: '16px',
     },
-    itemCard: {
-      background: currentTheme.cardBackground,
-      border: `1px solid ${currentTheme.cardBorder}`,
-      borderRadius: '12px',
-      padding: '24px',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'start',
-      gap: '16px',
-    },
+itemCard: {
+  background: currentTheme.cardBackground,
+  border: `1px solid ${currentTheme.cardBorder}`,
+  borderRadius: '12px',
+  padding: '24px',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'start',
+  gap: '16px',
+  transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
+  cursor: 'pointer',
+},
     itemDetails: {
       marginTop: '16px',
       display: 'grid',
@@ -2086,12 +2090,25 @@ dropdownItem: {
     <div style={styles.tabHeader}>
       <h2 style={{ fontSize: '1.5rem' }}>Inventory Items</h2>
       {userRole !== 'employee' && (
-        <button onClick={() => {
-          setShowInventoryModal(true);
-          isEditingRef.current = true;
-        }} style={styles.addButton}>
-          <Plus size={20} /> Add Item
-        </button>
+<button 
+  onClick={() => {
+    setShowInventoryModal(true);
+    isEditingRef.current = true;
+  }} 
+  style={styles.addButton}
+  onMouseEnter={(e) => {
+    e.target.style.transform = 'translateY(-2px)';
+    e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.4)';
+    e.target.style.background = '#059669';
+  }}
+  onMouseLeave={(e) => {
+    e.target.style.transform = 'translateY(0)';
+    e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+    e.target.style.background = '#10b981';
+  }}
+>
+  <Plus size={20} /> Add Item
+</button>
       )}
     </div>
 
@@ -2242,7 +2259,7 @@ dropdownItem: {
         {/* INVENTORY ITEMS LIST */}
         <div style={styles.itemsList}>
           {getPaginatedInventory().items.map(item => (
-            <div key={item.id} style={styles.itemCard}>
+              <div key={item.id} className="item-card" style={styles.itemCard}>
               {editingInventoryId === item.id ? (
                 <div style={{ flex: 1 }}>
                   <input
@@ -2357,9 +2374,9 @@ dropdownItem: {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                       <h3 style={{ fontSize: '1.25rem' }}>{item.name}</h3>
-                      {getStockStatus(item) === 'low' && (
-                        <span style={styles.stockBadgeLow}>⚠️ Low Stock</span>
-                      )}
+                    {getStockStatus(item) === 'low' && (
+  <span className="stock-badge-low" style={styles.stockBadgeLow}>⚠️ Low Stock</span>
+)}
                       {getStockStatus(item) === 'high' && (
                         <span style={styles.stockBadgeHigh}>⚠️ Overstocked</span>
                       )}
@@ -2529,12 +2546,25 @@ dropdownItem: {
             <div style={styles.tabHeader}>
               <h2 style={{ fontSize: '1.5rem' }}>Machinery</h2>
               {userRole !== 'employee' && (
-              <button onClick={() => {
-  setShowMachineryModal(true);
-  isEditingRef.current = true; // ✅ ADD THIS
-}} style={styles.addButton}>
-                  <Plus size={20} /> Add Machine
-                </button>
+<button 
+  onClick={() => {
+    setShowMachineryModal(true);
+    isEditingRef.current = true;
+  }} 
+  style={styles.addButton}
+  onMouseEnter={(e) => {
+    e.target.style.transform = 'translateY(-2px)';
+    e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.4)';
+    e.target.style.background = '#059669';
+  }}
+  onMouseLeave={(e) => {
+    e.target.style.transform = 'translateY(0)';
+    e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+    e.target.style.background = '#10b981';
+  }}
+>
+  <Plus size={20} /> Add Machine
+</button>
               )}
             </div>
 
@@ -2683,7 +2713,7 @@ dropdownItem: {
     {/* MACHINERY ITEMS LIST */}
     <div style={styles.itemsList}>
       {getPaginatedMachinery().items.map(item => (
-        <div key={item.id} style={styles.itemCard}>
+        <div key={item.id} className="item-card" style={styles.itemCard}>
           {editingMachineryId === item.id ? (
             <div style={{ flex: 1 }}>
               <input
@@ -2955,12 +2985,25 @@ dropdownItem: {
     )}
   </div>
   {userRole !== 'employee' && (
-    <button onClick={() => {
-  setShowServiceModal(true);
-  isEditingRef.current = true;
-}} style={styles.addButton}>
-      <Plus size={20} /> Add Service Record
-    </button>
+   <button 
+  onClick={() => {
+    setShowServiceModal(true);
+    isEditingRef.current = true;
+  }} 
+  style={styles.addButton}
+  onMouseEnter={(e) => {
+    e.target.style.transform = 'translateY(-2px)';
+    e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.4)';
+    e.target.style.background = '#059669';
+  }}
+  onMouseLeave={(e) => {
+    e.target.style.transform = 'translateY(0)';
+    e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+    e.target.style.background = '#10b981';
+  }}
+>
+  <Plus size={20} /> Add Service Record
+</button>
   )}
 </div>
             <div style={styles.searchSortContainer}>
@@ -2993,8 +3036,8 @@ dropdownItem: {
               </div>
             ) : (
               <div style={styles.itemsList}>
-                {getFilteredAndSortedService().map(record => (
-                  <div key={record.id} style={styles.itemCard}>
+            {getFilteredAndSortedService().map(record => (
+              <div key={record.id} className="item-card" style={styles.itemCard}>
 {editingServiceId === record.id ? (
   <div style={{ flex: 1 }}>
     <div style={{ marginBottom: '16px' }}>
@@ -4021,11 +4064,23 @@ dropdownItem: {
           onClose={() => setViewingImage(null)}
           theme={currentTheme}
         />}
-        <style>{`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
+<style>{`
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  .item-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+    border-color: #10b981;
+  }
+  .stock-badge-low {
+    animation: pulse 2s ease-in-out infinite;
+  }
+`}</style>
       </div>
     </div>
   );
