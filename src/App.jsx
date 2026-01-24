@@ -1612,14 +1612,14 @@ itemCard: {
     <div style={styles.content}>
       <div style={styles.header}>
 <div>
-  <h1 style={styles.title}>
-    <Wrench size={40} style={{ 
-      display: 'inline-block', 
-      verticalAlign: 'middle', 
-      marginRight: '12px' 
-    }} />
-    AgriTrack Manager
-  </h1>
+<h1 className="title-with-wrench" style={styles.title}>
+  <Wrench className="wrench-icon" size={40} style={{ 
+    display: 'inline-block', 
+    verticalAlign: 'middle', 
+    marginRight: '12px' 
+  }} />
+  AgriTrack Manager
+</h1>
   <p style={styles.subtitle}>Dahlton Ag Ventures</p>
 <p style={styles.stats}>
   {loading ? (
@@ -4079,6 +4079,12 @@ itemCard: {
   }
   .stock-badge-low {
     animation: pulse 2s ease-in-out infinite;
+  }
+  .wrench-icon {
+    transition: transform 0.6s ease;
+  }
+  .title-with-wrench:hover .wrench-icon {
+    transform: rotate(360deg);
   }
 `}</style>
       </div>
