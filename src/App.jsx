@@ -114,6 +114,8 @@ const [inventoryForm, setInventoryForm] = useState({
   const [machineSearchModal, setMachineSearchModal] = useState('');
   const [inventoryPage, setInventoryPage] = useState(1);
   const [inventoryItemsPerPage, setInventoryItemsPerPage] = useState(50);
+  const [machineryPage, setMachineryPage] = useState(1);
+  const [machineryItemsPerPage, setMachineryItemsPerPage] = useState(50);
   
   // Get current theme object
   const currentTheme = themes[theme];
@@ -498,6 +500,18 @@ const getPaginatedInventory = () => {
     endIndex: Math.min(endIndex, filtered.length)
   };
 };
+ const getPaginatedMachinery = () => {
+  const filtered = getFilteredAndSortedMachinery();
+  const startIndex = (machineryPage - 1) * machineryItemsPerPage;
+  const endIndex = startIndex + machineryItemsPerPage;
+  return {
+    items: filtered.slice(startIndex, endIndex),
+    totalItems: filtered.length,
+    totalPages: Math.ceil(filtered.length / machineryItemsPerPage),
+    startIndex: startIndex + 1,
+    endIndex: Math.min(endIndex, filtered.length)
+  };
+}; 
   const getFilteredAndSortedMachinery = () => {
     let filtered = machinery.filter(item => {
       const searchLower = machinerySearch.toLowerCase();
@@ -2511,181 +2525,380 @@ dropdownItem: {
             </div>
 
             <div style={styles.searchSortContainer}>
+  <input
+    type="text"
+    placeholder="🔍 Search machinery (name, VIN/serial, category)..."
+    value={machinerySearch}
+    onChange={(e) => {
+      setMachinerySearch(e.target.value);
+      setMachineryPage(1);
+    }}
+    style={styles.searchInput}
+  />
+  <select
+    value={machinerySort}
+    onChange={(e) => {
+      setMachinerySort(e.target.value);
+      setMachineryPage(1);
+    }}
+    style={styles.sortSelect}
+  >
+    <option value="name-asc">Name (A → Z)</option>
+    <option value="name-desc">Name (Z → A)</option>
+    <option value="category">Category</option>
+  </select>
+  <select
+    value={machineryItemsPerPage}
+    onChange={(e) => {
+      setMachineryItemsPerPage(Number(e.target.value));
+      setMachineryPage(1);
+    }}
+    style={styles.sortSelect}
+  >
+    <option value="25">Show 25</option>
+    <option value="50">Show 50</option>
+    <option value="100">Show 100</option>
+    <option value="200">Show 200</option>
+  </select>
+</div>
+
+     {machinery.length === 0 ? (
+  <div style={styles.emptyState}>
+    <Truck size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+    <p>No machinery yet</p>
+  </div>
+) : getPaginatedMachinery().totalItems === 0 ? (
+  <div style={styles.emptyState}>
+    <Truck size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+    <p>No machines match your search</p>
+  </div>
+) : (
+  <>
+    {/* TOP PAGINATION CONTROLS */}
+    <div style={{
+      padding: '16px',
+      background: currentTheme.cardBackground,
+      border: `1px solid ${currentTheme.cardBorder}`,
+      borderRadius: '12px',
+      marginBottom: '16px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      gap: '12px'
+    }}>
+      <div style={{ color: currentTheme.text }}>
+        Showing <strong>{getPaginatedMachinery().startIndex}-{getPaginatedMachinery().endIndex}</strong> of <strong>{getPaginatedMachinery().totalItems}</strong> machines
+      </div>
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+        <button
+          onClick={() => setMachineryPage(1)}
+          disabled={machineryPage === 1}
+          style={{
+            padding: '8px 16px',
+            background: machineryPage === 1 ? '#4b5563' : '#10b981',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: machineryPage === 1 ? 'not-allowed' : 'pointer',
+            fontSize: '0.875rem',
+            opacity: machineryPage === 1 ? 0.5 : 1
+          }}
+        >
+          First
+        </button>
+        <button
+          onClick={() => setMachineryPage(prev => Math.max(1, prev - 1))}
+          disabled={machineryPage === 1}
+          style={{
+            padding: '8px 16px',
+            background: machineryPage === 1 ? '#4b5563' : '#10b981',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: machineryPage === 1 ? 'not-allowed' : 'pointer',
+            fontSize: '0.875rem',
+            opacity: machineryPage === 1 ? 0.5 : 1
+          }}
+        >
+          Previous
+        </button>
+        <span style={{ 
+          padding: '8px 16px', 
+          color: currentTheme.text,
+          fontSize: '0.875rem',
+          fontWeight: 'bold'
+        }}>
+          Page {machineryPage} of {getPaginatedMachinery().totalPages}
+        </span>
+        <button
+          onClick={() => setMachineryPage(prev => Math.min(getPaginatedMachinery().totalPages, prev + 1))}
+          disabled={machineryPage === getPaginatedMachinery().totalPages}
+          style={{
+            padding: '8px 16px',
+            background: machineryPage === getPaginatedMachinery().totalPages ? '#4b5563' : '#10b981',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: machineryPage === getPaginatedMachinery().totalPages ? 'not-allowed' : 'pointer',
+            fontSize: '0.875rem',
+            opacity: machineryPage === getPaginatedMachinery().totalPages ? 0.5 : 1
+          }}
+        >
+          Next
+        </button>
+        <button
+          onClick={() => setMachineryPage(getPaginatedMachinery().totalPages)}
+          disabled={machineryPage === getPaginatedMachinery().totalPages}
+          style={{
+            padding: '8px 16px',
+            background: machineryPage === getPaginatedMachinery().totalPages ? '#4b5563' : '#10b981',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: machineryPage === getPaginatedMachinery().totalPages ? 'not-allowed' : 'pointer',
+            fontSize: '0.875rem',
+            opacity: machineryPage === getPaginatedMachinery().totalPages ? 0.5 : 1
+          }}
+        >
+          Last
+        </button>
+      </div>
+    </div>
+
+    {/* MACHINERY ITEMS LIST */}
+    <div style={styles.itemsList}>
+      {getPaginatedMachinery().items.map(item => (
+        <div key={item.id} style={styles.itemCard}>
+          {editingMachineryId === item.id ? (
+            <div style={{ flex: 1 }}>
               <input
-                type="text"
-                placeholder="🔍 Search machinery (name, VIN/serial, category)..."
-                value={machinerySearch}
-                onChange={(e) => setMachinerySearch(e.target.value)}
-                style={styles.searchInput}
+                style={styles.input}
+                placeholder="Machine Name"
+                value={machineryForm.name}
+                onChange={(e) => setMachineryForm({ ...machineryForm, name: e.target.value })}
+              />
+              <input
+                style={styles.input}
+                placeholder="VIN / Serial Number"
+                value={machineryForm.vinSerial}
+                onChange={(e) => setMachineryForm({ ...machineryForm, vinSerial: e.target.value })}
               />
               <select
-                value={machinerySort}
-                onChange={(e) => setMachinerySort(e.target.value)}
-                style={styles.sortSelect}
+                style={styles.input}
+                value={machineryForm.category}
+                onChange={(e) => setMachineryForm({ ...machineryForm, category: e.target.value })}
               >
-                <option value="name-asc">Name (A → Z)</option>
-                <option value="name-desc">Name (Z → A)</option>
-                <option value="category">Category</option>
-              </select>
-            </div>
-
-            {machinery.length === 0 ? (
-              <div style={styles.emptyState}>
-                <Truck size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
-                <p>No machinery yet</p>
-              </div>
-            ) : getFilteredAndSortedMachinery().length === 0 ? (
-              <div style={styles.emptyState}>
-                <Truck size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
-                <p>No machines match your search</p>
-              </div>
-            ) : (
-              <div style={styles.itemsList}>
-                {getFilteredAndSortedMachinery().map(item => (
-                  <div key={item.id} style={styles.itemCard}>
-                    {editingMachineryId === item.id ? (
-                      <div style={{ flex: 1 }}>
-                        <input
-                          style={styles.input}
-                          placeholder="Machine Name"
-                          value={machineryForm.name}
-                          onChange={(e) => setMachineryForm({ ...machineryForm, name: e.target.value })}
-                        />
-                        <input
-                          style={styles.input}
-                          placeholder="VIN / Serial Number"
-                          value={machineryForm.vinSerial}
-                          onChange={(e) => setMachineryForm({ ...machineryForm, vinSerial: e.target.value })}
-                        />
-                        <select
-                          style={styles.input}
-                          value={machineryForm.category}
-                          onChange={(e) => setMachineryForm({ ...machineryForm, category: e.target.value })}
-                        >
-                          <option value="">Select Category...</option>
-                          {MACHINERY_CATEGORIES.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                          ))}
-                        </select>
-                        <div style={{ marginBottom: '12px' }}>
-                          <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
-                            📸 Upload Photo
-                          </label>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={async (e) => {
-                              const file = e.target.files[0];
-                              if (file) {
-                                const photoUrl = await handlePhotoUpload(file, 'machinery');
-                                if (photoUrl) {
-                                  setMachineryForm({ ...machineryForm, photoUrl });
-                                }
-                              }
-                              e.target.value = '';
-                            }}
-                            style={{ ...styles.input, padding: '8px' }}
-                          />
-                          {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
-                          {machineryForm.photoUrl && (
-                            <img src={machineryForm.photoUrl} alt="Preview" style={{ maxWidth: '100px', marginTop: '8px', borderRadius: '8px' }} />
-                          )}
-                        </div>
-                        <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                          <button onClick={() => saveMachineryEdit(item.id)} style={styles.saveButton}>
-                            <Save size={16} /> Save
-                          </button>
-                          <button onClick={cancelMachineryEdit} style={styles.cancelButton}>
-                            <X size={16} /> Cancel
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                    {item.photoUrl && (
-                          <img 
-                            src={item.photoUrl} 
-                            alt={item.name} 
-                            style={{ 
-                              width: '100px', 
-                              height: '100px', 
-                              objectFit: 'cover', 
-                              borderRadius: '8px',
-                              marginRight: '16px',
-                              cursor: 'pointer',
-                              transition: 'transform 0.2s ease',
-                              border: '2px solid transparent',
-                              userSelect: 'none',
-                              WebkitUserSelect: 'none',
-                              pointerEvents: 'auto'
-                            }}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setViewingImage(item.photoUrl);
-                              setImageModalTitle(item.name);
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.transform = 'scale(1.05)';
-                              e.currentTarget.style.borderColor = '#10b981';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.transform = 'scale(1)';
-                              e.currentTarget.style.borderColor = 'transparent';
-                            }}
-                          />
-                        )}
-                        <div style={{ flex: 1 }}>
-                          <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{item.name}</h3>
-                          <div style={styles.itemDetails}>
-                            <div>
-                              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>VIN/Serial</p>
-                              <p>{item.vinSerial || 'N/A'}</p>
-                            </div>
-                            <div>
-                              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Category</p>
-                              <p>{item.category || 'N/A'}</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-  <button 
-    onClick={() => viewMachineServiceHistory(item.name)} 
-    style={{
-      ...styles.editButton,
-      background: '#8b5cf6',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '6px',
-      padding: '8px 12px',
-      whiteSpace: 'nowrap'
-    }}
-    title="View service history for this machine"
-  >
-    <AlertCircle size={16} />
-    <span style={{ fontSize: '0.875rem' }}>
-      {serviceHistory.filter(r => r.machineName === item.name).length} Services
-    </span>
-  </button>
-  {userRole !== 'employee' && (
-    <button onClick={() => startEditMachinery(item)} style={styles.editButton}>
-      <Edit2 size={16} />
-    </button>
-  )}
-  {userRole !== 'employee' && (
-    <button onClick={() => deleteMachineryItem(item.id)} style={styles.deleteButton}>
-      <Trash2 size={16} />
-    </button>
-  )}
-</div>
-                      </>
-                    )}
-                  </div>
+                <option value="">Select Category...</option>
+                {MACHINERY_CATEGORIES.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
                 ))}
+              </select>
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+                  📸 Upload Photo
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const photoUrl = await handlePhotoUpload(file, 'machinery');
+                      if (photoUrl) {
+                        setMachineryForm({ ...machineryForm, photoUrl });
+                      }
+                    }
+                    e.target.value = '';
+                  }}
+                  style={{ ...styles.input, padding: '8px' }}
+                />
+                {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
+                {machineryForm.photoUrl && (
+                  <img src={machineryForm.photoUrl} alt="Preview" style={{ maxWidth: '100px', marginTop: '8px', borderRadius: '8px' }} />
+                )}
               </div>
-            )}
-          </div>
-        )}
+              <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                <button onClick={() => saveMachineryEdit(item.id)} style={styles.saveButton}>
+                  <Save size={16} /> Save
+                </button>
+                <button onClick={cancelMachineryEdit} style={styles.cancelButton}>
+                  <X size={16} /> Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {item.photoUrl && (
+                <img 
+                  src={item.photoUrl} 
+                  alt={item.name} 
+                  style={{ 
+                    width: '100px', 
+                    height: '100px', 
+                    objectFit: 'cover', 
+                    borderRadius: '8px',
+                    marginRight: '16px',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s ease',
+                    border: '2px solid transparent',
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    pointerEvents: 'auto'
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setViewingImage(item.photoUrl);
+                    setImageModalTitle(item.name);
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                    e.currentTarget.style.borderColor = '#10b981';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.borderColor = 'transparent';
+                  }}
+                />
+              )}
+              <div style={{ flex: 1 }}>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{item.name}</h3>
+                <div style={styles.itemDetails}>
+                  <div>
+                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>VIN/Serial</p>
+                    <p>{item.vinSerial || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Category</p>
+                    <p>{item.category || 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button 
+                  onClick={() => viewMachineServiceHistory(item.name)} 
+                  style={{
+                    ...styles.editButton,
+                    background: '#8b5cf6',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 12px',
+                    whiteSpace: 'nowrap'
+                  }}
+                  title="View service history for this machine"
+                >
+                  <AlertCircle size={16} />
+                  <span style={{ fontSize: '0.875rem' }}>
+                    {serviceHistory.filter(r => r.machineName === item.name).length} Services
+                  </span>
+                </button>
+                {userRole !== 'employee' && (
+                  <button onClick={() => startEditMachinery(item)} style={styles.editButton}>
+                    <Edit2 size={16} />
+                  </button>
+                )}
+                {userRole !== 'employee' && (
+                  <button onClick={() => deleteMachineryItem(item.id)} style={styles.deleteButton}>
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      ))}
+    </div>
+
+    {/* BOTTOM PAGINATION CONTROLS */}
+    <div style={{
+      padding: '16px',
+      background: currentTheme.cardBackground,
+      border: `1px solid ${currentTheme.cardBorder}`,
+      borderRadius: '12px',
+      marginTop: '16px',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: '8px',
+      flexWrap: 'wrap'
+    }}>
+      <button
+        onClick={() => setMachineryPage(1)}
+        disabled={machineryPage === 1}
+        style={{
+          padding: '8px 16px',
+          background: machineryPage === 1 ? '#4b5563' : '#10b981',
+          border: 'none',
+          borderRadius: '8px',
+          color: 'white',
+          cursor: machineryPage === 1 ? 'not-allowed' : 'pointer',
+          fontSize: '0.875rem',
+          opacity: machineryPage === 1 ? 0.5 : 1
+        }}
+      >
+        First
+      </button>
+      <button
+        onClick={() => setMachineryPage(prev => Math.max(1, prev - 1))}
+        disabled={machineryPage === 1}
+        style={{
+          padding: '8px 16px',
+          background: machineryPage === 1 ? '#4b5563' : '#10b981',
+          border: 'none',
+          borderRadius: '8px',
+          color: 'white',
+          cursor: machineryPage === 1 ? 'not-allowed' : 'pointer',
+          fontSize: '0.875rem',
+          opacity: machineryPage === 1 ? 0.5 : 1
+        }}
+      >
+        Previous
+      </button>
+      <span style={{ 
+        padding: '8px 16px', 
+        color: currentTheme.text,
+        fontSize: '0.875rem',
+        fontWeight: 'bold'
+      }}>
+        Page {machineryPage} of {getPaginatedMachinery().totalPages}
+      </span>
+      <button
+        onClick={() => setMachineryPage(prev => Math.min(getPaginatedMachinery().totalPages, prev + 1))}
+        disabled={machineryPage === getPaginatedMachinery().totalPages}
+        style={{
+          padding: '8px 16px',
+          background: machineryPage === getPaginatedMachinery().totalPages ? '#4b5563' : '#10b981',
+          border: 'none',
+          borderRadius: '8px',
+          color: 'white',
+          cursor: machineryPage === getPaginatedMachinery().totalPages ? 'not-allowed' : 'pointer',
+          fontSize: '0.875rem',
+          opacity: machineryPage === getPaginatedMachinery().totalPages ? 0.5 : 1
+        }}
+      >
+        Next
+      </button>
+      <button
+        onClick={() => setMachineryPage(getPaginatedMachinery().totalPages)}
+        disabled={machineryPage === getPaginatedMachinery().totalPages}
+        style={{
+          padding: '8px 16px',
+          background: machineryPage === getPaginatedMachinery().totalPages ? '#4b5563' : '#10b981',
+          border: 'none',
+          borderRadius: '8px',
+          color: 'white',
+          cursor: machineryPage === getPaginatedMachinery().totalPages ? 'not-allowed' : 'pointer',
+          fontSize: '0.875rem',
+          opacity: machineryPage === getPaginatedMachinery().totalPages ? 0.5 : 1
+        }}
+      >
+        Last
+      </button>
+    </div>
+  </>
+)}      
 {activeTab === 'service' && (
           <div>
             <div style={styles.tabHeader}>
