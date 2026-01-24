@@ -2898,7 +2898,9 @@ dropdownItem: {
       </button>
     </div>
   </>
-)}      
+)}          
+</div>
+)}
 {activeTab === 'service' && (
           <div>
             <div style={styles.tabHeader}>
@@ -3999,7 +4001,7 @@ dropdownItem: {
           </Modal>
         )}
 {/* Zoomable Image Viewer Modal */}
-        {viewingImage && <ZoomableImageViewer 
+       {viewingImage && <ZoomableImageViewer 
           imageUrl={viewingImage} 
           title={imageModalTitle} 
           onClose={() => setViewingImage(null)}
