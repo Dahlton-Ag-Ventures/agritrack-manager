@@ -2,7 +2,7 @@
 // BUILD VERSION: 2025-01-21-v2-FIXED
 import React, { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut, ChevronDown, Wrench } from 'lucide-react';
 
 // Theme configurations
 const themes = {
@@ -1535,9 +1535,16 @@ dropdownItem: {
       <div style={styles.loginContainer}>
         <div style={styles.loginCard}>
           <h2 style={styles.loginTitle}>Welcome to</h2>
-          <h1 style={styles.title}>AgriTrack Manager</h1>
+<h1 style={styles.title}>
+  <Wrench size={36} style={{ 
+    display: 'inline-block', 
+    verticalAlign: 'middle', 
+    marginRight: '12px' 
+  }} />
+  AgriTrack Manager
+</h1>
 
-          <form onSubmit={handleLogin} style={styles.loginForm}>
+<form onSubmit={handleLogin} style={styles.loginForm}>
             <input
               type="email"
               placeholder="Email"
@@ -1600,9 +1607,16 @@ dropdownItem: {
 >
     <div style={styles.content}>
       <div style={styles.header}>
-        <div>
-            <h1 style={styles.title}>AgriTrack Manager</h1>
-            <p style={styles.subtitle}>Dahlton Ag Ventures</p>
+<div>
+  <h1 style={styles.title}>
+    <Wrench size={40} style={{ 
+      display: 'inline-block', 
+      verticalAlign: 'middle', 
+      marginRight: '12px' 
+    }} />
+    AgriTrack Manager
+  </h1>
+  <p style={styles.subtitle}>Dahlton Ag Ventures</p>
 <p style={styles.stats}>
   {loading ? (
     <>
