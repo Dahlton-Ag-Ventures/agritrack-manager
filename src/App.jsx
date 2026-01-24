@@ -1540,11 +1540,6 @@ itemCard: {
         <div style={styles.loginCard}>
           <h2 style={styles.loginTitle}>Welcome to</h2>
 <h1 style={styles.title}>
-  <Wrench size={36} style={{ 
-    display: 'inline-block', 
-    verticalAlign: 'middle', 
-    marginRight: '12px' 
-  }} />
   AgriTrack Manager
 </h1>
 
