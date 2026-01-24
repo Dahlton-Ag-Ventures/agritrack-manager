@@ -1597,11 +1597,14 @@ itemCard: {
     minHeight: '100vh',
     color: currentTheme.text,
     padding: '24px',
-    background: theme === 'dark' ? '#0d1117' : '#f3f4f6',
+    background: theme === 'dark' ? '#0a0a0a' : '#f3f4f6',
     backgroundImage: theme === 'dark' 
-      ? 'linear-gradient(rgba(37, 99, 235, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(37, 99, 235, 0.15) 1px, transparent 1px), radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.1) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(6, 182, 212, 0.1) 0%, transparent 50%)'
+      ? `radial-gradient(circle at 0% 0%, transparent 40px, rgba(16, 185, 129, 0.12) 40px, rgba(16, 185, 129, 0.12) 45px, transparent 45px),
+         radial-gradient(circle at 50% 50%, transparent 30px, rgba(16, 185, 129, 0.15) 30px, rgba(16, 185, 129, 0.15) 35px, transparent 35px),
+         radial-gradient(circle at 100% 100%, transparent 40px, rgba(16, 185, 129, 0.12) 40px, rgba(16, 185, 129, 0.12) 45px, transparent 45px)`
       : 'repeating-radial-gradient(circle at 0 0, transparent 0, #f3f4f6 40px), repeating-linear-gradient(rgba(6, 182, 212, 0.03), rgba(16, 185, 129, 0.03))',
-    backgroundSize: theme === 'dark' ? '50px 50px, 50px 50px, 100% 100%, 100% 100%' : 'auto'
+    backgroundSize: theme === 'dark' ? '200px 200px' : 'auto',
+    backgroundPosition: theme === 'dark' ? '0 0, 100px 100px, 200px 200px' : 'auto'
   }}
 >
     <div style={styles.content}>
