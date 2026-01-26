@@ -616,29 +616,38 @@ const addInventoryItem = async () => {
   lastLocalUpdateRef.current = Date.now();
   
   try {
-    // ✅ FETCH CURRENT DATA FROM DATABASE FIRST
+    // ✅ FETCH ALL CURRENT DATA FROM DATABASE FIRST
     const { data: currentData, error: fetchError } = await supabase
       .from('agritrack_data')
-      .select('inventory')
+      .select('*')
       .eq('id', 1)
       .single();
     
     if (fetchError) throw fetchError;
     
     const currentInventory = currentData?.inventory || [];
+    const currentMachinery = currentData?.machinery || [];
+    const currentServiceHistory = currentData?.service_history || [];
+    
     const newItem = { ...inventoryForm, id: Date.now() };
     const newInventory = [...currentInventory, newItem];
 
     // ✅ UPDATE LOCAL STATE IMMEDIATELY
     setInventory(newInventory);
+    setMachinery(currentMachinery);
+    setServiceHistory(currentServiceHistory);
     
-   setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
+    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
     setShowInventoryModal(false);
 
     // ✅ NOW SAVE BACK TO DATABASE
     const { error } = await supabase
       .from('agritrack_data')
-      .update({ inventory: newInventory })
+      .update({ 
+        inventory: newInventory,
+        machinery: currentMachinery,
+        service_history: currentServiceHistory
+      })
       .eq('id', 1);
     
     if (error) throw error;
@@ -738,28 +747,37 @@ const addMachineryItem = async () => {
   lastLocalUpdateRef.current = Date.now();
   
   try {
-    // ✅ FETCH CURRENT DATA FROM DATABASE FIRST
+    // ✅ FETCH ALL CURRENT DATA FROM DATABASE FIRST
     const { data: currentData, error: fetchError } = await supabase
       .from('agritrack_data')
-      .select('machinery')
+      .select('*')
       .eq('id', 1)
       .single();
     
     if (fetchError) throw fetchError;
     
     const currentMachinery = currentData?.machinery || [];
+    const currentInventory = currentData?.inventory || [];
+    const currentServiceHistory = currentData?.service_history || [];
+    
     const newItem = { ...machineryForm, id: Date.now() };
     const newMachinery = [...currentMachinery, newItem];
     
     // ✅ UPDATE LOCAL STATE IMMEDIATELY
     setMachinery(newMachinery);
+    setInventory(currentInventory);
+    setServiceHistory(currentServiceHistory);
     
     setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '' });
     setShowMachineryModal(false);
     
     const { error } = await supabase
       .from('agritrack_data')
-      .update({ machinery: newMachinery })
+      .update({ 
+        machinery: newMachinery,
+        inventory: currentInventory,
+        service_history: currentServiceHistory
+      })
       .eq('id', 1);
     
     if (error) throw error;
@@ -774,7 +792,7 @@ const addMachineryItem = async () => {
     isEditingRef.current = false;
     loadData();
   }
-};
+};;
   
 const deleteMachineryItem = async (id) => {
   // Find the machine we're about to delete
@@ -891,20 +909,22 @@ const viewMachineServiceHistory = (machineName) => {
 };
   
 const addServiceRecord = async () => {
-  // ✅ REMOVED BLOCKING uploadingPhoto check for mobile compatibility
   lastLocalUpdateRef.current = Date.now();
   
   try {
-    // ✅ FETCH CURRENT DATA FROM DATABASE FIRST
+    // ✅ FETCH ALL CURRENT DATA FROM DATABASE FIRST
     const { data: currentData, error: fetchError } = await supabase
       .from('agritrack_data')
-      .select('service_history')
+      .select('*')
       .eq('id', 1)
       .single();
     
     if (fetchError) throw fetchError;
     
     const currentServiceHistory = currentData?.service_history || [];
+    const currentInventory = currentData?.inventory || [];
+    const currentMachinery = currentData?.machinery || [];
+    
     const newRecord = { 
       ...serviceForm, 
       id: Date.now(),
@@ -915,13 +935,19 @@ const addServiceRecord = async () => {
     
     // ✅ UPDATE LOCAL STATE IMMEDIATELY
     setServiceHistory(newServiceHistory);
+    setInventory(currentInventory);
+    setMachinery(currentMachinery);
     
     setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
     setShowServiceModal(false);
     
     const { error } = await supabase
       .from('agritrack_data')
-      .update({ service_history: newServiceHistory })
+      .update({ 
+        service_history: newServiceHistory,
+        inventory: currentInventory,
+        machinery: currentMachinery
+      })
       .eq('id', 1);
     
     if (error) throw error;
