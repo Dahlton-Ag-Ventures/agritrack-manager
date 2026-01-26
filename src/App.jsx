@@ -1660,7 +1660,8 @@ itemCard: {
   <Wrench className="wrench-icon" size={40} style={{ 
     display: 'inline-block', 
     verticalAlign: 'middle', 
-    marginRight: '12px' 
+    marginRight: '12px',
+    color: '#06b6d4'
   }} />
   AgriTrack Manager
 </h1>
