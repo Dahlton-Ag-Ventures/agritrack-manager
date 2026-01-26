@@ -654,9 +654,10 @@ const addInventoryItem = async () => {
     console.log('✅ Inventory item added successfully');
     
     // ✅ Clear editing flag AFTER successful save with delay
-    setTimeout(() => {
-      isEditingRef.current = false;
-    }, 1000);
+setTimeout(() => {
+  console.log('🔓 Unlocking real-time sync');
+  isEditingRef.current = false;
+}, 3000);
   } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
@@ -783,16 +784,17 @@ const addMachineryItem = async () => {
     if (error) throw error;
     console.log('✅ Machinery item added successfully');
     
-    setTimeout(() => {
-      isEditingRef.current = false;
-    }, 1000);
+setTimeout(() => {
+  console.log('🔓 Unlocking real-time sync');
+  isEditingRef.current = false;
+}, 3000);
   } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
     isEditingRef.current = false;
     loadData();
   }
-};;
+};
   
 const deleteMachineryItem = async (id) => {
   // Find the machine we're about to delete
@@ -952,30 +954,43 @@ const newRecord = {
 console.log('📅 New Record to save:', newRecord);
     const newServiceHistory = [...currentServiceHistory, newRecord];
     
-    // ✅ UPDATE LOCAL STATE IMMEDIATELY
-    setServiceHistory(newServiceHistory);
-    setInventory(currentInventory);
-    setMachinery(currentMachinery);
-    
-    setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
-    setShowServiceModal(false);
-    
-    const { error } = await supabase
-      .from('agritrack_data')
-      .update({ 
-        service_history: newServiceHistory,
-        inventory: currentInventory,
-        machinery: currentMachinery
-      })
-      .eq('id', 1);
+ // ✅ Block real-time updates during save
+isEditingRef.current = true;
+lastLocalUpdateRef.current = Date.now();
+
+// ✅ UPDATE LOCAL STATE IMMEDIATELY
+setServiceHistory(newServiceHistory);
+setInventory(currentInventory);
+setMachinery(currentMachinery);
+
+setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
+setShowServiceModal(false);
+
+console.log('💾 SAVING TO DATABASE...', {
+  serviceCount: newServiceHistory.length,
+  newRecord: newRecord
+});
+
+const { error } = await supabase
+  .from('agritrack_data')
+  .update({ 
+    service_history: newServiceHistory,
+    inventory: currentInventory,
+    machinery: currentMachinery,
+    updated_at: new Date().toISOString()
+  })
+  .eq('id', 1);
+
+console.log('💾 DATABASE RESPONSE:', { error: error?.message || 'none' });
     
     if (error) throw error;
     console.log('✅ Service record added successfully');
     
     // ✅ Clear editing flag AFTER successful save with delay
-    setTimeout(() => {
-      isEditingRef.current = false;
-    }, 1000);
+setTimeout(() => {
+  console.log('🔓 Unlocking real-time sync');
+  isEditingRef.current = false;
+}, 3000);
   } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
