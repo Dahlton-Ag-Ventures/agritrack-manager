@@ -909,6 +909,20 @@ const viewMachineServiceHistory = (machineName) => {
 };
   
 const addServiceRecord = async () => {
+  console.log('🔧 ADD SERVICE RECORD CALLED');
+  console.log('📱 Is Mobile:', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+  console.log('📅 Service Form:', JSON.stringify(serviceForm, null, 2));
+  console.log('📅 Machine Name:', serviceForm.machineName);
+  console.log('📅 Service Type:', serviceForm.serviceType);
+  console.log('📅 Date Value:', serviceForm.date);
+  console.log('📅 Date Type:', typeof serviceForm.date);
+  
+  // Check if required fields are filled
+  if (!serviceForm.machineName) {
+    alert('⚠️ Please select a machine');
+    return;
+  }
+  
   lastLocalUpdateRef.current = Date.now();
   
   try {
