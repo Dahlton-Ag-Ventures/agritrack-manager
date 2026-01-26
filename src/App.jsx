@@ -4551,17 +4551,19 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
         </button>
       </div>
 
-      {/* Zoom Controls */}
+{/* Zoom Controls */}
       <div 
         style={{
           position: 'absolute',
-          top: '100px',
-          right: '24px',
+          bottom: '24px',
+          left: '50%',
+          transform: 'translateX(-50%)',
           background: theme.cardBackground,
           padding: '8px',
           borderRadius: '12px',
           display: 'flex',
-          flexDirection: 'column',
+          flexDirection: 'row',
+          alignItems: 'center',
           gap: '8px',
           zIndex: 102,
           pointerEvents: 'auto',
@@ -4569,46 +4571,6 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <button
-          onClick={zoomIn}
-          onMouseDown={(e) => e.stopPropagation()}
-          disabled={scale >= 5}
-          style={{
-            width: '44px',
-            height: '44px',
-            background: scale >= 5 ? '#6b7280' : '#10b981',
-            border: 'none',
-            borderRadius: '8px',
-            color: 'white',
-            cursor: scale >= 5 ? 'not-allowed' : 'pointer',
-            fontSize: '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 'bold',
-            transition: 'background 0.2s'
-          }}
-          onMouseEnter={(e) => {
-            if (scale < 5) e.target.style.background = '#059669';
-          }}
-          onMouseLeave={(e) => {
-            if (scale < 5) e.target.style.background = '#10b981';
-          }}
-        >
-          +
-        </button>
-        
-        <div style={{
-          color: theme.text,
-          fontSize: '0.875rem',
-          textAlign: 'center',
-          padding: '4px',
-          fontWeight: 'bold',
-          minWidth: '44px'
-        }}>
-          {Math.round(scale * 100)}%
-        </div>
-        
         <button
           onClick={zoomOut}
           onMouseDown={(e) => e.stopPropagation()}
@@ -4636,6 +4598,46 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
           }}
         >
           −
+        </button>
+        
+        <div style={{
+          color: theme.text,
+          fontSize: '0.875rem',
+          textAlign: 'center',
+          padding: '4px 8px',
+          fontWeight: 'bold',
+          minWidth: '60px'
+        }}>
+          {Math.round(scale * 100)}%
+        </div>
+        
+        <button
+          onClick={zoomIn}
+          onMouseDown={(e) => e.stopPropagation()}
+          disabled={scale >= 5}
+          style={{
+            width: '44px',
+            height: '44px',
+            background: scale >= 5 ? '#6b7280' : '#10b981',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: scale >= 5 ? 'not-allowed' : 'pointer',
+            fontSize: '1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 'bold',
+            transition: 'background 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            if (scale < 5) e.target.style.background = '#059669';
+          }}
+          onMouseLeave={(e) => {
+            if (scale < 5) e.target.style.background = '#10b981';
+          }}
+        >
+          +
         </button>
         
         <button
