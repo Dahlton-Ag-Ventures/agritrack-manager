@@ -1055,7 +1055,7 @@ loginCard: {
   width: '100%',
   boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)',
   backdropFilter: 'blur(12px)',
-},,
+},
     loginTitle: {
       fontSize: '1.25rem',
       fontWeight: 'normal',
