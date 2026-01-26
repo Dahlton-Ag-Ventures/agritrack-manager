@@ -4358,7 +4358,19 @@ itemCard: {
     </div>
 <div style={{ display: 'flex', gap: '12px' }}>
 <button 
-  onClick={addServiceRecord} 
+  onClick={(e) => {
+    console.log('🔴 ADD RECORD BUTTON CLICKED');
+    console.log('🔴 Service form data:', JSON.stringify(serviceForm, null, 2));
+    e.preventDefault();
+    e.stopPropagation();
+    addServiceRecord();
+  }}
+  onTouchEnd={(e) => {
+    console.log('📱 TOUCH EVENT ON ADD BUTTON');
+    e.preventDefault();
+    e.stopPropagation();
+    addServiceRecord();
+  }}
   style={{
     ...styles.primaryButton,
     opacity: !serviceForm.machineName || machinery.length === 0 ? 0.5 : 1,
