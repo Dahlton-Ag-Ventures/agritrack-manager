@@ -4292,26 +4292,29 @@ itemCard: {
 )}
 
         {showDebugModal && (
-          <Modal title="System Status" onClose={() => setShowDebugModal(false)}>
-            <div style={styles.debugInfo}>
-              <p><strong>Real-time Status:</strong> {realtimeStatus}</p>
-              <p><strong>Last Sync:</strong> {lastSync?.toLocaleString() || 'Never'}</p>
-              <p><strong>Inventory Items:</strong> {inventory.length}</p>
-              <p><strong>Machines:</strong> {machinery.length}</p>
-              <p><strong>Logged in as:</strong> {user?.email}</p>
-            </div>
-            <button onClick={() => window.location.reload()} style={styles.primaryButton}>
-              🔄 Refresh App
-            </button>
-          </Modal>
-        )}
-{/* Zoomable Image Viewer Modal */}
-       {viewingImage && <ZoomableImageViewer 
-          imageUrl={viewingImage} 
-          title={imageModalTitle} 
-          onClose={() => setViewingImage(null)}
-          theme={currentTheme}
-        />}
+  <Modal title="System Status" onClose={() => setShowDebugModal(false)}>
+    <div style={styles.debugInfo}>
+      <p><strong>Real-time Status:</strong> {realtimeStatus}</p>
+      <p><strong>Last Sync:</strong> {lastSync?.toLocaleString() || 'Never'}</p>
+      <p><strong>Inventory Items:</strong> {inventory.length}</p>
+      <p><strong>Machines:</strong> {machinery.length}</p>
+      <p><strong>Logged in as:</strong> {user?.email}</p>
+    </div>
+    <button onClick={() => window.location.reload()} style={styles.primaryButton}>
+      🔄 Refresh App
+    </button>
+  </Modal>
+)}
+
+{viewingImage && (
+  <ZoomableImageViewer 
+    imageUrl={viewingImage} 
+    title={imageModalTitle} 
+    onClose={() => setViewingImage(null)}
+    theme={currentTheme}
+  />
+)}
+
 <style>{`
   @keyframes spin {
     to { transform: rotate(360deg); }
