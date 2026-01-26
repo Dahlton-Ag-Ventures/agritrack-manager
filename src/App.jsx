@@ -4365,9 +4365,9 @@ itemCard: {
     transform: rotate(360deg);
   }
 `}</style>
+      </div>
     </div>
-  </div>
-);
+  );
 }
 
 // Zoomable Image Viewer Component
