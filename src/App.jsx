@@ -4291,7 +4291,7 @@ itemCard: {
   </Modal>
 )}
 
-        {showDebugModal && (
+{showDebugModal && (
   <Modal title="System Status" onClose={() => setShowDebugModal(false)}>
     <div style={styles.debugInfo}>
       <p><strong>Real-time Status:</strong> {realtimeStatus}</p>
