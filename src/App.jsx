@@ -4006,7 +4006,7 @@ itemCard: {
               </div>
             </div>
 
-            {/* Key Differences Highlight */}
+{/* Key Differences Highlight */}
             <div style={{
               ...styles.itemCard,
               marginTop: '24px',
@@ -4026,12 +4026,13 @@ itemCard: {
             </div>
           </div>
         </div>
-        )}
+      )}
+
         {showInventoryModal && (
           <Modal title="Add Inventory Item" onClose={() => {
-  setShowInventoryModal(false);
-  isEditingRef.current = false; // ✅ ADD THIS
-}}>
+            setShowInventoryModal(false);
+            isEditingRef.current = false;
+          }}>
             <input
               style={styles.input}
               placeholder="Item Name"
