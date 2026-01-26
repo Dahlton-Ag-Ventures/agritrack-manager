@@ -911,6 +911,9 @@ const viewMachineServiceHistory = (machineName) => {
 };
   
 const addServiceRecord = async () => {
+  try {
+    alert('🔧 Function called! Date: ' + serviceForm.date + ', Machine: ' + serviceForm.machineName);
+    
   console.log('🔧 ADD SERVICE RECORD CALLED');
   console.log('📱 Is Mobile:', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
   console.log('📅 Service Form:', JSON.stringify(serviceForm, null, 2));
@@ -1007,12 +1010,16 @@ setTimeout(() => {
   console.log('🔓 Unlocking real-time sync');
   isEditingRef.current = false;
 }, 3000);
-  } catch (error) {
+} catch (error) {
     console.error('Add error:', error);
-    alert('Error: ' + error.message);
+    alert('❌ ERROR SAVING: ' + error.message);
     isEditingRef.current = false;
     // ❌ ROLLBACK ON ERROR
     loadData();
+  }
+  } catch (outerError) {
+    alert('❌ OUTER ERROR: ' + outerError.message);
+    console.error('Outer error:', outerError);
   }
 };
   const deleteServiceRecord = async (id) => {
