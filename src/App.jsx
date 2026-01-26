@@ -944,12 +944,19 @@ const addServiceRecord = async () => {
 console.log('📅 Service Form Data:', serviceForm);
 console.log('📅 Date from form:', serviceForm.date);
 
+// Validate date before creating record
+const recordDate = serviceForm.date || new Date().toISOString().split('T')[0];
+console.log('📅 Final date being saved:', recordDate);
+console.log('📅 serviceForm.date value:', serviceForm.date);
+
 const newRecord = { 
   ...serviceForm, 
   id: Date.now(),
-  date: serviceForm.date || new Date().toISOString().split('T')[0],
+  date: recordDate,
   photoUrl: serviceForm.photoUrl || ''
 };
+
+console.log('📝 Complete record to save:', newRecord);
 
 console.log('📅 New Record to save:', newRecord);
     const newServiceHistory = [...currentServiceHistory, newRecord];
@@ -4291,12 +4298,18 @@ itemCard: {
       value={serviceForm.serviceType}
       onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
     />
-    <input
-      style={styles.input}
-      type="date"
-      value={serviceForm.date}
-      onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
-    />
+  <input
+  style={styles.input}
+  type="date"
+  value={serviceForm.date}
+  onChange={(e) => {
+    console.log('📅 Date changed:', e.target.value);
+    setServiceForm({ ...serviceForm, date: e.target.value });
+  }}
+  onBlur={(e) => {
+    console.log('📅 Date field blurred:', e.target.value);
+  }}
+/>
     <input
       style={styles.input}
       placeholder="Technician Name"
