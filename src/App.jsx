@@ -1826,6 +1826,7 @@ itemCard: {
         </div>
 
 {activeTab === 'home' && (
+  <div className="tab-content" style={styles.homeContainer}>
   <div style={styles.homeContainer}>
     <div style={{ ...styles.welcomeCard, background: 'rgba(6, 182, 212, 0.4)', border: '1px solid #06b6d4' }}>
       <h1 style={{ 
@@ -2125,6 +2126,7 @@ itemCard: {
 )}
         
       {activeTab === 'inventory' && (
+        <div className="tab-content">
   <div>
     <div style={styles.tabHeader}>
       <h2 style={{ fontSize: '1.5rem' }}>Inventory Items</h2>
@@ -2581,6 +2583,7 @@ itemCard: {
 )}
 
         {activeTab === 'machinery' && (
+           <div className="tab-content">
           <div>
             <div style={styles.tabHeader}>
               <h2 style={{ fontSize: '1.5rem' }}>Machinery</h2>
@@ -2985,6 +2988,7 @@ itemCard: {
 </div>
 )}
 {activeTab === 'service' && (
+  <div className="tab-content">
           <div>
             <div style={styles.tabHeader}>
   <div>
@@ -3481,6 +3485,7 @@ itemCard: {
         </div>
       )}
         {activeTab === 'settings' && (
+          <div className="tab-content" style={{ display: 'flex', minHeight: '100%' }}>
           <div style={{ display: 'flex', minHeight: '100%' }}>
             <div style={{ flex: 1, padding: '24px' }}>
               <div style={styles.tabHeader}>
@@ -3846,6 +3851,7 @@ itemCard: {
           </div>
         )}
 {activeTab === 'admin' && (
+  <div className="tab-content">
           <div>
             <div style={styles.tabHeader}>
               <h2 style={{ fontSize: '1.5rem' }}>👑 Admin Dashboard</h2>
@@ -4312,6 +4318,38 @@ itemCard: {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.6; }
   }
+  @keyframes fadeIn {
+    from { 
+      opacity: 0; 
+      transform: translateY(20px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+  @keyframes slideIn {
+    from { 
+      opacity: 0; 
+      transform: translateX(-30px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateX(0); 
+    }
+  }
+  .tab-content {
+    animation: fadeIn 0.4s ease-out;
+  }
+  .item-card {
+    animation: slideIn 0.3s ease-out;
+    animation-fill-mode: backwards;
+  }
+  .item-card:nth-child(1) { animation-delay: 0.05s; }
+  .item-card:nth-child(2) { animation-delay: 0.1s; }
+  .item-card:nth-child(3) { animation-delay: 0.15s; }
+  .item-card:nth-child(4) { animation-delay: 0.2s; }
+  .item-card:nth-child(5) { animation-delay: 0.25s; }
   .item-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
