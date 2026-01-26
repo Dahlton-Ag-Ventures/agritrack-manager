@@ -4372,7 +4372,7 @@ itemCard: {
 `}</style>
       </div>
     </div>
-  );
+);
 }
 
 // Zoomable Image Viewer Component
