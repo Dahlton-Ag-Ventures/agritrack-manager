@@ -978,7 +978,10 @@ console.log('💾 SAVING TO DATABASE...', {
   newRecord: newRecord
 });
 
-const { error } = await supabase
+console.log('💾 About to save - Record count:', newServiceHistory.length);
+console.log('💾 New record details:', JSON.stringify(newRecord));
+
+const { error, data } = await supabase
   .from('agritrack_data')
   .update({ 
     service_history: newServiceHistory,
@@ -986,12 +989,18 @@ const { error } = await supabase
     machinery: currentMachinery,
     updated_at: new Date().toISOString()
   })
-  .eq('id', 1);
+  .eq('id', 1)
+  .select();
 
-console.log('💾 DATABASE RESPONSE:', { error: error?.message || 'none' });
-    
-    if (error) throw error;
-    console.log('✅ Service record added successfully');
+console.log('💾 DATABASE SAVE COMPLETE');
+console.log('💾 Error?', error);
+console.log('💾 Data returned?', data);
+
+if (error) {
+  console.error('❌ DATABASE ERROR:', error);
+  throw error;
+}
+console.log('✅ Service record added successfully - Count:', newServiceHistory.length);
     
     // ✅ Clear editing flag AFTER successful save with delay
 setTimeout(() => {
