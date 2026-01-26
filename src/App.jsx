@@ -1047,14 +1047,14 @@ const cancelServiceEdit = () => {
       position: 'relative',
     },
 loginCard: {
-  background: 'rgba(31, 41, 55, 0.75)',
-  border: '1px solid rgba(255, 255, 255, 0.2)',
+  background: 'rgba(255, 255, 255, 0.15)',
+  border: '1px solid rgba(255, 255, 255, 0.3)',
   borderRadius: '16px',
   padding: '48px',
   maxWidth: '400px',
   width: '100%',
-  boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)',
-  backdropFilter: 'blur(12px)',
+  boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)',
+  backdropFilter: 'blur(16px)',
 },
     loginTitle: {
       fontSize: '1.25rem',
