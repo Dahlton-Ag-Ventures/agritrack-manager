@@ -4513,23 +4513,23 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
       onClick={handleOverlayClick}
     >
       {/* Title Bar */}
-      <div 
+<div 
         style={{
           background: theme.cardBackground,
-          padding: '16px',
+          padding: '8px 12px',
           borderRadius: '12px',
-          marginBottom: '16px',
+          marginBottom: '12px',   
           maxWidth: '90%',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          gap: '16px',
+          gap: '12px',
           pointerEvents: 'auto',
           zIndex: 102
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 style={{ margin: 0, fontSize: '1.25rem', color: theme.text }}>{title}</h3>
+        <h3 style={{ margin: 0, fontSize: '0.875rem', color: theme.text }}>{title}</h3>
         <button
           onClick={(e) => {
             e.stopPropagation();
