@@ -925,12 +925,17 @@ const addServiceRecord = async () => {
     const currentInventory = currentData?.inventory || [];
     const currentMachinery = currentData?.machinery || [];
     
-    const newRecord = { 
-      ...serviceForm, 
-      id: Date.now(),
-      date: serviceForm.date || new Date().toISOString().split('T')[0],
-      photoUrl: serviceForm.photoUrl || ''
-    };
+console.log('📅 Service Form Data:', serviceForm);
+console.log('📅 Date from form:', serviceForm.date);
+
+const newRecord = { 
+  ...serviceForm, 
+  id: Date.now(),
+  date: serviceForm.date || new Date().toISOString().split('T')[0],
+  photoUrl: serviceForm.photoUrl || ''
+};
+
+console.log('📅 New Record to save:', newRecord);
     const newServiceHistory = [...currentServiceHistory, newRecord];
     
     // ✅ UPDATE LOCAL STATE IMMEDIATELY
