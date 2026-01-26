@@ -4370,12 +4370,12 @@ itemCard: {
     transform: rotate(360deg);
   }
 `}</style>
-      </div>
     </div>
-);
+  </div>
+  );
 }
 
-// Zoomable Image Viewer Component
+
 function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
   const [scale, setScale] = React.useState(1);
   const [position, setPosition] = React.useState({ x: 0, y: 0 });
