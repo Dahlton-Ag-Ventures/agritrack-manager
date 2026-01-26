@@ -4669,25 +4669,6 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
         </button>
       </div>
 
-      {/* Help Text */}
-      <div style={{
-        position: 'absolute',
-        bottom: '24px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        background: 'rgba(0, 0, 0, 0.8)',
-        padding: '12px 24px',
-        borderRadius: '8px',
-        color: 'white',
-        fontSize: '0.875rem',
-        textAlign: 'center',
-        pointerEvents: 'none',
-        zIndex: 101,
-        maxWidth: '90%'
-      }}>
-        🖱️ Scroll to zoom • ✋ Click & drag to pan • 2️⃣ Double-click to {scale === 1 ? 'zoom in' : 'reset'}
-      </div>
-
       {/* Zoomable Image Container */}
       <div
         ref={imageContainerRef}
