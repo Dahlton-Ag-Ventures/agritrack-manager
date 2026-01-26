@@ -4319,8 +4319,14 @@ itemCard: {
   type="date"
   value={serviceForm.date}
   onChange={(e) => {
-    console.log('📅 Date changed:', e.target.value);
-    setServiceForm({ ...serviceForm, date: e.target.value });
+    const newDate = e.target.value;
+    alert('📅 Date selected: ' + newDate);
+    setServiceForm({ ...serviceForm, date: newDate });
+  }}
+  onInput={(e) => {
+    const newDate = e.target.value;
+    console.log('📅 Date input event:', newDate);
+    setServiceForm({ ...serviceForm, date: newDate });
   }}
   onBlur={(e) => {
     console.log('📅 Date field blurred:', e.target.value);
