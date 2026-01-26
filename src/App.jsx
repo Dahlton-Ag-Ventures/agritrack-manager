@@ -1851,7 +1851,7 @@ itemCard: {
       </p>
     </div>
 
-{/* How to Use Guide */}
+    {/* How to Use Guide */}
     <div style={{ 
       background: 'rgba(6, 182, 212, 0.2)', 
       border: '1px solid rgba(6, 182, 212, 0.5)',
@@ -2078,49 +2078,50 @@ itemCard: {
     </div>
 
     {/* Quick Stats Footer */}
-   <div style={{
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-  gap: '16px',
-  marginTop: '24px'
-}}>
-  <div style={{
-    background: 'rgba(6, 182, 212, 0.15)',
-    border: '1px solid rgba(6, 182, 212, 0.3)',
-    borderRadius: '8px',
-    padding: '16px',
-    textAlign: 'center'
-  }}>
-    <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Inventory</p>
-    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
-      {loading ? '...' : inventory.length}
-    </p>
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+      gap: '16px',
+      marginTop: '24px'
+    }}>
+      <div style={{
+        background: 'rgba(6, 182, 212, 0.15)',
+        border: '1px solid rgba(6, 182, 212, 0.3)',
+        borderRadius: '8px',
+        padding: '16px',
+        textAlign: 'center'
+      }}>
+        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Inventory</p>
+        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+          {loading ? '...' : inventory.length}
+        </p>
+      </div>
+      <div style={{
+        background: 'rgba(6, 182, 212, 0.15)',
+        border: '1px solid rgba(6, 182, 212, 0.3)',
+        borderRadius: '8px',
+        padding: '16px',
+        textAlign: 'center'
+      }}>
+        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Machinery</p>
+        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+          {loading ? '...' : machinery.length}
+        </p>
+      </div>
+      <div style={{
+        background: 'rgba(6, 182, 212, 0.15)',
+        border: '1px solid rgba(6, 182, 212, 0.3)',
+        borderRadius: '8px',
+        padding: '16px',
+        textAlign: 'center'
+      }}>
+        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Service Records</p>
+        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+          {loading ? '...' : serviceHistory.length}
+        </p>
+      </div>
+    </div>
   </div>
-  <div style={{
-    background: 'rgba(6, 182, 212, 0.15)',
-    border: '1px solid rgba(6, 182, 212, 0.3)',
-    borderRadius: '8px',
-    padding: '16px',
-    textAlign: 'center'
-  }}>
-    <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Machinery</p>
-    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
-      {loading ? '...' : machinery.length}
-    </p>
-  </div>
-  <div style={{
-    background: 'rgba(6, 182, 212, 0.15)',
-    border: '1px solid rgba(6, 182, 212, 0.3)',
-    borderRadius: '8px',
-    padding: '16px',
-    textAlign: 'center'
-  }}>
-    <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Service Records</p>
-    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
-      {loading ? '...' : serviceHistory.length}
-    </p>
-  </div>
-</div>
 )}
         
       {activeTab === 'inventory' && (
@@ -3832,7 +3833,7 @@ itemCard: {
                 </div>
               )}
 
-              <div
+             <div
                 style={{
                   marginTop: '24px',
                   padding: '16px',
@@ -3847,7 +3848,8 @@ itemCard: {
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 {activeTab === 'admin' && (
   <div className="tab-content">
           <div>
@@ -4023,6 +4025,7 @@ itemCard: {
               </div>
             </div>
           </div>
+        </div>
         )}
         {showInventoryModal && (
           <Modal title="Add Inventory Item" onClose={() => {
