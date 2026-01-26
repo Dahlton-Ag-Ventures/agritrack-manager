@@ -4359,17 +4359,15 @@ itemCard: {
 <div style={{ display: 'flex', gap: '12px' }}>
 <button 
   onClick={(e) => {
-    console.log('🔴 ADD RECORD BUTTON CLICKED');
-    console.log('🔴 Service form data:', JSON.stringify(serviceForm, null, 2));
+    alert('🔴 BUTTON CLICKED! Machine: ' + serviceForm.machineName + ', Date: ' + serviceForm.date);
     e.preventDefault();
     e.stopPropagation();
     addServiceRecord();
   }}
   onTouchEnd={(e) => {
-    console.log('📱 TOUCH EVENT ON ADD BUTTON');
+    alert('📱 TOUCH EVENT! Machine: ' + serviceForm.machineName + ', Date: ' + serviceForm.date);
     e.preventDefault();
     e.stopPropagation();
-    addServiceRecord();
   }}
   style={{
     ...styles.primaryButton,
