@@ -287,8 +287,8 @@ const checkUser = async () => {
 
     if (data) {
       console.log('✅ Data loaded');
-      console.log('📦 Inventory array length:', data.inventory?.length); 
-      console.log('📦 First 3 items:', data.inventory?.slice(0, 3));
+      console.log('📦 Inventory array length:', data.inventory?.length); // ADD THIS
+      console.log('📦 First 3 items:', data.inventory?.slice(0, 3)); // ADD THIS
       
       setInventory(data.inventory || []);
       setMachinery(data.machinery || []);
@@ -654,7 +654,7 @@ const addInventoryItem = async () => {
   if (!shouldDelete) return;
 
   try {
-    lastLocalUpdateRef.current = Date.now();
+    lastLocalUpdateRef.current = Date.now(); // ✅ ADD THIS LINE
     
     const newInventory = inventory.filter(item => item.id !== id);
     
@@ -692,7 +692,7 @@ const startEditInventory = (item) => {
 
   const saveInventoryEdit = async (id) => {
   try {
-    lastLocalUpdateRef.current = Date.now();
+    lastLocalUpdateRef.current = Date.now(); // ✅ ADD THIS LINE
     
     const newInventory = inventory.map(item => 
       item.id === id ? { ...item, ...inventoryForm } : item
@@ -792,7 +792,7 @@ const deleteMachineryItem = async (id) => {
   if (!confirm(confirmMessage)) return;
 
   try {
-    lastLocalUpdateRef.current = Date.now();
+    lastLocalUpdateRef.current = Date.now(); // ✅ ADD THIS LINE
     
     // Remove the machine
     const newMachinery = machinery.filter(item => item.id !== id);
@@ -936,7 +936,7 @@ const addServiceRecord = async () => {
   if (!confirm('Are you sure you want to delete this service record?')) return;
 
   try {
-    lastLocalUpdateRef.current = Date.now();
+    lastLocalUpdateRef.current = Date.now(); // ✅ ADD THIS LINE
     
     const newServiceHistory = serviceHistory.filter(record => record.id !== id);
 
@@ -1826,7 +1826,7 @@ itemCard: {
         </div>
 
 {activeTab === 'home' && (
-  <div className="tab-content" style={styles.homeContainer}>
+  <div style={styles.homeContainer}>
     <div style={{ ...styles.welcomeCard, background: 'rgba(6, 182, 212, 0.4)', border: '1px solid #06b6d4' }}>
       <h1 style={{ 
         color: currentTheme.text, 
@@ -1851,7 +1851,7 @@ itemCard: {
       </p>
     </div>
 
-    {/* How to Use Guide */}
+{/* How to Use Guide */}
     <div style={{ 
       background: 'rgba(6, 182, 212, 0.2)', 
       border: '1px solid rgba(6, 182, 212, 0.5)',
@@ -2078,54 +2078,53 @@ itemCard: {
     </div>
 
     {/* Quick Stats Footer */}
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-      gap: '16px',
-      marginTop: '24px'
-    }}>
-      <div style={{
-        background: 'rgba(6, 182, 212, 0.15)',
-        border: '1px solid rgba(6, 182, 212, 0.3)',
-        borderRadius: '8px',
-        padding: '16px',
-        textAlign: 'center'
-      }}>
-        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Inventory</p>
-        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
-          {loading ? '...' : inventory.length}
-        </p>
-      </div>
-      <div style={{
-        background: 'rgba(6, 182, 212, 0.15)',
-        border: '1px solid rgba(6, 182, 212, 0.3)',
-        borderRadius: '8px',
-        padding: '16px',
-        textAlign: 'center'
-      }}>
-        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Machinery</p>
-        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
-          {loading ? '...' : machinery.length}
-        </p>
-      </div>
-      <div style={{
-        background: 'rgba(6, 182, 212, 0.15)',
-        border: '1px solid rgba(6, 182, 212, 0.3)',
-        borderRadius: '8px',
-        padding: '16px',
-        textAlign: 'center'
-      }}>
-        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Service Records</p>
-        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
-          {loading ? '...' : serviceHistory.length}
-        </p>
-      </div>
-    </div>
+   <div style={{
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+  gap: '16px',
+  marginTop: '24px'
+}}>
+  <div style={{
+    background: 'rgba(6, 182, 212, 0.15)',
+    border: '1px solid rgba(6, 182, 212, 0.3)',
+    borderRadius: '8px',
+    padding: '16px',
+    textAlign: 'center'
+  }}>
+    <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Inventory</p>
+    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+      {loading ? '...' : inventory.length}
+    </p>
+  </div>
+  <div style={{
+    background: 'rgba(6, 182, 212, 0.15)',
+    border: '1px solid rgba(6, 182, 212, 0.3)',
+    borderRadius: '8px',
+    padding: '16px',
+    textAlign: 'center'
+  }}>
+    <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Machinery</p>
+    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+      {loading ? '...' : machinery.length}
+    </p>
+  </div>
+  <div style={{
+    background: 'rgba(6, 182, 212, 0.15)',
+    border: '1px solid rgba(6, 182, 212, 0.3)',
+    borderRadius: '8px',
+    padding: '16px',
+    textAlign: 'center'
+  }}>
+    <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Service Records</p>
+    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+      {loading ? '...' : serviceHistory.length}
+    </p>
+  </div>
+</div>
   </div>
 )}
         
       {activeTab === 'inventory' && (
-        <div className="tab-content">
   <div>
     <div style={styles.tabHeader}>
       <h2 style={{ fontSize: '1.5rem' }}>Inventory Items</h2>
@@ -2582,7 +2581,6 @@ itemCard: {
 )}
 
         {activeTab === 'machinery' && (
-           <div className="tab-content">
           <div>
             <div style={styles.tabHeader}>
               <h2 style={{ fontSize: '1.5rem' }}>Machinery</h2>
@@ -2987,7 +2985,6 @@ itemCard: {
 </div>
 )}
 {activeTab === 'service' && (
-  <div className="tab-content">
           <div>
             <div style={styles.tabHeader}>
   <div>
@@ -3484,7 +3481,6 @@ itemCard: {
         </div>
       )}
         {activeTab === 'settings' && (
-          <div className="tab-content" style={{ display: 'flex', minHeight: '100%' }}>
           <div style={{ display: 'flex', minHeight: '100%' }}>
             <div style={{ flex: 1, padding: '24px' }}>
               <div style={styles.tabHeader}>
@@ -3833,7 +3829,7 @@ itemCard: {
                 </div>
               )}
 
-             <div
+              <div
                 style={{
                   marginTop: '24px',
                   padding: '16px',
@@ -3848,10 +3844,8 @@ itemCard: {
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 {activeTab === 'admin' && (
-  <div className="tab-content">
           <div>
             <div style={styles.tabHeader}>
               <h2 style={{ fontSize: '1.5rem' }}>👑 Admin Dashboard</h2>
@@ -4006,7 +4000,7 @@ itemCard: {
               </div>
             </div>
 
-{/* Key Differences Highlight */}
+            {/* Key Differences Highlight */}
             <div style={{
               ...styles.itemCard,
               marginTop: '24px',
@@ -4025,14 +4019,12 @@ itemCard: {
               </div>
             </div>
           </div>
-        </div>
-      )}
-
+        )}
         {showInventoryModal && (
           <Modal title="Add Inventory Item" onClose={() => {
-            setShowInventoryModal(false);
-            isEditingRef.current = false;
-          }}>
+  setShowInventoryModal(false);
+  isEditingRef.current = false; // ✅ ADD THIS
+}}>
             <input
               style={styles.input}
               placeholder="Item Name"
@@ -4108,7 +4100,7 @@ itemCard: {
         {showMachineryModal && (
           <Modal title="Add Machinery" onClose={() => {
   setShowMachineryModal(false);
-  isEditingRef.current = false; //
+  isEditingRef.current = false; // ✅ ADD THIS
 }}>
             <input
               style={styles.input}
@@ -4167,7 +4159,7 @@ itemCard: {
 <Modal title="Add Service Record" onClose={() => {
   setShowServiceModal(false);
   setMachineSearchModal('');
-  isEditingRef.current = false;
+  isEditingRef.current = false; // ✅ ADD THIS
 }}>
     <div style={{ marginBottom: '16px' }}>
       <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
@@ -4291,30 +4283,27 @@ itemCard: {
   </Modal>
 )}
 
-{showDebugModal && (
-  <Modal title="System Status" onClose={() => setShowDebugModal(false)}>
-    <div style={styles.debugInfo}>
-      <p><strong>Real-time Status:</strong> {realtimeStatus}</p>
-      <p><strong>Last Sync:</strong> {lastSync?.toLocaleString() || 'Never'}</p>
-      <p><strong>Inventory Items:</strong> {inventory.length}</p>
-      <p><strong>Machines:</strong> {machinery.length}</p>
-      <p><strong>Logged in as:</strong> {user?.email}</p>
-    </div>
-    <button onClick={() => window.location.reload()} style={styles.primaryButton}>
-      🔄 Refresh App
-    </button>
-  </Modal>
-)}
-
-{viewingImage && (
-  <ZoomableImageViewer 
-    imageUrl={viewingImage} 
-    title={imageModalTitle} 
-    onClose={() => setViewingImage(null)}
-    theme={currentTheme}
-  />
-)}
-
+        {showDebugModal && (
+          <Modal title="System Status" onClose={() => setShowDebugModal(false)}>
+            <div style={styles.debugInfo}>
+              <p><strong>Real-time Status:</strong> {realtimeStatus}</p>
+              <p><strong>Last Sync:</strong> {lastSync?.toLocaleString() || 'Never'}</p>
+              <p><strong>Inventory Items:</strong> {inventory.length}</p>
+              <p><strong>Machines:</strong> {machinery.length}</p>
+              <p><strong>Logged in as:</strong> {user?.email}</p>
+            </div>
+            <button onClick={() => window.location.reload()} style={styles.primaryButton}>
+              🔄 Refresh App
+            </button>
+          </Modal>
+        )}
+{/* Zoomable Image Viewer Modal */}
+       {viewingImage && <ZoomableImageViewer 
+          imageUrl={viewingImage} 
+          title={imageModalTitle} 
+          onClose={() => setViewingImage(null)}
+          theme={currentTheme}
+        />}
 <style>{`
   @keyframes spin {
     to { transform: rotate(360deg); }
@@ -4323,38 +4312,6 @@ itemCard: {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.6; }
   }
-  @keyframes fadeIn {
-    from { 
-      opacity: 0; 
-      transform: translateY(20px); 
-    }
-    to { 
-      opacity: 1; 
-      transform: translateY(0); 
-    }
-  }
-  @keyframes slideIn {
-    from { 
-      opacity: 0; 
-      transform: translateX(-30px); 
-    }
-    to { 
-      opacity: 1; 
-      transform: translateX(0); 
-    }
-  }
-  .tab-content {
-    animation: fadeIn 0.4s ease-out;
-  }
-  .item-card {
-    animation: slideIn 0.3s ease-out;
-    animation-fill-mode: backwards;
-  }
-  .item-card:nth-child(1) { animation-delay: 0.05s; }
-  .item-card:nth-child(2) { animation-delay: 0.1s; }
-  .item-card:nth-child(3) { animation-delay: 0.15s; }
-  .item-card:nth-child(4) { animation-delay: 0.2s; }
-  .item-card:nth-child(5) { animation-delay: 0.25s; }
   .item-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
@@ -4370,12 +4327,12 @@ itemCard: {
     transform: rotate(360deg);
   }
 `}</style>
+      </div>
     </div>
-  </div>
   );
 }
 
-
+// Zoomable Image Viewer Component
 function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
   const [scale, setScale] = React.useState(1);
   const [position, setPosition] = React.useState({ x: 0, y: 0 });
