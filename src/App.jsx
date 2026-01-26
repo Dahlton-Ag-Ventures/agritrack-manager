@@ -1694,7 +1694,7 @@ itemCard: {
         fontSize: '0.75rem',
         fontWeight: 'bold',
         textTransform: 'uppercase',
-        color: 'white',
+        color: theme === 'dark' ? 'white' : '#1e40af',
         cursor: 'pointer',
         transition: 'all 0.2s ease'
       }}
