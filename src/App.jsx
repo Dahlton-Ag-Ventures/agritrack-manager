@@ -4377,10 +4377,11 @@ itemCard: {
     e.stopPropagation();
     addServiceRecord();
   }}
-  onTouchEnd={(e) => {
+onTouchEnd={(e) => {
     alert('📱 TOUCH EVENT! Machine: ' + serviceForm.machineName + ', Date: ' + serviceForm.date);
     e.preventDefault();
     e.stopPropagation();
+    addServiceRecord();
   }}
   style={{
     ...styles.primaryButton,
