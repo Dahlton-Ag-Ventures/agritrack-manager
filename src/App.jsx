@@ -4365,6 +4365,7 @@ itemCard: {
 `}</style>
       </div>
     </div>
+  </div>
   );
 }
 
