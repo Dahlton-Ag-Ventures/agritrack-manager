@@ -116,6 +116,8 @@ const [inventoryForm, setInventoryForm] = useState({
   const [inventoryItemsPerPage, setInventoryItemsPerPage] = useState(50);
   const [machineryPage, setMachineryPage] = useState(1);
   const [machineryItemsPerPage, setMachineryItemsPerPage] = useState(50);
+  const [servicePage, setServicePage] = useState(1);
+  const [serviceItemsPerPage, setServiceItemsPerPage] = useState(50);
   
   // Get current theme object
   const currentTheme = themes[theme];
@@ -512,6 +514,18 @@ const getPaginatedInventory = () => {
     endIndex: Math.min(endIndex, filtered.length)
   };
 }; 
+  const getPaginatedService = () => {
+  const filtered = getFilteredAndSortedService();
+  const startIndex = (servicePage - 1) * serviceItemsPerPage;
+  const endIndex = startIndex + serviceItemsPerPage;
+  return {
+    items: filtered.slice(startIndex, endIndex),
+    totalItems: filtered.length,
+    totalPages: Math.ceil(filtered.length / serviceItemsPerPage),
+    startIndex: startIndex + 1,
+    endIndex: Math.min(endIndex, filtered.length)
+  };
+};
   const getFilteredAndSortedMachinery = () => {
     let filtered = machinery.filter(item => {
       const searchLower = machinerySearch.toLowerCase();
@@ -3004,37 +3018,150 @@ itemCard: {
 </button>
   )}
 </div>
-            <div style={styles.searchSortContainer}>
-              <input
-                type="text"
-                placeholder="🔍 Search service records (machine, service type, technician, notes)..."
-                value={serviceSearch}
-                onChange={(e) => setServiceSearch(e.target.value)}
-                style={styles.searchInput}
-              />
-              <select
-                value={serviceSort}
-                onChange={(e) => setServiceSort(e.target.value)}
-                style={styles.sortSelect}
-              >
-                <option value="date-desc">Date (Newest First)</option>
-                <option value="date-asc">Date (Oldest First)</option>
-              </select>
-            </div>
+<div style={styles.searchSortContainer}>
+  <input
+    type="text"
+    placeholder="🔍 Search service records (machine, service type, technician, notes)..."
+    value={serviceSearch}
+    onChange={(e) => {
+      setServiceSearch(e.target.value);
+      setServicePage(1);
+    }}
+    style={styles.searchInput}
+  />
+  <select
+    value={serviceSort}
+    onChange={(e) => {
+      setServiceSort(e.target.value);
+      setServicePage(1);
+    }}
+    style={styles.sortSelect}
+  >
+    <option value="date-desc">Date (Newest First)</option>
+    <option value="date-asc">Date (Oldest First)</option>
+  </select>
+  <select
+    value={serviceItemsPerPage}
+    onChange={(e) => {
+      setServiceItemsPerPage(Number(e.target.value));
+      setServicePage(1);
+    }}
+    style={styles.sortSelect}
+  >
+    <option value="25">Show 25</option>
+    <option value="50">Show 50</option>
+    <option value="100">Show 100</option>
+    <option value="200">Show 200</option>
+  </select>
+</div>
 
-            {serviceHistory.length === 0 ? (
-              <div style={styles.emptyState}>
-                <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
-                <p>No service records yet</p>
-              </div>
-            ) : getFilteredAndSortedService().length === 0 ? (
-              <div style={styles.emptyState}>
-                <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
-                <p>No records match your search</p>
-              </div>
-            ) : (
-              <div style={styles.itemsList}>
-            {getFilteredAndSortedService().map(record => (
+{serviceHistory.length === 0 ? (
+  <div style={styles.emptyState}>
+    <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+    <p>No service records yet</p>
+  </div>
+) : getPaginatedService().totalItems === 0 ? (
+  <div style={styles.emptyState}>
+    <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+    <p>No records match your search</p>
+  </div>
+) : (
+  <>
+    {/* TOP PAGINATION CONTROLS */}
+    <div style={{
+      padding: '16px',
+      background: currentTheme.cardBackground,
+      border: `1px solid ${currentTheme.cardBorder}`,
+      borderRadius: '12px',
+      marginBottom: '16px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      gap: '12px'
+    }}>
+      <div style={{ color: currentTheme.text }}>
+        Showing <strong>{getPaginatedService().startIndex}-{getPaginatedService().endIndex}</strong> of <strong>{getPaginatedService().totalItems}</strong> records
+      </div>
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+        <button
+          onClick={() => setServicePage(1)}
+          disabled={servicePage === 1}
+          style={{
+            padding: '8px 16px',
+            background: servicePage === 1 ? '#4b5563' : '#10b981',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: servicePage === 1 ? 'not-allowed' : 'pointer',
+            fontSize: '0.875rem',
+            opacity: servicePage === 1 ? 0.5 : 1
+          }}
+        >
+          First
+        </button>
+        <button
+          onClick={() => setServicePage(prev => Math.max(1, prev - 1))}
+          disabled={servicePage === 1}
+          style={{
+            padding: '8px 16px',
+            background: servicePage === 1 ? '#4b5563' : '#10b981',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: servicePage === 1 ? 'not-allowed' : 'pointer',
+            fontSize: '0.875rem',
+            opacity: servicePage === 1 ? 0.5 : 1
+          }}
+        >
+          Previous
+        </button>
+        <span style={{ 
+          padding: '8px 16px', 
+          color: currentTheme.text,
+          fontSize: '0.875rem',
+          fontWeight: 'bold'
+        }}>
+          Page {servicePage} of {getPaginatedService().totalPages}
+        </span>
+        <button
+          onClick={() => setServicePage(prev => Math.min(getPaginatedService().totalPages, prev + 1))}
+          disabled={servicePage === getPaginatedService().totalPages}
+          style={{
+            padding: '8px 16px',
+            background: servicePage === getPaginatedService().totalPages ? '#4b5563' : '#10b981',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: servicePage === getPaginatedService().totalPages ? 'not-allowed' : 'pointer',
+            fontSize: '0.875rem',
+            opacity: servicePage === getPaginatedService().totalPages ? 0.5 : 1
+          }}
+        >
+          Next
+        </button>
+        <button
+          onClick={() => setServicePage(getPaginatedService().totalPages)}
+          disabled={servicePage === getPaginatedService().totalPages}
+          style={{
+            padding: '8px 16px',
+            background: servicePage === getPaginatedService().totalPages ? '#4b5563' : '#10b981',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: servicePage === getPaginatedService().totalPages ? 'not-allowed' : 'pointer',
+            fontSize: '0.875rem',
+            opacity: servicePage === getPaginatedService().totalPages ? 0.5 : 1
+          }}
+        >
+          Last
+        </button>
+      </div>
+    </div>
+
+    {/* SERVICE RECORDS LIST */}
+    <div style={styles.itemsList}>
+      {getPaginatedService().items.map(record => (
               <div key={record.id} className="item-card" style={styles.itemCard}>
 {editingServiceId === record.id ? (
   <div style={{ flex: 1 }}>
@@ -3235,9 +3362,97 @@ itemCard: {
                   </div>
                 ))}
               </div>
-            )}
-          </div>
-        )}
+    
+              {/* BOTTOM PAGINATION CONTROLS */}
+              <div style={{
+                padding: '16px',
+                background: currentTheme.cardBackground,
+                border: `1px solid ${currentTheme.cardBorder}`,
+                borderRadius: '12px',
+                marginTop: '16px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '8px',
+                flexWrap: 'wrap'
+              }}>
+               <button
+                  onClick={() => setServicePage(1)}
+                  disabled={servicePage === 1}
+                  style={{
+                    padding: '8px 16px',
+                    background: servicePage === 1 ? '#4b5563' : '#10b981',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: 'white',
+                    cursor: servicePage === 1 ? 'not-allowed' : 'pointer',
+                    fontSize: '0.875rem',
+                    opacity: servicePage === 1 ? 0.5 : 1
+                  }}
+                >
+                  First
+                </button>
+                <button
+                  onClick={() => setServicePage(prev => Math.max(1, prev - 1))}
+                  disabled={servicePage === 1}
+                  style={{
+                    padding: '8px 16px',
+                    background: servicePage === 1 ? '#4b5563' : '#10b981',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: 'white',
+                    cursor: servicePage === 1 ? 'not-allowed' : 'pointer',
+                    fontSize: '0.875rem',
+                    opacity: servicePage === 1 ? 0.5 : 1
+                  }}
+                >
+                  Previous
+                </button>
+                <span style={{ 
+                  padding: '8px 16px', 
+                  color: currentTheme.text,
+                  fontSize: '0.875rem',
+                  fontWeight: 'bold'
+                }}>
+                  Page {servicePage} of {getPaginatedService().totalPages}
+                </span>
+                <button
+                  onClick={() => setServicePage(prev => Math.min(getPaginatedService().totalPages, prev + 1))}
+                  disabled={servicePage === getPaginatedService().totalPages}
+                  style={{
+                    padding: '8px 16px',
+                    background: servicePage === getPaginatedService().totalPages ? '#4b5563' : '#10b981',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: 'white',
+                    cursor: servicePage === getPaginatedService().totalPages ? 'not-allowed' : 'pointer',
+                    fontSize: '0.875rem',
+                    opacity: servicePage === getPaginatedService().totalPages ? 0.5 : 1
+                  }}
+                >
+                  Next
+                </button>
+                <button
+                  onClick={() => setServicePage(getPaginatedService().totalPages)}
+                  disabled={servicePage === getPaginatedService().totalPages}
+                  style={{
+                    padding: '8px 16px',
+                    background: servicePage === getPaginatedService().totalPages ? '#4b5563' : '#10b981',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: 'white',
+                    cursor: servicePage === getPaginatedService().totalPages ? 'not-allowed' : 'pointer',
+                    fontSize: '0.875rem',
+                    opacity: servicePage === getPaginatedService().totalPages ? 0.5 : 1
+                  }}
+                >
+                  Last
+                </button>
+              </div>
+            </>                
+          )}
+        </div>
+      )}
         {activeTab === 'settings' && (
           <div style={{ display: 'flex', minHeight: '100%' }}>
             <div style={{ flex: 1, padding: '24px' }}>
