@@ -287,8 +287,8 @@ const checkUser = async () => {
 
     if (data) {
       console.log('✅ Data loaded');
-      console.log('📦 Inventory array length:', data.inventory?.length); // ADD THIS
-      console.log('📦 First 3 items:', data.inventory?.slice(0, 3)); // ADD THIS
+      console.log('📦 Inventory array length:', data.inventory?.length); 
+      console.log('📦 First 3 items:', data.inventory?.slice(0, 3));
       
       setInventory(data.inventory || []);
       setMachinery(data.machinery || []);
@@ -654,7 +654,7 @@ const addInventoryItem = async () => {
   if (!shouldDelete) return;
 
   try {
-    lastLocalUpdateRef.current = Date.now(); // ✅ ADD THIS LINE
+    lastLocalUpdateRef.current = Date.now();
     
     const newInventory = inventory.filter(item => item.id !== id);
     
@@ -692,7 +692,7 @@ const startEditInventory = (item) => {
 
   const saveInventoryEdit = async (id) => {
   try {
-    lastLocalUpdateRef.current = Date.now(); // ✅ ADD THIS LINE
+    lastLocalUpdateRef.current = Date.now();
     
     const newInventory = inventory.map(item => 
       item.id === id ? { ...item, ...inventoryForm } : item
@@ -792,7 +792,7 @@ const deleteMachineryItem = async (id) => {
   if (!confirm(confirmMessage)) return;
 
   try {
-    lastLocalUpdateRef.current = Date.now(); // ✅ ADD THIS LINE
+    lastLocalUpdateRef.current = Date.now();
     
     // Remove the machine
     const newMachinery = machinery.filter(item => item.id !== id);
@@ -936,7 +936,7 @@ const addServiceRecord = async () => {
   if (!confirm('Are you sure you want to delete this service record?')) return;
 
   try {
-    lastLocalUpdateRef.current = Date.now(); // ✅ ADD THIS LINE
+    lastLocalUpdateRef.current = Date.now();
     
     const newServiceHistory = serviceHistory.filter(record => record.id !== id);
 
@@ -4108,7 +4108,7 @@ itemCard: {
         {showMachineryModal && (
           <Modal title="Add Machinery" onClose={() => {
   setShowMachineryModal(false);
-  isEditingRef.current = false; // ✅ ADD THIS
+  isEditingRef.current = false; //
 }}>
             <input
               style={styles.input}
@@ -4167,7 +4167,7 @@ itemCard: {
 <Modal title="Add Service Record" onClose={() => {
   setShowServiceModal(false);
   setMachineSearchModal('');
-  isEditingRef.current = false; // ✅ ADD THIS
+  isEditingRef.current = false;
 }}>
     <div style={{ marginBottom: '16px' }}>
       <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
