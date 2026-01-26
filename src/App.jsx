@@ -62,6 +62,7 @@ export default function App() {
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loggingIn, setLoggingIn] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [activeSettingsSection, setActiveSettingsSection] = useState('general');
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
   const settingsDropdownRef = useRef(null);
@@ -1567,15 +1568,39 @@ itemCard: {
               required
               autoComplete="email"
             />
-            <input
-              type="password"
-              placeholder="Password"
-              value={loginPassword}
-              onChange={(e) => setLoginPassword(e.target.value)}
-              style={styles.loginInput}
-              required
-              autoComplete="current-password"
-            />
+            <div style={{ position: 'relative', width: '100%' }}>
+  <input
+    type={showPassword ? "text" : "password"}
+    placeholder="Password"
+    value={loginPassword}
+    onChange={(e) => setLoginPassword(e.target.value)}
+    style={styles.loginInput}
+    required
+    autoComplete="current-password"
+  />
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    style={{
+      position: 'absolute',
+      right: '12px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      background: 'transparent',
+      border: 'none',
+      color: '#9ca3af',
+      cursor: 'pointer',
+      padding: '4px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: '1.2rem'
+    }}
+    tabIndex={-1}
+  >
+    {showPassword ? '👁️' : '👁️‍🗨️'}
+  </button>
+</div>
 
             {loginError && (
               <div style={styles.loginError}>
