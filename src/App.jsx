@@ -1699,31 +1699,17 @@ itemCard: {
                 Syncing...
               </div>
             )}
-<button onClick={() => setShowDebugModal(true)} style={{
-  ...styles.statusBadge,
-  background: realtimeStatus === 'connected' 
-    ? 'rgba(16, 185, 129, 0.2)' 
-    : realtimeStatus === 'connecting' 
-      ? 'rgba(251, 191, 36, 0.2)' 
-      : 'rgba(239, 68, 68, 0.2)',
-  borderColor: realtimeStatus === 'connected' 
-    ? '#10b981' 
-    : realtimeStatus === 'connecting' 
-      ? '#fbbf24' 
-      : '#ef4444',
-  color: realtimeStatus === 'connected' 
-    ? '#10b981' 
-    : realtimeStatus === 'connecting' 
-      ? '#fbbf24' 
-      : '#ef4444'
-}}>
-  <Users size={16} />
-  {realtimeStatus === 'connected' 
-    ? 'Live Sync Active' 
-    : realtimeStatus === 'connecting' 
-      ? 'Connecting...' 
-      : 'Sync Error'}
-</button>
+{realtimeStatus === 'connected' && (
+  <button onClick={() => setShowDebugModal(true)} style={{
+    ...styles.statusBadge,
+    background: 'rgba(16, 185, 129, 0.2)',
+    borderColor: '#10b981',
+    color: '#10b981'
+  }}>
+    <Users size={16} />
+    Live Sync Active
+  </button>
+)}
             <button onClick={handleLogout} style={styles.logoutButton}>
               <LogOut size={16} />
               Logout
