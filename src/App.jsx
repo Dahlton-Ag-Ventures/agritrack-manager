@@ -4576,8 +4576,8 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
           onMouseDown={(e) => e.stopPropagation()}
           disabled={scale <= 1}
           style={{
-            width: '44px',
-            height: '44px',
+            width: '32px',
+            height: '32px',
             background: scale <= 1 ? '#6b7280' : '#10b981',
             border: 'none',
             borderRadius: '8px',
@@ -4616,8 +4616,8 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
           onMouseDown={(e) => e.stopPropagation()}
           disabled={scale >= 5}
           style={{
-            width: '44px',
-            height: '44px',
+            width: '32px',
+            height: '32px',
             background: scale >= 5 ? '#6b7280' : '#10b981',
             border: 'none',
             borderRadius: '8px',
@@ -4645,8 +4645,8 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
           onMouseDown={(e) => e.stopPropagation()}
           disabled={scale === 1}
           style={{
-            width: '44px',
-            height: '44px',
+            width: '32px',
+            height: '32px',
             background: scale === 1 ? '#6b7280' : '#2563eb',
             border: 'none',
             borderRadius: '8px',
