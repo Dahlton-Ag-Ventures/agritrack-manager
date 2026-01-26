@@ -1827,7 +1827,6 @@ itemCard: {
 
 {activeTab === 'home' && (
   <div className="tab-content" style={styles.homeContainer}>
-  <div style={styles.homeContainer}>
     <div style={{ ...styles.welcomeCard, background: 'rgba(6, 182, 212, 0.4)', border: '1px solid #06b6d4' }}>
       <h1 style={{ 
         color: currentTheme.text, 
@@ -2122,7 +2121,6 @@ itemCard: {
     </p>
   </div>
 </div>
-  </div>
 )}
         
       {activeTab === 'inventory' && (
