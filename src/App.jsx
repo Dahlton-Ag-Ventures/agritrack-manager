@@ -284,16 +284,18 @@ const checkUser = async () => {
     console.log('📥 Loading from NEW database...');
     setLoading(true);
     
-    const { data: inventoryData, error: invError } = await supabase
-      .from('inventory_items')
-      .select('*')
-      .order('name', { ascending: true });
+ const { data: inventoryData, error: invError } = await supabase
+  .from('inventory_items')
+  .select('*')
+  .limit(2000)
+  .order('name', { ascending: true });
     
     if (invError) throw invError;
     
     const { data: machineryData, error: machError } = await supabase
       .from('machinery_items')
       .select('*')
+      .limit(2000)
       .order('name', { ascending: true });
     
     if (machError) throw machError;
@@ -301,6 +303,7 @@ const checkUser = async () => {
     const { data: serviceData, error: servError } = await supabase
       .from('service_records')
       .select('*')
+      .limit(2000)
       .order('date', { ascending: false });
     
     if (servError) throw servError;
