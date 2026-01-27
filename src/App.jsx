@@ -284,33 +284,48 @@ const loadData = async () => {
     console.log('📥 Loading from NEW database...');
     setLoading(true);
     
-    const { data: inventoryData, error: invError } = await supabase
-      .from('inventory_items')
-      .select('*')
-      .range(0, 1999)
-      .order('name', { ascending: true });
+    // Load inventory in batches (handle 1000 row limit)
+    let allInventory = [];
+    let page = 0;
+    let hasMore = true;
     
-    if (invError) throw invError;
+    while (hasMore) {
+      const { data: batch, error } = await supabase
+        .from('inventory_items')
+        .select('*')
+        .order('name', { ascending: true })
+        .range(page * 1000, (page + 1) * 1000 - 1);
+      
+      if (error) throw error;
+      
+      if (batch && batch.length > 0) {
+        allInventory = [...allInventory, ...batch];
+        page++;
+        if (batch.length < 1000) hasMore = false;
+      } else {
+        hasMore = false;
+      }
+    }
     
+    // Load machinery (should be under 1000)
     const { data: machineryData, error: machError } = await supabase
       .from('machinery_items')
       .select('*')
-      .range(0, 1999)
       .order('name', { ascending: true });
     
     if (machError) throw machError;
     
+    // Load service records (should be under 1000)
     const { data: serviceData, error: servError } = await supabase
       .from('service_records')
       .select('*')
-      .range(0, 1999)
       .order('date', { ascending: false });
     
     if (servError) throw servError;
     
-    console.log('✅ Loaded:', inventoryData?.length, 'inventory,', machineryData?.length, 'machines,', serviceData?.length, 'services');
+    console.log('✅ Loaded:', allInventory?.length, 'inventory,', machineryData?.length, 'machines,', serviceData?.length, 'services');
     
-    setInventory(inventoryData?.map(item => ({
+    setInventory(allInventory?.map(item => ({
       id: item.id,
       name: item.name || '',
       partNumber: item.part_number || '',
