@@ -335,7 +335,7 @@ const checkUser = async () => {
   return;
 }
 
-if (timeSinceLastUpdate <= 10000) {
+if (timeSinceLastUpdate <= 15000) {
   console.log('⏸️ Skipping real-time update (recent local change)');
   return;
 }
@@ -657,7 +657,7 @@ const newItem = { ...inventoryForm, id: Date.now() };
 setTimeout(() => {
   console.log('🔓 Unlocking real-time sync');
   isEditingRef.current = false;
-}, 8000);
+}, 15000);
   } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
@@ -754,7 +754,7 @@ const saveInventoryEdit = async (id) => {
     
     setTimeout(() => {
       isEditingRef.current = false;
-    }, 8000);
+    }, 15000);
   } catch (error) {
     console.error('Error updating inventory item:', error);
     alert('Failed to update item. Please try again.');
@@ -814,7 +814,7 @@ const addMachineryItem = async () => {
 setTimeout(() => {
   console.log('🔓 Unlocking real-time sync');
   isEditingRef.current = false;
-}, 8000);
+}, 15000);
   } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
@@ -938,7 +938,7 @@ const deleteMachineryItem = async (id) => {
     
     setTimeout(() => {
       isEditingRef.current = false;
-    }, 8000);
+    }, 15000);
   } catch (error) {
     console.error('Update error:', error);
     alert('Error: ' + error.message);
@@ -1015,7 +1015,7 @@ const addServiceRecord = async () => {
     setTimeout(() => {
       console.log('🔓 Unlocking real-time sync');
       isEditingRef.current = false;
-    }, 8000);
+    }, 15000);
   } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
@@ -1111,7 +1111,7 @@ const saveServiceEdit = async (id) => {
     
     setTimeout(() => {
       isEditingRef.current = false;
-    }, 8000);
+    }, 15000);
   } catch (error) {
     console.error('Update error:', error);
     alert('Error: ' + error.message);
@@ -1168,7 +1168,7 @@ const cancelServiceEdit = () => {
       
       setTimeout(() => {
         isEditingRef.current = false;
-      }, 8000);
+      }, 15000);
     } catch (error) {
       console.error('Update error:', error);
       isEditingRef.current = false;
