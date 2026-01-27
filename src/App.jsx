@@ -103,7 +103,7 @@ const [inventoryForm, setInventoryForm] = useState({
 
   // Photo upload state
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
-
+  const [savingService, setSavingService] = useState(false);
   // Search and sort states
   const [inventorySearch, setInventorySearch] = useState('');
   const [inventorySort, setInventorySort] = useState('name-asc');
@@ -1071,6 +1071,7 @@ const startEditService = (record) => {
 };
 
 const saveServiceEdit = async (id) => {
+  setSavingService(true);
   try {
     isEditingRef.current = true;
     lastLocalUpdateRef.current = Date.now();
@@ -1125,6 +1126,7 @@ const saveServiceEdit = async (id) => {
     setEditingServiceId(null);
     setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
     setMachineSearchModal('');  // ← ALSO ADDED THIS
+    setSavingService(false);
     
     setTimeout(() => {
       isEditingRef.current = false;
@@ -1133,6 +1135,7 @@ const saveServiceEdit = async (id) => {
     console.error('Update error:', error);
     alert('Error: ' + error.message);
     isEditingRef.current = false;
+    setSavingService(false);
     // ❌ ROLLBACK ON ERROR
     loadData();
   }
@@ -3468,11 +3471,32 @@ itemCard: {
                             <img src={serviceForm.photoUrl} alt="Preview" style={{ maxWidth: '200px', marginTop: '8px', borderRadius: '8px' }} />
                           )}
                         </div>
-                        <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                          <button onClick={() => saveServiceEdit(record.id)} style={styles.saveButton}>
-                            <Save size={16} /> Save
+                       <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                          <button 
+                            onClick={() => saveServiceEdit(record.id)} 
+                            style={{
+                              ...styles.saveButton,
+                              opacity: savingService ? 0.7 : 1,
+                              cursor: savingService ? 'not-allowed' : 'pointer'
+                            }}
+                            disabled={savingService}
+                          >
+                            {savingService ? (
+                              <>
+                                <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} /> 
+                                Saving...
+                              </>
+                            ) : (
+                              <>
+                                <Save size={16} /> Save
+                              </>
+                            )}
                           </button>
-                          <button onClick={cancelServiceEdit} style={styles.cancelButton}>
+                          <button 
+                            onClick={cancelServiceEdit} 
+                            style={styles.cancelButton}
+                            disabled={savingService}
+                          >
                             <X size={16} /> Cancel
                           </button>
                         </div>
