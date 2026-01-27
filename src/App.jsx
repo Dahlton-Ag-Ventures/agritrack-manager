@@ -1088,8 +1088,18 @@ const saveServiceEdit = async (id) => {
     const currentInventory = currentData?.inventory || [];
     const currentMachinery = currentData?.machinery || [];
     
+    // ✅ ENSURE photoUrl is explicitly included
+    const updatedRecord = {
+      machineName: serviceForm.machineName,
+      serviceType: serviceForm.serviceType,
+      date: serviceForm.date,
+      notes: serviceForm.notes,
+      technician: serviceForm.technician,
+      photoUrl: serviceForm.photoUrl || ''
+    };
+    
     const newServiceHistory = currentServiceHistory.map(record => 
-      record.id === id ? { ...record, ...serviceForm } : record
+      record.id === id ? { ...record, ...updatedRecord } : record
     );
 
     // ✅ SAVE TO DATABASE FIRST
@@ -1114,6 +1124,7 @@ const saveServiceEdit = async (id) => {
     // Clear editing state
     setEditingServiceId(null);
     setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
+    setMachineSearchModal('');  // ← ALSO ADDED THIS
     
     setTimeout(() => {
       isEditingRef.current = false;
