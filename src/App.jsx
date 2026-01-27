@@ -279,16 +279,16 @@ const checkUser = async () => {
     setActiveTab('settings');
   };
   
- const loadData = async () => {
+const loadData = async () => {
   try {
     console.log('📥 Loading from NEW database...');
     setLoading(true);
     
- const { data: inventoryData, error: invError } = await supabase
-  .from('inventory_items')
-  .select('*')
-  .limit(2000)
-  .order('name', { ascending: true });
+    const { data: inventoryData, error: invError } = await supabase
+      .from('inventory_items')
+      .select('*')
+      .limit(2000)
+      .order('name', { ascending: true });
     
     if (invError) throw invError;
     
