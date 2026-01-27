@@ -963,47 +963,42 @@ const viewMachineServiceHistory = (machineName) => {
 };
   
 const addServiceRecord = async () => {
-  isEditingRef.current = true;  // ✅ MOVED TO FIRST LINE
+  isEditingRef.current = true;
   lastLocalUpdateRef.current = Date.now();
   
   try {
-    // ✅ FETCH ALL CURRENT DATA FROM DATABASE FIRST
+    // ✅ ONLY FETCH SERVICE HISTORY (not inventory or machinery)
     const { data: currentData, error: fetchError } = await supabase
       .from('agritrack_data')
-      .select('*')
+      .select('service_history')
       .eq('id', 1)
       .single();
     
     if (fetchError) throw fetchError;
     
     const currentServiceHistory = currentData?.service_history || [];
-    const currentInventory = currentData?.inventory || [];
-    const currentMachinery = currentData?.machinery || [];
     
-console.log('📅 Service Form Data:', serviceForm);
-console.log('📅 Date from form:', serviceForm.date);
+    console.log('📅 Service Form Data:', serviceForm);
+    console.log('📅 Date from form:', serviceForm.date);
 
-// Force the date format
-const finalDate = serviceForm.date || new Date().toISOString().split('T')[0];
+    const finalDate = serviceForm.date || new Date().toISOString().split('T')[0];
 
-const newRecord = { 
-  ...serviceForm, 
-  id: Date.now(),
-  date: finalDate,
-  photoUrl: serviceForm.photoUrl || ''
-};
+    const newRecord = { 
+      ...serviceForm, 
+      id: Date.now(),
+      date: finalDate,
+      photoUrl: serviceForm.photoUrl || ''
+    };
 
-console.log('📝 Complete record to save:', newRecord);
-console.log('📅 New Record to save:', newRecord);
+    console.log('📝 Complete record to save:', newRecord);
+    console.log('📅 New Record to save:', newRecord);
     const newServiceHistory = [...currentServiceHistory, newRecord];
     
-    // ✅ SAVE TO DATABASE FIRST (BEFORE updating state)
+    // ✅ ONLY UPDATE SERVICE HISTORY (not inventory or machinery)
     const { error } = await supabase
       .from('agritrack_data')
       .update({ 
         service_history: newServiceHistory,
-        inventory: currentInventory,
-        machinery: currentMachinery,
         updated_at: new Date().toISOString()
       })
       .eq('id', 1);
@@ -1011,36 +1006,31 @@ console.log('📅 New Record to save:', newRecord);
     if (error) throw error;
     console.log('✅ Service record added successfully');
     
-    // ✅ NOW UPDATE LOCAL STATE AFTER SUCCESSFUL SAVE
+    // ✅ ONLY UPDATE SERVICE HISTORY STATE
     setServiceHistory(newServiceHistory);
-    setInventory(currentInventory);
-    setMachinery(currentMachinery);
 
     setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
     setShowServiceModal(false);
     
-    // ✅ Clear editing flag AFTER successful save with delay
-setTimeout(() => {
-  console.log('🔓 Unlocking real-time sync');
-  isEditingRef.current = false;
-}, 8000);
-} catch (error) {
+    setTimeout(() => {
+      console.log('🔓 Unlocking real-time sync');
+      isEditingRef.current = false;
+    }, 8000);
+  } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
     isEditingRef.current = false;
-    // ❌ ROLLBACK ON ERROR
     loadData();
   }
 };
-  const deleteServiceRecord = async (id) => {
+const deleteServiceRecord = async (id) => {
   if (!confirm('Are you sure you want to delete this service record?')) return;
 
   try {
-    lastLocalUpdateRef.current = Date.now(); // ✅ ADD THIS LINE
+    lastLocalUpdateRef.current = Date.now();
     
     const newServiceHistory = serviceHistory.filter(record => record.id !== id);
 
-    // ✅ UPDATE LOCAL STATE IMMEDIATELY
     setServiceHistory(newServiceHistory);
 
     const { error } = await supabase
@@ -1053,7 +1043,6 @@ setTimeout(() => {
   } catch (error) {
     console.error('Delete error:', error);
     alert('Error: ' + error.message);
-    // ❌ ROLLBACK ON ERROR
     loadData();
   }
 };
@@ -1076,20 +1065,17 @@ const saveServiceEdit = async (id) => {
     isEditingRef.current = true;
     lastLocalUpdateRef.current = Date.now();
     
-    // ✅ FETCH ALL CURRENT DATA FROM DATABASE FIRST
+    // ✅ ONLY FETCH SERVICE HISTORY (not inventory or machinery)
     const { data: currentData, error: fetchError } = await supabase
       .from('agritrack_data')
-      .select('*')
+      .select('service_history')
       .eq('id', 1)
       .single();
     
     if (fetchError) throw fetchError;
     
     const currentServiceHistory = currentData?.service_history || [];
-    const currentInventory = currentData?.inventory || [];
-    const currentMachinery = currentData?.machinery || [];
     
-    // ✅ ENSURE photoUrl is explicitly included
     const updatedRecord = {
       machineName: serviceForm.machineName,
       serviceType: serviceForm.serviceType,
@@ -1103,13 +1089,11 @@ const saveServiceEdit = async (id) => {
       record.id === id ? { ...record, ...updatedRecord } : record
     );
 
-    // ✅ SAVE TO DATABASE FIRST
+    // ✅ ONLY UPDATE SERVICE HISTORY (not inventory or machinery)
     const { error } = await supabase
       .from('agritrack_data')
       .update({ 
-        service_history: newServiceHistory,
-        inventory: currentInventory,
-        machinery: currentMachinery
+        service_history: newServiceHistory
       })
       .eq('id', 1);
 
@@ -1117,15 +1101,12 @@ const saveServiceEdit = async (id) => {
 
     console.log('✅ Service record updated successfully');
     
-    // ✅ NOW UPDATE LOCAL STATE AFTER SUCCESSFUL SAVE
+    // ✅ ONLY UPDATE SERVICE HISTORY STATE
     setServiceHistory(newServiceHistory);
-    setInventory(currentInventory);
-    setMachinery(currentMachinery);
     
-    // Clear editing state
     setEditingServiceId(null);
     setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
-    setMachineSearchModal('');  // ← ALSO ADDED THIS
+    setMachineSearchModal('');
     setSavingService(false);
     
     setTimeout(() => {
@@ -1136,7 +1117,6 @@ const saveServiceEdit = async (id) => {
     alert('Error: ' + error.message);
     isEditingRef.current = false;
     setSavingService(false);
-    // ❌ ROLLBACK ON ERROR
     loadData();
   }
 };
