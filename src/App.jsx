@@ -331,14 +331,14 @@ const checkUser = async () => {
         const timeSinceLastUpdate = now - lastLocalUpdateRef.current;
         
         if (isEditingRef.current) {
-          console.log('⏸️ Skipping real-time update (user is editing)');
-          return;
-        }
-        
-        if (timeSinceLastUpdate <= 5000) {
-          console.log('⏸️ Skipping real-time update (recent local change)');
-          return;
-        }
+  console.log('⏸️ Skipping real-time update (user is editing)');
+  return;
+}
+
+if (timeSinceLastUpdate <= 5000) {
+  console.log('⏸️ Skipping real-time update (recent local change)');
+  return;
+}
         
         if (payload.new) {
           console.log('✅ Applying real-time update');
@@ -911,25 +911,7 @@ const viewMachineServiceHistory = (machineName) => {
 };
   
 const addServiceRecord = async () => {
-  try {
-    alert('🔧 Function called! Date: ' + serviceForm.date + ', Machine: ' + serviceForm.machineName);
-    
-  console.log('🔧 ADD SERVICE RECORD CALLED');
-  console.log('📱 Is Mobile:', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
-  console.log('📅 Service Form:', JSON.stringify(serviceForm, null, 2));
-  console.log('📅 Machine Name:', serviceForm.machineName);
-  console.log('📅 Service Type:', serviceForm.serviceType);
-  console.log('📅 Date Value:', serviceForm.date);
-  console.log('📅 Date Type:', typeof serviceForm.date);
-  
-  // Check if required fields are filled
-  if (!serviceForm.machineName) {
-    alert('⚠️ Please select a machine');
-    return;
-  }
-  
   lastLocalUpdateRef.current = Date.now();
-  
   try {
     // ✅ FETCH ALL CURRENT DATA FROM DATABASE FIRST
     const { data: currentData, error: fetchError } = await supabase
@@ -947,15 +929,8 @@ const addServiceRecord = async () => {
 console.log('📅 Service Form Data:', serviceForm);
 console.log('📅 Date from form:', serviceForm.date);
 
-// Validate date before creating record
-const recordDate = serviceForm.date || new Date().toISOString().split('T')[0];
-console.log('📅 Final date being saved:', recordDate);
-console.log('📅 serviceForm.date value:', serviceForm.date);
-
 // Force the date format
-const finalDate = recordDate || new Date().toISOString().split('T')[0];
-
-alert('📅 About to save with date: ' + finalDate);
+const finalDate = serviceForm.date || new Date().toISOString().split('T')[0];
 
 const newRecord = { 
   ...serviceForm, 
@@ -963,8 +938,6 @@ const newRecord = {
   date: finalDate,
   photoUrl: serviceForm.photoUrl || ''
 };
-
-alert('📝 Full record: ' + JSON.stringify(newRecord));
 
 console.log('📝 Complete record to save:', newRecord);
 
@@ -983,15 +956,7 @@ setMachinery(currentMachinery);
 setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
 setShowServiceModal(false);
 
-console.log('💾 SAVING TO DATABASE...', {
-  serviceCount: newServiceHistory.length,
-  newRecord: newRecord
-});
-
-console.log('💾 About to save - Record count:', newServiceHistory.length);
-console.log('💾 New record details:', JSON.stringify(newRecord));
-
-const { error, data } = await supabase
+const { error } = await supabase
   .from('agritrack_data')
   .update({ 
     service_history: newServiceHistory,
@@ -999,18 +964,10 @@ const { error, data } = await supabase
     machinery: currentMachinery,
     updated_at: new Date().toISOString()
   })
-  .eq('id', 1)
-  .select();
+  .eq('id', 1);
 
-console.log('💾 DATABASE SAVE COMPLETE');
-console.log('💾 Error?', error);
-console.log('💾 Data returned?', data);
-
-if (error) {
-  console.error('❌ DATABASE ERROR:', error);
-  throw error;
-}
-console.log('✅ Service record added successfully - Count:', newServiceHistory.length);
+if (error) throw error;
+console.log('✅ Service record added successfully');
     
     // ✅ Clear editing flag AFTER successful save with delay
 setTimeout(() => {
@@ -1019,14 +976,10 @@ setTimeout(() => {
 }, 3000);
 } catch (error) {
     console.error('Add error:', error);
-    alert('❌ ERROR SAVING: ' + error.message);
+    alert('Error: ' + error.message);
     isEditingRef.current = false;
     // ❌ ROLLBACK ON ERROR
     loadData();
-  }
-  } catch (outerError) {
-    alert('❌ OUTER ERROR: ' + outerError.message);
-    console.error('Outer error:', outerError);
   }
 };
   const deleteServiceRecord = async (id) => {
@@ -4321,22 +4274,12 @@ itemCard: {
       value={serviceForm.serviceType}
       onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
     />
-  <input
+<input
   style={styles.input}
   type="date"
   value={serviceForm.date}
   onChange={(e) => {
-    const newDate = e.target.value;
-    alert('📅 Date selected: ' + newDate);
-    setServiceForm({ ...serviceForm, date: newDate });
-  }}
-  onInput={(e) => {
-    const newDate = e.target.value;
-    console.log('📅 Date input event:', newDate);
-    setServiceForm({ ...serviceForm, date: newDate });
-  }}
-  onBlur={(e) => {
-    console.log('📅 Date field blurred:', e.target.value);
+    setServiceForm({ ...serviceForm, date: e.target.value });
   }}
 />
     <input
@@ -4378,14 +4321,8 @@ itemCard: {
     </div>
 <div style={{ display: 'flex', gap: '12px' }}>
 <button 
-  onClick={(e) => {
-    alert('🔴 BUTTON CLICKED! Machine: ' + serviceForm.machineName + ', Date: ' + serviceForm.date);
-    e.preventDefault();
-    e.stopPropagation();
-    addServiceRecord();
-  }}
-onTouchEnd={(e) => {
-    alert('📱 TOUCH EVENT! Machine: ' + serviceForm.machineName + ', Date: ' + serviceForm.date);
+  onClick={addServiceRecord}
+  onTouchEnd={(e) => {
     e.preventDefault();
     e.stopPropagation();
     addServiceRecord();
