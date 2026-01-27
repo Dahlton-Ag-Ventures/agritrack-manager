@@ -690,7 +690,10 @@ const getFilteredAndSortedService = () => {
   };
 
 const addInventoryItem = async () => {
-  isEditingRef.current = true;  // ✅ MOVED TO FIRST LINE
+  // ✅ Prevent double-saves
+  if (isEditingRef.current) return;
+  
+  isEditingRef.current = true;
   lastLocalUpdateRef.current = Date.now();
   
   try {
@@ -847,7 +850,10 @@ const cancelInventoryEdit = () => {
 };
 
 const addMachineryItem = async () => {
-  isEditingRef.current = true;  // ✅ MOVED TO FIRST LINE
+  // ✅ Prevent double-saves
+  if (isEditingRef.current) return;
+  
+  isEditingRef.current = true;
   lastLocalUpdateRef.current = Date.now();
   
   try {
@@ -4253,10 +4259,20 @@ itemCard: {
                 <img src={inventoryForm.photoUrl} alt="Preview" style={{ maxWidth: '100px', marginTop: '8px', borderRadius: '8px' }} />
               )}
             </div>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={addInventoryItem} style={styles.primaryButton}>Add Item</button>
-              <button onClick={() => setShowInventoryModal(false)} style={styles.secondaryButton}>Cancel</button>
-            </div>
+<div style={{ display: 'flex', gap: '12px' }}>
+  <button 
+    onClick={addInventoryItem} 
+    style={{
+      ...styles.primaryButton,
+      opacity: uploadingPhoto ? 0.5 : 1,
+      cursor: uploadingPhoto ? 'not-allowed' : 'pointer'
+    }}
+    disabled={uploadingPhoto}
+  >
+    {uploadingPhoto ? 'Uploading Photo...' : 'Add Item'}
+  </button>
+  <button onClick={() => setShowInventoryModal(false)} style={styles.secondaryButton}>Cancel</button>
+</div>
           </Modal>
         )}
 
@@ -4311,10 +4327,20 @@ itemCard: {
                 <img src={machineryForm.photoUrl} alt="Preview" style={{ maxWidth: '100px', marginTop: '8px', borderRadius: '8px' }} />
               )}
             </div>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={addMachineryItem} style={styles.primaryButton}>Add Machine</button>
-              <button onClick={() => setShowMachineryModal(false)} style={styles.secondaryButton}>Cancel</button>
-            </div>
+           <div style={{ display: 'flex', gap: '12px' }}>
+  <button 
+    onClick={addMachineryItem} 
+    style={{
+      ...styles.primaryButton,
+      opacity: uploadingPhoto ? 0.5 : 1,
+      cursor: uploadingPhoto ? 'not-allowed' : 'pointer'
+    }}
+    disabled={uploadingPhoto}
+  >
+    {uploadingPhoto ? 'Uploading Photo...' : 'Add Machine'}
+  </button>
+  <button onClick={() => setShowMachineryModal(false)} style={styles.secondaryButton}>Cancel</button>
+</div>
           </Modal>
         )}
 
