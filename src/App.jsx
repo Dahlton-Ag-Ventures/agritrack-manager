@@ -287,7 +287,7 @@ const loadData = async () => {
     const { data: inventoryData, error: invError } = await supabase
       .from('inventory_items')
       .select('*')
-      .limit(2000)
+      .range(0, 1999)
       .order('name', { ascending: true });
     
     if (invError) throw invError;
@@ -295,7 +295,7 @@ const loadData = async () => {
     const { data: machineryData, error: machError } = await supabase
       .from('machinery_items')
       .select('*')
-      .limit(2000)
+      .range(0, 1999)
       .order('name', { ascending: true });
     
     if (machError) throw machError;
@@ -303,7 +303,7 @@ const loadData = async () => {
     const { data: serviceData, error: servError } = await supabase
       .from('service_records')
       .select('*')
-      .limit(2000)
+      .range(0, 1999)
       .order('date', { ascending: false });
     
     if (servError) throw servError;
