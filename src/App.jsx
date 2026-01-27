@@ -281,86 +281,145 @@ const checkUser = async () => {
   
  const loadData = async () => {
   try {
-    console.log('📥 Loading data from Supabase...');
+    console.log('📥 Loading from NEW database...');
     setLoading(true);
     
-    const { data, error } = await supabase
-      .from('agritrack_data')
+    const { data: inventoryData, error: invError } = await supabase
+      .from('inventory_items')
       .select('*')
-      .eq('id', 1)
-      .single();
-
-    if (error) throw error;
-
-    if (data) {
-      console.log('✅ Data loaded');
-      console.log('📦 Inventory array length:', data.inventory?.length); // ADD THIS
-      console.log('📦 First 3 items:', data.inventory?.slice(0, 3)); // ADD THIS
-      
-      setInventory(data.inventory || []);
-      setMachinery(data.machinery || []);
-      setServiceHistory(data.service_history || []);
-      setLastSync(new Date());
-    }
+      .order('name', { ascending: true });
+    
+    if (invError) throw invError;
+    
+    const { data: machineryData, error: machError } = await supabase
+      .from('machinery_items')
+      .select('*')
+      .order('name', { ascending: true });
+    
+    if (machError) throw machError;
+    
+    const { data: serviceData, error: servError } = await supabase
+      .from('service_records')
+      .select('*')
+      .order('date', { ascending: false });
+    
+    if (servError) throw servError;
+    
+    console.log('✅ Loaded:', inventoryData?.length, 'inventory,', machineryData?.length, 'machines,', serviceData?.length, 'services');
+    
+    setInventory(inventoryData?.map(item => ({
+      id: item.id,
+      name: item.name || '',
+      partNumber: item.part_number || '',
+      quantity: item.quantity || '',
+      location: item.location || '',
+      minQuantity: item.min_quantity || '',
+      maxQuantity: item.max_quantity || '',
+      photoUrl: item.photo_url || ''
+    })) || []);
+    
+    setMachinery(machineryData?.map(item => ({
+      id: item.id,
+      name: item.name || '',
+      vinSerial: item.vin_serial || '',
+      category: item.category || '',
+      status: item.status || 'Active',
+      photoUrl: item.photo_url || ''
+    })) || []);
+    
+    setServiceHistory(serviceData?.map(item => ({
+      id: item.id,
+      machineName: item.machine_name || '',
+      serviceType: item.service_type || '',
+      date: item.date || '',
+      notes: item.notes || '',
+      technician: item.technician || '',
+      photoUrl: item.photo_url || ''
+    })) || []);
+    
+    setLastSync(new Date());
   } catch (error) {
     console.error('❌ Load error:', error);
-    alert('Failed to load data. Please refresh the page.');
+    alert('Failed to load data. Please refresh.');
   } finally {
     setLoading(false);
   }
 };
 
- const setupRealtime = () => {
-  console.log('🔔 Setting up real-time subscription...');
+const setupRealtime = () => {
+  console.log('🔔 Setting up real-time...');
 
-  const channel = supabase
-    .channel('agritrack-changes')
-    .on(
-      'postgres_changes',
-      {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'agritrack_data',
-        filter: 'id=eq.1'
-      },
-      (payload) => {
-        console.log('🔔 Real-time update received!', payload);
-        
-        // ✅ BLOCK: Don't apply updates if user is actively editing OR recent local change
-        const now = Date.now();
-        const timeSinceLastUpdate = now - lastLocalUpdateRef.current;
-        
-        if (isEditingRef.current) {
-  console.log('⏸️ Skipping real-time update (user is editing)');
-  return;
-}
+  supabase
+    .channel('inventory-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory_items' }, (payload) => {
+      console.log('🔔 Inventory change');
+      if (payload.eventType === 'INSERT') {
+        setInventory(prev => [...prev, {
+          id: payload.new.id, name: payload.new.name, partNumber: payload.new.part_number,
+          quantity: payload.new.quantity, location: payload.new.location,
+          minQuantity: payload.new.min_quantity, maxQuantity: payload.new.max_quantity,
+          photoUrl: payload.new.photo_url
+        }]);
+      } else if (payload.eventType === 'UPDATE') {
+        setInventory(prev => prev.map(item => item.id === payload.new.id ? {
+          id: payload.new.id, name: payload.new.name, partNumber: payload.new.part_number,
+          quantity: payload.new.quantity, location: payload.new.location,
+          minQuantity: payload.new.min_quantity, maxQuantity: payload.new.max_quantity,
+          photoUrl: payload.new.photo_url
+        } : item));
+      } else if (payload.eventType === 'DELETE') {
+        setInventory(prev => prev.filter(item => item.id !== payload.old.id));
+      }
+      setLastSync(new Date());
+    })
+    .subscribe();
 
-if (timeSinceLastUpdate <= 15000) {
-  console.log('⏸️ Skipping real-time update (recent local change)');
-  return;
-}
-        
-        if (payload.new) {
-          console.log('✅ Applying real-time update');
-          setInventory(payload.new.inventory || []);
-          setMachinery(payload.new.machinery || []);
-          setServiceHistory(payload.new.service_history || []);
-          setLastSync(new Date());
-          setRealtimeStatus('connected');
-        }
+  supabase
+    .channel('machinery-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'machinery_items' }, (payload) => {
+      console.log('🔔 Machinery change');
+      if (payload.eventType === 'INSERT') {
+        setMachinery(prev => [...prev, {
+          id: payload.new.id, name: payload.new.name, vinSerial: payload.new.vin_serial,
+          category: payload.new.category, status: payload.new.status, photoUrl: payload.new.photo_url
+        }]);
+      } else if (payload.eventType === 'UPDATE') {
+        setMachinery(prev => prev.map(item => item.id === payload.new.id ? {
+          id: payload.new.id, name: payload.new.name, vinSerial: payload.new.vin_serial,
+          category: payload.new.category, status: payload.new.status, photoUrl: payload.new.photo_url
+        } : item));
+      } else if (payload.eventType === 'DELETE') {
+        setMachinery(prev => prev.filter(item => item.id !== payload.old.id));
       }
-    )
-    .subscribe((status) => {
-      console.log('🔔 Real-time status:', status);
-      if (status === 'SUBSCRIBED') {
-        setRealtimeStatus('connected');
-        console.log('✅ Real-time subscription active!');
-      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-        setRealtimeStatus('error');
+      setLastSync(new Date());
+    })
+    .subscribe();
+
+  supabase
+    .channel('service-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'service_records' }, (payload) => {
+      console.log('🔔 Service change');
+      if (payload.eventType === 'INSERT') {
+        setServiceHistory(prev => [...prev, {
+          id: payload.new.id, machineName: payload.new.machine_name, serviceType: payload.new.service_type,
+          date: payload.new.date, notes: payload.new.notes, technician: payload.new.technician,
+          photoUrl: payload.new.photo_url
+        }]);
+      } else if (payload.eventType === 'UPDATE') {
+        setServiceHistory(prev => prev.map(item => item.id === payload.new.id ? {
+          id: payload.new.id, machineName: payload.new.machine_name, serviceType: payload.new.service_type,
+          date: payload.new.date, notes: payload.new.notes, technician: payload.new.technician,
+          photoUrl: payload.new.photo_url
+        } : item));
+      } else if (payload.eventType === 'DELETE') {
+        setServiceHistory(prev => prev.filter(item => item.id !== payload.old.id));
       }
-    });
+      setLastSync(new Date());
+    })
+    .subscribe();
+
+  setRealtimeStatus('connected');
 };
-
 // Photo Upload Function with automatic compression
   const handlePhotoUpload = async (file, formType) => {
     if (!file) return null;
@@ -963,87 +1022,40 @@ const viewMachineServiceHistory = (machineName) => {
 };
   
 const addServiceRecord = async () => {
-  isEditingRef.current = true;
-  lastLocalUpdateRef.current = Date.now();
-  
+  setSavingService(true);
   try {
-    // ✅ ONLY FETCH SERVICE HISTORY (not inventory or machinery)
-    const { data: currentData, error: fetchError } = await supabase
-      .from('agritrack_data')
-      .select('service_history')
-      .eq('id', 1)
-      .single();
-    
-    if (fetchError) throw fetchError;
-    
-    const currentServiceHistory = currentData?.service_history || [];
-    
-    console.log('📅 Service Form Data:', serviceForm);
-    console.log('📅 Date from form:', serviceForm.date);
-
     const finalDate = serviceForm.date || new Date().toISOString().split('T')[0];
-
-    const newRecord = { 
-      ...serviceForm, 
-      id: Date.now(),
+    
+    await supabase.from('service_records').insert([{
+      id: Date.now().toString(),
+      user_id: user.id,
+      machine_name: serviceForm.machineName,
+      service_type: serviceForm.serviceType,
       date: finalDate,
-      photoUrl: serviceForm.photoUrl || ''
-    };
-
-    console.log('📝 Complete record to save:', newRecord);
-    console.log('📅 New Record to save:', newRecord);
-    const newServiceHistory = [...currentServiceHistory, newRecord];
+      notes: serviceForm.notes,
+      technician: serviceForm.technician,
+      photo_url: serviceForm.photoUrl || ''
+    }]);
     
-    // ✅ ONLY UPDATE SERVICE HISTORY (not inventory or machinery)
-    const { error } = await supabase
-      .from('agritrack_data')
-      .update({ 
-        service_history: newServiceHistory,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', 1);
-
-    if (error) throw error;
-    console.log('✅ Service record added successfully');
-    
-    // ✅ ONLY UPDATE SERVICE HISTORY STATE
-    setServiceHistory(newServiceHistory);
-
+    console.log('✅ Service saved - FAST!');
     setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
     setShowServiceModal(false);
-    
-    setTimeout(() => {
-      console.log('🔓 Unlocking real-time sync');
-      isEditingRef.current = false;
-    }, 15000);
+    setSavingService(false);
   } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
-    isEditingRef.current = false;
-    loadData();
+    setSavingService(false);
   }
 };
 const deleteServiceRecord = async (id) => {
   if (!confirm('Are you sure you want to delete this service record?')) return;
 
   try {
-    lastLocalUpdateRef.current = Date.now();
-    
-    const newServiceHistory = serviceHistory.filter(record => record.id !== id);
-
-    setServiceHistory(newServiceHistory);
-
-    const { error } = await supabase
-      .from('agritrack_data')
-      .update({ service_history: newServiceHistory })
-      .eq('id', 1);
-
-    if (error) throw error;
-    console.log('✅ Service record deleted successfully');
+    await supabase.from('service_records').delete().eq('id', id);
+    console.log('✅ Service record deleted');
   } catch (error) {
     console.error('Delete error:', error);
     alert('Error: ' + error.message);
-    loadData();
   }
 };
 const startEditService = (record) => {
@@ -1062,62 +1074,24 @@ const startEditService = (record) => {
 const saveServiceEdit = async (id) => {
   setSavingService(true);
   try {
-    isEditingRef.current = true;
-    lastLocalUpdateRef.current = Date.now();
-    
-    // ✅ ONLY FETCH SERVICE HISTORY (not inventory or machinery)
-    const { data: currentData, error: fetchError } = await supabase
-      .from('agritrack_data')
-      .select('service_history')
-      .eq('id', 1)
-      .single();
-    
-    if (fetchError) throw fetchError;
-    
-    const currentServiceHistory = currentData?.service_history || [];
-    
-    const updatedRecord = {
-      machineName: serviceForm.machineName,
-      serviceType: serviceForm.serviceType,
+    await supabase.from('service_records').update({
+      machine_name: serviceForm.machineName,
+      service_type: serviceForm.serviceType,
       date: serviceForm.date,
       notes: serviceForm.notes,
       technician: serviceForm.technician,
-      photoUrl: serviceForm.photoUrl || ''
-    };
-    
-    const newServiceHistory = currentServiceHistory.map(record => 
-      record.id === id ? { ...record, ...updatedRecord } : record
-    );
+      photo_url: serviceForm.photoUrl || ''
+    }).eq('id', id);
 
-    // ✅ ONLY UPDATE SERVICE HISTORY (not inventory or machinery)
-    const { error } = await supabase
-      .from('agritrack_data')
-      .update({ 
-        service_history: newServiceHistory
-      })
-      .eq('id', 1);
-
-    if (error) throw error;
-
-    console.log('✅ Service record updated successfully');
-    
-    // ✅ ONLY UPDATE SERVICE HISTORY STATE
-    setServiceHistory(newServiceHistory);
-    
+    console.log('✅ Service updated - FAST!');
     setEditingServiceId(null);
     setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
     setMachineSearchModal('');
     setSavingService(false);
-    
-    setTimeout(() => {
-      isEditingRef.current = false;
-    }, 15000);
   } catch (error) {
     console.error('Update error:', error);
     alert('Error: ' + error.message);
-    isEditingRef.current = false;
     setSavingService(false);
-    loadData();
   }
 };
 const cancelServiceEdit = () => {
