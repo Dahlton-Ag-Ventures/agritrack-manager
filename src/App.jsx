@@ -952,12 +952,19 @@ const recordDate = serviceForm.date || new Date().toISOString().split('T')[0];
 console.log('📅 Final date being saved:', recordDate);
 console.log('📅 serviceForm.date value:', serviceForm.date);
 
+// Force the date format
+const finalDate = recordDate || new Date().toISOString().split('T')[0];
+
+alert('📅 About to save with date: ' + finalDate);
+
 const newRecord = { 
   ...serviceForm, 
   id: Date.now(),
-  date: recordDate,
+  date: finalDate,
   photoUrl: serviceForm.photoUrl || ''
 };
+
+alert('📝 Full record: ' + JSON.stringify(newRecord));
 
 console.log('📝 Complete record to save:', newRecord);
 
