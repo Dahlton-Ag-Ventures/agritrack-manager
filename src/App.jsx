@@ -1040,6 +1040,9 @@ const viewMachineServiceHistory = (machineName) => {
 };
   
 const addServiceRecord = async () => {
+  // ✅ Prevent double-saves
+  if (savingService) return;
+  
   setSavingService(true);
   try {
     const finalDate = serviceForm.date || new Date().toISOString().split('T')[0];
@@ -1058,10 +1061,10 @@ const addServiceRecord = async () => {
     console.log('✅ Service saved - FAST!');
     setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
     setShowServiceModal(false);
-    setSavingService(false);
   } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
+  } finally {
     setSavingService(false);
   }
 };
@@ -4431,19 +4434,14 @@ itemCard: {
 <div style={{ display: 'flex', gap: '12px' }}>
 <button 
   onClick={addServiceRecord}
-  onTouchEnd={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addServiceRecord();
-  }}
   style={{
     ...styles.primaryButton,
-    opacity: !serviceForm.machineName || machinery.length === 0 ? 0.5 : 1,
-    cursor: !serviceForm.machineName || machinery.length === 0 ? 'not-allowed' : 'pointer'
+    opacity: !serviceForm.machineName || machinery.length === 0 || savingService ? 0.5 : 1,
+    cursor: !serviceForm.machineName || machinery.length === 0 || savingService ? 'not-allowed' : 'pointer'
   }}
-  disabled={!serviceForm.machineName || machinery.length === 0}
+  disabled={!serviceForm.machineName || machinery.length === 0 || savingService}
 >
-  Add Record
+  {savingService ? 'Saving...' : 'Add Record'}
 </button>
       <button onClick={() => setShowServiceModal(false)} style={styles.secondaryButton}>Cancel</button>
     </div>
