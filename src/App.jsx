@@ -281,69 +281,31 @@ const checkUser = async () => {
   
 const loadData = async () => {
   try {
-    console.log('📥 Loading from NEW database...');
+    console.log('📥 Loading data...');
     setLoading(true);
     
-    // Load inventory in batches (handle 1000 row limit)
-    let allInventory = [];
-    let page = 0;
-    let hasMore = true;
-    
-    while (hasMore) {
-      const { data: batch, error } = await supabase
-        .from('inventory_items')
-        .select('*')
-        .order('name', { ascending: true })
-        .range(page * 1000, (page + 1) * 1000 - 1);
-      
-      if (error) throw error;
-      
-      if (batch && batch.length > 0) {
-        allInventory = [...allInventory, ...batch];
-        page++;
-        if (batch.length < 1000) hasMore = false;
-      } else {
-        hasMore = false;
-      }
-    }
-    
-    // Load machinery (should be under 1000)
-    const { data: machineryData, error: machError } = await supabase
-      .from('machinery_items')
+    // Load from OLD agritrack_data table
+    const { data, error } = await supabase
+      .from('agritrack_data')
       .select('*')
-      .order('name', { ascending: true });
+      .eq('id', 1)
+      .single();
     
-    if (machError) throw machError;
+    if (error) throw error;
     
-    // Load service records (should be under 1000)
+    console.log('✅ Loaded data');
+    
+    setInventory(data?.inventory || []);
+    setMachinery(data?.machinery || []);
+    setServiceHistory(data?.service_history || []);
+    
+    // Also load service records from NEW table
     const { data: serviceData, error: servError } = await supabase
       .from('service_records')
       .select('*')
       .order('date', { ascending: false });
     
     if (servError) throw servError;
-    
-    console.log('✅ Loaded:', allInventory?.length, 'inventory,', machineryData?.length, 'machines,', serviceData?.length, 'services');
-    
-    setInventory(allInventory?.map(item => ({
-      id: item.id,
-      name: item.name || '',
-      partNumber: item.part_number || '',
-      quantity: item.quantity || '',
-      location: item.location || '',
-      minQuantity: item.min_quantity || '',
-      maxQuantity: item.max_quantity || '',
-      photoUrl: item.photo_url || ''
-    })) || []);
-    
-    setMachinery(machineryData?.map(item => ({
-      id: item.id,
-      name: item.name || '',
-      vinSerial: item.vin_serial || '',
-      category: item.category || '',
-      status: item.status || 'Active',
-      photoUrl: item.photo_url || ''
-    })) || []);
     
     setServiceHistory(serviceData?.map(item => ({
       id: item.id,
@@ -367,30 +329,45 @@ const loadData = async () => {
 const setupRealtime = () => {
   console.log('🔔 Setting up real-time...');
 
+  // Watch the agritrack_data table for inventory/machinery changes
   supabase
-    .channel('inventory-changes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory_items' }, (payload) => {
-      console.log('🔔 Inventory change');
+    .channel('agritrack-changes')
+    .on('postgres_changes', { 
+      event: '*', 
+      schema: 'public', 
+      table: 'agritrack_data' 
+    }, (payload) => {
+      console.log('🔔 Data changed, reloading...');
+      loadData();
+    })
+    .subscribe();
+
+  // Watch service_records table separately
+  supabase
+    .channel('service-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'service_records' }, (payload) => {
+      console.log('🔔 Service change');
       if (payload.eventType === 'INSERT') {
-        setInventory(prev => [...prev, {
-          id: payload.new.id, name: payload.new.name, partNumber: payload.new.part_number,
-          quantity: payload.new.quantity, location: payload.new.location,
-          minQuantity: payload.new.min_quantity, maxQuantity: payload.new.max_quantity,
+        setServiceHistory(prev => [...prev, {
+          id: payload.new.id, machineName: payload.new.machine_name, serviceType: payload.new.service_type,
+          date: payload.new.date, notes: payload.new.notes, technician: payload.new.technician,
           photoUrl: payload.new.photo_url
         }]);
       } else if (payload.eventType === 'UPDATE') {
-        setInventory(prev => prev.map(item => item.id === payload.new.id ? {
-          id: payload.new.id, name: payload.new.name, partNumber: payload.new.part_number,
-          quantity: payload.new.quantity, location: payload.new.location,
-          minQuantity: payload.new.min_quantity, maxQuantity: payload.new.max_quantity,
+        setServiceHistory(prev => prev.map(item => item.id === payload.new.id ? {
+          id: payload.new.id, machineName: payload.new.machine_name, serviceType: payload.new.service_type,
+          date: payload.new.date, notes: payload.new.notes, technician: payload.new.technician,
           photoUrl: payload.new.photo_url
         } : item));
       } else if (payload.eventType === 'DELETE') {
-        setInventory(prev => prev.filter(item => item.id !== payload.old.id));
+        setServiceHistory(prev => prev.filter(item => item.id !== payload.old.id));
       }
       setLastSync(new Date());
     })
     .subscribe();
+
+  setRealtimeStatus('connected');
+};
 
   supabase
     .channel('machinery-changes')
@@ -2280,7 +2257,6 @@ itemCard: {
 <button 
   onClick={() => {
     setShowInventoryModal(true);
-    isEditingRef.current = true;
   }} 
   style={styles.addButton}
   onMouseEnter={(e) => {
@@ -2736,7 +2712,6 @@ itemCard: {
 <button 
   onClick={() => {
     setShowMachineryModal(true);
-    isEditingRef.current = true;
   }} 
   style={styles.addButton}
   onMouseEnter={(e) => {
@@ -3175,7 +3150,6 @@ itemCard: {
    <button 
   onClick={() => {
     setShowServiceModal(true);
-    isEditingRef.current = true;
   }} 
   style={styles.addButton}
   onMouseEnter={(e) => {
