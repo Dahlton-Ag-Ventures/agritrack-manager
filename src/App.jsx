@@ -2836,9 +2836,39 @@ itemCard: {
                   style={{ ...styles.input, padding: '8px' }}
                 />
                 {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
-                {machineryForm.photoUrl && (
-                  <img src={machineryForm.photoUrl} alt="Preview" style={{ maxWidth: '100px', marginTop: '8px', borderRadius: '8px' }} />
-                )}
+{machineryForm.photoUrl && (
+  <div style={{ marginTop: '8px', position: 'relative', display: 'inline-block' }}>
+    <img 
+      src={machineryForm.photoUrl} 
+      alt="Preview" 
+      style={{ maxWidth: '100px', borderRadius: '8px', display: 'block' }} 
+    />
+    <button
+      onClick={() => setMachineryForm({ ...machineryForm, photoUrl: '' })}
+      style={{
+        position: 'absolute',
+        top: '4px',
+        right: '4px',
+        background: '#ef4444',
+        border: 'none',
+        borderRadius: '50%',
+        width: '24px',
+        height: '24px',
+        color: 'white',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '14px',
+        fontWeight: 'bold',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+      }}
+      title="Remove photo"
+    >
+      ✕
+    </button>
+  </div>
+)}
               </div>
               <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                 <button onClick={() => saveMachineryEdit(item.id)} style={styles.saveButton}>
@@ -4213,9 +4243,39 @@ itemCard: {
                 style={{ ...styles.input, padding: '8px' }}
               />
               {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
-              {machineryForm.photoUrl && (
-                <img src={machineryForm.photoUrl} alt="Preview" style={{ maxWidth: '100px', marginTop: '8px', borderRadius: '8px' }} />
-              )}
+{machineryForm.photoUrl && (
+  <div style={{ marginTop: '8px', position: 'relative', display: 'inline-block' }}>
+    <img 
+      src={machineryForm.photoUrl} 
+      alt="Preview" 
+      style={{ maxWidth: '100px', borderRadius: '8px', display: 'block' }} 
+    />
+    <button
+      onClick={() => setMachineryForm({ ...machineryForm, photoUrl: '' })}
+      style={{
+        position: 'absolute',
+        top: '4px',
+        right: '4px',
+        background: '#ef4444',
+        border: 'none',
+        borderRadius: '50%',
+        width: '24px',
+        height: '24px',
+        color: 'white',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '14px',
+        fontWeight: 'bold',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+      }}
+      title="Remove photo"
+    >
+      ✕
+    </button>
+  </div>
+)}
             </div>
            <div style={{ display: 'flex', gap: '12px' }}>
   <button 
