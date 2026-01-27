@@ -369,52 +369,6 @@ const setupRealtime = () => {
   setRealtimeStatus('connected');
 };
 
-  supabase
-    .channel('machinery-changes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'machinery_items' }, (payload) => {
-      console.log('🔔 Machinery change');
-      if (payload.eventType === 'INSERT') {
-        setMachinery(prev => [...prev, {
-          id: payload.new.id, name: payload.new.name, vinSerial: payload.new.vin_serial,
-          category: payload.new.category, status: payload.new.status, photoUrl: payload.new.photo_url
-        }]);
-      } else if (payload.eventType === 'UPDATE') {
-        setMachinery(prev => prev.map(item => item.id === payload.new.id ? {
-          id: payload.new.id, name: payload.new.name, vinSerial: payload.new.vin_serial,
-          category: payload.new.category, status: payload.new.status, photoUrl: payload.new.photo_url
-        } : item));
-      } else if (payload.eventType === 'DELETE') {
-        setMachinery(prev => prev.filter(item => item.id !== payload.old.id));
-      }
-      setLastSync(new Date());
-    })
-    .subscribe();
-
-  supabase
-    .channel('service-changes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'service_records' }, (payload) => {
-      console.log('🔔 Service change');
-      if (payload.eventType === 'INSERT') {
-        setServiceHistory(prev => [...prev, {
-          id: payload.new.id, machineName: payload.new.machine_name, serviceType: payload.new.service_type,
-          date: payload.new.date, notes: payload.new.notes, technician: payload.new.technician,
-          photoUrl: payload.new.photo_url
-        }]);
-      } else if (payload.eventType === 'UPDATE') {
-        setServiceHistory(prev => prev.map(item => item.id === payload.new.id ? {
-          id: payload.new.id, machineName: payload.new.machine_name, serviceType: payload.new.service_type,
-          date: payload.new.date, notes: payload.new.notes, technician: payload.new.technician,
-          photoUrl: payload.new.photo_url
-        } : item));
-      } else if (payload.eventType === 'DELETE') {
-        setServiceHistory(prev => prev.filter(item => item.id !== payload.old.id));
-      }
-      setLastSync(new Date());
-    })
-    .subscribe();
-
-  setRealtimeStatus('connected');
-};
 // Photo Upload Function with automatic compression
   const handlePhotoUpload = async (file, formType) => {
     if (!file) return null;
@@ -4163,11 +4117,11 @@ itemCard: {
             </div>
           </div>
         )}
-        {showInventoryModal && (
-          <Modal title="Add Inventory Item" onClose={() => {
-  setShowInventoryModal(false);
-  isEditingRef.current = false; // ✅ ADD THIS
-}}>
+{showInventoryModal && (
+  <Modal title="Add Inventory Item" onClose={() => {
+    setShowInventoryModal(false);
+    isEditingRef.current = false;
+  }}>
             <input
               style={styles.input}
               placeholder="Item Name"
@@ -4250,10 +4204,10 @@ itemCard: {
           </Modal>
         )}
 
-        {showMachineryModal && (
-          <Modal title="Add Machinery" onClose={() => {
+{showMachineryModal && (
+  <Modal title="Add Machinery" onClose={() => {
   setShowMachineryModal(false);
-  isEditingRef.current = false; // ✅ ADD THIS
+  isEditingRef.current = false;
 }}>
             <input
               style={styles.input}
@@ -4322,7 +4276,7 @@ itemCard: {
 <Modal title="Add Service Record" onClose={() => {
   setShowServiceModal(false);
   setMachineSearchModal('');
-  isEditingRef.current = false; // ✅ ADD THIS
+  isEditingRef.current = false;
 }}>
     <div style={{ marginBottom: '16px' }}>
       <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
