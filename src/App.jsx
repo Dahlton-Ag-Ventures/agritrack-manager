@@ -613,6 +613,7 @@ const getFilteredAndSortedService = () => {
   };
 
 const addInventoryItem = async () => {
+  isEditingRef.current = true;  // ✅ MOVED TO FIRST LINE
   lastLocalUpdateRef.current = Date.now();
   
   try {
@@ -745,6 +746,7 @@ const cancelInventoryEdit = () => {
 };
 
 const addMachineryItem = async () => {
+  isEditingRef.current = true;  // ✅ MOVED TO FIRST LINE
   lastLocalUpdateRef.current = Date.now();
   
   try {
@@ -911,7 +913,9 @@ const viewMachineServiceHistory = (machineName) => {
 };
   
 const addServiceRecord = async () => {
+  isEditingRef.current = true;  // ✅ MOVED TO FIRST LINE
   lastLocalUpdateRef.current = Date.now();
+  
   try {
     // ✅ FETCH ALL CURRENT DATA FROM DATABASE FIRST
     const { data: currentData, error: fetchError } = await supabase
