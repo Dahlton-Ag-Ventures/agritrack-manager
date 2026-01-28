@@ -284,17 +284,32 @@ const loadData = async () => {
     console.log('📥 Loading data...');
     setLoading(true);
     
-// Load inventory from NEW table
-    const { data: inventoryData, error: invError } = await supabase
-      .from('inventory_items')
-      .select('*')
-      .order('name', { ascending: true })
-      .range(0, 9999);
+    // ✅ FETCH ALL INVENTORY - Using proper pagination
+    let allInventory = [];
+    let inventoryPage = 0;
+    let hasMoreInventory = true;
+    const pageSize = 1000;
     
-    if (invError) throw invError;
+    while (hasMoreInventory) {
+      const { data: inventoryData, error: invError } = await supabase
+        .from('inventory_items')
+        .select('*')
+        .order('name', { ascending: true })
+        .range(inventoryPage * pageSize, (inventoryPage + 1) * pageSize - 1);
+      
+      if (invError) throw invError;
+      
+      if (inventoryData && inventoryData.length > 0) {
+        allInventory = [...allInventory, ...inventoryData];
+        inventoryPage++;
+        hasMoreInventory = inventoryData.length === pageSize;
+      } else {
+        hasMoreInventory = false;
+      }
+    }
     
-    console.log('✅ Loaded inventory from new table');
-    setInventory(inventoryData?.map(item => ({
+    console.log(`✅ Loaded ${allInventory.length} inventory items from database`);
+    setInventory(allInventory.map(item => ({
       id: item.id,
       name: item.name || '',
       partNumber: item.part_number || '',
@@ -303,38 +318,66 @@ const loadData = async () => {
       minQuantity: item.min_quantity || '',
       maxQuantity: item.max_quantity || '',
       photoUrl: item.photo_url || ''
-    })) || []);
+    })));
     
-    // Load machinery from NEW table
-    const { data: machineryData, error: machError } = await supabase
-      .from('machinery_items')
-      .select('*')
-      .order('name', { ascending: true })
-      .range(0, 9999);
+    // ✅ FETCH ALL MACHINERY - Using proper pagination
+    let allMachinery = [];
+    let machineryPage = 0;
+    let hasMoreMachinery = true;
     
-    if (machError) throw machError;
+    while (hasMoreMachinery) {
+      const { data: machineryData, error: machError } = await supabase
+        .from('machinery_items')
+        .select('*')
+        .order('name', { ascending: true })
+        .range(machineryPage * pageSize, (machineryPage + 1) * pageSize - 1);
+      
+      if (machError) throw machError;
+      
+      if (machineryData && machineryData.length > 0) {
+        allMachinery = [...allMachinery, ...machineryData];
+        machineryPage++;
+        hasMoreMachinery = machineryData.length === pageSize;
+      } else {
+        hasMoreMachinery = false;
+      }
+    }
     
-    console.log('✅ Loaded machinery from new table');
-    setMachinery(machineryData?.map(item => ({
+    console.log(`✅ Loaded ${allMachinery.length} machinery items from database`);
+    setMachinery(allMachinery.map(item => ({
       id: item.id,
       name: item.name || '',
       vinSerial: item.vin_serial || '',
       category: item.category || '',
       status: item.status || 'Active',
       photoUrl: item.photo_url || ''
-    })) || []);
+    })));
     
-    // Load service records from NEW table
-    const { data: serviceData, error: servError } = await supabase
-      .from('service_records')
-      .select('*')
-      .order('date', { ascending: false })
-      .range(0, 9999);
+    // ✅ FETCH ALL SERVICE RECORDS - Using proper pagination
+    let allServiceRecords = [];
+    let servicePage = 0;
+    let hasMoreService = true;
     
-    if (servError) throw servError;
+    while (hasMoreService) {
+      const { data: serviceData, error: servError } = await supabase
+        .from('service_records')
+        .select('*')
+        .order('date', { ascending: false })
+        .range(servicePage * pageSize, (servicePage + 1) * pageSize - 1);
+      
+      if (servError) throw servError;
+      
+      if (serviceData && serviceData.length > 0) {
+        allServiceRecords = [...allServiceRecords, ...serviceData];
+        servicePage++;
+        hasMoreService = serviceData.length === pageSize;
+      } else {
+        hasMoreService = false;
+      }
+    }
     
-    console.log('✅ Loaded service records from new table');
-    setServiceHistory(serviceData?.map(item => ({
+    console.log(`✅ Loaded ${allServiceRecords.length} service records from database`);
+    setServiceHistory(allServiceRecords.map(item => ({
       id: item.id,
       machineName: item.machine_name || '',
       serviceType: item.service_type || '',
@@ -342,7 +385,7 @@ const loadData = async () => {
       notes: item.notes || '',
       technician: item.technician || '',
       photoUrl: item.photo_url || ''
-    })) || []);
+    })));
     
     setLastSync(new Date());
   } catch (error) {
