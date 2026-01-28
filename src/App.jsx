@@ -3192,7 +3192,12 @@ itemCard: {
             <div style={styles.tabHeader}>
   <div>
     <h2 style={{ fontSize: '1.5rem' }}>Service Records</h2>
-    {serviceFilter && (
+  {serviceFilter && (() => {
+  const filteredCount = serviceHistory.filter(r => r.machineName === serviceFilter).length;
+  
+  // Only show banner if NO records exist
+  if (filteredCount === 0) {
+    return (
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -3206,7 +3211,7 @@ itemCard: {
         color: '#a78bfa'
       }}>
         <AlertCircle size={16} />
-        Showing records for: <strong>{serviceFilter}</strong>
+        No records exist for <strong>{serviceFilter}</strong>
         <button
           onClick={() => setServiceFilter('')}
           style={{
@@ -3224,7 +3229,12 @@ itemCard: {
           Clear Filter
         </button>
       </div>
-    )}
+    );
+  }
+  
+  // If records exist, return null (show nothing)
+  return null;
+})()}
   </div>
   {userRole !== 'employee' && (
    <button 
