@@ -711,10 +711,10 @@ const newItem = { ...inventoryForm, id: Date.now() };
     if (error) throw error;
     console.log('✅ Inventory item added successfully');
     
-    // ✅ NOW UPDATE LOCAL STATE AFTER SUCCESSFUL SAVE
-    setInventory(newInventory);
-    setMachinery(currentMachinery);
-    setServiceHistory(currentServiceHistory);
+    // ✅ NOW UPDATE LOCAL STATE AFTER SUCCESSFUL SAVE - FORCE RE-RENDER
+setInventory([...newInventory]);
+setMachinery([...currentMachinery]);
+setServiceHistory([...currentServiceHistory]);
     
     setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
     setShowInventoryModal(false);
@@ -740,8 +740,8 @@ setTimeout(() => {
     
     const newInventory = inventory.filter(item => item.id !== id);
     
-    // ✅ UPDATE LOCAL STATE IMMEDIATELY
-    setInventory(newInventory);
+// ✅ UPDATE LOCAL STATE IMMEDIATELY - FORCE RE-RENDER
+setInventory([...newInventory]);
 
     const { error } = await supabase
       .from('agritrack_data')
@@ -808,10 +808,10 @@ const saveInventoryEdit = async (id) => {
 
     console.log('✅ Item updated successfully');
     
-    // ✅ NOW UPDATE LOCAL STATE AFTER SUCCESSFUL SAVE
-    setInventory(newInventory);
-    setMachinery(currentMachinery);
-    setServiceHistory(currentServiceHistory);
+// ✅ NOW UPDATE LOCAL STATE AFTER SUCCESSFUL SAVE - FORCE RE-RENDER
+setInventory([...newInventory]);
+setMachinery([...currentMachinery]);
+setServiceHistory([...currentServiceHistory]);
     
     // Clear editing state
     setEditingInventoryId(null);
@@ -1055,10 +1055,10 @@ const cancelServiceEdit = () => {
 
       if (error) throw error;
       
-      // ✅ NOW UPDATE LOCAL STATE
-      setInventory(newInventory);
-      setMachinery(currentMachinery);
-      setServiceHistory(currentServiceHistory);
+// ✅ NOW UPDATE LOCAL STATE - FORCE RE-RENDER
+setInventory([...newInventory]);
+setMachinery([...currentMachinery]);
+setServiceHistory([...currentServiceHistory]);
       
       setTimeout(() => {
         isEditingRef.current = false;
@@ -2523,10 +2523,10 @@ itemCard: {
               
               if (error) throw error;
               
-              // Update local state
-              setInventory(newInventory);
-              setMachinery(currentMachinery);
-              setServiceHistory(currentServiceHistory);
+// Update local state - FORCE RE-RENDER
+setInventory([...newInventory]);
+setMachinery([...currentMachinery]);
+setServiceHistory([...currentServiceHistory]);
               
               console.log('✅ Photo removed from inventory item');
               
