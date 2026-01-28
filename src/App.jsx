@@ -284,17 +284,25 @@ const loadData = async () => {
     console.log('📥 Loading data...');
     setLoading(true);
     
-    // Load from OLD agritrack_data table for inventory only
-    const { data, error } = await supabase
-      .from('agritrack_data')
+// Load inventory from NEW table
+    const { data: inventoryData, error: invError } = await supabase
+      .from('inventory_items')
       .select('*')
-      .eq('id', 1)
-      .single();
+      .order('name', { ascending: true });
     
-    if (error) throw error;
+    if (invError) throw invError;
     
-    console.log('✅ Loaded inventory from old table');
-    setInventory(data?.inventory || []);
+    console.log('✅ Loaded inventory from new table');
+    setInventory(inventoryData?.map(item => ({
+      id: item.id,
+      name: item.name || '',
+      partNumber: item.part_number || '',
+      quantity: item.quantity || '',
+      location: item.location || '',
+      minQuantity: item.min_quantity || '',
+      maxQuantity: item.max_quantity || '',
+      photoUrl: item.photo_url || ''
+    })) || []);
     
     // Load machinery from NEW table
     const { data: machineryData, error: machError } = await supabase
@@ -345,41 +353,39 @@ const loadData = async () => {
 const setupRealtime = () => {
   console.log('🔔 Setting up real-time...');
 
- // Watch agritrack_data for inventory changes only
-supabase
-  .channel('agritrack-changes')
-  .on('postgres_changes', { 
-    event: '*', 
-    schema: 'public', 
-    table: 'agritrack_data' 
-  }, (payload) => {
-    // ✅ IGNORE UPDATES IF WE JUST MADE A CHANGE (within 2 seconds)
-    const timeSinceLastUpdate = Date.now() - lastLocalUpdateRef.current;
-    if (isEditingRef.current || timeSinceLastUpdate < 2000) {
-      console.log('🔕 Ignoring real-time update (local edit in progress)');
-      return;
-    }
-    
-    console.log('🔔 Inventory changed, reloading...');
-    
-    // ✅ DON'T SHOW LOADING SCREEN FOR REAL-TIME UPDATES
-    const { data, error } = supabase
-      .from('agritrack_data')
-      .select('*')
-      .eq('id', 1)
-      .single()
-      .then(({ data, error }) => {
-        if (error) {
-          console.error('❌ Real-time load error:', error);
-          return;
-        }
-        
-        console.log('✅ Real-time update applied');
-        setInventory(data?.inventory || []);
-        setLastSync(new Date());
-      });
-  })
-  .subscribe();
+// Watch inventory_items table
+  supabase
+    .channel('inventory-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory_items' }, (payload) => {
+      console.log('🔔 Inventory change');
+      if (payload.eventType === 'INSERT') {
+        setInventory(prev => [...prev, {
+          id: payload.new.id,
+          name: payload.new.name,
+          partNumber: payload.new.part_number,
+          quantity: payload.new.quantity,
+          location: payload.new.location,
+          minQuantity: payload.new.min_quantity,
+          maxQuantity: payload.new.max_quantity,
+          photoUrl: payload.new.photo_url
+        }]);
+      } else if (payload.eventType === 'UPDATE') {
+        setInventory(prev => prev.map(item => item.id === payload.new.id ? {
+          id: payload.new.id,
+          name: payload.new.name,
+          partNumber: payload.new.part_number,
+          quantity: payload.new.quantity,
+          location: payload.new.location,
+          minQuantity: payload.new.min_quantity,
+          maxQuantity: payload.new.max_quantity,
+          photoUrl: payload.new.photo_url
+        } : item));
+      } else if (payload.eventType === 'DELETE') {
+        setInventory(prev => prev.filter(item => item.id !== payload.old.id));
+      }
+      setLastSync(new Date());
+    })
+    .subscribe();
 
   // Watch machinery_items table
   supabase
@@ -690,13 +696,30 @@ const getFilteredAndSortedService = () => {
   };
 
 const addInventoryItem = async () => {
-  // ✅ Prevent double-saves
-  if (isEditingRef.current) return;
-  
-  isEditingRef.current = true;
-  lastLocalUpdateRef.current = Date.now();
+  if (uploadingPhoto) return;
   
   try {
+    await supabase.from('inventory_items').insert([{
+      id: Date.now().toString(),
+      user_id: user.id,
+      name: inventoryForm.name,
+      part_number: inventoryForm.partNumber,
+      quantity: inventoryForm.quantity,
+      location: inventoryForm.location,
+      min_quantity: inventoryForm.minQuantity,
+      max_quantity: inventoryForm.maxQuantity,
+      photo_url: inventoryForm.photoUrl || ''
+    }]);
+    
+    console.log('✅ Inventory saved - FAST!');
+    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
+    setShowInventoryModal(false);
+  } catch (error) {
+    console.error('Add error:', error);
+    alert('Error: ' + error.message);
+  }
+};
+    
     // ✅ FETCH ALL CURRENT DATA FROM DATABASE FIRST
     const { data: currentData, error: fetchError } = await supabase
       .from('agritrack_data')
@@ -710,7 +733,9 @@ const addInventoryItem = async () => {
     const currentMachinery = currentData?.machinery || [];
     const currentServiceHistory = currentData?.service_history || [];
     
-const newItem = { ...inventoryForm, id: Date.now() };
+    // ✅ REMOVE _pendingPhotoFile and USE finalPhotoUrl
+    const { _pendingPhotoFile, ...formWithoutFile } = inventoryForm;
+    const newItem = { ...formWithoutFile, photoUrl: finalPhotoUrl, id: Date.now() };
     const newInventory = [...currentInventory, newItem];
 
     // ✅ SAVE TO DATABASE FIRST (BEFORE updating state)
@@ -727,17 +752,18 @@ const newItem = { ...inventoryForm, id: Date.now() };
     console.log('✅ Inventory item added successfully');
     
     // ✅ NOW UPDATE LOCAL STATE AFTER SUCCESSFUL SAVE - FORCE RE-RENDER
-setInventory([...newInventory]);
-setMachinery([...currentMachinery]);
-setServiceHistory([...currentServiceHistory]);
+    setInventory([...newInventory]);
+    setMachinery([...currentMachinery]);
+    setServiceHistory([...currentServiceHistory]);
     
     setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
     setShowInventoryModal(false);
+    
     // ✅ Clear editing flag AFTER successful save with delay
-setTimeout(() => {
-  console.log('🔓 Unlocking real-time sync');
-  isEditingRef.current = false;
-}, 3000);
+    setTimeout(() => {
+      console.log('🔓 Unlocking real-time sync');
+      isEditingRef.current = false;
+    }, 3000);
   } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
@@ -747,29 +773,14 @@ setTimeout(() => {
   }
 };
   const deleteInventoryItem = async (id) => {
-  const shouldDelete = window.confirm('Are you sure you want to delete this item?');
-  if (!shouldDelete) return;
+  if (!confirm('Are you sure you want to delete this item?')) return;
 
   try {
-    lastLocalUpdateRef.current = Date.now(); // ✅ ADD THIS LINE
-    
-    const newInventory = inventory.filter(item => item.id !== id);
-    
-// ✅ UPDATE LOCAL STATE IMMEDIATELY - FORCE RE-RENDER
-setInventory([...newInventory]);
-
-    const { error } = await supabase
-      .from('agritrack_data')
-      .update({ inventory: newInventory })
-      .eq('id', 1);
-
-    if (error) throw error;
-    console.log('✅ Item deleted successfully');
+    await supabase.from('inventory_items').delete().eq('id', id);
+    console.log('✅ Item deleted');
   } catch (error) {
-    console.error('Error deleting inventory item:', error);
-    alert('Failed to delete item. Please try again.');
-    // ❌ ROLLBACK ON ERROR
-    loadData();
+    console.error('Delete error:', error);
+    alert('Error: ' + error.message);
   }
 };
 
@@ -789,8 +800,24 @@ const startEditInventory = (item) => {
 
 const saveInventoryEdit = async (id) => {
   try {
-    isEditingRef.current = true;
-    lastLocalUpdateRef.current = Date.now();
+    await supabase.from('inventory_items').update({
+      name: inventoryForm.name,
+      part_number: inventoryForm.partNumber,
+      quantity: inventoryForm.quantity,
+      location: inventoryForm.location,
+      min_quantity: inventoryForm.minQuantity,
+      max_quantity: inventoryForm.maxQuantity,
+      photo_url: inventoryForm.photoUrl || ''
+    }).eq('id', id);
+
+    console.log('✅ Inventory updated - FAST!');
+    setEditingInventoryId(null);
+    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
+  } catch (error) {
+    console.error('Update error:', error);
+    alert('Error: ' + error.message);
+  }
+};
     
     // ✅ FETCH ALL CURRENT DATA FROM DATABASE FIRST
     const { data: currentData, error: fetchError } = await supabase
@@ -805,8 +832,10 @@ const saveInventoryEdit = async (id) => {
     const currentMachinery = currentData?.machinery || [];
     const currentServiceHistory = currentData?.service_history || [];
     
+    // ✅ Use finalPhotoUrl instead of form photoUrl
+    const { _pendingPhotoFile, ...formWithoutFile } = inventoryForm;
     const newInventory = currentInventory.map(item => 
-      item.id === id ? { ...item, ...inventoryForm } : item
+      item.id === id ? { ...item, ...formWithoutFile, photoUrl: finalPhotoUrl } : item
     );
 
     // ✅ SAVE TO DATABASE FIRST
@@ -823,20 +852,20 @@ const saveInventoryEdit = async (id) => {
 
     console.log('✅ Item updated successfully');
     
-// ✅ NOW UPDATE LOCAL STATE AFTER SUCCESSFUL SAVE - FORCE RE-RENDER
-setInventory([...newInventory]);
-setMachinery([...currentMachinery]);
-setServiceHistory([...currentServiceHistory]);
+    // ✅ NOW UPDATE LOCAL STATE AFTER SUCCESSFUL SAVE - FORCE RE-RENDER
+    setInventory([...newInventory]);
+    setMachinery([...currentMachinery]);
+    setServiceHistory([...currentServiceHistory]);
     
     // Clear editing state
     setEditingInventoryId(null);
     setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
     
-// ✅ SHORTER TIMEOUT - allow real-time updates after 3 seconds
-setTimeout(() => {
-  console.log('🔓 Unlocking real-time sync after edit');
-  isEditingRef.current = false;
-}, 3000);
+    // ✅ SHORTER TIMEOUT - allow real-time updates after 3 seconds
+    setTimeout(() => {
+      console.log('🔓 Unlocking real-time sync after edit');
+      isEditingRef.current = false;
+    }, 3000);
   } catch (error) {
     console.error('Error updating inventory item:', error);
     alert('Failed to update item. Please try again.');
@@ -1038,53 +1067,20 @@ const cancelServiceEdit = () => {
   setMachineSearchModal('');
 };
 
- const quickUpdateQuantity = async (id, delta) => {
-    isEditingRef.current = true;
-    lastLocalUpdateRef.current = Date.now();
+const quickUpdateQuantity = async (id, delta) => {
+  try {
+    const item = inventory.find(i => i.id === id);
+    if (!item) return;
     
-    try {
-      // ✅ FETCH ALL CURRENT DATA FROM DATABASE FIRST
-      const { data: currentData, error: fetchError } = await supabase
-        .from('agritrack_data')
-        .select('*')
-        .eq('id', 1)
-        .single();
-      
-      if (fetchError) throw fetchError;
-      
-      const currentInventory = currentData?.inventory || [];
-      const currentMachinery = currentData?.machinery || [];
-      const currentServiceHistory = currentData?.service_history || [];
-      
-      const newInventory = currentInventory.map(item => 
-        item.id === id ? { ...item, quantity: Math.max(0, (parseInt(item.quantity) || 0) + delta).toString() } : item
-      );
-
-      // ✅ SAVE TO DATABASE FIRST
-      const { error } = await supabase
-        .from('agritrack_data')
-        .update({ 
-          inventory: newInventory,
-          machinery: currentMachinery,
-          service_history: currentServiceHistory
-        })
-        .eq('id', 1);
-
-      if (error) throw error;
-      
-// ✅ NOW UPDATE LOCAL STATE - FORCE RE-RENDER
-setInventory([...newInventory]);
-setMachinery([...currentMachinery]);
-setServiceHistory([...currentServiceHistory]);
-      
-  setTimeout(() => {
-      console.log('🔓 Unlocking real-time sync after quantity update');
-      isEditingRef.current = false;
-    }, 3000);
+    const newQuantity = Math.max(0, (parseInt(item.quantity) || 0) + delta).toString();
+    
+    await supabase.from('inventory_items').update({
+      quantity: newQuantity
+    }).eq('id', id);
+    
+    console.log('✅ Quantity updated - FAST!');
   } catch (error) {
     console.error('Update error:', error);
-    isEditingRef.current = false;
-    loadData();
     alert('Error updating quantity: ' + error.message);
   }
 };
@@ -2400,35 +2396,28 @@ itemCard: {
                       onChange={(e) => setInventoryForm({ ...inventoryForm, maxQuantity: e.target.value })}
                     />
                   </div>
-                  <div style={{ marginBottom: '12px' }}>
+                 <div style={{ marginBottom: '12px' }}>
                     <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
                       📸 Upload Photo
                     </label>
                     <input
                       type="file"
                       accept="image/*"
-                     onChange={async (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    // ✅ SHOW PREVIEW IMMEDIATELY
-    const objectUrl = URL.createObjectURL(file);
-    setInventoryForm({ ...inventoryForm, photoUrl: objectUrl });
-    
-    // ✅ COMPRESS IN BACKGROUND
-    const photoUrl = await handlePhotoUpload(file, 'inventory');
-    if (photoUrl) {
-      setInventoryForm({ ...inventoryForm, photoUrl });
-      URL.revokeObjectURL(objectUrl); // Clean up temporary URL
-    } else {
-      // If upload failed, remove the preview
-      setInventoryForm({ ...inventoryForm, photoUrl: '' });
-    }
-  }
-  e.target.value = '';
-}}
+                      onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          const objectUrl = URL.createObjectURL(file);
+                          setInventoryForm({ 
+                            ...inventoryForm, 
+                            photoUrl: objectUrl,
+                            _pendingPhotoFile: file
+                          });
+                        }
+                        e.target.value = '';
+                      }}
                       style={{ ...styles.input, padding: '8px' }}
                     />
-                    {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
+                    {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Compressing photo...</p>}
 {inventoryForm.photoUrl && (
   <div style={{ marginTop: '8px', position: 'relative', display: 'inline-block' }}>
     <img 
@@ -2513,47 +2502,20 @@ itemCard: {
     {userRole !== 'employee' && (
       <button
         onClick={async (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  if (confirm('Remove this photo from the inventory item?')) {
-    try {
-      isEditingRef.current = true;
-      lastLocalUpdateRef.current = Date.now();
-      
-      // ✅ UPDATE UI IMMEDIATELY (OPTIMISTIC UPDATE)
-      const newInventory = inventory.map(invItem => 
-        invItem.id === item.id ? { ...invItem, photoUrl: '' } : invItem
-      );
-      setInventory([...newInventory]);
-      
-      console.log('✅ Photo removed from UI (saving in background...)');
-      
-      // ✅ SAVE TO DATABASE IN BACKGROUND
-      const { error } = await supabase
-        .from('agritrack_data')
-        .update({ inventory: newInventory })
-        .eq('id', 1);
-      
-      if (error) {
-        console.error('Database save failed:', error);
-        // ❌ ROLLBACK ON ERROR
-        loadData();
-        alert('Failed to save. Changes reverted.');
-      } else {
-        console.log('✅ Photo deletion saved to database');
-      }
-      
-      setTimeout(() => {
-        isEditingRef.current = false;
-      }, 3000);
-    } catch (error) {
-      console.error('Error removing photo:', error);
-      alert('Failed to remove photo');
-      isEditingRef.current = false;
-      loadData();
-    }
-  }
-}}
+          e.preventDefault();
+          e.stopPropagation();
+          if (confirm('Remove this photo from the inventory item?')) {
+            try {
+              await supabase.from('inventory_items').update({
+                photo_url: ''
+              }).eq('id', item.id);
+              console.log('✅ Photo removed from inventory');
+            } catch (error) {
+              console.error('Error removing photo:', error);
+              alert('Failed to remove photo');
+            }
+          }
+        }}
         style={{
           position: 'absolute',
           top: '4px',
@@ -4404,7 +4366,7 @@ itemCard: {
                 onChange={(e) => setInventoryForm({ ...inventoryForm, maxQuantity: e.target.value })}
               />
             </div>
-            <div style={{ marginBottom: '16px' }}>
+<div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
                 📸 Upload Photo (Optional)
               </label>
@@ -4414,16 +4376,18 @@ itemCard: {
                 onChange={async (e) => {
                   const file = e.target.files[0];
                   if (file) {
-                    const photoUrl = await handlePhotoUpload(file, 'inventory');
-                    if (photoUrl) {
-                      setInventoryForm({ ...inventoryForm, photoUrl });
-                    }
+                    const objectUrl = URL.createObjectURL(file);
+                    setInventoryForm({ 
+                      ...inventoryForm, 
+                      photoUrl: objectUrl,
+                      _pendingPhotoFile: file
+                    });
                   }
                   e.target.value = ''; 
                 }}
                 style={{ ...styles.input, padding: '8px' }}
               />
-              {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
+              {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Compressing photo...</p>}
 {inventoryForm.photoUrl && (
   <div style={{ marginTop: '8px', position: 'relative', display: 'inline-block' }}>
     <img 
