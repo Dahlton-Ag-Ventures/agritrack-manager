@@ -2431,7 +2431,7 @@ itemCard: {
                 </div>
               ) : (
                 <>
-                 {item.photoUrl && (
+                {item.photoUrl && (
   <div style={{ position: 'relative', marginRight: '16px' }}>
     <img 
       src={item.photoUrl} 
@@ -2466,37 +2466,49 @@ itemCard: {
     />
     {userRole !== 'employee' && (
       <button
-  onClick={async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (confirm('Remove this photo from the inventory item?')) {
-      try {
-        await supabase.from('inventory_items').update({
-          photo_url: ''
-        }).eq('id', item.id);
-        
-        // ✅ IMMEDIATELY update local state
-        setInventory(prev => prev.map(i => 
-          i.id === item.id ? { ...i, photoUrl: '' } : i
-        ));
-        
-        console.log('✅ Photo removed from inventory');
-      } catch (error) {
-        console.error('Error removing photo:', error);
-        alert('Failed to remove photo');
-      }
-    }
-  }}
-  style={{
-    position: 'absolute',
-    top: '4px',
-    right: '4px',
-    background: '#ef4444',
-    // ... styles
-  }}
->
-  ✕
-</button>
+        onClick={async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (confirm('Remove this photo from the inventory item?')) {
+            try {
+              await supabase.from('inventory_items').update({
+                photo_url: ''
+              }).eq('id', item.id);
+              
+              setInventory(prev => prev.map(i => 
+                i.id === item.id ? { ...i, photoUrl: '' } : i
+              ));
+              
+              console.log('✅ Photo removed from inventory');
+            } catch (error) {
+              console.error('Error removing photo:', error);
+              alert('Failed to remove photo');
+            }
+          }
+        }}
+        style={{
+          position: 'absolute',
+          top: '4px',
+          right: '4px',
+          background: '#ef4444',
+          border: 'none',
+          borderRadius: '50%',
+          width: '24px',
+          height: '24px',
+          color: 'white',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+          zIndex: 10
+        }}
+        title="Remove photo"
+      >
+        ✕
+      </button>
     )}
   </div>
 )}
@@ -2970,31 +2982,49 @@ itemCard: {
     />
     {userRole !== 'employee' && (
       <button
-  onClick={async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (confirm('Remove this photo from the machine?')) {
-      try {
-        await supabase.from('machinery_items').update({
-          photo_url: ''
-        }).eq('id', item.id);
-        
-        // ✅ IMMEDIATELY update local state
-        setMachinery(prev => prev.map(i => 
-          i.id === item.id ? { ...i, photoUrl: '' } : i
-        ));
-        
-        console.log('✅ Photo removed from machinery');
-      } catch (error) {
-        console.error('Error removing photo:', error);
-        alert('Failed to remove photo');
-      }
-    }
-  }}
-  // ... button styles
->
-  ✕
-</button>
+        onClick={async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (confirm('Remove this photo from the machine?')) {
+            try {
+              await supabase.from('machinery_items').update({
+                photo_url: ''
+              }).eq('id', item.id);
+              
+              setMachinery(prev => prev.map(i => 
+                i.id === item.id ? { ...i, photoUrl: '' } : i
+              ));
+              
+              console.log('✅ Photo removed from machinery');
+            } catch (error) {
+              console.error('Error removing photo:', error);
+              alert('Failed to remove photo');
+            }
+          }
+        }}
+        style={{
+          position: 'absolute',
+          top: '4px',
+          right: '4px',
+          background: '#ef4444',
+          border: 'none',
+          borderRadius: '50%',
+          width: '24px',
+          height: '24px',
+          color: 'white',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+          zIndex: 10
+        }}
+        title="Remove photo"
+      >
+        ✕
+      </button>
     )}
   </div>
 )}
