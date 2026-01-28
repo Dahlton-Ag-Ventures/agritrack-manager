@@ -718,60 +718,7 @@ const addInventoryItem = async () => {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
   }
-};
-    
-    // ✅ FETCH ALL CURRENT DATA FROM DATABASE FIRST
-    const { data: currentData, error: fetchError } = await supabase
-      .from('agritrack_data')
-      .select('*')
-      .eq('id', 1)
-      .single();
-    
-    if (fetchError) throw fetchError;
-    
-    const currentInventory = currentData?.inventory || [];
-    const currentMachinery = currentData?.machinery || [];
-    const currentServiceHistory = currentData?.service_history || [];
-    
-    // ✅ REMOVE _pendingPhotoFile and USE finalPhotoUrl
-    const { _pendingPhotoFile, ...formWithoutFile } = inventoryForm;
-    const newItem = { ...formWithoutFile, photoUrl: finalPhotoUrl, id: Date.now() };
-    const newInventory = [...currentInventory, newItem];
 
-    // ✅ SAVE TO DATABASE FIRST (BEFORE updating state)
-    const { error } = await supabase
-      .from('agritrack_data')
-      .update({ 
-        inventory: newInventory,
-        machinery: currentMachinery,
-        service_history: currentServiceHistory
-      })
-      .eq('id', 1);
-    
-    if (error) throw error;
-    console.log('✅ Inventory item added successfully');
-    
-    // ✅ NOW UPDATE LOCAL STATE AFTER SUCCESSFUL SAVE - FORCE RE-RENDER
-    setInventory([...newInventory]);
-    setMachinery([...currentMachinery]);
-    setServiceHistory([...currentServiceHistory]);
-    
-    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
-    setShowInventoryModal(false);
-    
-    // ✅ Clear editing flag AFTER successful save with delay
-    setTimeout(() => {
-      console.log('🔓 Unlocking real-time sync');
-      isEditingRef.current = false;
-    }, 3000);
-  } catch (error) {
-    console.error('Add error:', error);
-    alert('Error: ' + error.message);
-    isEditingRef.current = false;
-    // ❌ ROLLBACK ON ERROR
-    loadData();
-  }
-};
   const deleteInventoryItem = async (id) => {
   if (!confirm('Are you sure you want to delete this item?')) return;
 
@@ -819,61 +766,6 @@ const saveInventoryEdit = async (id) => {
   }
 };
     
-    // ✅ FETCH ALL CURRENT DATA FROM DATABASE FIRST
-    const { data: currentData, error: fetchError } = await supabase
-      .from('agritrack_data')
-      .select('*')
-      .eq('id', 1)
-      .single();
-    
-    if (fetchError) throw fetchError;
-    
-    const currentInventory = currentData?.inventory || [];
-    const currentMachinery = currentData?.machinery || [];
-    const currentServiceHistory = currentData?.service_history || [];
-    
-    // ✅ Use finalPhotoUrl instead of form photoUrl
-    const { _pendingPhotoFile, ...formWithoutFile } = inventoryForm;
-    const newInventory = currentInventory.map(item => 
-      item.id === id ? { ...item, ...formWithoutFile, photoUrl: finalPhotoUrl } : item
-    );
-
-    // ✅ SAVE TO DATABASE FIRST
-    const { error } = await supabase
-      .from('agritrack_data')
-      .update({ 
-        inventory: newInventory,
-        machinery: currentMachinery,
-        service_history: currentServiceHistory
-      })
-      .eq('id', 1);
-
-    if (error) throw error;
-
-    console.log('✅ Item updated successfully');
-    
-    // ✅ NOW UPDATE LOCAL STATE AFTER SUCCESSFUL SAVE - FORCE RE-RENDER
-    setInventory([...newInventory]);
-    setMachinery([...currentMachinery]);
-    setServiceHistory([...currentServiceHistory]);
-    
-    // Clear editing state
-    setEditingInventoryId(null);
-    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
-    
-    // ✅ SHORTER TIMEOUT - allow real-time updates after 3 seconds
-    setTimeout(() => {
-      console.log('🔓 Unlocking real-time sync after edit');
-      isEditingRef.current = false;
-    }, 3000);
-  } catch (error) {
-    console.error('Error updating inventory item:', error);
-    alert('Failed to update item. Please try again.');
-    isEditingRef.current = false;
-    // ❌ ROLLBACK ON ERROR
-    loadData();
-  }
-};
 const cancelInventoryEdit = () => {
   setEditingInventoryId(null);
   isEditingRef.current = false;
