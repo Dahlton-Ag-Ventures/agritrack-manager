@@ -2342,23 +2342,21 @@ itemCard: {
                     <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
                       📸 Upload Photo
                     </label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={async (e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          const objectUrl = URL.createObjectURL(file);
-                          setInventoryForm({ 
-                            ...inventoryForm, 
-                            photoUrl: objectUrl,
-                            _pendingPhotoFile: file
-                          });
-                        }
-                        e.target.value = '';
-                      }}
-                      style={{ ...styles.input, padding: '8px' }}
-                    />
+<input
+  type="file"
+  accept="image/*"
+  onChange={async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const photoUrl = await handlePhotoUpload(file, 'inventory');
+      if (photoUrl) {
+        setInventoryForm({ ...inventoryForm, photoUrl });
+      }
+    }
+    e.target.value = '';
+  }}
+  style={{ ...styles.input, padding: '8px' }}
+/>
                     {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Compressing photo...</p>}
 {inventoryForm.photoUrl && (
   <div style={{ marginTop: '8px', position: 'relative', display: 'inline-block' }}>
@@ -4320,23 +4318,21 @@ itemCard: {
               <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
                 📸 Upload Photo (Optional)
               </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={async (e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    const objectUrl = URL.createObjectURL(file);
-                    setInventoryForm({ 
-                      ...inventoryForm, 
-                      photoUrl: objectUrl,
-                      _pendingPhotoFile: file
-                    });
-                  }
-                  e.target.value = ''; 
-                }}
-                style={{ ...styles.input, padding: '8px' }}
-              />
+            <input
+  type="file"
+  accept="image/*"
+  onChange={async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const photoUrl = await handlePhotoUpload(file, 'inventory');
+      if (photoUrl) {
+        setInventoryForm({ ...inventoryForm, photoUrl });
+      }
+    }
+    e.target.value = '';
+  }}
+  style={{ ...styles.input, padding: '8px' }}
+/>
               {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Compressing photo...</p>}
 {inventoryForm.photoUrl && (
   <div style={{ marginTop: '8px', position: 'relative', display: 'inline-block' }}>
