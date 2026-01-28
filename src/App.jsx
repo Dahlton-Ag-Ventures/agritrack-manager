@@ -106,6 +106,8 @@ const [inventoryForm, setInventoryForm] = useState({
   // Photo upload state
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [savingService, setSavingService] = useState(false);
+  const [savingInventory, setSavingInventory] = useState(false);
+  const [savingMachinery, setSavingMachinery] = useState(false);
   // Search and sort states
   const [inventorySearch, setInventorySearch] = useState('');
   const [inventorySort, setInventorySort] = useState('name-asc');
@@ -794,6 +796,7 @@ const startEditInventory = (item) => {
 };
 
 const saveInventoryEdit = async (id) => {
+  setSavingInventory(true);
   try {
     const updates = {
       name: inventoryForm.name,
@@ -832,9 +835,11 @@ const saveInventoryEdit = async (id) => {
     console.log('✅ Inventory updated - FAST!');
     setEditingInventoryId(null);
     setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
-  } catch (error) {
+} catch (error) {
     console.error('Update error:', error);
     alert('Error: ' + error.message);
+  } finally {
+    setSavingInventory(false);
   }
 };
     
@@ -926,7 +931,8 @@ const deleteMachineryItem = async (id) => {
     });
   };
 
- const saveMachineryEdit = async (id) => {
+const saveMachineryEdit = async (id) => {
+  setSavingMachinery(true);
   try {
     const updates = {
       name: machineryForm.name,
@@ -953,9 +959,11 @@ const deleteMachineryItem = async (id) => {
     console.log('✅ Machinery updated - FAST!');
     setEditingMachineryId(null);
     setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '' });
-  } catch (error) {
+} catch (error) {
     console.error('Update error:', error);
     alert('Error: ' + error.message);
+  } finally {
+    setSavingMachinery(false);
   }
 };
 
@@ -2441,9 +2449,26 @@ itemCard: {
 )}
                   </div>
                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    <button onClick={() => saveInventoryEdit(item.id)} style={styles.saveButton}>
-                      <Save size={16} /> Save
-                    </button>
+                    <button 
+  onClick={() => saveInventoryEdit(item.id)} 
+  style={{
+    ...styles.saveButton,
+    opacity: savingInventory ? 0.7 : 1,
+    cursor: savingInventory ? 'not-allowed' : 'pointer'
+  }}
+  disabled={savingInventory}
+>
+  {savingInventory ? (
+    <>
+      <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} /> 
+      Saving...
+    </>
+  ) : (
+    <>
+      <Save size={16} /> Save
+    </>
+  )}
+</button>
                     <button onClick={cancelInventoryEdit} style={styles.cancelButton}>
                       <X size={16} /> Cancel
                     </button>
@@ -2957,9 +2982,26 @@ itemCard: {
 )}
               </div>
               <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                <button onClick={() => saveMachineryEdit(item.id)} style={styles.saveButton}>
-                  <Save size={16} /> Save
-                </button>
+                <button 
+  onClick={() => saveMachineryEdit(item.id)} 
+  style={{
+    ...styles.saveButton,
+    opacity: savingMachinery ? 0.7 : 1,
+    cursor: savingMachinery ? 'not-allowed' : 'pointer'
+  }}
+  disabled={savingMachinery}
+>
+  {savingMachinery ? (
+    <>
+      <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} /> 
+      Saving...
+    </>
+  ) : (
+    <>
+      <Save size={16} /> Save
+    </>
+  )}
+</button>
                 <button onClick={cancelMachineryEdit} style={styles.cancelButton}>
                   <X size={16} /> Cancel
                 </button>
