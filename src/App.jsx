@@ -1673,14 +1673,16 @@ itemCard: {
 // This continues from: if (!user) { return ( ... login screen ... ); }
 
  return (
- <div 
+<div 
   key={theme}
   style={{
     minHeight: '100vh',
     color: currentTheme.text,
     padding: '24px',
     background: theme === 'dark' ? currentTheme.background : '#f3f4f6',
-    backgroundImage: theme === 'dark' ? currentTheme.backgroundImage : 'repeating-radial-gradient(circle at 0 0, transparent 0, #f3f4f6 40px), repeating-linear-gradient(rgba(6, 182, 212, 0.03), rgba(16, 185, 129, 0.03))'
+    backgroundImage: theme === 'dark' ? currentTheme.backgroundImage : 'repeating-radial-gradient(circle at 0 0, transparent 0, #f3f4f6 40px), repeating-linear-gradient(rgba(6, 182, 212, 0.03), rgba(16, 185, 129, 0.03))',
+    backgroundSize: theme === 'dark' ? 'cover' : 'auto',
+    backgroundAttachment: 'fixed'
   }}
 >
     <div style={styles.content}>
