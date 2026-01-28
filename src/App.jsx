@@ -3234,48 +3234,47 @@ itemCard: {
             <div style={styles.tabHeader}>
   <div>
     <h2 style={{ fontSize: '1.5rem' }}>Service Records</h2>
-  {serviceFilter && (() => {
+ {serviceFilter && (() => {
   const filteredCount = serviceHistory.filter(r => r.machineName === serviceFilter).length;
   
-  // Only show banner if NO records exist
-  if (filteredCount === 0) {
-    return (
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        marginTop: '8px',
-        padding: '8px 12px',
-        background: 'rgba(139, 92, 246, 0.2)',
-        border: '1px solid #8b5cf6',
-        borderRadius: '8px',
-        fontSize: '0.875rem',
-        color: '#a78bfa'
-      }}>
-        <AlertCircle size={16} />
-        No records exist for <strong>{serviceFilter}</strong>
-        <button
-          onClick={() => setServiceFilter('')}
-          style={{
-            marginLeft: '8px',
-            padding: '4px 8px',
-            background: '#8b5cf6',
-            border: 'none',
-            borderRadius: '6px',
-            color: 'white',
-            cursor: 'pointer',
-            fontSize: '0.75rem',
-            fontWeight: 'bold'
-          }}
-        >
-          Clear Filter
-        </button>
-      </div>
-    );
-  }
-  
-  // If records exist, return null (show nothing)
-  return null;
+  // Show banner with appropriate message
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      marginTop: '8px',
+      padding: '8px 12px',
+      background: 'rgba(139, 92, 246, 0.2)',
+      border: '1px solid #8b5cf6',
+      borderRadius: '8px',
+      fontSize: '0.875rem',
+      color: '#a78bfa'
+    }}>
+      <AlertCircle size={16} />
+      {filteredCount === 0 ? (
+        <>No records exist for <strong>{serviceFilter}</strong></>
+      ) : (
+        <>Showing {filteredCount} record{filteredCount === 1 ? '' : 's'} for <strong>{serviceFilter}</strong></>
+      )}
+      <button
+        onClick={() => setServiceFilter('')}
+        style={{
+          marginLeft: '8px',
+          padding: '4px 8px',
+          background: '#8b5cf6',
+          border: 'none',
+          borderRadius: '6px',
+          color: 'white',
+          cursor: 'pointer',
+          fontSize: '0.75rem',
+          fontWeight: 'bold'
+        }}
+      >
+        Clear Filter
+      </button>
+    </div>
+  );
 })()}
   </div>
   {userRole !== 'employee' && (
