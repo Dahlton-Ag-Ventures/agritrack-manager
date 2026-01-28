@@ -535,25 +535,7 @@ const handlePhotoUpload = async (file, formType) => {
     return null;
   }
 };
-
-      // Clean up
-      URL.revokeObjectURL(objectUrl);
-      setUploadingPhoto(false);
-
-      const finalSizeMB = (base64Result.length / (1024 * 1024)).toFixed(2);
-      console.log(`✅ Image compressed to ${finalSizeMB}MB at ${Math.round(quality * 100)}% quality`);
-
-      return base64Result;
-
-    } catch (error) {
-      console.error('Image processing error:', error);
-      alert('Failed to process image. Please try a different image.');
-      setUploadingPhoto(false);
-      return null;
-    }
-  };
   
-  // Check inventory stock levels
   const getStockStatus = (item) => {
     const qty = parseInt(item.quantity) || 0;
     const min = parseInt(item.minQuantity) || 0;
