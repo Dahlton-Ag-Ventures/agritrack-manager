@@ -70,6 +70,7 @@ export default function App() {
   const [imageModalTitle, setImageModalTitle] = useState('');
   const lastLocalUpdateRef = useRef(0);
   const isEditingRef = useRef(false);
+  const recentlyUpdatedIdsRef = useRef(new Set());
 
   const [activeTab, setActiveTab] = useState('home');
   const [inventory, setInventory] = useState([]);
@@ -415,18 +416,25 @@ const setupRealtime = () => {
           maxQuantity: payload.new.max_quantity,
           photoUrl: payload.new.photo_url
         }]);
-      } else if (payload.eventType === 'UPDATE') {
-        setInventory(prev => prev.map(item => item.id === payload.new.id ? {
-          id: payload.new.id,
-          name: payload.new.name,
-          partNumber: payload.new.part_number,
-          quantity: payload.new.quantity,
-          location: payload.new.location,
-          minQuantity: payload.new.min_quantity,
-          maxQuantity: payload.new.max_quantity,
-          photoUrl: payload.new.photo_url
-        } : item));
-      } else if (payload.eventType === 'DELETE') {
+     } else if (payload.eventType === 'UPDATE') {
+  // Skip if we just updated this item locally
+  if (recentlyUpdatedIdsRef.current.has(payload.new.id)) {
+    console.log('⏭️ Skipping real-time update for recently modified item:', payload.new.id);
+    recentlyUpdatedIdsRef.current.delete(payload.new.id);
+    return;
+  }
+  
+  setInventory(prev => prev.map(item => item.id === payload.new.id ? {
+    id: payload.new.id,
+    name: payload.new.name,
+    partNumber: payload.new.part_number,
+    quantity: payload.new.quantity,
+    location: payload.new.location,
+    minQuantity: payload.new.min_quantity,
+    maxQuantity: payload.new.max_quantity,
+    photoUrl: payload.new.photo_url
+  } : item));
+}
         setInventory(prev => prev.filter(item => item.id !== payload.old.id));
       }
       setLastSync(new Date());
@@ -793,7 +801,7 @@ const startEditInventory = (item) => {
 
 const saveInventoryEdit = async (id) => {
   try {
-    await supabase.from('inventory_items').update({
+    const updates = {
       name: inventoryForm.name,
       part_number: inventoryForm.partNumber,
       quantity: inventoryForm.quantity,
@@ -801,7 +809,31 @@ const saveInventoryEdit = async (id) => {
       min_quantity: inventoryForm.minQuantity,
       max_quantity: inventoryForm.maxQuantity,
       photo_url: inventoryForm.photoUrl || ''
-    }).eq('id', id);
+    };
+    
+    await supabase.from('inventory_items').update(updates).eq('id', id);
+
+    // Mark this ID as recently updated to skip real-time event
+    recentlyUpdatedIdsRef.current.add(id);
+    
+    // Remove from set after 2 seconds (safety cleanup)
+    setTimeout(() => {
+      recentlyUpdatedIdsRef.current.delete(id);
+    }, 2000);
+
+    // Update local state immediately
+    setInventory(prev => prev.map(item => 
+      item.id === id ? {
+        id: item.id,
+        name: updates.name,
+        partNumber: updates.part_number,
+        quantity: updates.quantity,
+        location: updates.location,
+        minQuantity: updates.min_quantity,
+        maxQuantity: updates.max_quantity,
+        photoUrl: updates.photo_url
+      } : item
+    ));
 
     console.log('✅ Inventory updated - FAST!');
     setEditingInventoryId(null);
