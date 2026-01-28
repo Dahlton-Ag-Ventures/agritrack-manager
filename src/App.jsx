@@ -7,8 +7,8 @@ import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Sav
 // Theme configurations
 const themes = {
   dark: {
-    background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%)',
-    backgroundImage: 'radial-gradient(circle at 30% 30%, rgba(139, 92, 246, 0.25) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(167, 139, 250, 0.2) 0%, transparent 50%)',
+    background: '#1e1b4b',
+    backgroundImage: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%), radial-gradient(circle at 30% 30%, rgba(139, 92, 246, 0.25) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(167, 139, 250, 0.2) 0%, transparent 50%)',
     cardBackground: '#1e3a5f',
     cardBorder: '#2563eb',
     text: 'white',
@@ -1680,9 +1680,7 @@ itemCard: {
     color: currentTheme.text,
     padding: '24px',
     background: theme === 'dark' ? currentTheme.background : '#f3f4f6',
-    backgroundImage: theme === 'dark' ? currentTheme.backgroundImage : 'repeating-radial-gradient(circle at 0 0, transparent 0, #f3f4f6 40px), repeating-linear-gradient(rgba(6, 182, 212, 0.03), rgba(16, 185, 129, 0.03))',
-    backgroundSize: theme === 'dark' ? 'cover' : 'auto',
-    backgroundAttachment: 'fixed'
+    backgroundImage: theme === 'dark' ? currentTheme.backgroundImage : 'repeating-radial-gradient(circle at 0 0, transparent 0, #f3f4f6 40px), repeating-linear-gradient(rgba(6, 182, 212, 0.03), rgba(16, 185, 129, 0.03))'
   }}
 >
     <div style={styles.content}>
