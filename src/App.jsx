@@ -3591,32 +3591,50 @@ itemCard: {
       }}
     />
     {userRole !== 'employee' && (
-     <button
-  onClick={async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (confirm('Remove this photo from the service record?')) {
-      try {
-        await supabase.from('service_records').update({
-          photo_url: ''
-        }).eq('id', record.id);
-        
-        // ✅ IMMEDIATELY update local state
-        setServiceHistory(prev => prev.map(r => 
-          r.id === record.id ? { ...r, photoUrl: '' } : r
-        ));
-        
-        console.log('✅ Photo removed from service record');
-      } catch (error) {
-        console.error('Error removing photo:', error);
-        alert('Failed to remove photo');
-      }
-    }
-  }}
-  // ... button styles
->
-  ✕
-</button>
+      <button
+        onClick={async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (confirm('Remove this photo from the service record?')) {
+            try {
+              await supabase.from('service_records').update({
+                photo_url: ''
+              }).eq('id', record.id);
+              
+              setServiceHistory(prev => prev.map(r => 
+                r.id === record.id ? { ...r, photoUrl: '' } : r
+              ));
+              
+              console.log('✅ Photo removed from service record');
+            } catch (error) {
+              console.error('Error removing photo:', error);
+              alert('Failed to remove photo');
+            }
+          }
+        }}
+        style={{
+          position: 'absolute',
+          top: '4px',
+          right: '4px',
+          background: '#ef4444',
+          border: 'none',
+          borderRadius: '50%',
+          width: '24px',
+          height: '24px',
+          color: 'white',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+          zIndex: 10
+        }}
+        title="Remove photo"
+      >
+        ✕
+      </button>
     )}
   </div>
 )}
