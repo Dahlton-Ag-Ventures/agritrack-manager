@@ -2882,38 +2882,81 @@ itemCard: {
           ) : (
             <>
               {item.photoUrl && (
-                <img 
-                  src={item.photoUrl} 
-                  alt={item.name} 
-                  style={{ 
-                    width: '100px', 
-                    height: '100px', 
-                    objectFit: 'cover', 
-                    borderRadius: '8px',
-                    marginRight: '16px',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s ease',
-                    border: '2px solid transparent',
-                    userSelect: 'none',
-                    WebkitUserSelect: 'none',
-                    pointerEvents: 'auto'
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setViewingImage(item.photoUrl);
-                    setImageModalTitle(item.name);
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                    e.currentTarget.style.borderColor = '#10b981';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.borderColor = 'transparent';
-                  }}
-                />
-              )}
+  <div style={{ position: 'relative', marginRight: '16px' }}>
+    <img 
+      src={item.photoUrl} 
+      alt={item.name} 
+      style={{ 
+        width: '100px', 
+        height: '100px', 
+        objectFit: 'cover', 
+        borderRadius: '8px',
+        cursor: 'pointer',
+        transition: 'transform 0.2s ease',
+        border: '2px solid transparent',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        pointerEvents: 'auto',
+        display: 'block'
+      }}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setViewingImage(item.photoUrl);
+        setImageModalTitle(item.name);
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'scale(1.05)';
+        e.currentTarget.style.borderColor = '#10b981';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'scale(1)';
+        e.currentTarget.style.borderColor = 'transparent';
+      }}
+    />
+    {userRole !== 'employee' && (
+      <button
+        onClick={async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (confirm('Remove this photo from the machine?')) {
+            try {
+              await supabase.from('machinery_items').update({
+                photo_url: ''
+              }).eq('id', item.id);
+              console.log('✅ Photo removed from machinery');
+            } catch (error) {
+              console.error('Error removing photo:', error);
+              alert('Failed to remove photo');
+            }
+          }
+        }}
+        style={{
+          position: 'absolute',
+          top: '4px',
+          right: '4px',
+          background: '#ef4444',
+          border: 'none',
+          borderRadius: '50%',
+          width: '24px',
+          height: '24px',
+          color: 'white',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+          zIndex: 10
+        }}
+        title="Remove photo"
+      >
+        ✕
+      </button>
+    )}
+  </div>
+)}
               <div style={{ flex: 1 }}>
                 <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{item.name}</h3>
                 <div style={styles.itemDetails}>
