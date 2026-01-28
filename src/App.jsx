@@ -473,9 +473,9 @@ const handlePhotoUpload = async (file, formType) => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
-    // ✅ REDUCED MAX DIMENSIONS for faster processing
-    const MAX_WIDTH = 800;  // Was 1200
-    const MAX_HEIGHT = 800; // Was 1200
+// ✅ EVEN SMALLER for instant uploads
+const MAX_WIDTH = 600;  // Smaller = faster
+const MAX_HEIGHT = 600;
 
     let width = img.width;
     let height = img.height;
@@ -499,9 +499,9 @@ const handlePhotoUpload = async (file, formType) => {
     // Draw and compress
     ctx.drawImage(img, 0, 0, width, height);
 
-    // ✅ SIMPLIFIED: Just use one quality level - faster!
-    const quality = 0.6; // Lower quality = faster processing
-    let base64Result = canvas.toDataURL('image/jpeg', quality);
+// ✅ EVEN FASTER: Lower quality, smaller file
+const quality = 0.5; // Faster processing, smaller file
+let base64Result = canvas.toDataURL('image/jpeg', quality);
 
     // ✅ ONLY ONE SIZE CHECK - no loop
     if (base64Result.length > 4 * 1024 * 1024) {
@@ -2407,16 +2407,25 @@ itemCard: {
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={async (e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          const photoUrl = await handlePhotoUpload(file, 'inventory');
-                          if (photoUrl) {
-                            setInventoryForm({ ...inventoryForm, photoUrl });
-                          }
-                        }
-                        e.target.value = '';
-                      }}
+                     onChange={async (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    // ✅ SHOW PREVIEW IMMEDIATELY
+    const objectUrl = URL.createObjectURL(file);
+    setInventoryForm({ ...inventoryForm, photoUrl: objectUrl });
+    
+    // ✅ COMPRESS IN BACKGROUND
+    const photoUrl = await handlePhotoUpload(file, 'inventory');
+    if (photoUrl) {
+      setInventoryForm({ ...inventoryForm, photoUrl });
+      URL.revokeObjectURL(objectUrl); // Clean up temporary URL
+    } else {
+      // If upload failed, remove the preview
+      setInventoryForm({ ...inventoryForm, photoUrl: '' });
+    }
+  }
+  e.target.value = '';
+}}
                       style={{ ...styles.input, padding: '8px' }}
                     />
                     {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
@@ -2504,62 +2513,47 @@ itemCard: {
     {userRole !== 'employee' && (
       <button
         onClick={async (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          if (confirm('Remove this photo from the inventory item?')) {
-            try {
-              isEditingRef.current = true;
-              lastLocalUpdateRef.current = Date.now();
-              
-              // Fetch current data
-              const { data: currentData, error: fetchError } = await supabase
-                .from('agritrack_data')
-                .select('*')
-                .eq('id', 1)
-                .single();
-              
-              if (fetchError) throw fetchError;
-              
-              const currentInventory = currentData?.inventory || [];
-              const currentMachinery = currentData?.machinery || [];
-              const currentServiceHistory = currentData?.service_history || [];
-              
-              // Update inventory to remove photo
-              const newInventory = currentInventory.map(invItem => 
-                invItem.id === item.id ? { ...invItem, photoUrl: '' } : invItem
-              );
-              
-              // Save to database
-              const { error } = await supabase
-                .from('agritrack_data')
-                .update({ 
-                  inventory: newInventory,
-                  machinery: currentMachinery,
-                  service_history: currentServiceHistory
-                })
-                .eq('id', 1);
-              
-              if (error) throw error;
-              
-// Update local state - FORCE RE-RENDER
-setInventory([...newInventory]);
-setMachinery([...currentMachinery]);
-setServiceHistory([...currentServiceHistory]);
-              
-              console.log('✅ Photo removed from inventory item');
-              
-setTimeout(() => {
-  console.log('🔓 Unlocking real-time sync after photo delete');
-  isEditingRef.current = false;
-}, 3000);
-            } catch (error) {
-              console.error('Error removing photo:', error);
-              alert('Failed to remove photo');
-              isEditingRef.current = false;
-              loadData();
-            }
-          }
-        }}
+  e.preventDefault();
+  e.stopPropagation();
+  if (confirm('Remove this photo from the inventory item?')) {
+    try {
+      isEditingRef.current = true;
+      lastLocalUpdateRef.current = Date.now();
+      
+      // ✅ UPDATE UI IMMEDIATELY (OPTIMISTIC UPDATE)
+      const newInventory = inventory.map(invItem => 
+        invItem.id === item.id ? { ...invItem, photoUrl: '' } : invItem
+      );
+      setInventory([...newInventory]);
+      
+      console.log('✅ Photo removed from UI (saving in background...)');
+      
+      // ✅ SAVE TO DATABASE IN BACKGROUND
+      const { error } = await supabase
+        .from('agritrack_data')
+        .update({ inventory: newInventory })
+        .eq('id', 1);
+      
+      if (error) {
+        console.error('Database save failed:', error);
+        // ❌ ROLLBACK ON ERROR
+        loadData();
+        alert('Failed to save. Changes reverted.');
+      } else {
+        console.log('✅ Photo deletion saved to database');
+      }
+      
+      setTimeout(() => {
+        isEditingRef.current = false;
+      }, 3000);
+    } catch (error) {
+      console.error('Error removing photo:', error);
+      alert('Failed to remove photo');
+      isEditingRef.current = false;
+      loadData();
+    }
+  }
+}}
         style={{
           position: 'absolute',
           top: '4px',
