@@ -8,7 +8,7 @@ import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Sav
 const themes = {
   dark: {
     background: '#1e1b4b',
-    backgroundImage: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%), radial-gradient(circle at 30% 30%, rgba(139, 92, 246, 0.06) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(167, 139, 250, 0.05) 0%, transparent 50%)',
+    backgroundImage: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%), radial-gradient(circle at 30% 30%, rgba(139, 92, 246, 0.02) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(167, 139, 250, 0.015) 0%, transparent 50%)',
     cardBackground: '#1e3a5f',
     cardBorder: '#2563eb',
     text: 'white',
