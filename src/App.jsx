@@ -289,6 +289,7 @@ const loadData = async () => {
       .from('inventory_items')
       .select('*')
       .order('name', { ascending: true });
+      .range(0, 9999);
     
     if (invError) throw invError;
     
@@ -309,6 +310,7 @@ const loadData = async () => {
       .from('machinery_items')
       .select('*')
       .order('name', { ascending: true });
+      .range(0, 9999);
     
     if (machError) throw machError;
     
@@ -327,6 +329,7 @@ const loadData = async () => {
       .from('service_records')
       .select('*')
       .order('date', { ascending: false });
+      .range(0, 9999);
     
     if (servError) throw servError;
     
