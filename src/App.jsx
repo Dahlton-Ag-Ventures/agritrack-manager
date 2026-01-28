@@ -345,18 +345,41 @@ const loadData = async () => {
 const setupRealtime = () => {
   console.log('🔔 Setting up real-time...');
 
-  // Watch agritrack_data for inventory changes only
-  supabase
-    .channel('agritrack-changes')
-    .on('postgres_changes', { 
-      event: '*', 
-      schema: 'public', 
-      table: 'agritrack_data' 
-    }, (payload) => {
-      console.log('🔔 Inventory changed, reloading...');
-      loadData();
-    })
-    .subscribe();
+ // Watch agritrack_data for inventory changes only
+supabase
+  .channel('agritrack-changes')
+  .on('postgres_changes', { 
+    event: '*', 
+    schema: 'public', 
+    table: 'agritrack_data' 
+  }, (payload) => {
+    // ✅ IGNORE UPDATES IF WE JUST MADE A CHANGE (within 2 seconds)
+    const timeSinceLastUpdate = Date.now() - lastLocalUpdateRef.current;
+    if (isEditingRef.current || timeSinceLastUpdate < 2000) {
+      console.log('🔕 Ignoring real-time update (local edit in progress)');
+      return;
+    }
+    
+    console.log('🔔 Inventory changed, reloading...');
+    
+    // ✅ DON'T SHOW LOADING SCREEN FOR REAL-TIME UPDATES
+    const { data, error } = supabase
+      .from('agritrack_data')
+      .select('*')
+      .eq('id', 1)
+      .single()
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('❌ Real-time load error:', error);
+          return;
+        }
+        
+        console.log('✅ Real-time update applied');
+        setInventory(data?.inventory || []);
+        setLastSync(new Date());
+      });
+  })
+  .subscribe();
 
   // Watch machinery_items table
   supabase
@@ -722,7 +745,7 @@ setServiceHistory([...currentServiceHistory]);
 setTimeout(() => {
   console.log('🔓 Unlocking real-time sync');
   isEditingRef.current = false;
-}, 15000);
+}, 3000);
   } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
@@ -817,9 +840,11 @@ setServiceHistory([...currentServiceHistory]);
     setEditingInventoryId(null);
     setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
     
-    setTimeout(() => {
-      isEditingRef.current = false;
-    }, 15000);
+// ✅ SHORTER TIMEOUT - allow real-time updates after 3 seconds
+setTimeout(() => {
+  console.log('🔓 Unlocking real-time sync after edit');
+  isEditingRef.current = false;
+}, 3000);
   } catch (error) {
     console.error('Error updating inventory item:', error);
     alert('Failed to update item. Please try again.');
@@ -1060,16 +1085,17 @@ setInventory([...newInventory]);
 setMachinery([...currentMachinery]);
 setServiceHistory([...currentServiceHistory]);
       
-      setTimeout(() => {
-        isEditingRef.current = false;
-      }, 15000);
-    } catch (error) {
-      console.error('Update error:', error);
+  setTimeout(() => {
+      console.log('🔓 Unlocking real-time sync after quantity update');
       isEditingRef.current = false;
-      loadData();
-      alert('Error updating quantity: ' + error.message);
-    }
-  };;
+    }, 3000);
+  } catch (error) {
+    console.error('Update error:', error);
+    isEditingRef.current = false;
+    loadData();
+    alert('Error updating quantity: ' + error.message);
+  }
+};
 
   // Styles object - NOW USES currentTheme WHICH IS DEFINED
   const styles = {
@@ -2530,9 +2556,10 @@ setServiceHistory([...currentServiceHistory]);
               
               console.log('✅ Photo removed from inventory item');
               
-              setTimeout(() => {
-                isEditingRef.current = false;
-              }, 15000);
+setTimeout(() => {
+  console.log('🔓 Unlocking real-time sync after photo delete');
+  isEditingRef.current = false;
+}, 3000);
             } catch (error) {
               console.error('Error removing photo:', error);
               alert('Failed to remove photo');
