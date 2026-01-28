@@ -2134,6 +2134,10 @@ itemCard: {
         <option value="50">Show 50</option>
         <option value="100">Show 100</option>
         <option value="200">Show 200</option>
+        <option value="500">Show 500</option>
+        <option value="1000">Show 1000</option>
+        <option value="2000">Show 2000</option>
+        <option value="99999">Show All</option>
       </select>
     </div>
 
@@ -2665,6 +2669,10 @@ itemCard: {
     <option value="50">Show 50</option>
     <option value="100">Show 100</option>
     <option value="200">Show 200</option>
+    <option value="500">Show 500</option>
+    <option value="1000">Show 1000</option>
+    <option value="2000">Show 2000</option>
+    <option value="99999">Show All</option>
   </select>
 </div>
 
@@ -3174,6 +3182,10 @@ itemCard: {
     <option value="50">Show 50</option>
     <option value="100">Show 100</option>
     <option value="200">Show 200</option>
+    <option value="500">Show 500</option>
+    <option value="1000">Show 1000</option>
+    <option value="2000">Show 2000</option>
+    <option value="99999">Show All</option>
   </select>
 </div>
 
