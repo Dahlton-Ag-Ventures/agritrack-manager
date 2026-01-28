@@ -401,45 +401,38 @@ const setupRealtime = () => {
   console.log('🔔 Setting up real-time...');
 
 // Watch inventory_items table
-  supabase
-    .channel('inventory-changes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory_items' }, (payload) => {
-      console.log('🔔 Inventory change');
-      if (payload.eventType === 'INSERT') {
-        setInventory(prev => [...prev, {
-          id: payload.new.id,
-          name: payload.new.name,
-          partNumber: payload.new.part_number,
-          quantity: payload.new.quantity,
-          location: payload.new.location,
-          minQuantity: payload.new.min_quantity,
-          maxQuantity: payload.new.max_quantity,
-          photoUrl: payload.new.photo_url
-        }]);
-     } else if (payload.eventType === 'UPDATE') {
-  // Skip if we just updated this item locally
-  if (recentlyUpdatedIdsRef.current.has(payload.new.id)) {
-    console.log('⏭️ Skipping real-time update for recently modified item:', payload.new.id);
-    recentlyUpdatedIdsRef.current.delete(payload.new.id);
-    return;
-  }
-  
-  setInventory(prev => prev.map(item => item.id === payload.new.id ? {
-    id: payload.new.id,
-    name: payload.new.name,
-    partNumber: payload.new.part_number,
-    quantity: payload.new.quantity,
-    location: payload.new.location,
-    minQuantity: payload.new.min_quantity,
-    maxQuantity: payload.new.max_quantity,
-    photoUrl: payload.new.photo_url
-  } : item));
-}
-        setInventory(prev => prev.filter(item => item.id !== payload.old.id));
-      }
-      setLastSync(new Date());
-    })
-    .subscribe();
+supabase
+  .channel('inventory-changes')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory_items' }, (payload) => {
+    console.log('🔔 Inventory change');
+    if (payload.eventType === 'INSERT') {
+      setInventory(prev => [...prev, {
+        id: payload.new.id,
+        name: payload.new.name,
+        partNumber: payload.new.part_number,
+        quantity: payload.new.quantity,
+        location: payload.new.location,
+        minQuantity: payload.new.min_quantity,
+        maxQuantity: payload.new.max_quantity,
+        photoUrl: payload.new.photo_url
+      }]);
+    } else if (payload.eventType === 'UPDATE') {
+      setInventory(prev => prev.map(item => item.id === payload.new.id ? {
+        id: payload.new.id,
+        name: payload.new.name,
+        partNumber: payload.new.part_number,
+        quantity: payload.new.quantity,
+        location: payload.new.location,
+        minQuantity: payload.new.min_quantity,
+        maxQuantity: payload.new.max_quantity,
+        photoUrl: payload.new.photo_url
+      } : item));
+    } else if (payload.eventType === 'DELETE') {
+      setInventory(prev => prev.filter(item => item.id !== payload.old.id));
+    }
+    setLastSync(new Date());
+  })  // ← Make sure this closing paren is here
+  .subscribe();
 
   // Watch machinery_items table
   supabase
