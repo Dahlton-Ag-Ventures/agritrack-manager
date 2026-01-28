@@ -446,85 +446,95 @@ supabase
   setRealtimeStatus('connected');
 };
 
-// Photo Upload Function with automatic compression
-  const handlePhotoUpload = async (file, formType) => {
-    if (!file) return null;
+// Photo Upload Function with automatic compression - OPTIMIZED
+const handlePhotoUpload = async (file, formType) => {
+  if (!file) return null;
 
-    // Check if file is an image
-    if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file (JPG, PNG, etc.)');
-      return null;
+  // Check if file is an image
+  if (!file.type.startsWith('image/')) {
+    alert('Please upload an image file (JPG, PNG, etc.)');
+    return null;
+  }
+
+  setUploadingPhoto(true);
+
+  try {
+    // Create an image element to load the file
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = objectUrl;
+    });
+
+    // Create canvas for compression
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // ✅ REDUCED MAX DIMENSIONS for faster processing
+    const MAX_WIDTH = 800;  // Was 1200
+    const MAX_HEIGHT = 800; // Was 1200
+
+    let width = img.width;
+    let height = img.height;
+
+    // Calculate new dimensions maintaining aspect ratio
+    if (width > height) {
+      if (width > MAX_WIDTH) {
+        height *= MAX_WIDTH / width;
+        width = MAX_WIDTH;
+      }
+    } else {
+      if (height > MAX_HEIGHT) {
+        width *= MAX_HEIGHT / height;
+        height = MAX_HEIGHT;
+      }
     }
 
-    setUploadingPhoto(true);
+    canvas.width = width;
+    canvas.height = height;
 
-    try {
-      // Create an image element to load the file
-      const img = new Image();
-      const objectUrl = URL.createObjectURL(file);
+    // Draw and compress
+    ctx.drawImage(img, 0, 0, width, height);
+
+    // ✅ SIMPLIFIED: Just use one quality level - faster!
+    const quality = 0.6; // Lower quality = faster processing
+    let base64Result = canvas.toDataURL('image/jpeg', quality);
+
+    // ✅ ONLY ONE SIZE CHECK - no loop
+    if (base64Result.length > 4 * 1024 * 1024) {
+      // If too large, reduce dimensions more aggressively
+      canvas.width = width * 0.6;
+      canvas.height = height * 0.6;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      base64Result = canvas.toDataURL('image/jpeg', 0.5);
       
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-        img.src = objectUrl;
-      });
-
-      // Create canvas for compression
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-
-      // Maximum dimensions (adjust these as needed)
-      const MAX_WIDTH = 1200;
-      const MAX_HEIGHT = 1200;
-
-      let width = img.width;
-      let height = img.height;
-
-      // Calculate new dimensions maintaining aspect ratio
-      if (width > height) {
-        if (width > MAX_WIDTH) {
-          height *= MAX_WIDTH / width;
-          width = MAX_WIDTH;
-        }
-      } else {
-        if (height > MAX_HEIGHT) {
-          width *= MAX_HEIGHT / height;
-          height = MAX_HEIGHT;
-        }
-      }
-
-      canvas.width = width;
-      canvas.height = height;
-
-      // Draw and compress
-      ctx.drawImage(img, 0, 0, width, height);
-
-      // Convert to base64 with compression
-      // Start with 0.7 quality, reduce if still too large
-      let quality = 0.7;
-      let base64Result = canvas.toDataURL('image/jpeg', quality);
-
-      // If still over 3MB as base64, reduce quality further
-      while (base64Result.length > 3 * 1024 * 1024 && quality > 0.3) {
-        quality -= 0.1;
-        base64Result = canvas.toDataURL('image/jpeg', quality);
-      }
-
-      // Final check - if STILL too large, try even more aggressive compression
       if (base64Result.length > 4 * 1024 * 1024) {
-        // Try reducing dimensions even more
-        canvas.width = width * 0.7;
-        canvas.height = height * 0.7;
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        base64Result = canvas.toDataURL('image/jpeg', 0.5);
-        
-        if (base64Result.length > 4 * 1024 * 1024) {
-          alert('Image is extremely large and could not be compressed enough. Please try a different image.');
-          setUploadingPhoto(false);
-          URL.revokeObjectURL(objectUrl);
-          return null;
-        }
+        alert('Image is too large. Please try a smaller image or take a new photo.');
+        setUploadingPhoto(false);
+        URL.revokeObjectURL(objectUrl);
+        return null;
       }
+    }
+
+    // Clean up
+    URL.revokeObjectURL(objectUrl);
+    setUploadingPhoto(false);
+
+    const finalSizeMB = (base64Result.length / (1024 * 1024)).toFixed(2);
+    console.log(`✅ Image compressed to ${finalSizeMB}MB at ${Math.round(quality * 100)}% quality`);
+
+    return base64Result;
+
+  } catch (error) {
+    console.error('Image processing error:', error);
+    alert('Failed to process image. Please try a different image.');
+    setUploadingPhoto(false);
+    return null;
+  }
+};
 
       // Clean up
       URL.revokeObjectURL(objectUrl);
