@@ -718,7 +718,7 @@ const addInventoryItem = async () => {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
   }
-
+};
   const deleteInventoryItem = async (id) => {
   if (!confirm('Are you sure you want to delete this item?')) return;
 
