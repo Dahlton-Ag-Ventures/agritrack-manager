@@ -3411,9 +3411,42 @@ itemCard: {
         style={{ ...styles.input, padding: '8px' }}
       />
                           {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
-                          {serviceForm.photoUrl && (
-                            <img src={serviceForm.photoUrl} alt="Preview" style={{ maxWidth: '200px', marginTop: '8px', borderRadius: '8px' }} />
-                          )}
+{serviceForm.photoUrl && (
+  <div style={{ marginTop: '8px', position: 'relative', display: 'inline-block' }}>
+    <img 
+      src={serviceForm.photoUrl} 
+      alt="Preview" 
+      style={{ maxWidth: '200px', borderRadius: '8px', display: 'block' }} 
+    />
+    <button
+      onClick={(e) => {
+        e.preventDefault();
+        setServiceForm({ ...serviceForm, photoUrl: '' });
+      }}
+      style={{
+        position: 'absolute',
+        top: '4px',
+        right: '4px',
+        background: '#ef4444',
+        border: 'none',
+        borderRadius: '50%',
+        width: '24px',
+        height: '24px',
+        color: 'white',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '14px',
+        fontWeight: 'bold',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+      }}
+      title="Remove photo"
+    >
+      ✕
+    </button>
+  </div>
+)}
                         </div>
                        <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                           <button 
@@ -3449,38 +3482,81 @@ itemCard: {
                       <>
                         <div style={{ flex: 1 }}>
                           <div style={{ display: 'flex', alignItems: 'start', gap: '16px' }}>
- {record.photoUrl && (
-  <img 
-    src={record.photoUrl} 
-    alt="Service record" 
-    style={{ 
-      width: '120px', 
-      height: '120px', 
-      objectFit: 'cover', 
-      borderRadius: '8px',
-      flexShrink: 0,
-      cursor: 'pointer',
-      transition: 'transform 0.2s ease',
-      border: '2px solid transparent',
-      userSelect: 'none',
-      WebkitUserSelect: 'none',
-      pointerEvents: 'auto'
-    }}
-    onClick={(e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setViewingImage(record.photoUrl);
-      setImageModalTitle(`${record.machineName} - ${record.serviceType}`);
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.transform = 'scale(1.05)';
-      e.currentTarget.style.borderColor = '#10b981';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.transform = 'scale(1)';
-      e.currentTarget.style.borderColor = 'transparent';
-    }}
-  />
+{record.photoUrl && (
+  <div style={{ position: 'relative', flexShrink: 0, marginRight: '16px' }}>
+    <img 
+      src={record.photoUrl} 
+      alt="Service record" 
+      style={{ 
+        width: '120px', 
+        height: '120px', 
+        objectFit: 'cover', 
+        borderRadius: '8px',
+        cursor: 'pointer',
+        transition: 'transform 0.2s ease',
+        border: '2px solid transparent',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        pointerEvents: 'auto',
+        display: 'block'
+      }}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setViewingImage(record.photoUrl);
+        setImageModalTitle(`${record.machineName} - ${record.serviceType}`);
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'scale(1.05)';
+        e.currentTarget.style.borderColor = '#10b981';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'scale(1)';
+        e.currentTarget.style.borderColor = 'transparent';
+      }}
+    />
+    {userRole !== 'employee' && (
+      <button
+        onClick={async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (confirm('Remove this photo from the service record?')) {
+            try {
+              await supabase.from('service_records').update({
+                photo_url: ''
+              }).eq('id', record.id);
+              console.log('✅ Photo removed from service record');
+            } catch (error) {
+              console.error('Error removing photo:', error);
+              alert('Failed to remove photo');
+            }
+          }
+        }}
+        style={{
+          position: 'absolute',
+          top: '4px',
+          right: '4px',
+          background: '#ef4444',
+          border: 'none',
+          borderRadius: '50%',
+          width: '24px',
+          height: '24px',
+          color: 'white',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+          zIndex: 10
+        }}
+        title="Remove photo"
+      >
+        ✕
+      </button>
+    )}
+  </div>
 )}
                             <div style={{ flex: 1 }}>
                               <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
@@ -4446,9 +4522,42 @@ itemCard: {
         style={{ ...styles.input, padding: '8px' }}
       />
       {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
-      {serviceForm.photoUrl && (
-        <img src={serviceForm.photoUrl} alt="Preview" style={{ maxWidth: '200px', marginTop: '8px', borderRadius: '8px' }} />
-      )}
+{serviceForm.photoUrl && (
+  <div style={{ marginTop: '8px', position: 'relative', display: 'inline-block' }}>
+    <img 
+      src={serviceForm.photoUrl} 
+      alt="Preview" 
+      style={{ maxWidth: '200px', borderRadius: '8px', display: 'block' }} 
+    />
+    <button
+      onClick={(e) => {
+        e.preventDefault();
+        setServiceForm({ ...serviceForm, photoUrl: '' });
+      }}
+      style={{
+        position: 'absolute',
+        top: '4px',
+        right: '4px',
+        background: '#ef4444',
+        border: 'none',
+        borderRadius: '50%',
+        width: '24px',
+        height: '24px',
+        color: 'white',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '14px',
+        fontWeight: 'bold',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+      }}
+      title="Remove photo"
+    >
+      ✕
+    </button>
+  </div>
+)}
     </div>
 <div style={{ display: 'flex', gap: '12px' }}>
 <button 
