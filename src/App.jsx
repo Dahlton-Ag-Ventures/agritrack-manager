@@ -843,11 +843,11 @@ const cancelInventoryEdit = () => {
   setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
 };
 
-  const addMachineryItem = async () => {
+const addMachineryItem = async () => {
   if (uploadingPhoto) return;
   
   try {
-    await supabase.from('machinery_items').insert([{
+    const newItem = {
       id: Date.now().toString(),
       user_id: user.id,
       name: machineryForm.name,
@@ -855,6 +855,18 @@ const cancelInventoryEdit = () => {
       category: machineryForm.category,
       status: machineryForm.status || 'Active',
       photo_url: machineryForm.photoUrl || ''
+    };
+    
+    await supabase.from('machinery_items').insert([newItem]);
+    
+    // ✅ IMMEDIATELY update local state
+    setMachinery(prev => [...prev, {
+      id: newItem.id,
+      name: newItem.name,
+      vinSerial: newItem.vin_serial,
+      category: newItem.category,
+      status: newItem.status,
+      photoUrl: newItem.photo_url
     }]);
     
     console.log('✅ Machinery saved - FAST!');
@@ -865,7 +877,6 @@ const cancelInventoryEdit = () => {
     alert('Error: ' + error.message);
   }
 };
-
 const deleteMachineryItem = async (id) => {
   const machineToDelete = machinery.find(item => item.id === id);
   
@@ -916,13 +927,27 @@ const deleteMachineryItem = async (id) => {
 
  const saveMachineryEdit = async (id) => {
   try {
-    await supabase.from('machinery_items').update({
+    const updates = {
       name: machineryForm.name,
       vin_serial: machineryForm.vinSerial,
       category: machineryForm.category,
       status: machineryForm.status,
       photo_url: machineryForm.photoUrl || ''
-    }).eq('id', id);
+    };
+    
+    await supabase.from('machinery_items').update(updates).eq('id', id);
+
+    // ✅ IMMEDIATELY update local state
+    setMachinery(prev => prev.map(item => 
+      item.id === id ? {
+        id: item.id,
+        name: updates.name,
+        vinSerial: updates.vin_serial,
+        category: updates.category,
+        status: updates.status,
+        photoUrl: updates.photo_url
+      } : item
+    ));
 
     console.log('✅ Machinery updated - FAST!');
     setEditingMachineryId(null);
