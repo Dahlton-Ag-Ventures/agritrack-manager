@@ -5188,10 +5188,10 @@ itemCard: {
   .wrench-icon {
     transition: transform 0.6s ease;
   }
-  .title-with-wrench:hover .wrench-icon {
+.title-with-wrench:hover .wrench-icon {
     transform: rotate(360deg);
   }
-</style>
+`}</style>
       </div>
     </div>
   );
