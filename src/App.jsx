@@ -5613,7 +5613,6 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
   }}
   draggable="false"
 />
-        />
       </div>
     </div>
   );
