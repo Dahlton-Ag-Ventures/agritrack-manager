@@ -99,10 +99,14 @@ const [inventoryForm, setInventoryForm] = useState({
   const [machineryForm, setMachineryForm] = useState({ 
     name: '', vinSerial: '', category: '', status: 'Active', photoUrl: ''
   });
-  const [serviceForm, setServiceForm] = useState({
-    machineName: '', serviceType: '', date: '', notes: '', technician: ''
-  });
-
+const [serviceForm, setServiceForm] = useState({
+  machineName: '', 
+  serviceType: '', 
+  date: '', 
+  notes: '', 
+  technician: '',
+  photoUrls: []
+});
   // Photo upload state
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [savingService, setSavingService] = useState(false);
@@ -381,15 +385,15 @@ const loadData = async () => {
     }
     
     console.log(`✅ Loaded ${allServiceRecords.length} service records from database`);
-    setServiceHistory(allServiceRecords.map(item => ({
-      id: item.id,
-      machineName: item.machine_name || '',
-      serviceType: item.service_type || '',
-      date: item.date || '',
-      notes: item.notes || '',
-      technician: item.technician || '',
-      photoUrl: item.photo_url || ''
-    })));
+setServiceHistory(allServiceRecords.map(item => ({
+  id: item.id,
+  machineName: item.machine_name || '',
+  serviceType: item.service_type || '',
+  date: item.date || '',
+  notes: item.notes || '',
+  technician: item.technician || '',
+  photoUrls: item.photo_urls ? JSON.parse(item.photo_urls) : []
+})));
     
     setLastSync(new Date());
   } catch (error) {
@@ -469,36 +473,35 @@ supabase
 
   // Watch service_records table
   supabase
-    .channel('service-changes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'service_records' }, (payload) => {
-      console.log('🔔 Service change');
-      if (payload.eventType === 'INSERT') {
-        setServiceHistory(prev => [...prev, {
-          id: payload.new.id,
-          machineName: payload.new.machine_name,
-          serviceType: payload.new.service_type,
-          date: payload.new.date,
-          notes: payload.new.notes,
-          technician: payload.new.technician,
-          photoUrl: payload.new.photo_url
-        }]);
-      } else if (payload.eventType === 'UPDATE') {
-        setServiceHistory(prev => prev.map(item => item.id === payload.new.id ? {
-          id: payload.new.id,
-          machineName: payload.new.machine_name,
-          serviceType: payload.new.service_type,
-          date: payload.new.date,
-          notes: payload.new.notes,
-          technician: payload.new.technician,
-          photoUrl: payload.new.photo_url
-        } : item));
-      } else if (payload.eventType === 'DELETE') {
-        setServiceHistory(prev => prev.filter(item => item.id !== payload.old.id));
-      }
-      setLastSync(new Date());
-    })
-    .subscribe();
-
+  .channel('service-changes')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'service_records' }, (payload) => {
+    console.log('🔔 Service change');
+    if (payload.eventType === 'INSERT') {
+      setServiceHistory(prev => [...prev, {
+        id: payload.new.id,
+        machineName: payload.new.machine_name,
+        serviceType: payload.new.service_type,
+        date: payload.new.date,
+        notes: payload.new.notes,
+        technician: payload.new.technician,
+        photoUrls: payload.new.photo_urls ? JSON.parse(payload.new.photo_urls) : []
+      }]);
+    } else if (payload.eventType === 'UPDATE') {
+      setServiceHistory(prev => prev.map(item => item.id === payload.new.id ? {
+        id: payload.new.id,
+        machineName: payload.new.machine_name,
+        serviceType: payload.new.service_type,
+        date: payload.new.date,
+        notes: payload.new.notes,
+        technician: payload.new.technician,
+        photoUrls: payload.new.photo_urls ? JSON.parse(payload.new.photo_urls) : []
+      } : item));
+    } else if (payload.eventType === 'DELETE') {
+      setServiceHistory(prev => prev.filter(item => item.id !== payload.old.id));
+    }
+    setLastSync(new Date());
+  })
+  .subscribe();
   setRealtimeStatus('connected');
 };
 
@@ -982,7 +985,6 @@ const viewMachineServiceHistory = (machineName) => {
 };
   
 const addServiceRecord = async () => {
-  // ✅ Prevent double-saves
   if (savingService) return;
   
   setSavingService(true);
@@ -997,11 +999,11 @@ const addServiceRecord = async () => {
       date: finalDate,
       notes: serviceForm.notes,
       technician: serviceForm.technician,
-      photo_url: serviceForm.photoUrl || ''
+      photo_urls: JSON.stringify(serviceForm.photoUrls || [])
     }]);
     
     console.log('✅ Service saved - FAST!');
-    setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
+    setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrls: [] });
     setShowServiceModal(false);
   } catch (error) {
     console.error('Add error:', error);
@@ -1030,7 +1032,7 @@ const startEditService = (record) => {
     date: record.date || '',
     notes: record.notes || '',
     technician: record.technician || '',
-    photoUrl: record.photoUrl || ''
+    photoUrls: record.photoUrls || []
   });
 };
 
@@ -1043,12 +1045,12 @@ const saveServiceEdit = async (id) => {
       date: serviceForm.date,
       notes: serviceForm.notes,
       technician: serviceForm.technician,
-      photo_url: serviceForm.photoUrl || ''
+      photo_urls: JSON.stringify(serviceForm.photoUrls || [])
     }).eq('id', id);
 
     console.log('✅ Service updated - FAST!');
     setEditingServiceId(null);
-    setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
+    setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrls: [] });
     setMachineSearchModal('');
     setSavingService(false);
   } catch (error) {
@@ -1060,7 +1062,14 @@ const saveServiceEdit = async (id) => {
 const cancelServiceEdit = () => {
   setEditingServiceId(null);
   isEditingRef.current = false;
-  setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrl: '' });
+  setServiceForm({ 
+    machineName: '', 
+    serviceType: '', 
+    date: '', 
+    notes: '', 
+    technician: '', 
+    photoUrls: [] 
+  });
   setMachineSearchModal('');
 };
 
@@ -3602,62 +3611,133 @@ itemCard: {
                           onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
                         />
                         <div style={{ marginBottom: '12px' }}>
-                          <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
-                            📎 Upload Photo/File
-                          </label>
-                          <input
-        type="file"
-        accept="image/*"
-        onChange={async (e) => {
-          const file = e.target.files[0];
-          if (file) {
-            const photoUrl = await handlePhotoUpload(file, 'service');
-            if (photoUrl) {
-              setServiceForm({ ...serviceForm, photoUrl });
-            }
-          }
-          // Clear the input so the same file can be selected again
-          e.target.value = '';
-        }}
-        style={{ ...styles.input, padding: '8px' }}
-      />
-                          {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
-{serviceForm.photoUrl && (
-  <div style={{ marginTop: '8px', position: 'relative', display: 'inline-block' }}>
-    <img 
-      src={serviceForm.photoUrl} 
-      alt="Preview" 
-      style={{ maxWidth: '200px', borderRadius: '8px', display: 'block' }} 
-    />
-    <button
-      onClick={(e) => {
-        e.preventDefault();
-        setServiceForm({ ...serviceForm, photoUrl: '' });
-      }}
-      style={{
-        position: 'absolute',
-        top: '4px',
-        right: '4px',
-        background: '#ef4444',
-        border: 'none',
-        borderRadius: '50%',
-        width: '24px',
-        height: '24px',
-        color: 'white',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '14px',
-        fontWeight: 'bold',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
-      }}
-      title="Remove photo"
-    >
-      ✕
-    </button>
-  </div>
-)}
+  <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+    📸 Upload Photos (up to 10)
+  </label>
+  <input
+    type="file"
+    accept="image/*"
+    multiple
+    onChange={async (e) => {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+      
+      const currentCount = serviceForm.photoUrls.length;
+      const remainingSlots = 10 - currentCount;
+      
+      if (remainingSlots === 0) {
+        alert('Maximum 10 photos allowed');
+        e.target.value = '';
+        return;
+      }
+      
+      const filesToUpload = files.slice(0, remainingSlots);
+      if (files.length > remainingSlots) {
+        alert(`Only uploading ${remainingSlots} photo(s) to stay within 10 photo limit`);
+      }
+      
+      for (const file of filesToUpload) {
+        const photoUrl = await handlePhotoUpload(file, 'service');
+        if (photoUrl) {
+          setServiceForm(prev => ({
+            ...prev,
+            photoUrls: [...prev.photoUrls, photoUrl]
+          }));
+        }
+      }
+      
+      e.target.value = '';
+    }}
+    style={{ ...styles.input, padding: '8px' }}
+    disabled={serviceForm.photoUrls.length >= 10 || uploadingPhoto}
+  />
+  
+  {uploadingPhoto && (
+    <p style={{ color: '#10b981', fontSize: '0.875rem', marginTop: '8px' }}>
+      Compressing photo...
+    </p>
+  )}
+  
+  {serviceForm.photoUrls.length > 0 && (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
+      gap: '12px',
+      marginTop: '12px'
+    }}>
+      {serviceForm.photoUrls.map((url, index) => (
+        <div key={index} style={{ position: 'relative', display: 'inline-block' }}>
+          <img 
+            src={url} 
+            alt={`Photo ${index + 1}`}
+            style={{ 
+              width: '100%', 
+              height: '100px', 
+              objectFit: 'cover', 
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'transform 0.2s ease',
+              border: '2px solid transparent'
+            }} 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setViewingImage(url);
+              setImageModalTitle(`Service Photo ${index + 1}`);
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.borderColor = '#10b981';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.borderColor = 'transparent';
+            }}
+          />
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              setServiceForm(prev => ({
+                ...prev,
+                photoUrls: prev.photoUrls.filter((_, i) => i !== index)
+              }));
+            }}
+            style={{
+              position: 'absolute',
+              top: '4px',
+              right: '4px',
+              background: '#ef4444',
+              border: 'none',
+              borderRadius: '50%',
+              width: '24px',
+              height: '24px',
+              color: 'white',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+            }}
+            title="Remove photo"
+          >
+            ✕
+          </button>
+        </div>
+      ))}
+    </div>
+  )}
+  
+  <p style={{ 
+    color: '#9ca3af', 
+    fontSize: '0.75rem', 
+    marginTop: '8px' 
+  }}>
+    {serviceForm.photoUrls.length} / 10 photos
+  </p>
+</div>
+    
                         </div>
                        <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                           <button 
@@ -3693,85 +3773,109 @@ itemCard: {
                       <>
                         <div style={{ flex: 1 }}>
                           <div style={{ display: 'flex', alignItems: 'start', gap: '16px' }}>
-{record.photoUrl && (
-  <div style={{ position: 'relative', flexShrink: 0, marginRight: '16px' }}>
-    <img 
-      src={record.photoUrl} 
-      alt="Service record" 
-      style={{ 
-        width: '120px', 
-        height: '120px', 
-        objectFit: 'cover', 
-        borderRadius: '8px',
-        cursor: 'pointer',
-        transition: 'transform 0.2s ease',
-        border: '2px solid transparent',
-        userSelect: 'none',
-        WebkitUserSelect: 'none',
-        pointerEvents: 'auto',
-        display: 'block'
-      }}
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setViewingImage(record.photoUrl);
-        setImageModalTitle(`${record.machineName} - ${record.serviceType}`);
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'scale(1.05)';
-        e.currentTarget.style.borderColor = '#10b981';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'scale(1)';
-        e.currentTarget.style.borderColor = 'transparent';
-      }}
-    />
-    {userRole !== 'employee' && (
-      <button
-        onClick={async (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          if (confirm('Remove this photo from the service record?')) {
-            try {
-              await supabase.from('service_records').update({
-                photo_url: ''
-              }).eq('id', record.id);
-              
-              setServiceHistory(prev => prev.map(r => 
-                r.id === record.id ? { ...r, photoUrl: '' } : r
-              ));
-              
-              console.log('✅ Photo removed from service record');
-            } catch (error) {
-              console.error('Error removing photo:', error);
-              alert('Failed to remove photo');
-            }
-          }
-        }}
-        style={{
-          position: 'absolute',
-          top: '4px',
-          right: '4px',
-          background: '#ef4444',
-          border: 'none',
-          borderRadius: '50%',
-          width: '24px',
-          height: '24px',
-          color: 'white',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '14px',
-          fontWeight: 'bold',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
-          zIndex: 10
-        }}
-        title="Remove photo"
-      >
-        ✕
-      </button>
-    )}
+{record.photoUrls && record.photoUrls.length > 0 && (
+  <div style={{ 
+    marginRight: '16px',
+    maxWidth: '300px'
+  }}>
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: record.photoUrls.length === 1 
+        ? '1fr' 
+        : 'repeat(auto-fill, minmax(100px, 1fr))',
+      gap: '8px'
+    }}>
+      {record.photoUrls.map((url, index) => (
+        <div key={index} style={{ position: 'relative' }}>
+          <img 
+            src={url} 
+            alt={`Service photo ${index + 1}`}
+            style={{ 
+              width: '100%', 
+              height: record.photoUrls.length === 1 ? '120px' : '100px',
+              objectFit: 'cover', 
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'transform 0.2s ease',
+              border: '2px solid transparent',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              pointerEvents: 'auto',
+              display: 'block'
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setViewingImage(url);
+              setImageModalTitle(`${record.machineName} - ${record.serviceType} (${index + 1}/${record.photoUrls.length})`);
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.borderColor = '#10b981';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.borderColor = 'transparent';
+            }}
+          />
+          {userRole !== 'employee' && (
+            <button
+              onClick={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (confirm('Remove this photo from the service record?')) {
+                  try {
+                    const updatedPhotos = record.photoUrls.filter((_, i) => i !== index);
+                    await supabase.from('service_records').update({
+                      photo_urls: JSON.stringify(updatedPhotos)
+                    }).eq('id', record.id);
+                    
+                    setServiceHistory(prev => prev.map(r => 
+                      r.id === record.id ? { ...r, photoUrls: updatedPhotos } : r
+                    ));
+                    
+                    console.log('✅ Photo removed from service record');
+                  } catch (error) {
+                    console.error('Error removing photo:', error);
+                    alert('Failed to remove photo');
+                  }
+                }
+              }}
+              style={{
+                position: 'absolute',
+                top: '4px',
+                right: '4px',
+                background: '#ef4444',
+                border: 'none',
+                borderRadius: '50%',
+                width: '24px',
+                height: '24px',
+                color: 'white',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                zIndex: 10
+              }}
+              title="Remove photo"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+    <p style={{ 
+      color: '#9ca3af', 
+      fontSize: '0.75rem', 
+      marginTop: '4px',
+      textAlign: 'center'
+    }}>
+      {record.photoUrls.length} photo{record.photoUrls.length !== 1 ? 's' : ''}
+    </p>
   </div>
 )}
                             <div style={{ flex: 1 }}>
@@ -4750,64 +4854,133 @@ itemCard: {
       value={serviceForm.notes}
       onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
     />
-   <div style={{ marginBottom: '16px' }}>
-      <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
-        📎 Upload Photo/File (Optional)
-      </label>
-      <input
-        type="file"
-        accept="image/*"
-        onChange={async (e) => {
-          const file = e.target.files[0];
-          if (file) {
-            const photoUrl = await handlePhotoUpload(file, 'service');
-            if (photoUrl) {
-              setServiceForm({ ...serviceForm, photoUrl });
-            }
-          }
-          // Clear the input so the same file can be selected again
-          e.target.value = '';
-        }}
-        style={{ ...styles.input, padding: '8px' }}
-      />
-      {uploadingPhoto && <p style={{ color: '#10b981', fontSize: '0.875rem' }}>Uploading...</p>}
-{serviceForm.photoUrl && (
-  <div style={{ marginTop: '8px', position: 'relative', display: 'inline-block' }}>
-    <img 
-      src={serviceForm.photoUrl} 
-      alt="Preview" 
-      style={{ maxWidth: '200px', borderRadius: '8px', display: 'block' }} 
-    />
-    <button
-      onClick={(e) => {
-        e.preventDefault();
-        setServiceForm({ ...serviceForm, photoUrl: '' });
-      }}
-      style={{
-        position: 'absolute',
-        top: '4px',
-        right: '4px',
-        background: '#ef4444',
-        border: 'none',
-        borderRadius: '50%',
-        width: '24px',
-        height: '24px',
-        color: 'white',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '14px',
-        fontWeight: 'bold',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
-      }}
-      title="Remove photo"
-    >
-      ✕
-    </button>
-  </div>
-)}
+<div style={{ marginBottom: '16px' }}>
+  <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+    📸 Upload Photos (up to 10)
+  </label>
+  <input
+    type="file"
+    accept="image/*"
+    multiple
+    onChange={async (e) => {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+      
+      const currentCount = serviceForm.photoUrls.length;
+      const remainingSlots = 10 - currentCount;
+      
+      if (remainingSlots === 0) {
+        alert('Maximum 10 photos allowed');
+        e.target.value = '';
+        return;
+      }
+      
+      const filesToUpload = files.slice(0, remainingSlots);
+      if (files.length > remainingSlots) {
+        alert(`Only uploading ${remainingSlots} photo(s) to stay within 10 photo limit`);
+      }
+      
+      for (const file of filesToUpload) {
+        const photoUrl = await handlePhotoUpload(file, 'service');
+        if (photoUrl) {
+          setServiceForm(prev => ({
+            ...prev,
+            photoUrls: [...prev.photoUrls, photoUrl]
+          }));
+        }
+      }
+      
+      e.target.value = '';
+    }}
+    style={{ ...styles.input, padding: '8px' }}
+    disabled={serviceForm.photoUrls.length >= 10 || uploadingPhoto}
+  />
+  
+  {uploadingPhoto && (
+    <p style={{ color: '#10b981', fontSize: '0.875rem', marginTop: '8px' }}>
+      Compressing photo...
+    </p>
+  )}
+  
+  {serviceForm.photoUrls.length > 0 && (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
+      gap: '12px',
+      marginTop: '12px'
+    }}>
+      {serviceForm.photoUrls.map((url, index) => (
+        <div key={index} style={{ position: 'relative', display: 'inline-block' }}>
+          <img 
+            src={url} 
+            alt={`Photo ${index + 1}`}
+            style={{ 
+              width: '100%', 
+              height: '100px', 
+              objectFit: 'cover', 
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'transform 0.2s ease',
+              border: '2px solid transparent'
+            }} 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setViewingImage(url);
+              setImageModalTitle(`Service Photo ${index + 1}`);
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.borderColor = '#10b981';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.borderColor = 'transparent';
+            }}
+          />
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              setServiceForm(prev => ({
+                ...prev,
+                photoUrls: prev.photoUrls.filter((_, i) => i !== index)
+              }));
+            }}
+            style={{
+              position: 'absolute',
+              top: '4px',
+              right: '4px',
+              background: '#ef4444',
+              border: 'none',
+              borderRadius: '50%',
+              width: '24px',
+              height: '24px',
+              color: 'white',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+            }}
+            title="Remove photo"
+          >
+            ✕
+          </button>
+        </div>
+      ))}
     </div>
+  )}
+  
+  <p style={{ 
+    color: '#9ca3af', 
+    fontSize: '0.75rem', 
+    marginTop: '8px' 
+  }}>
+    {serviceForm.photoUrls.length} / 10 photos
+  </p>
+</div>
 <div style={{ display: 'flex', gap: '12px' }}>
 <button 
   onClick={addServiceRecord}
