@@ -1719,7 +1719,17 @@ itemCard: {
     return (
       <div style={styles.loginContainer}>
         <div style={styles.loginCard}>
-          <h2 style={styles.loginTitle}>Welcome to</h2>
+          <h2 style={{
+  fontSize: '1.75rem',
+  fontWeight: '600',
+  color: '#111827',
+  marginBottom: '8px',
+  textAlign: 'center',
+  lineHeight: '1.4',
+  textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)'
+}}>
+  Welcome to
+</h2>
 <h1 style={styles.title}>
   AgriTrack Manager
 </h1>
@@ -1926,7 +1936,16 @@ itemCard: {
             </button>
           </form>
 
-          <p style={styles.loginSubtitle}>created by Dahlton Ag Ventures</p>
+          <p style={{
+  color: '#111827',
+  fontSize: '0.9rem',
+  textAlign: 'center',
+  marginTop: '20px',
+  fontWeight: '500',
+  textShadow: '1px 1px 3px rgba(0, 0, 0, 0.3)'
+}}>
+  created by Dahlton Ag Ventures
+</p>
         </div>
 
         <div style={styles.loginFooter}>
