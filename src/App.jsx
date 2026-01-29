@@ -1809,17 +1809,17 @@ itemCard: {
     <div style={styles.content}>
       <div style={styles.header}>
 <div>
-  <p style={{
-    ...styles.subtitle,
-    fontSize: '1.5rem',
-    fontWeight: '600',
-    textShadow: theme === 'dark' 
-      ? '2px 2px 4px rgba(0, 0, 0, 0.5)' 
-      : '2px 2px 4px rgba(0, 0, 0, 0.2)',
-    marginBottom: '8px'
-  }}>
-    Dahlton Ag Ventures
-  </p>
+ <p style={{
+  fontSize: '1.5rem',
+  fontWeight: '600',
+  color: theme === 'dark' ? '#06b6d4' : '#111827',
+  textShadow: theme === 'dark' 
+    ? '2px 2px 4px rgba(0, 0, 0, 0.5)' 
+    : '2px 2px 4px rgba(0, 0, 0, 0.2)',
+  marginBottom: '8px'
+}}>
+  Dahlton Ag Ventures
+</p>
 <p style={styles.stats}>
   {loading ? (
     <>
