@@ -5594,7 +5594,7 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
         onDoubleClick={handleDoubleClick}
         onClick={(e) => e.stopPropagation()}
       >
-  <img 
+<img 
   src={imageUrl} 
   alt="Zoomable view"
   style={{
