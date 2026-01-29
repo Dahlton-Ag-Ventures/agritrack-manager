@@ -5191,7 +5191,7 @@ itemCard: {
   .title-with-wrench:hover .wrench-icon {
     transform: rotate(360deg);
   }
-`}</style>
+</style>
       </div>
     </div>
   );
