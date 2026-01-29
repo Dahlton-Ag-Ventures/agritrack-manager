@@ -5252,7 +5252,14 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
         </button>
       </div>
       
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div 
+        style={{ 
+          flex: 1, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center' 
+        }}
+      >
         <img 
           src={imageUrl} 
           alt="View" 
@@ -5294,7 +5301,14 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
         >
           −
         </button>
-        <span style={{ color: theme.text, fontWeight: 'bold', minWidth: '60px', textAlign: 'center' }}>
+        <span 
+          style={{ 
+            color: theme.text, 
+            fontWeight: 'bold', 
+            minWidth: '60px', 
+            textAlign: 'center' 
+          }}
+        >
           {Math.round(scale * 100)}%
         </span>
         <button 
