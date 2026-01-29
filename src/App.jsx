@@ -2,7 +2,7 @@
 // BUILD VERSION: 2025-01-29-v2-FIXED
 import React, { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut, ChevronDown, Wrench } from 'lucide-react';
+import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut, ChevronDown, Wrench, Mail } from 'lucide-react';
 
 const styleSheet = document.createElement("style");
 styleSheet.innerText = `
@@ -76,6 +76,11 @@ export default function App() {
   const [loginError, setLoginError] = useState('');
   const [loggingIn, setLoggingIn] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordRecovery, setShowPasswordRecovery] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState('');
+  const [sendingRecovery, setSendingRecovery] = useState(false);
+  const [recoveryMessage, setRecoveryMessage] = useState('');
+  const [recoveryError, setRecoveryError] = useState('');
   const [activeSettingsSection, setActiveSettingsSection] = useState('general');
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
   const settingsDropdownRef = useRef(null);
@@ -298,6 +303,38 @@ const checkUser = async () => {
     setShowSettingsDropdown(false);
     setActiveTab('settings');
   };
+  const handlePasswordRecovery = async () => {
+  if (!recoveryEmail.trim()) {
+    setRecoveryError('Please enter your email address');
+    return;
+  }
+
+  setSendingRecovery(true);
+  setRecoveryError('');
+  setRecoveryMessage('');
+
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(recoveryEmail, {
+      redirectTo: window.location.origin,
+    });
+
+    if (error) throw error;
+
+    setRecoveryMessage('Password recovery email sent! Please check your inbox.');
+    setRecoveryEmail('');
+    
+    setTimeout(() => {
+      setShowPasswordRecovery(false);
+      setRecoveryMessage('');
+    }, 3000);
+    
+  } catch (error) {
+    console.error('Password recovery error:', error);
+    setRecoveryError(error.message || 'Failed to send recovery email. Please try again.');
+  } finally {
+    setSendingRecovery(false);
+  }
+};
   
 const loadData = async () => {
   try {
@@ -4179,35 +4216,196 @@ itemCard: {
                 </div>
               )}
 
-              {activeSettingsSection === 'account' && (
-                <div style={styles.itemCard}>
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>👤 Account Information</h3>
-                    <div style={styles.itemDetails}>
-                      <div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Email</p>
-                        <p>{user?.email || 'Not available'}</p>
-                      </div>
-                      <div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>User ID</p>
-                        <p style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>
-                          {user?.id || 'Not available'}
-                        </p>
-                      </div>
-                      <div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Access Level</p>
-                        <p style={{ 
-                          textTransform: 'capitalize', 
-                          fontWeight: 'bold', 
-                          color: userRole === 'employee' ? '#9ca3af' : '#10b981' 
-                        }}>
-                          {userRole === 'employee' ? 'Employee (View Only)' : 'Admin/Manager (Full Access)'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+             {activeSettingsSection === 'account' && (
+  <>
+    {/* Account Information Card */}
+    <div style={styles.itemCard}>
+      <div style={{ flex: 1 }}>
+        <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>👤 Account Information</h3>
+        <div style={styles.itemDetails}>
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Email</p>
+            <p>{user?.email || 'Not available'}</p>
+          </div>
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>User ID</p>
+            <p style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>
+              {user?.id || 'Not available'}
+            </p>
+          </div>
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Access Level</p>
+            <p style={{ 
+              textTransform: 'capitalize', 
+              fontWeight: 'bold', 
+              color: userRole === 'employee' ? '#9ca3af' : '#10b981' 
+            }}>
+              {userRole === 'employee' ? 'Employee (View Only)' : 'Admin/Manager (Full Access)'}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Password Recovery Card */}
+    <div style={{
+      ...styles.itemCard,
+      marginTop: '24px',
+      background: theme === 'dark' ? 'rgba(37, 99, 235, 0.1)' : '#f0f9ff',
+      border: `1px solid ${theme === 'dark' ? '#2563eb' : '#3b82f6'}`
+    }}>
+      <div style={{ flex: 1 }}>
+        <h3 style={{ fontSize: '1.25rem', marginBottom: '16px', color: '#3b82f6' }}>
+          🔐 Password Management
+        </h3>
+        
+        {!showPasswordRecovery ? (
+          <>
+            <p style={{ color: currentTheme.textSecondary, marginBottom: '16px' }}>
+              Need to reset your password? We'll send you an email with instructions to create a new password.
+            </p>
+            <button
+              onClick={() => setShowPasswordRecovery(true)}
+              style={{
+                padding: '12px 24px',
+                background: '#2563eb',
+                border: 'none',
+                borderRadius: '8px',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = '#1d4ed8';
+                e.target.style.transform = 'translateY(-1px)';
+                e.target.style.boxShadow = '0 4px 8px rgba(37, 99, 235, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = '#2563eb';
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+              }}
+            >
+              <Mail size={20} />
+              Reset Password
+            </button>
+          </>
+        ) : (
+          <>
+            <p style={{ color: currentTheme.textSecondary, marginBottom: '16px' }}>
+              Enter your email address and we'll send you a link to reset your password.
+            </p>
+            
+            <input
+              type="email"
+              placeholder="Enter your email address"
+              value={recoveryEmail}
+              onChange={(e) => setRecoveryEmail(e.target.value)}
+              style={{
+                ...styles.input,
+                marginBottom: '8px'
+              }}
+            />
+            
+            {recoveryError && (
+              <div style={{
+                padding: '12px',
+                background: 'rgba(239, 68, 68, 0.2)',
+                border: '1px solid #ef4444',
+                borderRadius: '8px',
+                color: '#ef4444',
+                fontSize: '0.875rem',
+                marginBottom: '12px'
+              }}>
+                {recoveryError}
+              </div>
+            )}
+            
+            {recoveryMessage && (
+              <div style={{
+                padding: '12px',
+                background: 'rgba(16, 185, 129, 0.2)',
+                border: '1px solid #10b981',
+                borderRadius: '8px',
+                color: '#10b981',
+                fontSize: '0.875rem',
+                marginBottom: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <Mail size={16} />
+                {recoveryMessage}
+              </div>
+            )}
+            
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={handlePasswordRecovery}
+                disabled={sendingRecovery || !recoveryEmail.trim()}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: sendingRecovery || !recoveryEmail.trim() ? '#6b7280' : '#10b981',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: 'white',
+                  cursor: sendingRecovery || !recoveryEmail.trim() ? 'not-allowed' : 'pointer',
+                  fontSize: '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  opacity: sendingRecovery || !recoveryEmail.trim() ? 0.6 : 1
+                }}
+              >
+                {sendingRecovery ? (
+                  <>
+                    <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail size={16} />
+                    Send Recovery Email
+                  </>
+                )}
+              </button>
+              
+              <button
+                onClick={() => {
+                  setShowPasswordRecovery(false);
+                  setRecoveryEmail('');
+                  setRecoveryError('');
+                  setRecoveryMessage('');
+                }}
+                disabled={sendingRecovery}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: '#4b5563',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: 'white',
+                  cursor: sendingRecovery ? 'not-allowed' : 'pointer',
+                  fontSize: '1rem',
+                  opacity: sendingRecovery ? 0.6 : 1
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  </>
+)}
 
               {activeSettingsSection === 'application' && (
                 <>
