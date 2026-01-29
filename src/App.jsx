@@ -1767,13 +1767,156 @@ itemCard: {
     {showPassword ? '👁️' : '👁️‍🗨️'}
   </button>
 </div>
-
+  
+{/* Forgot Password Link */}
+  <button
+    type="button"
+    onClick={() => {
+      setShowPasswordRecovery(true);
+      setLoginError('');
+    }}
+    style={{
+      background: 'transparent',
+      border: 'none',
+      color: '#06b6d4',
+      cursor: 'pointer',
+      fontSize: '0.875rem',
+      textAlign: 'right',
+      padding: '0',
+      marginTop: '-8px',
+      textDecoration: 'underline',
+      alignSelf: 'flex-end'
+    }}
+  >
+    Forgot Password?
+  </button>
             {loginError && (
               <div style={styles.loginError}>
                 {loginError}
               </div>
             )}
-
+ {showPasswordRecovery && (
+    <div style={{
+      padding: '16px',
+      background: 'rgba(6, 182, 212, 0.1)',
+      border: '1px solid #06b6d4',
+      borderRadius: '8px',
+      marginTop: '8px'
+    }}>
+      <h4 style={{ 
+        color: '#06b6d4', 
+        marginBottom: '8px',
+        fontSize: '1rem',
+        fontWeight: 'bold'
+      }}>
+        Reset Password
+      </h4>
+      <p style={{ 
+        color: '#d1d5db', 
+        fontSize: '0.875rem',
+        marginBottom: '12px' 
+      }}>
+        Enter your email to receive a password reset link
+      </p>
+      
+      <input
+        type="email"
+        placeholder="Enter your email"
+        value={recoveryEmail}
+        onChange={(e) => setRecoveryEmail(e.target.value)}
+        style={{
+          ...styles.loginInput,
+          marginBottom: '12px'
+        }}
+      />
+      
+      {recoveryError && (
+        <div style={{
+          ...styles.loginError,
+          marginBottom: '12px'
+        }}>
+          {recoveryError}
+        </div>
+      )}
+      
+      {recoveryMessage && (
+        <div style={{
+          padding: '12px',
+          background: 'rgba(16, 185, 129, 0.2)',
+          border: '1px solid #10b981',
+          borderRadius: '8px',
+          color: '#10b981',
+          fontSize: '0.875rem',
+          marginBottom: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <Mail size={16} />
+          {recoveryMessage}
+        </div>
+      )}
+      
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <button
+          type="button"
+          onClick={handlePasswordRecovery}
+          disabled={sendingRecovery || !recoveryEmail.trim()}
+          style={{
+            flex: 1,
+            padding: '10px',
+            background: sendingRecovery || !recoveryEmail.trim() ? '#6b7280' : '#10b981',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: sendingRecovery || !recoveryEmail.trim() ? 'not-allowed' : 'pointer',
+            fontSize: '0.875rem',
+            fontWeight: 'bold',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px'
+          }}
+        >
+          {sendingRecovery ? (
+            <>
+              <RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} />
+              Sending...
+            </>
+          ) : (
+            <>
+              <Mail size={14} />
+              Send Link
+            </>
+          )}
+        </button>
+        
+        <button
+          type="button"
+          onClick={() => {
+            setShowPasswordRecovery(false);
+            setRecoveryEmail('');
+            setRecoveryError('');
+            setRecoveryMessage('');
+          }}
+          disabled={sendingRecovery}
+          style={{
+            flex: 1,
+            padding: '10px',
+            background: '#374151',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: sendingRecovery ? 'not-allowed' : 'pointer',
+            fontSize: '0.875rem',
+            fontWeight: 'bold'
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  )}
             <button 
               type="submit" 
               style={styles.loginButton}
