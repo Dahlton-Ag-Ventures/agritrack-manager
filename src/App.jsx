@@ -1939,7 +1939,13 @@ itemCard: {
 
 {activeTab === 'home' && (
   <div style={styles.homeContainer}>
-    <div style={{ ...styles.welcomeCard, background: 'rgba(6, 182, 212, 0.4)', border: '1px solid #06b6d4' }}>
+    {/* Welcome Header */}
+    <div style={{ 
+      ...styles.welcomeCard, 
+      background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.4) 0%, rgba(16, 185, 129, 0.3) 100%)',
+      border: '2px solid #10b981',
+      marginBottom: '30px'
+    }}>
       <h1 style={{ 
         color: currentTheme.text, 
         marginBottom: '16px', 
@@ -1963,231 +1969,319 @@ itemCard: {
       </p>
     </div>
 
-{/* How to Use Guide */}
-    <div style={{ 
-      background: 'rgba(6, 182, 212, 0.2)', 
-      border: '1px solid rgba(6, 182, 212, 0.5)',
-      borderRadius: '12px',
-      padding: '32px',
-      marginTop: '24px'
+    {/* Featured Card: General Features */}
+    <div style={{
+      background: 'rgba(30, 58, 95, 0.6)',
+      border: '2px solid #2563eb',
+      borderRadius: '16px',
+      padding: '30px',
+      marginBottom: '24px',
+      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    }}
+    className="feature-card"
+    onMouseEnter={(e) => {
+      e.currentTarget.style.transform = 'translateY(-4px)';
+      e.currentTarget.style.boxShadow = '0 8px 24px rgba(16, 185, 129, 0.3)';
+      e.currentTarget.style.borderColor = '#10b981';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.transform = 'translateY(0)';
+      e.currentTarget.style.boxShadow = 'none';
+      e.currentTarget.style.borderColor = '#2563eb';
     }}>
-      <h2 style={{ 
-        fontSize: '1.75rem', 
-        marginBottom: '24px',
-        background: 'linear-gradient(to right, #10b981, #06b6d4)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent'
+      {/* Card Header */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        marginBottom: '20px',
+        paddingBottom: '16px',
+        borderBottom: '2px solid rgba(37, 99, 235, 0.3)'
       }}>
-        How to Use the App
-      </h2>
-
-      {/* Inventory Section */}
-      <div style={{ marginBottom: '32px' }}>
-        <h3 style={{ 
-          fontSize: '1.25rem', 
-          marginBottom: '16px',
-          color: '#06b6d4',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px'
-        }}>
-          <Package size={24} /> Inventory Management
-        </h3>
-        <div style={{ 
-          paddingLeft: '36px',
-          color: currentTheme.text,
-          lineHeight: '1.8'
-        }}>
-          {userRole === 'employee' ? (
-            <>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• View Items:</strong> Browse all inventory items with details like part numbers, quantities, and locations
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Search & Filter:</strong> Use the search bar to quickly find specific items by name, part number, or location
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• View Quantities:</strong> See current stock levels for all items (read-only)
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Stock Alerts:</strong> Low stock items are marked with a red warning badge, overstocked items show yellow
-              </p>
-            </>
-          ) : (
-            <>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Add New Items:</strong> Click "Add Item" to create inventory entries with photos, part numbers, and stock levels
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Edit Items:</strong> Click the blue edit icon to modify item details, locations, or min/max quantities
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Quick Updates:</strong> Use + and - buttons for fast quantity adjustments
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Stock Alerts:</strong> Set min/max quantities to get automatic low stock and overstock warnings
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Delete Items:</strong> Click the red trash icon to remove items (requires confirmation)
-              </p>
-            </>
-          )}
-        </div>
+        <span style={{ fontSize: '2rem' }}>👥</span>
+        <h3 style={{ fontSize: '1.5rem', color: '#06b6d4', margin: 0 }}>General Features</h3>
       </div>
 
-      {/* Machinery Section */}
-      <div style={{ marginBottom: '32px' }}>
-        <h3 style={{ 
-          fontSize: '1.25rem', 
-          marginBottom: '16px',
-          color: '#06b6d4',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px'
-        }}>
-          <Truck size={24} /> Machinery Tracking
-        </h3>
-        <div style={{ 
-          paddingLeft: '36px',
-          color: currentTheme.text,
-          lineHeight: '1.8'
-        }}>
-          {userRole === 'employee' ? (
-            <>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• View Equipment:</strong> Access complete list of all farm machinery and equipment
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Search Records:</strong> Find specific machines by name, VIN/serial number, or category
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• View Service History:</strong> Click the purple "Services" button on any machine to see its complete maintenance history
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Check Details:</strong> View VIN numbers, categories, and photos for each piece of equipment
-              </p>
-            </>
-          ) : (
-            <>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Add Machines:</strong> Click "Add Machine" to register new equipment with photos and VIN/serial numbers
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Categorize:</strong> Organize equipment by type (tractors, combines, sprayers, etc.)
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• View Service History:</strong> Click the purple "Services" button to jump to that machine's maintenance records
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Edit Records:</strong> Update machine information, categories, or add photos anytime
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Remove Equipment:</strong> Delete machinery records when equipment is sold or retired
-              </p>
-            </>
-          )}
+      {/* Card Content */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+        gap: '20px',
+        color: '#d1d5db'
+      }}>
+        <div>
+          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: '1.1rem' }}>Real-Time Sync:</h4>
+          <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
+            <li>All changes sync instantly across all devices - no manual refresh needed</li>
+          </ul>
         </div>
-      </div>
-
-      {/* Service Records Section */}
-      <div style={{ marginBottom: '32px' }}>
-        <h3 style={{ 
-          fontSize: '1.25rem', 
-          marginBottom: '16px',
-          color: '#06b6d4',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px'
-        }}>
-          <AlertCircle size={24} /> Service History
-        </h3>
-        <div style={{ 
-          paddingLeft: '36px',
-          color: currentTheme.text,
-          lineHeight: '1.8'
-        }}>
-          {userRole === 'employee' ? (
-            <>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• View Records:</strong> See complete service history for all equipment
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Machine Filter:</strong> When viewing from Machinery tab, records are automatically filtered to that specific machine
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Search History:</strong> Find services by machine name, type, technician, or notes
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Sort Records:</strong> Organize by date to track maintenance patterns
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Review Details:</strong> Check service dates, technicians, detailed notes, and attached photos
-              </p>
-            </>
-          ) : (
-            <>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Log Services:</strong> Click "Add Service Record" and select a machine from the dropdown menu
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Select Machine:</strong> Choose from your machinery list to ensure accurate tracking
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Add Details:</strong> Include service type, date, technician names, and detailed notes
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Attach Photos:</strong> Upload service photos or receipts for complete documentation
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Edit History:</strong> Update service records if details change or need correction
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Export Data:</strong> Generate reports and export service history via Settings
-              </p>
-            </>
-          )}
+        <div>
+          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: '1.1rem' }}>Search & Sort:</h4>
+          <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
+            <li>Every tab has powerful search and sorting options to find what you need</li>
+          </ul>
         </div>
-      </div>
-
-      {/* General Features */}
-      <div>
-        <h3 style={{ 
-          fontSize: '1.25rem', 
-          marginBottom: '16px',
-          color: '#06b6d4',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px'
-        }}>
-          <Users size={24} /> General Features
-        </h3>
-        <div style={{ 
-          paddingLeft: '36px',
-          color: currentTheme.text,
-          lineHeight: '1.8'
-        }}>
-          <p style={{ marginBottom: '12px' }}>
-            <strong>• Real-Time Sync:</strong> All changes sync instantly across all devices - no manual refresh needed
-          </p>
-          <p style={{ marginBottom: '12px' }}>
-            <strong>• Search & Sort:</strong> Every tab has powerful search and sorting options to find what you need
-          </p>
-          <p style={{ marginBottom: '12px' }}>
-            <strong>• Mobile Friendly:</strong> Works perfectly on phones, tablets, and computers
-          </p>
-          {userRole !== 'employee' && (
-            <>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Import/Export:</strong> Bulk import data from CSV files or export for backups via Settings
-              </p>
-              <p style={{ marginBottom: '12px' }}>
-                <strong>• Dark/Light Mode:</strong> Switch themes in Settings for comfortable viewing
-              </p>
-            </>
-          )}
+        <div>
+          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: '1.1rem' }}>Mobile Friendly:</h4>
+          <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
+            <li>Works perfectly on phones, tablets, and computers</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: '1.1rem' }}>Import/Export:</h4>
+          <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
+            <li>Bulk import data from CSV files or export for backups via Settings</li>
+          </ul>
         </div>
       </div>
     </div>
+
+    {/* Three Column Cards */}
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+      gap: '24px',
+      marginBottom: '30px'
+    }}>
+      {/* Card 1: Inventory Management */}
+      <div style={{
+        background: 'rgba(30, 58, 95, 0.6)',
+        border: '2px solid #2563eb',
+        borderRadius: '16px',
+        padding: '30px',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+      }}
+      className="feature-card"
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.boxShadow = '0 8px 24px rgba(16, 185, 129, 0.3)';
+        e.currentTarget.style.borderColor = '#10b981';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = 'none';
+        e.currentTarget.style.borderColor = '#2563eb';
+      }}>
+        {/* Card Header */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '20px',
+          paddingBottom: '16px',
+          borderBottom: '2px solid rgba(37, 99, 235, 0.3)'
+        }}>
+          <span style={{ fontSize: '2rem' }}>📦</span>
+          <h3 style={{ fontSize: '1.5rem', color: '#06b6d4', margin: 0 }}>Inventory Management</h3>
+        </div>
+
+        {/* Card Content */}
+        <div style={{ color: '#d1d5db', lineHeight: '1.8' }}>
+          <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
+            Add New Items:
+          </h4>
+          <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+            <li>Click "Add Item" to create inventory entries with photos, part numbers, and stock levels</li>
+          </ul>
+
+          <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
+            Edit Items:
+          </h4>
+          <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+            <li>Click the blue edit icon to modify item details, locations, or min/max quantities</li>
+          </ul>
+
+          <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
+            Quick Updates:
+          </h4>
+          <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+            <li>Use + and - buttons for fast quantity adjustments</li>
+          </ul>
+
+          <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
+            Stock Alerts:
+          </h4>
+          <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+            <li>Set min/max quantities to get automatic low stock and overstock warnings</li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Card 2: Machinery Tracking */}
+      <div style={{
+        background: 'rgba(30, 58, 95, 0.6)',
+        border: '2px solid #2563eb',
+        borderRadius: '16px',
+        padding: '30px',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+      }}
+      className="feature-card"
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.boxShadow = '0 8px 24px rgba(16, 185, 129, 0.3)';
+        e.currentTarget.style.borderColor = '#10b981';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = 'none';
+        e.currentTarget.style.borderColor = '#2563eb';
+      }}>
+        {/* Card Header */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '20px',
+          paddingBottom: '16px',
+          borderBottom: '2px solid rgba(37, 99, 235, 0.3)'
+        }}>
+          <span style={{ fontSize: '2rem' }}>🚜</span>
+          <h3 style={{ fontSize: '1.5rem', color: '#06b6d4', margin: 0 }}>Machinery Tracking</h3>
+        </div>
+
+        {/* Card Content */}
+        <div style={{ color: '#d1d5db', lineHeight: '1.8' }}>
+          <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
+            Add Machines:
+          </h4>
+          <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+            <li>Click "Add Machine" to register new equipment with photos and VIN/serial numbers</li>
+          </ul>
+
+          <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
+            Categorize:
+          </h4>
+          <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+            <li>Organize equipment by type (tractors, combines, sprayers, etc.)</li>
+          </ul>
+
+          <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
+            View Service History:
+          </h4>
+          <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+            <li>Click the purple "Services" button to jump to that machine's maintenance records</li>
+          </ul>
+
+          <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
+            Edit Records:
+          </h4>
+          <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+            <li>Update machine information, categories, or add photos anytime</li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Card 3: Service History */}
+      <div style={{
+        background: 'rgba(30, 58, 95, 0.6)',
+        border: '2px solid #2563eb',
+        borderRadius: '16px',
+        padding: '30px',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+      }}
+      className="feature-card"
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.boxShadow = '0 8px 24px rgba(16, 185, 129, 0.3)';
+        e.currentTarget.style.borderColor = '#10b981';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = 'none';
+        e.currentTarget.style.borderColor = '#2563eb';
+      }}>
+        {/* Card Header */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '20px',
+          paddingBottom: '16px',
+          borderBottom: '2px solid rgba(37, 99, 235, 0.3)'
+        }}>
+          <span style={{ fontSize: '2rem' }}>🔧</span>
+          <h3 style={{ fontSize: '1.5rem', color: '#06b6d4', margin: 0 }}>Service History</h3>
+        </div>
+
+        {/* Card Content */}
+        <div style={{ color: '#d1d5db', lineHeight: '1.8' }}>
+          <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
+            Log Services:
+          </h4>
+          <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+            <li>Click "Add Service Record" and select a machine from the dropdown menu</li>
+          </ul>
+
+          <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
+            Add Details:
+          </h4>
+          <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+            <li>Include service type, date, technician names, and detailed notes</li>
+          </ul>
+
+          <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
+            Attach Photos:
+          </h4>
+          <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+            <li>Upload service photos or receipts for complete documentation</li>
+          </ul>
+
+          <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
+            Export Data:
+          </h4>
+          <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+            <li>Generate reports and export service history via Settings</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    {/* Stats Footer */}
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+      gap: '16px',
+      marginTop: '30px'
+    }}>
+      <div style={{
+        background: 'rgba(6, 182, 212, 0.15)',
+        border: '1px solid rgba(6, 182, 212, 0.3)',
+        borderRadius: '8px',
+        padding: '16px',
+        textAlign: 'center'
+      }}>
+        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Inventory</p>
+        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+          {loading ? '...' : inventory.length}
+        </p>
+      </div>
+      <div style={{
+        background: 'rgba(6, 182, 212, 0.15)',
+        border: '1px solid rgba(6, 182, 212, 0.3)',
+        borderRadius: '8px',
+        padding: '16px',
+        textAlign: 'center'
+      }}>
+        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Machinery</p>
+        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+          {loading ? '...' : machinery.length}
+        </p>
+      </div>
+      <div style={{
+        background: 'rgba(6, 182, 212, 0.15)',
+        border: '1px solid rgba(6, 182, 212, 0.3)',
+        borderRadius: '8px',
+        padding: '16px',
+        textAlign: 'center'
+      }}>
+        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Service Records</p>
+        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+          {loading ? '...' : serviceHistory.length}
+        </p>
+      </div>
+    </div>
+  </div>
+)}
 
     {/* Quick Stats Footer */}
    <div style={{
