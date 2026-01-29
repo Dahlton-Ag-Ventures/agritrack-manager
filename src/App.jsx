@@ -5594,24 +5594,25 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
         onDoubleClick={handleDoubleClick}
         onClick={(e) => e.stopPropagation()}
       >
-        <img 
-          src={imageUrl} 
-          alt="Zoomable view"
-          style={{
-            maxWidth: '90vw',
-            maxHeight: '70vh',
-            objectFit: 'contain',
-            borderRadius: '8px',
-            transform: 'translate(' + position.x + 'px, ' + position.y + 'px) scale(' + scale + ')',
-            transformOrigin: 'center center',
-            transition: isDragging ? 'none' : 'transform 0.1s ease-out',
-            willChange: 'transform',
-            pointerEvents: 'none',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-            WebkitUserDrag: 'none'
-          }}
-          draggable="false"
+  <img 
+  src={imageUrl} 
+  alt="Zoomable view"
+  style={{
+    maxWidth: '90vw',
+    maxHeight: '70vh',
+    objectFit: 'contain',
+    borderRadius: '8px',
+    transform: 'translate(' + position.x + 'px, ' + position.y + 'px) scale(' + scale + ')',
+    transformOrigin: 'center center',
+    transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+    willChange: 'transform',
+    pointerEvents: 'none',
+    userSelect: 'none',
+    WebkitUserSelect: 'none',
+    WebkitUserDrag: 'none'
+  }}
+  draggable="false"
+/>
         />
       </div>
     </div>
