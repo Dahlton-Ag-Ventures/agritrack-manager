@@ -5147,7 +5147,7 @@ itemCard: {
     </div>
   </Modal>
 )}
-
+      </div>
         {showDebugModal && (
           <Modal title="System Status" onClose={() => setShowDebugModal(false)}>
             <div style={styles.debugInfo}>
