@@ -2324,13 +2324,13 @@ itemCard: {
     <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Service Records</p>
     <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
       {loading ? '...' : serviceHistory.length}
-    </p>
-  </div>
-</div>
+        </p>
+      </div>
+    </div>
   </div>
 )}
-        
-      {activeTab === 'inventory' && (
+     
+  {activeTab === 'inventory' && (
   <div>
     <div style={styles.tabHeader}>
       <h2 style={{ fontSize: '1.5rem' }}>Inventory Items</h2>
