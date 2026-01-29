@@ -1730,7 +1730,16 @@ itemCard: {
 }}>
   Welcome to
 </h2>
-<h1 style={styles.title}>
+<h1 style={{
+  fontSize: '2.5rem',
+  fontWeight: 'bold',
+  background: 'linear-gradient(to right, #059669, #0891b2)',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  marginBottom: '8px',
+  textAlign: 'center',
+  filter: 'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.4))'
+}}>
   AgriTrack Manager
 </h1>
 
