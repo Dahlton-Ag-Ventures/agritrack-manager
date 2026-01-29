@@ -3234,7 +3234,7 @@ itemCard: {
             <div style={styles.tabHeader}>
   <div>
     <h2 style={{ fontSize: '1.5rem' }}>Service Records</h2>
- {serviceFilter && (() => {
+{serviceFilter && (() => {
   const filteredCount = serviceHistory.filter(r => r.machineName === serviceFilter).length;
   
   // Show banner with appropriate message
@@ -3244,59 +3244,124 @@ itemCard: {
       alignItems: 'center',
       gap: '8px',
       marginTop: '8px',
-      padding: '8px 12px',
-      background: 'rgba(139, 92, 246, 0.2)',
-      border: '1px solid #8b5cf6',
-      borderRadius: '8px',
-      fontSize: '0.875rem',
-      color: '#a78bfa'
+      flexWrap: 'wrap'  ← NEW: allows wrapping
     }}>
-      <AlertCircle size={16} />
-      {filteredCount === 0 ? (
-        <>No records exist for <strong>{serviceFilter}</strong></>
-      ) : (
-        <>Showing {filteredCount} record{filteredCount === 1 ? '' : 's'} for <strong>{serviceFilter}</strong></>
-      )}
-      <button
-        onClick={() => setServiceFilter('')}
-        style={{
-          marginLeft: '8px',
-          padding: '4px 8px',
-          background: '#8b5cf6',
-          border: 'none',
-          borderRadius: '6px',
-          color: 'white',
-          cursor: 'pointer',
-          fontSize: '0.75rem',
-          fontWeight: 'bold'
-        }}
-      >
-        Clear Filter
-      </button>
+      <div style={{  ← NEW: purple banner gets its own container
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        padding: '8px 12px',
+        background: 'rgba(139, 92, 246, 0.2)',
+        border: '1px solid #8b5cf6',
+        borderRadius: '8px',
+        fontSize: '0.875rem',
+        color: '#a78bfa'
+      }}>
+        <AlertCircle size={16} />
+        {filteredCount === 0 ? (
+          <>No records exist for <strong>{serviceFilter}</strong></>
+        ) : (
+          <>Showing {filteredCount} record{filteredCount === 1 ? '' : 's'} for <strong>{serviceFilter}</strong></>
+        )}
+        <button
+          onClick={() => setServiceFilter('')}
+          style={{
+            marginLeft: '8px',
+            padding: '4px 8px',
+            background: '#8b5cf6',
+            border: 'none',
+            borderRadius: '6px',
+            color: 'white',
+            cursor: 'pointer',
+            fontSize: '0.75rem',
+            fontWeight: 'bold'
+          }}
+        >
+          Clear Filter
+        </button>
+      </div>  ← closes purple banner container
+      
+      {/* ✅ NEW: Add One button - only show when no records exist and user is not an employee */}
+      {filteredCount === 0 && userRole !== 'employee' && (  ← NEW: "Add one" button!
+        <button
+          onClick={() => {
+            setServiceForm({ 
+              machineName: serviceFilter, 
+              serviceType: '', 
+              date: '', 
+              notes: '', 
+              technician: '', 
+              photoUrl: '' 
+            });
+            setShowServiceModal(true);
+          }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '8px 12px',
+            background: '#10b981',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: 'pointer',
+            fontSize: '0.875rem',
+            fontWeight: 'bold',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = '#059669';
+            e.target.style.transform = 'translateY(-1px)';
+            e.target.style.boxShadow = '0 4px 8px rgba(16, 185, 129, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = '#10b981';
+            e.target.style.transform = 'translateY(0)';
+            e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+          }}
+        >
+          <Plus size={16} />
+          Add one
+        </button>
+      )}  ← closes "Add one" button conditional
     </div>
   );
 })()}
   </div>
   {userRole !== 'employee' && (
-   <button 
-  onClick={() => {
-    setShowServiceModal(true);
-  }} 
-  style={styles.addButton}
-  onMouseEnter={(e) => {
-    e.target.style.transform = 'translateY(-2px)';
-    e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.4)';
-    e.target.style.background = '#059669';
-  }}
-  onMouseLeave={(e) => {
-    e.target.style.transform = 'translateY(0)';
-    e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-    e.target.style.background = '#10b981';
-  }}
->
-  <Plus size={20} /> Add Service Record
-</button>
-  )}
+  <button 
+    onClick={() => {
+      setShowServiceModal(true);
+    }} 
+    style={{
+      padding: '12px 24px',
+      background: '#10b981',
+      border: 'none',
+      borderRadius: '8px',
+      color: 'white',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      fontSize: '1rem',
+      transition: 'all 0.2s ease',
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    }}  ← Now matches Add Item and Add Machine!
+    onMouseEnter={(e) => {
+      e.target.style.transform = 'translateY(-2px)';
+      e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.4)';
+      e.target.style.background = '#059669';
+    }}
+    onMouseLeave={(e) => {
+      e.target.style.transform = 'translateY(0)';
+      e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+      e.target.style.background = '#10b981';
+    }}
+  >
+    <Plus size={20} /> Add Service Record
+  </button>
+)}
 </div>
 <div style={styles.searchSortContainer}>
   <input
