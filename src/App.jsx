@@ -19,7 +19,7 @@ if (!document.getElementById('agritrack-animations')) {
 // Theme configurations
 const themes = {
   dark: {
-    background: '#1e1b4b',
+    background: '#0a0a0a',
     backgroundImage: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
     cardBackground: '#1e3a5f',
     cardBorder: '#2563eb',
@@ -1975,7 +1975,7 @@ return (
     padding: '24px',
     background: theme === 'dark' ? currentTheme.background : '#f3f4f6',
     backgroundImage: theme === 'dark' 
-      ? 'repeating-radial-gradient(circle at 0 0, transparent 0, #0f172a 40px), repeating-linear-gradient(rgba(6, 182, 212, 0.015), rgba(16, 185, 129, 0.015))'
+      ? 'repeating-radial-gradient(circle at 0 0, transparent 0, #0f172a 40px), repeating-linear-gradient(rgba(6, 182, 212, 0.01), rgba(16, 185, 129, 0.01))'
       : 'repeating-radial-gradient(circle at 0 0, transparent 0, #f3f4f6 40px), repeating-linear-gradient(rgba(6, 182, 212, 0.03), rgba(16, 185, 129, 0.03))'
   }}
 >
