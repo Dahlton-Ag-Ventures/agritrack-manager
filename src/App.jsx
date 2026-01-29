@@ -2019,14 +2019,14 @@ itemCard: {
     </div>
 
     {/* Featured Card: General Features */}
-    <div style={{
-      background: 'rgba(30, 58, 95, 0.6)',
-      border: '2px solid #2563eb',
-      borderRadius: '16px',
-      padding: '30px',
-      marginBottom: '24px',
-      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-    }}
+<div style={{
+  background: theme === 'dark' ? 'rgba(30, 58, 95, 0.6)' : 'white',
+  border: '2px solid #2563eb',
+  borderRadius: '16px',
+  padding: '30px',
+  marginBottom: '24px',
+  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+}}
     className="feature-card"
     onMouseEnter={(e) => {
       e.currentTarget.style.transform = 'translateY(-4px)';
@@ -2052,12 +2052,12 @@ itemCard: {
       </div>
 
       {/* Card Content */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-        gap: '20px',
-        color: '#d1d5db'
-      }}>
+<div style={{
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+  gap: '20px',
+  color: theme === 'dark' ? '#d1d5db' : '#374151'
+}}>
         <div>
           <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: '1.1rem' }}>Real-Time Sync:</h4>
           <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
@@ -2096,7 +2096,7 @@ itemCard: {
 <div 
   onClick={() => setActiveTab('inventory')}
   style={{
-    background: 'rgba(30, 58, 95, 0.6)',
+    background: theme === 'dark' ? 'rgba(30, 58, 95, 0.6)' : 'white',
     border: '2px solid #2563eb',
     borderRadius: '16px',
     padding: '30px',
@@ -2128,7 +2128,7 @@ itemCard: {
         </div>
 
         {/* Card Content */}
-        <div style={{ color: '#d1d5db', lineHeight: '1.8' }}>
+        <div style={{ color: theme === 'dark' ? '#d1d5db' : '#374151', lineHeight: '1.8' }}>
           <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
             Add New Items:
           </h4>
@@ -2163,7 +2163,7 @@ itemCard: {
 <div 
   onClick={() => setActiveTab('machinery')}
   style={{
-    background: 'rgba(30, 58, 95, 0.6)',
+    background: theme === 'dark' ? 'rgba(30, 58, 95, 0.6)' : 'white',
     border: '2px solid #2563eb',
     borderRadius: '16px',
     padding: '30px',
@@ -2195,7 +2195,7 @@ itemCard: {
         </div>
 
         {/* Card Content */}
-        <div style={{ color: '#d1d5db', lineHeight: '1.8' }}>
+        <div style={{ color: theme === 'dark' ? '#d1d5db' : '#374151', lineHeight: '1.8' }}>
           <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
             Add Machines:
           </h4>
@@ -2230,7 +2230,7 @@ itemCard: {
 <div 
   onClick={() => setActiveTab('service')}
   style={{
-    background: 'rgba(30, 58, 95, 0.6)',
+    background: theme === 'dark' ? 'rgba(30, 58, 95, 0.6)' : 'white',
     border: '2px solid #2563eb',
     borderRadius: '16px',
     padding: '30px',
@@ -2262,7 +2262,7 @@ itemCard: {
         </div>
 
         {/* Card Content */}
-        <div style={{ color: '#d1d5db', lineHeight: '1.8' }}>
+        <div style={{ color: theme === 'dark' ? '#d1d5db' : '#374151', lineHeight: '1.8' }}>
           <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
             Log Services:
           </h4>
