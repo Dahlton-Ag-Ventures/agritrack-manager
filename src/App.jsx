@@ -2093,13 +2093,16 @@ itemCard: {
       marginBottom: '30px'
     }}>
       {/* Card 1: Inventory Management */}
-      <div style={{
-        background: 'rgba(30, 58, 95, 0.6)',
-        border: '2px solid #2563eb',
-        borderRadius: '16px',
-        padding: '30px',
-        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-      }}
+<div 
+  onClick={() => setActiveTab('inventory')}
+  style={{
+    background: 'rgba(30, 58, 95, 0.6)',
+    border: '2px solid #2563eb',
+    borderRadius: '16px',
+    padding: '30px',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    cursor: 'pointer',
+  }}
       className="feature-card"
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-4px)';
@@ -2157,13 +2160,16 @@ itemCard: {
       </div>
 
       {/* Card 2: Machinery Tracking */}
-      <div style={{
-        background: 'rgba(30, 58, 95, 0.6)',
-        border: '2px solid #2563eb',
-        borderRadius: '16px',
-        padding: '30px',
-        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-      }}
+<div 
+  onClick={() => setActiveTab('machinery')}
+  style={{
+    background: 'rgba(30, 58, 95, 0.6)',
+    border: '2px solid #2563eb',
+    borderRadius: '16px',
+    padding: '30px',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    cursor: 'pointer',
+  }}
       className="feature-card"
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-4px)';
@@ -2221,13 +2227,16 @@ itemCard: {
       </div>
 
       {/* Card 3: Service History */}
-      <div style={{
-        background: 'rgba(30, 58, 95, 0.6)',
-        border: '2px solid #2563eb',
-        borderRadius: '16px',
-        padding: '30px',
-        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-      }}
+<div 
+  onClick={() => setActiveTab('service')}
+  style={{
+    background: 'rgba(30, 58, 95, 0.6)',
+    border: '2px solid #2563eb',
+    borderRadius: '16px',
+    padding: '30px',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    cursor: 'pointer',
+  }}
       className="feature-card"
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-4px)';
