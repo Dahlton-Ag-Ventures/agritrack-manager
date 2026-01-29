@@ -392,7 +392,9 @@ setServiceHistory(allServiceRecords.map(item => ({
   date: item.date || '',
   notes: item.notes || '',
   technician: item.technician || '',
-  photoUrls: item.photo_urls ? JSON.parse(item.photo_urls) : []
+  photoUrls: item.photo_urls
+  ? JSON.parse(item.photo_urls)
+  : (item.photo_url ? [item.photo_url] : [])
 })));
     
     setLastSync(new Date());
@@ -484,9 +486,12 @@ supabase
         date: payload.new.date,
         notes: payload.new.notes,
         technician: payload.new.technician,
-        photoUrls: payload.new.photo_urls ? JSON.parse(payload.new.photo_urls) : []
-      }]);
-    } else if (payload.eventType === 'UPDATE') {
+        photoUrls: payload.new.photo_urls
+        ? JSON.parse(payload.new.photo_urls)
+        : (payload.new.photo_url ? [payload.new.photo_url] : [])
+  }]);
+}
+ else if (payload.eventType === 'UPDATE') {
       setServiceHistory(prev => prev.map(item => item.id === payload.new.id ? {
         id: payload.new.id,
         machineName: payload.new.machine_name,
@@ -494,9 +499,12 @@ supabase
         date: payload.new.date,
         notes: payload.new.notes,
         technician: payload.new.technician,
-        photoUrls: payload.new.photo_urls ? JSON.parse(payload.new.photo_urls) : []
-      } : item));
-    } else if (payload.eventType === 'DELETE') {
+        photoUrls: payload.new.photo_urls
+        ? JSON.parse(payload.new.photo_urls)
+        : (payload.new.photo_url ? [payload.new.photo_url] : [])
+
+  } : item));
+} else if (payload.eventType === 'DELETE') {
       setServiceHistory(prev => prev.filter(item => item.id !== payload.old.id));
     }
     setLastSync(new Date());
