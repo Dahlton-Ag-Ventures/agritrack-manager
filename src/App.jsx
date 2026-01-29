@@ -1733,7 +1733,7 @@ itemCard: {
 <h1 style={{
   fontSize: '2.5rem',
   fontWeight: 'bold',
-  background: 'linear-gradient(to right, #059669, #0891b2)',
+  background: 'linear-gradient(to right, #10b981, #22d3ee)',
   WebkitBackgroundClip: 'text',
   WebkitTextFillColor: 'transparent',
   marginBottom: '8px',
