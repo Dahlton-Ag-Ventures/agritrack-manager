@@ -1958,7 +1958,7 @@ itemCard: {
         </div>
 
         <div style={styles.loginFooter}>
-          powered by Vercel
+          powered by Vercel & Supabase
         </div>
       </div>
     );
