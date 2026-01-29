@@ -5200,193 +5200,13 @@ itemCard: {
 // Zoomable Image Viewer Component
 function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
   const [scale, setScale] = React.useState(1);
-  const [position, setPosition] = React.useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = React.useState(false);
-  const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
-  const [lastTouchDistance, setLastTouchDistance] = React.useState(null);
-  const imageContainerRef = React.useRef(null);
-  const overlayRef = React.useRef(null);
-  const animationFrameRef = React.useRef(null);
-
-  const handleWheel = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
-    
-    animationFrameRef.current = requestAnimationFrame(() => {
-      setScale(prevScale => {
-        const delta = -e.deltaY;
-        const sensitivity = 0.002;
-        const zoomFactor = 1 + (delta * sensitivity);
-        
-        const newScale = prevScale * zoomFactor;
-        const clampedScale = Math.min(Math.max(1, newScale), 5);
-        
-        if (clampedScale === 1) {
-          setPosition({ x: 0, y: 0 });
-        }
-        
-        return clampedScale;
-      });
-    });
-  };
-
-  const handleMouseDown = (e) => {
-    if (scale > 1 && (e.target.tagName === 'IMG' || e.target === imageContainerRef.current)) {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDragging(true);
-      setDragStart({
-        x: e.clientX - position.x,
-        y: e.clientY - position.y
-      });
-    }
-  };
-
-  const handleMouseMove = (e) => {
-    if (isDragging && scale > 1) {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      const newX = e.clientX - dragStart.x;
-      const newY = e.clientY - dragStart.y;
-      
-      setPosition({ x: newX, y: newY });
-    }
-  };
-
-  const handleMouseUp = (e) => {
-    if (isDragging) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    setIsDragging(false);
-  };
-
-  const getTouchDistance = (touches) => {
-    const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
-    return Math.sqrt(dx * dx + dy * dy);
-  };
-
-  const handleTouchStart = (e) => {
-    if (e.touches.length === 2) {
-      e.preventDefault();
-      setLastTouchDistance(getTouchDistance(e.touches));
-    } else if (e.touches.length === 1 && scale > 1) {
-      const touch = e.touches[0];
-      setIsDragging(true);
-      setDragStart({
-        x: touch.clientX - position.x,
-        y: touch.clientY - position.y
-      });
-    }
-  };
-
-  const handleTouchMove = (e) => {
-    if (e.touches.length === 2 && lastTouchDistance) {
-      e.preventDefault();
-      const newDistance = getTouchDistance(e.touches);
-      const scaleChange = newDistance / lastTouchDistance;
-      
-      setScale(prevScale => {
-        const newScale = Math.min(Math.max(1, prevScale * scaleChange), 5);
-        if (newScale === 1) {
-          setPosition({ x: 0, y: 0 });
-        }
-        return newScale;
-      });
-      
-      setLastTouchDistance(newDistance);
-    } else if (e.touches.length === 1 && isDragging && scale > 1) {
-      const touch = e.touches[0];
-      setPosition({
-        x: touch.clientX - dragStart.x,
-        y: touch.clientY - dragStart.y
-      });
-    }
-  };
-
-  const handleTouchEnd = () => {
-    setLastTouchDistance(null);
-    setIsDragging(false);
-  };
-
-  const handleDoubleClick = (e) => {
-    if (e.target.tagName === 'IMG' || e.target === imageContainerRef.current) {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      if (scale === 1) {
-        setScale(2);
-      } else {
-        setScale(1);
-        setPosition({ x: 0, y: 0 });
-      }
-    }
-  };
-
-  const handleOverlayClick = (e) => {
-    if (e.target === overlayRef.current) {
-      onClose();
-    }
-  };
-
-  const zoomIn = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setScale(prevScale => Math.min(prevScale + 0.5, 5));
-  };
-
-  const zoomOut = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setScale(prevScale => {
-      const newScale = Math.max(prevScale - 0.5, 1);
-      if (newScale === 1) {
-        setPosition({ x: 0, y: 0 });
-      }
-      return newScale;
-    });
-  };
-
-  const resetZoom = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setScale(1);
-    setPosition({ x: 0, y: 0 });
-  };
-
-  React.useEffect(() => {
-    const handleGlobalMouseUp = () => {
-      setIsDragging(false);
-    };
-
-    if (isDragging) {
-      window.addEventListener('mouseup', handleGlobalMouseUp);
-      window.addEventListener('mousemove', handleMouseMove);
-    }
-
-    return () => {
-      window.removeEventListener('mouseup', handleGlobalMouseUp);
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, [isDragging, dragStart, position]);
-
-  React.useEffect(() => {
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, []);
-
+  
+  const zoomIn = () => setScale(prev => Math.min(prev + 0.5, 3));
+  const zoomOut = () => setScale(prev => Math.max(prev - 0.5, 1));
+  const resetZoom = () => setScale(1);
+  
   return (
     <div 
-      ref={overlayRef}
       style={{
         position: 'fixed',
         top: 0,
@@ -5399,34 +5219,25 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
         alignItems: 'center',
         justifyContent: 'center',
         padding: '24px',
-        zIndex: 100,
-        overflow: 'hidden'
+        zIndex: 100
       }}
-      onClick={handleOverlayClick}
+      onClick={onClose}
     >
-      {/* Title Bar */}
-<div 
+      <div 
         style={{
           background: theme.cardBackground,
-          padding: '8px 12px',
+          padding: '12px 24px',
           borderRadius: '12px',
-          marginBottom: '12px',   
-          maxWidth: '90%',
+          marginBottom: '20px',
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: '12px',
-          pointerEvents: 'auto',
-          zIndex: 102
+          gap: '20px',
+          alignItems: 'center'
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 style={{ margin: 0, fontSize: '0.875rem', color: theme.text }}>{title}</h3>
+        <h3 style={{ color: theme.text, margin: 0 }}>{title}</h3>
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
+          onClick={onClose}
           style={{
             padding: '8px 16px',
             background: '#2563eb',
@@ -5434,190 +5245,92 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
             borderRadius: '8px',
             color: 'white',
             cursor: 'pointer',
-            fontSize: '0.875rem',
-            whiteSpace: 'nowrap',
             fontWeight: 'bold'
           }}
         >
           Close ✕
         </button>
       </div>
-
-{/* Zoom Controls */}
+      
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <img 
+          src={imageUrl} 
+          alt="View" 
+          style={{ 
+            maxWidth: '90vw', 
+            maxHeight: '70vh',
+            objectFit: 'contain',
+            borderRadius: '8px',
+            transform: 'scale(' + scale + ')',
+            transition: 'transform 0.3s ease'
+          }} 
+          onClick={(e) => e.stopPropagation()}
+        />
+      </div>
+      
       <div 
         style={{
-          position: 'absolute',
-          bottom: '24px',
-          left: '50%',
-          transform: 'translateX(-50%)',
           background: theme.cardBackground,
-          padding: '8px',
+          padding: '12px',
           borderRadius: '12px',
           display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: '8px',
-          zIndex: 102,
-          pointerEvents: 'auto',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
+          gap: '12px',
+          alignItems: 'center'
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <button
-          onClick={zoomOut}
-          onMouseDown={(e) => e.stopPropagation()}
-          disabled={scale <= 1}
-          style={{
-            width: '32px',
-            height: '32px',
-            background: scale <= 1 ? '#6b7280' : '#10b981',
-            border: 'none',
-            borderRadius: '8px',
-            color: 'white',
-            cursor: scale <= 1 ? 'not-allowed' : 'pointer',
-            fontSize: '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 'bold',
-            transition: 'background 0.2s'
-          }}
-          onMouseEnter={(e) => {
-            if (scale > 1) e.target.style.background = '#059669';
-          }}
-          onMouseLeave={(e) => {
-            if (scale > 1) e.target.style.background = '#10b981';
+        <button 
+          onClick={zoomOut} 
+          disabled={scale <= 1} 
+          style={{ 
+            padding: '8px 16px', 
+            background: scale <= 1 ? '#6b7280' : '#10b981', 
+            border: 'none', 
+            borderRadius: '8px', 
+            color: 'white', 
+            cursor: scale <= 1 ? 'not-allowed' : 'pointer', 
+            fontWeight: 'bold' 
           }}
         >
           −
         </button>
-        
-        <div style={{
-          color: theme.text,
-          fontSize: '0.875rem',
-          textAlign: 'center',
-          padding: '4px 8px',
-          fontWeight: 'bold',
-          minWidth: '60px'
-        }}>
+        <span style={{ color: theme.text, fontWeight: 'bold', minWidth: '60px', textAlign: 'center' }}>
           {Math.round(scale * 100)}%
-        </div>
-        
-        <button
-          onClick={zoomIn}
-          onMouseDown={(e) => e.stopPropagation()}
-          disabled={scale >= 5}
-          style={{
-            width: '32px',
-            height: '32px',
-            background: scale >= 5 ? '#6b7280' : '#10b981',
-            border: 'none',
-            borderRadius: '8px',
-            color: 'white',
-            cursor: scale >= 5 ? 'not-allowed' : 'pointer',
-            fontSize: '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 'bold',
-            transition: 'background 0.2s'
-          }}
-          onMouseEnter={(e) => {
-            if (scale < 5) e.target.style.background = '#059669';
-          }}
-          onMouseLeave={(e) => {
-            if (scale < 5) e.target.style.background = '#10b981';
+        </span>
+        <button 
+          onClick={zoomIn} 
+          disabled={scale >= 3} 
+          style={{ 
+            padding: '8px 16px', 
+            background: scale >= 3 ? '#6b7280' : '#10b981', 
+            border: 'none', 
+            borderRadius: '8px', 
+            color: 'white', 
+            cursor: scale >= 3 ? 'not-allowed' : 'pointer', 
+            fontWeight: 'bold' 
           }}
         >
           +
         </button>
-        
-        <button
-          onClick={resetZoom}
-          onMouseDown={(e) => e.stopPropagation()}
-          disabled={scale === 1}
-          style={{
-            width: '32px',
-            height: '32px',
-            background: scale === 1 ? '#6b7280' : '#2563eb',
-            border: 'none',
-            borderRadius: '8px',
-            color: 'white',
-            cursor: scale === 1 ? 'not-allowed' : 'pointer',
-            fontSize: '1.25rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 'bold',
-            transition: 'background 0.2s'
-          }}
-          title="Reset zoom"
-          onMouseEnter={(e) => {
-            if (scale !== 1) e.target.style.background = '#1d4ed8';
-          }}
-          onMouseLeave={(e) => {
-            if (scale !== 1) e.target.style.background = '#2563eb';
+        <button 
+          onClick={resetZoom} 
+          disabled={scale === 1} 
+          style={{ 
+            padding: '8px 16px', 
+            background: scale === 1 ? '#6b7280' : '#2563eb', 
+            border: 'none', 
+            borderRadius: '8px', 
+            color: 'white', 
+            cursor: scale === 1 ? 'not-allowed' : 'pointer', 
+            fontWeight: 'bold' 
           }}
         >
-          ⟲
+          Reset
         </button>
-      </div>
-
-      {/* Zoomable Image Container */}
-      <div
-        ref={imageContainerRef}
-        style={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden',
-          cursor: scale > 1 
-            ? (isDragging ? 'grabbing' : 'grab') 
-            : 'zoom-in',
-          touchAction: 'none',
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          MozUserSelect: 'none',
-          msUserSelect: 'none',
-          pointerEvents: 'auto',
-          width: '100%',
-          position: 'relative'
-        }}
-        onWheel={handleWheel}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onDoubleClick={handleDoubleClick}
-        onClick={(e) => e.stopPropagation()}
-      >
-<img 
-  src={imageUrl} 
-  alt="Zoomable view"
-  style={{
-    maxWidth: '90vw',
-    maxHeight: '70vh',
-    objectFit: 'contain',
-    borderRadius: '8px',
-    transform: 'translate(' + position.x + 'px, ' + position.y + 'px) scale(' + scale + ')',
-    transformOrigin: 'center center',
-    transition: isDragging ? 'none' : 'transform 0.1s ease-out',
-    willChange: 'transform',
-    pointerEvents: 'none',
-    userSelect: 'none',
-    WebkitUserSelect: 'none',
-    WebkitUserDrag: 'none'
-  }}
-  draggable="false"
-/>
       </div>
     </div>
   );
 }
-
 // Modal component - defined outside to avoid recreation on each render
 function Modal({ children, onClose, title }) {
   const modalStyles = {
