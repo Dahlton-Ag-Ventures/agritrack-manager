@@ -589,9 +589,9 @@ const handlePhotoUpload = async (file, formType) => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
-// ✅ EVEN SMALLER for instant uploads
-const MAX_WIDTH = 600;  // Smaller = faster
-const MAX_HEIGHT = 600;
+// ✅ LARGER for sharper photos
+const MAX_WIDTH = 1200;
+const MAX_HEIGHT = 1200;
 
     let width = img.width;
     let height = img.height;
@@ -615,8 +615,8 @@ const MAX_HEIGHT = 600;
     // Draw and compress
     ctx.drawImage(img, 0, 0, width, height);
 
-// ✅ EVEN FASTER: Lower quality, smaller file
-const quality = 0.5; // Faster processing, smaller file
+// ✅ BALANCED: Better quality while still being reasonable size
+const quality = 0.85; // Much better quality, still compressed
 let base64Result = canvas.toDataURL('image/jpeg', quality);
 
     // ✅ ONLY ONE SIZE CHECK - no loop
