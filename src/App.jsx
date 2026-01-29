@@ -434,7 +434,7 @@ supabase
       setInventory(prev => prev.filter(item => item.id !== payload.old.id));
     }
     setLastSync(new Date());
-  })  // ← Make sure this closing paren is here
+  })
   .subscribe();
 
   // Watch machinery_items table
@@ -3244,9 +3244,9 @@ itemCard: {
       alignItems: 'center',
       gap: '8px',
       marginTop: '8px',
-      flexWrap: 'wrap'  ← NEW: allows wrapping
+      flexWrap: 'wrap'
     }}>
-      <div style={{  ← NEW: purple banner gets its own container
+      <div style={{
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
@@ -3279,10 +3279,10 @@ itemCard: {
         >
           Clear Filter
         </button>
-      </div>  ← closes purple banner container
+      </div>
       
       {/* ✅ NEW: Add One button - only show when no records exist and user is not an employee */}
-      {filteredCount === 0 && userRole !== 'employee' && (  ← NEW: "Add one" button!
+      {filteredCount === 0 && userRole !== 'employee' && (
         <button
           onClick={() => {
             setServiceForm({ 
@@ -3324,7 +3324,7 @@ itemCard: {
           <Plus size={16} />
           Add one
         </button>
-      )}  ← closes "Add one" button conditional
+      )}
     </div>
   );
 })()}
@@ -3347,7 +3347,7 @@ itemCard: {
       fontSize: '1rem',
       transition: 'all 0.2s ease',
       boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-    }}  ← Now matches Add Item and Add Machine!
+    }}
     onMouseEnter={(e) => {
       e.target.style.transform = 'translateY(-2px)';
       e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.4)';
