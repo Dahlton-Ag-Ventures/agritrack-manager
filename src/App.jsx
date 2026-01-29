@@ -1,5 +1,5 @@
 
-// BUILD VERSION: 2025-01-21-v2-FIXED
+// BUILD VERSION: 2025-01-29-v2-FIXED
 import React, { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut, ChevronDown, Wrench } from 'lucide-react';
@@ -3738,7 +3738,6 @@ itemCard: {
   </p>
 </div>
     
-                        </div>
                        <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                           <button 
                             onClick={() => saveServiceEdit(record.id)} 
