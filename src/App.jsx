@@ -404,16 +404,23 @@ const loadData = async () => {
         // Try to parse photo data safely
         let photoUrls = [];
         
-        if (item.photo_urls) {
-          try {
-            photoUrls = JSON.parse(item.photo_urls);
-          } catch (parseError) {
-            console.warn(`⚠️ Could not parse photo_urls for record ${item.id}:`, parseError);
-            photoUrls = [];
-          }
-        } else if (item.photo_url) {
-          photoUrls = [item.photo_url];
-        }
+if (item.photo_urls) {
+  try {
+    // Try to parse as JSON array first
+    photoUrls = JSON.parse(item.photo_urls);
+  } catch (parseError) {
+    // If JSON parse fails, it might be a raw base64 string or URL
+    if (typeof item.photo_urls === 'string' && item.photo_urls.trim().length > 0) {
+      // It's a string - treat it as a single photo
+      photoUrls = [item.photo_urls];
+    } else {
+      console.warn(`⚠️ Could not parse photo_urls for record ${item.id}:`, parseError);
+      photoUrls = [];
+    }
+  }
+} else if (item.photo_url) {
+  photoUrls = [item.photo_url];
+}
         
         mappedServiceRecords.push({
           id: item.id,
