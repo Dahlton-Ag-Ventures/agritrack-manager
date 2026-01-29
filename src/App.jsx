@@ -5169,29 +5169,6 @@ itemCard: {
           onClose={() => setViewingImage(null)}
           theme={currentTheme}
         />}
-<style>{`
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-  }
-  .item-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
-    border-color: #10b981;
-  }
-  .stock-badge-low {
-    animation: pulse 2s ease-in-out infinite;
-  }
-  .wrench-icon {
-    transition: transform 0.6s ease;
-  }
-  .title-with-wrench:hover .wrench-icon {
-    transform: rotate(360deg);
-  }
-`}</style>
       </div>
     </div>
   );
