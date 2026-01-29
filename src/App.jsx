@@ -5602,7 +5602,7 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
             maxHeight: '70vh',
             objectFit: 'contain',
             borderRadius: '8px',
-            transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+            transform: 'translate(' + position.x + 'px, ' + position.y + 'px) scale(' + scale + ')',
             transformOrigin: 'center center',
             transition: isDragging ? 'none' : 'transform 0.1s ease-out',
             willChange: 'transform',
