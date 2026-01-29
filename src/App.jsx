@@ -4,6 +4,18 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut, ChevronDown, Wrench } from 'lucide-react';
 
+const styleSheet = document.createElement("style");
+styleSheet.innerText = `
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+`;
+if (!document.getElementById('agritrack-animations')) {
+  styleSheet.id = 'agritrack-animations';
+  document.head.appendChild(styleSheet);
+}
+
 // Theme configurations
 const themes = {
   dark: {
@@ -2277,53 +2289,6 @@ itemCard: {
         <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Service Records</p>
         <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
           {loading ? '...' : serviceHistory.length}
-        </p>
-      </div>
-    </div>
-  </div>
-)}
-
-    {/* Quick Stats Footer */}
-   <div style={{
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-  gap: '16px',
-  marginTop: '24px'
-}}>
-  <div style={{
-    background: 'rgba(6, 182, 212, 0.15)',
-    border: '1px solid rgba(6, 182, 212, 0.3)',
-    borderRadius: '8px',
-    padding: '16px',
-    textAlign: 'center'
-  }}>
-    <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Inventory</p>
-    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
-      {loading ? '...' : inventory.length}
-    </p>
-  </div>
-  <div style={{
-    background: 'rgba(6, 182, 212, 0.15)',
-    border: '1px solid rgba(6, 182, 212, 0.3)',
-    borderRadius: '8px',
-    padding: '16px',
-    textAlign: 'center'
-  }}>
-    <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Machinery</p>
-    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
-      {loading ? '...' : machinery.length}
-    </p>
-  </div>
-  <div style={{
-    background: 'rgba(6, 182, 212, 0.15)',
-    border: '1px solid rgba(6, 182, 212, 0.3)',
-    borderRadius: '8px',
-    padding: '16px',
-    textAlign: 'center'
-  }}>
-    <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Service Records</p>
-    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
-      {loading ? '...' : serviceHistory.length}
         </p>
       </div>
     </div>
@@ -5147,7 +5112,7 @@ itemCard: {
     </div>
   </Modal>
 )}
-      </div>
+     
       {showDebugModal && (
           <Modal title="System Status" onClose={() => setShowDebugModal(false)}>
             <div style={styles.debugInfo}>
