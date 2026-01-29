@@ -1199,22 +1199,22 @@ const quickUpdateQuantity = async (id, delta) => {
 
   // Styles object - NOW USES currentTheme WHICH IS DEFINED
   const styles = {
-    loginContainer: {
-      minHeight: '100vh',
-      background: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop")',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '24px',
-      position: 'relative',
-    },
+   loginContainer: {
+  minHeight: '100vh',
+  background: 'linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop")',
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  backgroundRepeat: 'no-repeat',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '24px',
+  position: 'relative',
+},
 loginCard: {
-  background: 'rgba(255, 255, 255, 0.15)',
-  border: '1px solid rgba(255, 255, 255, 0.3)',
+  background: 'rgba(255, 255, 255, 0.25)',
+  border: '1px solid rgba(255, 255, 255, 0.4)',
   borderRadius: '16px',
   padding: '48px',
   maxWidth: '400px',
