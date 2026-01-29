@@ -1996,17 +1996,18 @@ itemCard: {
       marginBottom: '30px'
     }}>
       <h1 style={{ 
-        color: currentTheme.text, 
-        marginBottom: '16px', 
-        fontSize: '2.5rem', 
-        fontWeight: '700',
-        textAlign: 'center',
-        background: 'linear-gradient(to right, #10b981, #06b6d4)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent'
-      }}>
-        Welcome to AgriTrack Manager
-      </h1>
+  color: theme === 'dark' ? currentTheme.text : '#111827',
+  marginBottom: '16px', 
+  fontSize: '2.5rem', 
+  fontWeight: '700',
+  textAlign: 'center',
+  background: theme === 'dark' ? 'linear-gradient(to right, #10b981, #06b6d4)' : 'none',
+  WebkitBackgroundClip: theme === 'dark' ? 'text' : 'unset',
+  WebkitTextFillColor: theme === 'dark' ? 'transparent' : '#111827',
+  textShadow: theme === 'light' ? '2px 2px 4px rgba(0, 0, 0, 0.3)' : 'none'
+}}>
+  Welcome to AgriTrack Manager
+</h1>
       <p style={{ 
         color: currentTheme.text, 
         fontSize: '1.1rem', 
