@@ -1809,16 +1809,17 @@ itemCard: {
     <div style={styles.content}>
       <div style={styles.header}>
 <div>
-<h1 className="title-with-wrench" style={styles.title}>
-  <Wrench className="wrench-icon" size={40} style={{ 
-    display: 'inline-block', 
-    verticalAlign: 'middle', 
-    marginRight: '12px',
-    color: '#06b6d4'
-  }} />
-  AgriTrack Manager
-</h1>
-  <p style={styles.subtitle}>Dahlton Ag Ventures</p>
+  <p style={{
+    ...styles.subtitle,
+    fontSize: '1.5rem',
+    fontWeight: '600',
+    textShadow: theme === 'dark' 
+      ? '2px 2px 4px rgba(0, 0, 0, 0.5)' 
+      : '2px 2px 4px rgba(0, 0, 0, 0.2)',
+    marginBottom: '8px'
+  }}>
+    Dahlton Ag Ventures
+  </p>
 <p style={styles.stats}>
   {loading ? (
     <>
