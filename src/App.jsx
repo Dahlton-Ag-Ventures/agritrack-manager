@@ -1966,7 +1966,7 @@ itemCard: {
 // PART 4 - MAIN APP RETURN (Insert after login screen)
 // This continues from: if (!user) { return ( ... login screen ... ); }
 
- return (
+return (
 <div 
   key={theme}
   style={{
@@ -1974,7 +1974,9 @@ itemCard: {
     color: currentTheme.text,
     padding: '24px',
     background: theme === 'dark' ? currentTheme.background : '#f3f4f6',
-    backgroundImage: theme === 'dark' ? currentTheme.backgroundImage : 'repeating-radial-gradient(circle at 0 0, transparent 0, #f3f4f6 40px), repeating-linear-gradient(rgba(6, 182, 212, 0.03), rgba(16, 185, 129, 0.03))'
+    backgroundImage: theme === 'dark' 
+      ? 'repeating-radial-gradient(circle at 0 0, transparent 0, #0f172a 40px), repeating-linear-gradient(rgba(6, 182, 212, 0.05), rgba(16, 185, 129, 0.05))'
+      : 'repeating-radial-gradient(circle at 0 0, transparent 0, #f3f4f6 40px), repeating-linear-gradient(rgba(6, 182, 212, 0.03), rgba(16, 185, 129, 0.03))'
   }}
 >
     <div style={styles.content}>
