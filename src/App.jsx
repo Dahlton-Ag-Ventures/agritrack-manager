@@ -305,7 +305,10 @@ const loadData = async () => {
         .order('name', { ascending: true })
         .range(inventoryPage * pageSize, (inventoryPage + 1) * pageSize - 1);
       
-      if (invError) throw invError;
+      if (invError) {
+        console.error('❌ Inventory load error:', invError);
+        throw invError;
+      }
       
       if (inventoryData && inventoryData.length > 0) {
         allInventory = [...allInventory, ...inventoryData];
@@ -340,7 +343,10 @@ const loadData = async () => {
         .order('name', { ascending: true })
         .range(machineryPage * pageSize, (machineryPage + 1) * pageSize - 1);
       
-      if (machError) throw machError;
+      if (machError) {
+        console.error('❌ Machinery load error:', machError);
+        throw machError;
+      }
       
       if (machineryData && machineryData.length > 0) {
         allMachinery = [...allMachinery, ...machineryData];
@@ -361,7 +367,7 @@ const loadData = async () => {
       photoUrl: item.photo_url || ''
     })));
     
-    // ✅ FETCH ALL SERVICE RECORDS - Using proper pagination
+    // ✅ FETCH ALL SERVICE RECORDS - WITH SAFE ERROR HANDLING
     let allServiceRecords = [];
     let servicePage = 0;
     let hasMoreService = true;
@@ -373,7 +379,10 @@ const loadData = async () => {
         .order('date', { ascending: false })
         .range(servicePage * pageSize, (servicePage + 1) * pageSize - 1);
       
-      if (servError) throw servError;
+      if (servError) {
+        console.error('❌ Service records load error:', servError);
+        throw servError;
+      }
       
       if (serviceData && serviceData.length > 0) {
         allServiceRecords = [...allServiceRecords, ...serviceData];
@@ -385,22 +394,55 @@ const loadData = async () => {
     }
     
     console.log(`✅ Loaded ${allServiceRecords.length} service records from database`);
-setServiceHistory(allServiceRecords.map(item => ({
-  id: item.id,
-  machineName: item.machine_name || '',
-  serviceType: item.service_type || '',
-  date: item.date || '',
-  notes: item.notes || '',
-  technician: item.technician || '',
-  photoUrls: item.photo_urls
-  ? JSON.parse(item.photo_urls)
-  : (item.photo_url ? [item.photo_url] : [])
-})));
+    
+    // ✅ SAFELY MAP SERVICE RECORDS WITH ERROR HANDLING PER RECORD
+    const mappedServiceRecords = [];
+    let skippedRecords = 0;
+    
+    for (const item of allServiceRecords) {
+      try {
+        // Try to parse photo data safely
+        let photoUrls = [];
+        
+        if (item.photo_urls) {
+          try {
+            photoUrls = JSON.parse(item.photo_urls);
+          } catch (parseError) {
+            console.warn(`⚠️ Could not parse photo_urls for record ${item.id}:`, parseError);
+            photoUrls = [];
+          }
+        } else if (item.photo_url) {
+          photoUrls = [item.photo_url];
+        }
+        
+        mappedServiceRecords.push({
+          id: item.id,
+          machineName: item.machine_name || '',
+          serviceType: item.service_type || '',
+          date: item.date || '',
+          notes: item.notes || '',
+          technician: item.technician || '',
+          photoUrls: photoUrls
+        });
+      } catch (recordError) {
+        console.error(`❌ Error mapping service record ${item.id}:`, recordError);
+        skippedRecords++;
+      }
+    }
+    
+    if (skippedRecords > 0) {
+      console.warn(`⚠️ Skipped ${skippedRecords} problematic service records`);
+      alert(`Warning: ${skippedRecords} service record(s) could not be loaded due to data format issues. Please check console for details.`);
+    }
+    
+    setServiceHistory(mappedServiceRecords);
+    console.log(`✅ Successfully mapped ${mappedServiceRecords.length} service records`);
     
     setLastSync(new Date());
   } catch (error) {
-    console.error('❌ Load error:', error);
-    alert('Failed to load data. Please refresh.');
+    console.error('❌ CRITICAL Load error:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
+    alert('Failed to load data: ' + error.message + '\n\nCheck browser console (F12) for details.');
   } finally {
     setLoading(false);
   }
