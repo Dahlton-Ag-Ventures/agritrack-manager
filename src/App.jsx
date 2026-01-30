@@ -2195,13 +2195,11 @@ return (
 
     {/* Featured Card: General Features */}
 <div style={{
-  background: theme === 'dark' ? 'rgba(30, 58, 95, 0.6)' : 'white',
-  border: '2px solid #2563eb',
-  borderRadius: '16px',
-  padding: '30px',
-  marginBottom: '24px',
-  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-}}
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+  gap: '16px',
+  color: theme === 'dark' ? '#d1d5db' : '#374151'
+}}>
     className="feature-card"
     onMouseEnter={(e) => {
       e.currentTarget.style.transform = 'translateY(-4px)';
@@ -2236,25 +2234,25 @@ return (
 }}>
         <div>
           <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Real-Time Sync:</h4>
-          <ul style={{ paddingLeft: '20px', lineHeight: '1.6', fontSize: 'clamp(0.9rem, 3vw, 1rem)', margin: '0 0 16px 0' }}>
+          <ul style={{ paddingLeft: '18px', lineHeight: '1.5', fontSize: 'clamp(0.88rem, 2.8vw, 1rem)', margin: '0 0 12px 0' }}>
             <li>All changes sync instantly across all devices - no manual refresh needed</li>
           </ul>
         </div>
         <div>
           <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Search & Sort:</h4>
-          <ul style={{ paddingLeft: '20px', lineHeight: '1.6', fontSize: 'clamp(0.9rem, 3vw, 1rem)', margin: '0 0 16px 0' }}>
+          <ul style={{ paddingLeft: '18px', lineHeight: '1.5', fontSize: 'clamp(0.88rem, 2.8vw, 1rem)', margin: '0 0 12px 0' }}>
             <li>Every tab has powerful search and sorting options to find what you need</li>
           </ul>
         </div>
         <div>
           <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Mobile Friendly:</h4>
-          <ul style={{ paddingLeft: '20px', lineHeight: '1.6', fontSize: 'clamp(0.9rem, 3vw, 1rem)', margin: '0 0 16px 0' }}>
+          <ul style={{ paddingLeft: '18px', lineHeight: '1.5', fontSize: 'clamp(0.88rem, 2.8vw, 1rem)', margin: '0 0 12px 0' }}>
             <li>Works perfectly on phones, tablets, and computers</li>
           </ul>
         </div>
         <div>
-          <h4 style={{ color: '#10b81', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Import/Export:</h4>
-          <ul style={{ paddingLeft: '20px', lineHeight: '1.6', fontSize: 'clamp(0.9rem, 3vw, 1rem)', margin: '0 0 16px 0' }}>
+          <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Import/Export:</h4>
+          <ul style={{ paddingLeft: '18px', lineHeight: '1.5', fontSize: 'clamp(0.88rem, 2.8vw, 1rem)', margin: '0 0 12px 0' }}>
             <li>Bulk import data from CSV files or export for backups via Settings</li>
           </ul>
         </div>
