@@ -2130,17 +2130,13 @@ return (
       marginBottom: '30px'
     }}>
 <h1 style={{ 
-  color: theme === 'dark' ? '#ffffff' : '#111827',
+  color: '#ffffff',
   marginBottom: '16px', 
   fontSize: '2.5rem', 
   fontWeight: '700',
   textAlign: 'center',
-  background: theme === 'dark' ? 'linear-gradient(to right, #34d399, #22d3ee)' : 'none',
-  WebkitBackgroundClip: theme === 'dark' ? 'text' : 'unset',
-  WebkitTextFillColor: theme === 'dark' ? 'transparent' : '#111827',
-  textShadow: theme === 'dark' 
-    ? '2px 4px 8px rgba(0, 0, 0, 0.8), 4px 6px 12px rgba(0, 0, 0, 0.6)' 
-    : '2px 2px 4px rgba(0, 0, 0, 0.3)',
+  filter: theme === 'dark' ? 'drop-shadow(2px 4px 8px rgba(0, 0, 0, 0.8)) drop-shadow(4px 6px 12px rgba(0, 0, 0, 0.6))' : 'none',
+  textShadow: theme === 'light' ? '2px 2px 4px rgba(0, 0, 0, 0.3)' : 'none',
   animation: 'floatIn 1.2s ease-out',
   opacity: 1
 }}>
