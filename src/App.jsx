@@ -2438,9 +2438,9 @@ return (
       gap: '16px',
       marginTop: '30px'
     }}>
-      <div style={{
+    <div style={{
         background: 'rgba(6, 182, 212, 0.15)',
-        border: '1px solid rgba(6, 182, 212, 0.3)',
+        border: '2px solid #2563eb',
         borderRadius: '8px',
         padding: '16px',
         textAlign: 'center'
@@ -2452,7 +2452,7 @@ return (
       </div>
       <div style={{
         background: 'rgba(6, 182, 212, 0.15)',
-        border: '1px solid rgba(6, 182, 212, 0.3)',
+        border: '2px solid #2563eb',
         borderRadius: '8px',
         padding: '16px',
         textAlign: 'center'
@@ -2460,6 +2460,18 @@ return (
         <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Machinery</p>
         <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
           {loading ? '...' : machinery.length}
+        </p>
+      </div>
+      <div style={{
+        background: 'rgba(6, 182, 212, 0.15)',
+        border: '2px solid #2563eb',
+        borderRadius: '8px',
+        padding: '16px',
+        textAlign: 'center'
+      }}>
+        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Service Records</p>
+        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+          {loading ? '...' : serviceHistory.length}
         </p>
       </div>
       <div style={{
