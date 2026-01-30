@@ -2234,26 +2234,26 @@ return (
   color: theme === 'dark' ? '#d1d5db' : '#374151'
 }}>
         <div>
-          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: 'clamp(0.95rem, 3vw, 1.1rem)' }}>Real-Time Sync:</h4>
-          <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
+          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: 'clamp(0.9rem, 2.5vw, 1.1rem)' }}>Real-Time Sync:</h4>
+          <ul style={{ paddingLeft: '20px', lineHeight: '1.8', fontSize: 'clamp(0.85rem, 2vw, 1rem)' }}>
             <li>All changes sync instantly across all devices - no manual refresh needed</li>
           </ul>
         </div>
         <div>
-          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: 'clamp(0.95rem, 3vw, 1.1rem)' }}>Search & Sort:</h4>
-          <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
+          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: 'clamp(0.9rem, 2.5vw, 1.1rem)' }}>Search & Sort:</h4>
+          <ul style={{ paddingLeft: '20px', lineHeight: '1.8', fontSize: 'clamp(0.85rem, 2vw, 1rem)' }}>
             <li>Every tab has powerful search and sorting options to find what you need</li>
           </ul>
         </div>
         <div>
-          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: 'clamp(0.95rem, 3vw, 1.1rem)' }}>Mobile Friendly:</h4>
-          <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
+          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: 'clamp(0.9rem, 2.5vw, 1.1rem)' }}>Mobile Friendly:</h4>
+          <ul style={{ paddingLeft: '20px', lineHeight: '1.8', fontSize: 'clamp(0.85rem, 2vw, 1rem)' }}>
             <li>Works perfectly on phones, tablets, and computers</li>
           </ul>
         </div>
         <div>
-          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: 'clamp(0.95rem, 3vw, 1.1rem)' }}>Import/Export:</h4>
-          <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
+          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: 'clamp(0.9rem, 2.5vw, 1.1rem)' }}>Import/Export:</h4>
+          <ul style={{ paddingLeft: '20px', lineHeight: '1.8', fontSize: 'clamp(0.85rem, 2vw, 1rem)' }}>
             <li>Bulk import data from CSV files or export for backups via Settings</li>
           </ul>
         </div>
