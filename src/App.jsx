@@ -2823,7 +2823,7 @@ return (
                 </div>
               ) : (
                 <>
-                {item.photoUrl && (
+               {item.photoUrl && (
   <div style={{ position: 'relative', marginRight: '16px' }}>
     <img 
       src={item.photoUrl} 
@@ -2902,6 +2902,28 @@ return (
         ✕
       </button>
     )}
+    {window.innerWidth < 768 && userRole !== 'employee' && (
+      <div style={{ display: 'flex', gap: '8px', marginTop: '8px', justifyContent: 'center' }}>
+        <button onClick={() => startEditInventory(item)} style={styles.editButton}>
+          <Edit2 size={16} />
+        </button>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            deleteInventoryItem(item.id);
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            deleteInventoryItem(item.id);
+          }}
+          style={{...styles.deleteButton, touchAction: 'manipulation'}}
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
+    )}
   </div>
 )}
                   <div style={{ flex: 1 }}>
@@ -2953,13 +2975,11 @@ return (
                       )}
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    {userRole !== 'employee' && (
+                  {window.innerWidth >= 768 && userRole !== 'employee' && (
+                    <div style={{ display: 'flex', gap: '8px' }}>
                       <button onClick={() => startEditInventory(item)} style={styles.editButton}>
                         <Edit2 size={16} />
                       </button>
-                    )}
-                    {userRole !== 'employee' && (
                       <button
                         onClick={(e) => {
                           e.preventDefault();
@@ -2975,8 +2995,8 @@ return (
                       >
                         <Trash2 size={16} />
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -3435,6 +3455,16 @@ return (
         ✕
       </button>
     )}
+    {window.innerWidth < 768 && userRole !== 'employee' && (
+      <div style={{ display: 'flex', gap: '8px', marginTop: '8px', justifyContent: 'center' }}>
+        <button onClick={() => startEditMachinery(item)} style={styles.editButton}>
+          <Edit2 size={16} />
+        </button>
+        <button onClick={() => deleteMachineryItem(item.id)} style={styles.deleteButton}>
+          <Trash2 size={16} />
+        </button>
+      </div>
+    )}
   </div>
 )}
               <div style={{ flex: 1 }}>
@@ -3450,36 +3480,38 @@ return (
                   </div>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                <button 
-                  onClick={() => viewMachineServiceHistory(item.name)} 
-                  style={{
-                    ...styles.editButton,
-                    background: '#8b5cf6',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '8px 12px',
-                    whiteSpace: 'nowrap'
-                  }}
-                  title="View service history for this machine"
-                >
-                  <AlertCircle size={16} />
-                  <span style={{ fontSize: '0.875rem' }}>
-                    {serviceHistory.filter(r => r.machineName === item.name).length} Services
-                  </span>
-                </button>
-                {userRole !== 'employee' && (
-                  <button onClick={() => startEditMachinery(item)} style={styles.editButton}>
-                    <Edit2 size={16} />
+              {window.innerWidth >= 768 && (
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <button 
+                    onClick={() => viewMachineServiceHistory(item.name)} 
+                    style={{
+                      ...styles.editButton,
+                      background: '#8b5cf6',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '8px 12px',
+                      whiteSpace: 'nowrap'
+                    }}
+                    title="View service history for this machine"
+                  >
+                    <AlertCircle size={16} />
+                    <span style={{ fontSize: '0.875rem' }}>
+                      {serviceHistory.filter(r => r.machineName === item.name).length} Services
+                    </span>
                   </button>
-                )}
-                {userRole !== 'employee' && (
-                  <button onClick={() => deleteMachineryItem(item.id)} style={styles.deleteButton}>
-                    <Trash2 size={16} />
-                  </button>
-                )}
-              </div>
+                  {userRole !== 'employee' && (
+                    <button onClick={() => startEditMachinery(item)} style={styles.editButton}>
+                      <Edit2 size={16} />
+                    </button>
+                  )}
+                  {userRole !== 'employee' && (
+                    <button onClick={() => deleteMachineryItem(item.id)} style={styles.deleteButton}>
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>
