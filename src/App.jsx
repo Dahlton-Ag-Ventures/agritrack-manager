@@ -2229,31 +2229,32 @@ return (
       {/* Card Content */}
 <div style={{
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
   gap: '20px',
-  color: theme === 'dark' ? '#d1d5db' : '#374151'
+  color: theme === 'dark' ? '#d1d5db' : '#374151',
+  padding: '0 10px'
 }}>
         <div>
-          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: 'clamp(0.9rem, 2.5vw, 1.1rem)' }}>Real-Time Sync:</h4>
-          <ul style={{ paddingLeft: '20px', lineHeight: '1.8', fontSize: 'clamp(0.85rem, 2vw, 1rem)' }}>
+          <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Real-Time Sync:</h4>
+          <ul style={{ paddingLeft: '20px', lineHeight: '1.6', fontSize: 'clamp(0.9rem, 3vw, 1rem)', margin: '0 0 16px 0' }}>
             <li>All changes sync instantly across all devices - no manual refresh needed</li>
           </ul>
         </div>
         <div>
-          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: 'clamp(0.9rem, 2.5vw, 1.1rem)' }}>Search & Sort:</h4>
-          <ul style={{ paddingLeft: '20px', lineHeight: '1.8', fontSize: 'clamp(0.85rem, 2vw, 1rem)' }}>
+          <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Search & Sort:</h4>
+          <ul style={{ paddingLeft: '20px', lineHeight: '1.6', fontSize: 'clamp(0.9rem, 3vw, 1rem)', margin: '0 0 16px 0' }}>
             <li>Every tab has powerful search and sorting options to find what you need</li>
           </ul>
         </div>
         <div>
-          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: 'clamp(0.9rem, 2.5vw, 1.1rem)' }}>Mobile Friendly:</h4>
-          <ul style={{ paddingLeft: '20px', lineHeight: '1.8', fontSize: 'clamp(0.85rem, 2vw, 1rem)' }}>
+          <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Mobile Friendly:</h4>
+          <ul style={{ paddingLeft: '20px', lineHeight: '1.6', fontSize: 'clamp(0.9rem, 3vw, 1rem)', margin: '0 0 16px 0' }}>
             <li>Works perfectly on phones, tablets, and computers</li>
           </ul>
         </div>
         <div>
-          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: 'clamp(0.9rem, 2.5vw, 1.1rem)' }}>Import/Export:</h4>
-          <ul style={{ paddingLeft: '20px', lineHeight: '1.8', fontSize: 'clamp(0.85rem, 2vw, 1rem)' }}>
+          <h4 style={{ color: '#10b81', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Import/Export:</h4>
+          <ul style={{ paddingLeft: '20px', lineHeight: '1.6', fontSize: 'clamp(0.9rem, 3vw, 1rem)', margin: '0 0 16px 0' }}>
             <li>Bulk import data from CSV files or export for backups via Settings</li>
           </ul>
         </div>
