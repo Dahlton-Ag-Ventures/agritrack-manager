@@ -51,7 +51,7 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Machinery categories for dropdown
+{/*Machinery categories for dropdown */}
 const MACHINERY_CATEGORIES = [
   'Land Improvement Equipment',
   'Augers & Conveyors',
@@ -104,7 +104,6 @@ export default function App() {
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [showDebugModal, setShowDebugModal] = useState(false);
 
-  // Edit state
   const [editingInventoryId, setEditingInventoryId] = useState(null);
   const [editingMachineryId, setEditingMachineryId] = useState(null);
   const [editingServiceId, setEditingServiceId] = useState(null);
@@ -221,9 +220,9 @@ const checkUser = async () => {
         console.log('⚠️ No role found, defaulting to employee');
         setUserRole('employee'); // Default role
       }
-      // ✅ DON'T SET LOADING FALSE HERE - wait for data to load
+      
     } else {
-      // ✅ Only set loading false if there's no user (show login screen)
+      
       setLoading(false);
     }
   } catch (error) {
@@ -248,7 +247,6 @@ const checkUser = async () => {
       setUser(data.user);
       console.log('🔐 Logged in user ID:', data.user.id);
       
-      // Fetch user role
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
@@ -341,7 +339,6 @@ const loadData = async () => {
     console.log('📥 Loading data...');
     setLoading(true);
     
-    // ✅ FETCH ALL INVENTORY - Using proper pagination
     let allInventory = [];
     let inventoryPage = 0;
     let hasMoreInventory = true;
@@ -380,7 +377,6 @@ const loadData = async () => {
       photoUrl: item.photo_url || ''
     })));
     
-    // ✅ FETCH ALL MACHINERY - Using proper pagination
     let allMachinery = [];
     let machineryPage = 0;
     let hasMoreMachinery = true;
@@ -416,7 +412,6 @@ const loadData = async () => {
       photoUrl: item.photo_url || ''
     })));
     
-    // ✅ FETCH ALL SERVICE RECORDS - WITH SAFE ERROR HANDLING
     let allServiceRecords = [];
     let servicePage = 0;
     let hasMoreService = true;
@@ -444,23 +439,18 @@ const loadData = async () => {
     
     console.log(`✅ Loaded ${allServiceRecords.length} service records from database`);
     
-    // ✅ SAFELY MAP SERVICE RECORDS WITH ERROR HANDLING PER RECORD
     const mappedServiceRecords = [];
     let skippedRecords = 0;
     
     for (const item of allServiceRecords) {
       try {
-        // Try to parse photo data safely
         let photoUrls = [];
         
 if (item.photo_urls) {
   try {
-    // Try to parse as JSON array first
     photoUrls = JSON.parse(item.photo_urls);
   } catch (parseError) {
-    // If JSON parse fails, it might be a raw base64 string or URL
     if (typeof item.photo_urls === 'string' && item.photo_urls.trim().length > 0) {
-      // It's a string - treat it as a single photo
       photoUrls = [item.photo_urls];
     } else {
       console.warn(`⚠️ Could not parse photo_urls for record ${item.id}:`, parseError);
@@ -611,11 +601,9 @@ supabase
   setRealtimeStatus('connected');
 };
 
-// Photo Upload Function with automatic compression - OPTIMIZED
 const handlePhotoUpload = async (file, formType) => {
   if (!file) return null;
 
-  // Check if file is an image
   if (!file.type.startsWith('image/')) {
     alert('Please upload an image file (JPG, PNG, etc.)');
     return null;
@@ -624,7 +612,6 @@ const handlePhotoUpload = async (file, formType) => {
   setUploadingPhoto(true);
 
   try {
-    // Create an image element to load the file
     const img = new Image();
     const objectUrl = URL.createObjectURL(file);
     
@@ -634,18 +621,15 @@ const handlePhotoUpload = async (file, formType) => {
       img.src = objectUrl;
     });
 
-    // Create canvas for compression
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
-// ✅ LARGER for sharper photos
 const MAX_WIDTH = 1200;
 const MAX_HEIGHT = 1200;
 
     let width = img.width;
     let height = img.height;
 
-    // Calculate new dimensions maintaining aspect ratio
     if (width > height) {
       if (width > MAX_WIDTH) {
         height *= MAX_WIDTH / width;
@@ -684,7 +668,6 @@ let base64Result = canvas.toDataURL('image/jpeg', quality);
       }
     }
 
-    // Clean up
     URL.revokeObjectURL(objectUrl);
     setUploadingPhoto(false);
 
@@ -711,7 +694,6 @@ let base64Result = canvas.toDataURL('image/jpeg', quality);
     return 'normal';
   };
 
-  // Filter and sort functions
   const getFilteredAndSortedInventory = () => {
   let filtered = inventory.filter(item => {
     const searchLower = inventorySearch.toLowerCase();
@@ -802,12 +784,10 @@ const getPaginatedInventory = () => {
 
 const getFilteredAndSortedService = () => {
   let filtered = serviceHistory.filter(record => {
-    // First apply machine filter if set
     if (serviceFilter && record.machineName !== serviceFilter) {
       return false;
     }
     
-    // Then apply search filter
     const searchLower = serviceSearch.toLowerCase();
     return (
       record.machineName?.toLowerCase().includes(searchLower) ||
@@ -919,15 +899,12 @@ const saveInventoryEdit = async (id) => {
     
     await supabase.from('inventory_items').update(updates).eq('id', id);
 
-    // Mark this ID as recently updated to skip real-time event
     recentlyUpdatedIdsRef.current.add(id);
     
-    // Remove from set after 2 seconds (safety cleanup)
     setTimeout(() => {
       recentlyUpdatedIdsRef.current.delete(id);
     }, 2000);
 
-    // Update local state immediately
     setInventory(prev => prev.map(item => 
       item.id === id ? {
         id: item.id,
@@ -1012,10 +989,9 @@ const deleteMachineryItem = async (id) => {
   if (!confirm(confirmMessage)) return;
 
   try {
-    // Delete the machine
+    
     await supabase.from('machinery_items').delete().eq('id', id);
     
-    // Delete related service records
     if (serviceCount > 0) {
       await supabase.from('service_records')
         .delete()
@@ -1053,7 +1029,6 @@ const saveMachineryEdit = async (id) => {
     
     await supabase.from('machinery_items').update(updates).eq('id', id);
 
-    // ✅ IMMEDIATELY update local state
     setMachinery(prev => prev.map(item => 
       item.id === id ? {
         id: item.id,
@@ -2994,15 +2969,16 @@ return (
                         style={{...styles.deleteButton, touchAction: 'manipulation'}}
                       >
                         <Trash2 size={16} />
-                      </button>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-        </div>
-                  
-        {/* BOTTOM PAGINATION CONTROLS */}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* BOTTOM PAGINATION CONTROLS */}
         <div style={{
           padding: '16px',
           background: currentTheme.cardBackground,
