@@ -3869,7 +3869,7 @@ return (
     {/* SERVICE RECORDS LIST */}
     <div style={styles.itemsList}>
       {getPaginatedService().items.map(record => (
-     <div key={record.id} className="item-card" style={styles.itemCard}>
+   <div key={record.id} className="item-card" style={styles.itemCard}>
   {editingServiceId === record.id ? (
     <div style={{ flex: 1 }}>
       <div style={{ marginBottom: '16px' }}>
