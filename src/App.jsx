@@ -3583,23 +3583,23 @@ return (
 {serviceFilter && (() => {
   const filteredCount = serviceHistory.filter(r => r.machineName === serviceFilter).length;
   
-  // Show banner with appropriate message
   return (
     <div style={{
       display: 'flex',
       alignItems: 'center',
-      gap: '8px',
+      justifyContent: 'space-between',
+      gap: '12px',
       marginTop: '8px',
+      padding: '12px 16px',
+      background: 'rgba(139, 92, 246, 0.2)',
+      border: '1px solid #8b5cf6',
+      borderRadius: '8px',
       flexWrap: 'wrap'
     }}>
       <div style={{
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
-        padding: '8px 12px',
-        background: 'rgba(139, 92, 246, 0.2)',
-        border: '1px solid #8b5cf6',
-        borderRadius: '8px',
         fontSize: '0.875rem',
         color: '#a78bfa'
       }}>
@@ -3609,68 +3609,71 @@ return (
         ) : (
           <>Showing {filteredCount} record{filteredCount === 1 ? '' : 's'} for <strong>{serviceFilter}</strong></>
         )}
+      </div>
+      
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {filteredCount === 0 && userRole !== 'employee' && (
+          <button
+            onClick={() => {
+              setServiceForm({ 
+                machineName: serviceFilter, 
+                serviceType: '', 
+                date: '', 
+                notes: '', 
+                technician: '', 
+                photoUrls: [] 
+              });
+              setShowServiceModal(true);
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 12px',
+              background: '#8b5cf6',
+              border: 'none',
+              borderRadius: '6px',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: 'bold',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = '#7c3aed';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = '#8b5cf6';
+            }}
+          >
+            <Plus size={16} />
+            add a new service record?
+          </button>
+        )}
+        
         <button
           onClick={() => setServiceFilter('')}
           style={{
-            marginLeft: '8px',
-            padding: '4px 8px',
+            padding: '6px 12px',
             background: '#8b5cf6',
             border: 'none',
             borderRadius: '6px',
             color: 'white',
             cursor: 'pointer',
-            fontSize: '0.75rem',
-            fontWeight: 'bold'
+            fontSize: '0.875rem',
+            fontWeight: 'bold',
+            transition: 'all 0.2s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = '#7c3aed';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = '#8b5cf6';
           }}
         >
           Clear Filter
         </button>
       </div>
-      
-      {/* ✅ NEW: Add One button - only show when no records exist and user is not an employee */}
-      {filteredCount === 0 && userRole !== 'employee' && (
-        <button
-          onClick={() => {
-            setServiceForm({ 
-              machineName: serviceFilter, 
-              serviceType: '', 
-              date: '', 
-              notes: '', 
-              technician: '', 
-              photoUrl: '' 
-            });
-            setShowServiceModal(true);
-          }}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '8px 12px',
-            background: '#10b981',
-            border: 'none',
-            borderRadius: '8px',
-            color: 'white',
-            cursor: 'pointer',
-            fontSize: '0.875rem',
-            fontWeight: 'bold',
-            transition: 'all 0.2s ease',
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.background = '#059669';
-            e.target.style.transform = 'translateY(-1px)';
-            e.target.style.boxShadow = '0 4px 8px rgba(16, 185, 129, 0.4)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.background = '#10b981';
-            e.target.style.transform = 'translateY(0)';
-            e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-          }}
-        >
-          <Plus size={16} />
-          Add one
-        </button>
-      )}
     </div>
   );
 })()}
