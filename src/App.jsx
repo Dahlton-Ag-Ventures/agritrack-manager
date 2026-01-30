@@ -4859,7 +4859,7 @@ return (
                 }}
               >
                 <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center' }}>
-                  AgriTrack Manager v2.0 • Created by Dahlton Ag Ventures • Powered by Vercel
+                  AgriTrack Manager • Created by Dahlton Ag Ventures • Powered by Vercel & Supabase
                 </p>
               </div>
             </div>
