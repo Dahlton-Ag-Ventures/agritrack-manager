@@ -2193,13 +2193,15 @@ return (
       </p>
     </div>
 
-    {/* Featured Card: General Features */}
-<div style={{
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-  gap: '16px',
-  color: theme === 'dark' ? '#d1d5db' : '#374151'
-}}>
+   {/* Featured Card: General Features */}
+    <div style={{
+      background: theme === 'dark' ? 'rgba(30, 58, 95, 0.6)' : 'white',
+      border: '2px solid #2563eb',
+      borderRadius: '16px',
+      padding: '20px',
+      marginBottom: '24px',
+      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    }}
     className="feature-card"
     onMouseEnter={(e) => {
       e.currentTarget.style.transform = 'translateY(-4px)';
