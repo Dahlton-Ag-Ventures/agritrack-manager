@@ -2234,25 +2234,25 @@ return (
   color: theme === 'dark' ? '#d1d5db' : '#374151'
 }}>
         <div>
-          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: '1.1rem' }}>Real-Time Sync:</h4>
+          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: 'clamp(0.95rem, 3vw, 1.1rem)' }}>Real-Time Sync:</h4>
           <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
             <li>All changes sync instantly across all devices - no manual refresh needed</li>
           </ul>
         </div>
         <div>
-          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: '1.1rem' }}>Search & Sort:</h4>
+          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: 'clamp(0.95rem, 3vw, 1.1rem)' }}>Search & Sort:</h4>
           <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
             <li>Every tab has powerful search and sorting options to find what you need</li>
           </ul>
         </div>
         <div>
-          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: '1.1rem' }}>Mobile Friendly:</h4>
+          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: 'clamp(0.95rem, 3vw, 1.1rem)' }}>Mobile Friendly:</h4>
           <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
             <li>Works perfectly on phones, tablets, and computers</li>
           </ul>
         </div>
         <div>
-          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: '1.1rem' }}>Import/Export:</h4>
+          <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: 'clamp(0.95rem, 3vw, 1.1rem)' }}>Import/Export:</h4>
           <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
             <li>Bulk import data from CSV files or export for backups via Settings</li>
           </ul>
@@ -2263,8 +2263,8 @@ return (
     {/* Three Column Cards */}
     <div style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-      gap: '24px',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+      gap: '16px',
       marginBottom: '30px'
     }}>
       {/* Card 1: Inventory Management */}
@@ -2366,7 +2366,7 @@ return (
           borderBottom: '2px solid rgba(37, 99, 235, 0.3)'
         }}>
           <span style={{ fontSize: '2rem' }}>🚜</span>
-          <h3 style={{ fontSize: '1.5rem', color: '#06b6d4', margin: 0 }}>Machinery Tracking</h3>
+          <h3 style={{ fontSize: 'clamp(1.2rem, 4vw, 1.5rem)', color: '#06b6d4', margin: 0 }}>
         </div>
 
         {/* Card Content */}
