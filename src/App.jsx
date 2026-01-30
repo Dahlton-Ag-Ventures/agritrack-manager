@@ -3678,9 +3678,17 @@ return (
   );
 })()}
   </div>
-  {userRole !== 'employee' && (
+ {userRole !== 'employee' && (
   <button 
     onClick={() => {
+      setServiceForm({ 
+        machineName: '', 
+        serviceType: '', 
+        date: '', 
+        notes: '', 
+        technician: '', 
+        photoUrls: [] 
+      });
       setShowServiceModal(true);
     }} 
     style={{
