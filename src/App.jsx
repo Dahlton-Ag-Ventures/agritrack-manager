@@ -4132,7 +4132,7 @@ return (
       display: 'grid',
       gridTemplateColumns: record.photoUrls.length === 1 
         ? '1fr' 
-        : 'repeat(auto-fill, minmax(120px, 1fr))',
+        : 'repeat(auto-fill, minmax(min(150px, 100%), 1fr))',
       gap: '12px'
     }}>
       {record.photoUrls.map((url, index) => (
@@ -4140,9 +4140,9 @@ return (
           <img 
             src={url} 
             alt={`Service photo ${index + 1}`}
-           style={{ 
+            style={{ 
               width: '100%', 
-              height: record.photoUrls.length === 1 ? '200px' : '140px',
+              height: record.photoUrls.length === 1 ? '150px' : '120px',
               objectFit: 'cover', 
               borderRadius: '8px',
               cursor: 'pointer',
