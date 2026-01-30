@@ -1968,64 +1968,38 @@ return (
 }}>
   Dahlton Ag Ventures
 </p>
-<p style={styles.stats}>
-  {loading ? (
-    <>
-      <span style={{ opacity: 0.6 }}>Loading data...</span>
-    </>
-  ) : (
-    <>
-      {inventory.length} Inventory • {machinery.length} Machines • {serviceHistory.length} Service Records
-    </>
-  )}
-  {userRole && !loading && (
-  userRole === 'employee' ? (
-    <span style={{ 
-      marginLeft: '12px', 
-      padding: '4px 12px', 
-      background: 'rgba(107, 114, 128, 0.2)',
-      border: '1px solid #6b7280',
+{userRole && !loading && userRole !== 'employee' && (
+  <button
+    onClick={() => setActiveTab('admin')}
+    style={{ 
+      padding: '6px 16px', 
+      background: activeTab === 'admin' ? 'linear-gradient(to right, #10b981, #06b6d4)' : 'rgba(16, 185, 129, 0.2)',
+      border: `1px solid ${activeTab === 'admin' ? '#06b6d4' : '#10b981'}`,
       borderRadius: '12px',
-      fontSize: '0.75rem',
+      fontSize: '0.875rem',
       fontWeight: 'bold',
-      textTransform: 'uppercase'
-    }}>
-      {userRole}
-    </span>
-  ) : (
-    <button
-      onClick={() => setActiveTab('admin')}
-      style={{ 
-        marginLeft: '12px', 
-        padding: '4px 12px', 
-        background: activeTab === 'admin' ? 'linear-gradient(to right, #10b981, #06b6d4)' : 'rgba(16, 185, 129, 0.2)',
-        border: `1px solid ${activeTab === 'admin' ? '#06b6d4' : '#10b981'}`,
-        borderRadius: '12px',
-        fontSize: '0.75rem',
-        fontWeight: 'bold',
-        textTransform: 'uppercase',
-        color: theme === 'dark' ? 'white' : '#1e40af',
-        cursor: 'pointer',
-        transition: 'all 0.2s ease'
-      }}
-      onMouseEnter={(e) => {
-        if (activeTab !== 'admin') {
-          e.target.style.background = 'rgba(16, 185, 129, 0.3)';
-          e.target.style.transform = 'scale(1.05)';
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (activeTab !== 'admin') {
-          e.target.style.background = 'rgba(16, 185, 129, 0.2)';
-          e.target.style.transform = 'scale(1)';
-        }
-      }}
-    >
-      {userRole}
-    </button>
-  )
+      textTransform: 'uppercase',
+      color: theme === 'dark' ? 'white' : '#1e40af',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease',
+      marginTop: '8px'
+    }}
+    onMouseEnter={(e) => {
+      if (activeTab !== 'admin') {
+        e.target.style.background = 'rgba(16, 185, 129, 0.3)';
+        e.target.style.transform = 'scale(1.05)';
+      }
+    }}
+    onMouseLeave={(e) => {
+      if (activeTab !== 'admin') {
+        e.target.style.background = 'rgba(16, 185, 129, 0.2)';
+        e.target.style.transform = 'scale(1)';
+      }
+    }}
+  >
+    {userRole}
+  </button>
 )}
-            </p>
           </div>
           <div style={styles.statusContainer}>
             {syncing && (
