@@ -10,6 +10,17 @@ styleSheet.innerText = `
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
   }
+  
+  @keyframes floatIn {
+    0% {
+      opacity: 0;
+      transform: translateY(-30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 `;
 if (!document.getElementById('agritrack-animations')) {
   styleSheet.id = 'agritrack-animations';
@@ -2118,8 +2129,8 @@ return (
       border: '2px solid #10b981',
       marginBottom: '30px'
     }}>
-      <h1 style={{ 
-  color: theme === 'dark' ? currentTheme.text : '#111827',
+    <h1 style={{ 
+  color: theme === 'dark' ? '#ffffff' : '#111827',
   marginBottom: '16px', 
   fontSize: '2.5rem', 
   fontWeight: '700',
@@ -2127,7 +2138,11 @@ return (
   background: theme === 'dark' ? 'linear-gradient(to right, #10b981, #06b6d4)' : 'none',
   WebkitBackgroundClip: theme === 'dark' ? 'text' : 'unset',
   WebkitTextFillColor: theme === 'dark' ? 'transparent' : '#111827',
-  textShadow: theme === 'light' ? '2px 2px 4px rgba(0, 0, 0, 0.3)' : 'none'
+  textShadow: theme === 'dark' 
+    ? '0 0 20px rgba(16, 185, 129, 0.8), 0 0 40px rgba(6, 182, 212, 0.6)' 
+    : '2px 2px 4px rgba(0, 0, 0, 0.3)',
+  animation: 'floatIn 1.2s ease-out',
+  opacity: 1
 }}>
   Welcome to AgriTrack Manager
 </h1>
@@ -2136,7 +2151,8 @@ return (
         fontSize: '1.1rem', 
         fontWeight: '400',
         textAlign: 'center',
-        opacity: 0.9
+        opacity: 0.9,
+        animation: 'floatIn 1.4s ease-out'
       }}>
         Track inventory, machinery, and service records all in one place
       </p>
