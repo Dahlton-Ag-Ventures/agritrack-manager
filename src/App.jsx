@@ -4124,23 +4124,25 @@ return (
 {record.photoUrls && record.photoUrls.length > 0 && (
   <div style={{ 
     marginRight: '16px',
-    maxWidth: '300px'
+    maxWidth: '100%',
+    width: '100%',
+    marginBottom: '12px'
   }}>
     <div style={{
       display: 'grid',
       gridTemplateColumns: record.photoUrls.length === 1 
         ? '1fr' 
-        : 'repeat(auto-fill, minmax(100px, 1fr))',
-      gap: '8px'
+        : 'repeat(auto-fill, minmax(120px, 1fr))',
+      gap: '12px'
     }}>
       {record.photoUrls.map((url, index) => (
         <div key={index} style={{ position: 'relative' }}>
           <img 
             src={url} 
             alt={`Service photo ${index + 1}`}
-            style={{ 
+           style={{ 
               width: '100%', 
-              height: record.photoUrls.length === 1 ? '120px' : '100px',
+              height: record.photoUrls.length === 1 ? '200px' : '140px',
               objectFit: 'cover', 
               borderRadius: '8px',
               cursor: 'pointer',
