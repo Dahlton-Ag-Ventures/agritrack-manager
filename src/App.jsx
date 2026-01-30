@@ -4105,109 +4105,109 @@ return (
   <>
     <div style={{ width: '100%' }}>
       {record.photoUrls && record.photoUrls.length > 0 && (
-        <div style={{ 
-          width: '100%',
-          marginBottom: '16px'
-        }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: record.photoUrls.length === 1 
-              ? '1fr' 
-              : 'repeat(auto-fit, minmax(180px, 1fr))',
-            gap: '12px',
-            maxWidth: '100%'
-          }}>
-            {record.photoUrls.map((url, index) => (
-              <div key={index} style={{ position: 'relative', aspectRatio: '1/1' }}>
-                <img 
-                  src={url} 
-                  alt={`Service photo ${index + 1}`}
-                  style={{ 
-                    width: '100%', 
-                    height: '100%',
-                    objectFit: 'cover', 
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s ease',
-                    border: '2px solid transparent',
-                    userSelect: 'none',
-                    WebkitUserSelect: 'none',
-                    pointerEvents: 'auto',
-                    display: 'block'
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setViewingImage(url);
-                    setImageModalTitle(`${record.machineName} - ${record.serviceType} (${index + 1}/${record.photoUrls.length})`);
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                    e.currentTarget.style.borderColor = '#10b981';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.borderColor = 'transparent';
-                  }}
-                />
-                {userRole !== 'employee' && (
-                  <button
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      if (confirm('Remove this photo from the service record?')) {
-                        try {
-                          const updatedPhotos = record.photoUrls.filter((_, i) => i !== index);
-                          await supabase.from('service_records').update({
-                            photo_urls: JSON.stringify(updatedPhotos)
-                          }).eq('id', record.id);
-                          setServiceHistory(prev => prev.map(r => 
-                            r.id === record.id ? { ...r, photoUrls: updatedPhotos } : r
-                          ));
-                          console.log('✅ Photo removed from service record');
-                        } catch (error) {
-                          console.error('Error removing photo:', error);
-                          alert('Failed to remove photo');
-                        }
-                      }
-                    }}
-                    style={{
-                      position: 'absolute',
-                      top: '4px',
-                      right: '4px',
-                      background: '#ef4444',
-                      border: 'none',
-                      borderRadius: '50%',
-                      width: '24px',
-                      height: '24px',
-                      color: 'white',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '14px',
-                      fontWeight: 'bold',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                      zIndex: 10
-                    }}
-                    title="Remove photo"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-          <p style={{ 
-            color: '#9ca3af', 
-            fontSize: '0.75rem', 
-            marginTop: '8px',
-            textAlign: 'center'
-          }}>
-            {record.photoUrls.length} photo{record.photoUrls.length !== 1 ? 's' : ''}
-          </p>
+  <div style={{ 
+    width: '100%',
+    marginBottom: '16px'
+  }}>
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: record.photoUrls.length === 1 
+        ? '1fr' 
+        : 'repeat(auto-fit, minmax(180px, 1fr))',
+      gap: '12px',
+      maxWidth: record.photoUrls.length === 1 ? '300px' : '600px'
+    }}>
+      {record.photoUrls.map((url, index) => (
+        <div key={index} style={{ position: 'relative', aspectRatio: '1/1' }}>
+          <img 
+            src={url} 
+            alt={`Service photo ${index + 1}`}
+            style={{ 
+              width: '100%', 
+              height: '100%',
+              objectFit: 'cover', 
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'transform 0.2s ease',
+              border: '2px solid transparent',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              pointerEvents: 'auto',
+              display: 'block'
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setViewingImage(url);
+              setImageModalTitle(`${record.machineName} - ${record.serviceType} (${index + 1}/${record.photoUrls.length})`);
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.borderColor = '#10b981';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.borderColor = 'transparent';
+            }}
+          />
+          {userRole !== 'employee' && (
+            <button
+              onClick={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (confirm('Remove this photo from the service record?')) {
+                  try {
+                    const updatedPhotos = record.photoUrls.filter((_, i) => i !== index);
+                    await supabase.from('service_records').update({
+                      photo_urls: JSON.stringify(updatedPhotos)
+                    }).eq('id', record.id);
+                    setServiceHistory(prev => prev.map(r => 
+                      r.id === record.id ? { ...r, photoUrls: updatedPhotos } : r
+                    ));
+                    console.log('✅ Photo removed from service record');
+                  } catch (error) {
+                    console.error('Error removing photo:', error);
+                    alert('Failed to remove photo');
+                  }
+                }
+              }}
+              style={{
+                position: 'absolute',
+                top: '4px',
+                right: '4px',
+                background: '#ef4444',
+                border: 'none',
+                borderRadius: '50%',
+                width: '24px',
+                height: '24px',
+                color: 'white',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                zIndex: 10
+              }}
+              title="Remove photo"
+            >
+              ✕
+            </button>
+          )}
         </div>
-      )}
+      ))}
+    </div>
+    <p style={{ 
+      color: '#9ca3af', 
+      fontSize: '0.75rem', 
+      marginTop: '8px',
+      textAlign: 'center'
+    }}>
+      {record.photoUrls.length} photo{record.photoUrls.length !== 1 ? 's' : ''}
+    </p>
+  </div>
+)}
       <div style={{ flex: 1 }}>
         <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
         <p style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '12px' }}>{record.serviceType}</p>
