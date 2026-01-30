@@ -4214,8 +4214,9 @@ return (
                 <Trash2 size={16} />
               </button>
             </div>
-          )}
+        )}
         </div>
+      )}
       <div style={{ flex: 1 }}>
         <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
         <p style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '12px' }}>{record.serviceType}</p>
