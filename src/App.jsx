@@ -3000,83 +3000,7 @@ return (
                 </>
               )}
             </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                      <h3 style={{ fontSize: '1.25rem' }}>{item.name}</h3>
-                    {getStockStatus(item) === 'low' && (
-  <span className="stock-badge-low" style={styles.stockBadgeLow}>⚠️ Low Stock</span>
-)}
-                      {getStockStatus(item) === 'high' && (
-                        <span style={styles.stockBadgeHigh}>⚠️ Overstocked</span>
-                      )}
-                    </div>
-                    <div style={styles.itemDetails}>
-                      <div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Part Number</p>
-                        <p>{item.partNumber || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Quantity</p>
-                        {userRole === 'employee' ? (
-                          <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
-                        ) : (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <button 
-                              onClick={() => quickUpdateQuantity(item.id, -1)}
-                              style={styles.quantityButton}
-                            >
-                              −
-                            </button>
-                            <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
-                            <button 
-                              onClick={() => quickUpdateQuantity(item.id, 1)}
-                              style={styles.quantityButton}
-                            >
-                              +
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Location</p>
-                        <p>{item.location || 'N/A'}</p>
-                      </div>
-                      {(item.minQuantity || item.maxQuantity) && (
-                        <div>
-                          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Min / Max</p>
-                          <p>{item.minQuantity || '—'} / {item.maxQuantity || '—'}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {window.innerWidth >= 768 && userRole !== 'employee' && (
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button onClick={() => startEditInventory(item)} style={styles.editButton}>
-                        <Edit2 size={16} />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          deleteInventoryItem(item.id);
-                        }}
-                        onTouchEnd={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          deleteInventoryItem(item.id);
-                        }}
-                        style={{...styles.deleteButton, touchAction: 'manipulation'}}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-
+                  
         {/* BOTTOM PAGINATION CONTROLS */}
         <div style={{
           padding: '16px',
@@ -3589,57 +3513,7 @@ return (
             </>
           )}
         </div>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{item.name}</h3>
-                <div style={styles.itemDetails}>
-                  <div>
-                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>VIN/Serial</p>
-                    <p>{item.vinSerial || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Category</p>
-                    <p>{item.category || 'N/A'}</p>
-                  </div>
-                </div>
-              </div>
-              {window.innerWidth >= 768 && (
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  <button 
-                    onClick={() => viewMachineServiceHistory(item.name)} 
-                    style={{
-                      ...styles.editButton,
-                      background: '#8b5cf6',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '8px 12px',
-                      whiteSpace: 'nowrap'
-                    }}
-                    title="View service history for this machine"
-                  >
-                    <AlertCircle size={16} />
-                    <span style={{ fontSize: '0.875rem' }}>
-                      {serviceHistory.filter(r => r.machineName === item.name).length} Services
-                    </span>
-                  </button>
-                  {userRole !== 'employee' && (
-                    <button onClick={() => startEditMachinery(item)} style={styles.editButton}>
-                      <Edit2 size={16} />
-                    </button>
-                  )}
-                  {userRole !== 'employee' && (
-                    <button onClick={() => deleteMachineryItem(item.id)} style={styles.deleteButton}>
-                      <Trash2 size={16} />
-                    </button>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      ))}
-    </div>
-
+             
     {/* BOTTOM PAGINATION CONTROLS */}
     <div style={{
       padding: '16px',
