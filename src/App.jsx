@@ -3451,7 +3451,7 @@ return (
                     onClick={() => viewMachineServiceHistory(item.name)} 
                     style={{
                       ...styles.editButton,
-                      background: '#8b5cf6',
+                      background: theme === 'dark' ? '#8b5cf6' : '#c4b5fd',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '6px',
@@ -3582,15 +3582,15 @@ return (
   const filteredCount = serviceHistory.filter(r => r.machineName === serviceFilter).length;
   
   return (
-    <div style={{
+<div style={{
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: '12px',
       marginTop: '8px',
       padding: '12px 16px',
-      background: 'rgba(139, 92, 246, 0.2)',
-      border: '1px solid #8b5cf6',
+      background: theme === 'dark' ? 'rgba(139, 92, 246, 0.2)' : 'rgba(196, 181, 253, 0.3)',
+      border: theme === 'dark' ? '1px solid #8b5cf6' : '1px solid #c4b5fd',
       borderRadius: '8px',
       flexWrap: 'wrap'
     }}>
@@ -3599,7 +3599,7 @@ return (
         alignItems: 'center',
         gap: '8px',
         fontSize: '0.875rem',
-        color: '#a78bfa'
+        color: theme === 'dark' ? '#a78bfa' : '#7c3aed'
       }}>
         <AlertCircle size={16} />
         {filteredCount === 0 ? (
@@ -3623,12 +3623,12 @@ return (
               });
               setShowServiceModal(true);
             }}
-            style={{
+          style={{
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
               padding: '6px 12px',
-              background: '#8b5cf6',
+              background: theme === 'dark' ? '#8b5cf6' : '#c4b5fd',
               border: 'none',
               borderRadius: '6px',
               color: 'white',
@@ -3638,10 +3638,10 @@ return (
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-              e.target.style.background = '#7c3aed';
+              e.target.style.background = theme === 'dark' ? '#7c3aed' : '#a78bfa';
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = '#8b5cf6';
+              e.target.style.background = theme === 'dark' ? '#8b5cf6' : '#c4b5fd';
             }}
           >
             <Plus size={16} />
@@ -3653,7 +3653,7 @@ return (
           onClick={() => setServiceFilter('')}
           style={{
             padding: '6px 12px',
-            background: '#8b5cf6',
+            background: theme === 'dark' ? '#8b5cf6' : '#c4b5fd',
             border: 'none',
             borderRadius: '6px',
             color: 'white',
@@ -3663,10 +3663,10 @@ return (
             transition: 'all 0.2s ease'
           }}
           onMouseEnter={(e) => {
-            e.target.style.background = '#7c3aed';
+            e.target.style.background = theme === 'dark' ? '#7c3aed' : '#a78bfa';
           }}
           onMouseLeave={(e) => {
-            e.target.style.background = '#8b5cf6';
+            e.target.style.background = theme === 'dark' ? '#8b5cf6' : '#c4b5fd';
           }}
         >
           Clear Filter
