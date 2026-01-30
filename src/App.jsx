@@ -4123,27 +4123,27 @@ return (
                           <div style={{ display: 'flex', alignItems: 'start', gap: '16px' }}>
 {record.photoUrls && record.photoUrls.length > 0 && (
   <div style={{ 
-    marginRight: '16px',
-    maxWidth: '100%',
     width: '100%',
-    marginBottom: '12px'
+    marginBottom: '16px'
   }}>
     <div style={{
       display: 'grid',
       gridTemplateColumns: record.photoUrls.length === 1 
         ? '1fr' 
-        : 'repeat(auto-fill, minmax(200px, 1fr))',
+        : window.innerWidth < 768 
+          ? 'repeat(2, 1fr)' 
+          : 'repeat(auto-fill, minmax(220px, 1fr))',
       gap: '12px',
-      maxWidth: record.photoUrls.length === 1 ? '400px' : '100%'
+      maxWidth: record.photoUrls.length === 1 ? '300px' : '100%'
     }}>
       {record.photoUrls.map((url, index) => (
-        <div key={index} style={{ position: 'relative' }}>
+        <div key={index} style={{ position: 'relative', width: '100%' }}>
           <img 
             src={url} 
             alt={`Service photo ${index + 1}`}
             style={{ 
               width: '100%', 
-              height: record.photoUrls.length === 1 ? '300px' : '180px',
+              height: '180px',
               objectFit: 'cover', 
               borderRadius: '8px',
               cursor: 'pointer',
@@ -4222,14 +4222,14 @@ return (
     <p style={{ 
       color: '#9ca3af', 
       fontSize: '0.75rem', 
-      marginTop: '4px',
+      marginTop: '8px',
       textAlign: 'center'
     }}>
       {record.photoUrls.length} photo{record.photoUrls.length !== 1 ? 's' : ''}
     </p>
   </div>
 )}
-                            <div style={{ flex: 1 }}>
+<div style={{ flex: 1 }}>
                               <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
                               <p style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '12px' }}>{record.serviceType}</p>
                               <div style={styles.itemDetails}>
