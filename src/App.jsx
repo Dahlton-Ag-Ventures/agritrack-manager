@@ -2129,17 +2129,17 @@ return (
       border: '2px solid #10b981',
       marginBottom: '30px'
     }}>
-    <h1 style={{ 
+<h1 style={{ 
   color: theme === 'dark' ? '#ffffff' : '#111827',
   marginBottom: '16px', 
   fontSize: '2.5rem', 
   fontWeight: '700',
   textAlign: 'center',
-  background: theme === 'dark' ? 'linear-gradient(to right, #10b981, #06b6d4)' : 'none',
+  background: theme === 'dark' ? 'linear-gradient(to right, #34d399, #22d3ee)' : 'none',
   WebkitBackgroundClip: theme === 'dark' ? 'text' : 'unset',
   WebkitTextFillColor: theme === 'dark' ? 'transparent' : '#111827',
   textShadow: theme === 'dark' 
-    ? '0 0 20px rgba(16, 185, 129, 0.8), 0 0 40px rgba(6, 182, 212, 0.6)' 
+    ? '2px 4px 8px rgba(0, 0, 0, 0.8), 4px 6px 12px rgba(0, 0, 0, 0.6)' 
     : '2px 2px 4px rgba(0, 0, 0, 0.3)',
   animation: 'floatIn 1.2s ease-out',
   opacity: 1
