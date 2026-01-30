@@ -1959,7 +1959,7 @@ return (
 <div>
  <p style={{
   fontSize: '1.5rem',
-  fontWeight: '600',
+  fontWeight: '700',
   color: theme === 'dark' ? '#06b6d4' : '#111827',
   textShadow: theme === 'dark' 
     ? '2px 2px 4px rgba(0, 0, 0, 0.5)' 
