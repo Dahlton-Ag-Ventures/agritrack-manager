@@ -3480,7 +3480,7 @@ return (
                       <Edit2 size={16} />
                     </button>
                   )}
-                  {userRole !== 'employee' && (
+                {userRole !== 'employee' && (
                     <button onClick={() => deleteMachineryItem(item.id)} style={styles.deleteButton}>
                       <Trash2 size={16} />
                     </button>
@@ -3490,7 +3490,9 @@ return (
             </>
           )}
         </div>
-             
+      ))}
+    </div>
+
     {/* BOTTOM PAGINATION CONTROLS */}
     <div style={{
       padding: '16px',
