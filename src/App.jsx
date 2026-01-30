@@ -3000,6 +3000,7 @@ return (
                 </>
               )}
             </div>
+        </div>
                   
         {/* BOTTOM PAGINATION CONTROLS */}
         <div style={{
