@@ -2365,8 +2365,8 @@ return (
           paddingBottom: '16px',
           borderBottom: '2px solid rgba(37, 99, 235, 0.3)'
         }}>
-          <span style={{ fontSize: '2rem' }}>🚜</span>
-          <h3 style={{ fontSize: 'clamp(1.2rem, 4vw, 1.5rem)', color: '#06b6d4', margin: 0 }}>
+ <span style={{ fontSize: '2rem' }}>🚜</span>
+          <h3 style={{ fontSize: 'clamp(1.2rem, 4vw, 1.5rem)', color: '#06b6d4', margin: 0 }}>Machinery Tracking</h3>
         </div>
 
         {/* Card Content */}
