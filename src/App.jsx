@@ -4132,8 +4132,9 @@ return (
       display: 'grid',
       gridTemplateColumns: record.photoUrls.length === 1 
         ? '1fr' 
-        : 'repeat(auto-fill, minmax(min(150px, 100%), 1fr))',
-      gap: '12px'
+        : 'repeat(auto-fill, minmax(200px, 1fr))',
+      gap: '12px',
+      maxWidth: record.photoUrls.length === 1 ? '400px' : '100%'
     }}>
       {record.photoUrls.map((url, index) => (
         <div key={index} style={{ position: 'relative' }}>
@@ -4142,7 +4143,7 @@ return (
             alt={`Service photo ${index + 1}`}
             style={{ 
               width: '100%', 
-              height: record.photoUrls.length === 1 ? '150px' : '120px',
+              height: record.photoUrls.length === 1 ? '300px' : '180px',
               objectFit: 'cover', 
               borderRadius: '8px',
               cursor: 'pointer',
