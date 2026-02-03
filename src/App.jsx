@@ -34,7 +34,7 @@ const themes = {
     backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url("https://agritrack-manager.vercel.app/Gear_Background-1.jpg")',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    backgroundAttachment: 'fixed',,
+    backgroundAttachment: 'fixed',
     cardBackground: '#1e3a5f',
     cardBorder: '#2563eb',
     text: 'white',
