@@ -34,9 +34,10 @@ const themes = {
     backgroundImage: window.innerWidth < 768 
   ? 'linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("https://agritrack-manager.vercel.app/Mobile-friendly_John_Deere_Starry_Night.png")'
   : 'linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("https://agritrack-manager.vercel.app/John_Deere_Combine_App_background.jpg")',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundAttachment: 'fixed',
+    backgroundSize: window.innerWidth < 768 ? 'cover' : 'cover',
+    backgroundPosition: window.innerWidth < 768 ? 'center center' : 'center',
+    backgroundAttachment: window.innerWidth < 768 ? 'scroll' : 'fixed',
+    backgroundRepeat: 'no-repeat',
     cardBackground: '#1e3a5f',
     cardBorder: '#2563eb',
     text: 'white',
@@ -1968,10 +1969,10 @@ key={theme}
     backgroundImage: theme === 'dark' 
       ? currentTheme.backgroundImage
       : 'repeating-radial-gradient(circle at 0 0, transparent 0, #f3f4f6 40px), repeating-linear-gradient(rgba(6, 182, 212, 0.03), rgba(16, 185, 129, 0.03))',
-    backgroundSize: theme === 'dark' ? (window.innerWidth < 768 ? 'contain' : 'cover') : 'auto',
-    backgroundPosition: theme === 'dark' ? 'center center' : 'initial',
-    backgroundAttachment: theme === 'dark' ? 'fixed' : 'initial',
-    backgroundRepeat: theme === 'dark' ? 'no-repeat' : 'initial'
+    backgroundSize: theme === 'dark' ? currentTheme.backgroundSize : 'auto',
+    backgroundPosition: theme === 'dark' ? currentTheme.backgroundPosition : 'initial',
+    backgroundAttachment: theme === 'dark' ? currentTheme.backgroundAttachment : 'initial',
+    backgroundRepeat: theme === 'dark' ? currentTheme.backgroundRepeat : 'initial'
   }}
 >
     <div style={styles.content}>
