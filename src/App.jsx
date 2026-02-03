@@ -29,11 +29,13 @@ if (!document.getElementById('agritrack-animations')) {
 
 // Theme configurations
 const themes = {
-  dark: {
+dark: {
     background: '#0a0a0a',
-    backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("https://agritrack-manager.vercel.app/space_background_agritrack.png")',
-    backgroundSize: window.innerWidth < 768 ? 'cover' : 'cover',
-    backgroundPosition: window.innerWidth < 768 ? 'center center' : 'center',
+    backgroundImage: window.innerWidth >= 768 
+      ? 'linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("https://agritrack-manager.vercel.app/space_background_agritrack.png")'
+      : 'none',
+    backgroundSize: window.innerWidth < 768 ? 'auto' : 'cover',
+    backgroundPosition: window.innerWidth < 768 ? 'initial' : 'center',
     backgroundAttachment: window.innerWidth < 768 ? 'scroll' : 'fixed',
     backgroundRepeat: 'no-repeat',
     cardBackground: '#1e3a5f',
