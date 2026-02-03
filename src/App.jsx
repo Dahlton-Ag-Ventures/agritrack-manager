@@ -31,7 +31,10 @@ if (!document.getElementById('agritrack-animations')) {
 const themes = {
   dark: {
     background: '#0a0a0a',
-    backgroundImage: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+    backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url("https://agritrack-manager.vercel.app/Gear_Background-1.jpg")',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundAttachment: 'fixed',,
     cardBackground: '#1e3a5f',
     cardBorder: '#2563eb',
     text: 'white',
@@ -1961,7 +1964,11 @@ return (
     padding: '24px',
     background: theme === 'dark' ? currentTheme.background : '#f3f4f6',
     backgroundImage: theme === 'dark' 
-      ? 'repeating-radial-gradient(circle at 0 0, transparent 0, #0f172a 40px), repeating-linear-gradient(rgba(6, 182, 212, 0.01), rgba(16, 185, 129, 0.01))'
+      ? currentTheme.backgroundImage
+      backgroundSize: theme === 'dark' ? 'cover' : 'auto',
+    backgroundPosition: theme === 'dark' ? 'center' : 'initial',
+    backgroundAttachment: theme === 'dark' ? 'fixed' : 'initial',
+    backgroundRepeat: theme === 'dark' ? 'no-repeat' : 'initial'
       : 'repeating-radial-gradient(circle at 0 0, transparent 0, #f3f4f6 40px), repeating-linear-gradient(rgba(6, 182, 212, 0.03), rgba(16, 185, 129, 0.03))'
   }}
 >
