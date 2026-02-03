@@ -1966,10 +1966,10 @@ key={theme}
     backgroundImage: theme === 'dark' 
       ? currentTheme.backgroundImage
       : 'repeating-radial-gradient(circle at 0 0, transparent 0, #f3f4f6 40px), repeating-linear-gradient(rgba(6, 182, 212, 0.03), rgba(16, 185, 129, 0.03))',
-    backgroundSize: theme === 'dark' ? 'cover' : 'auto',
+    backgroundSize: theme === 'dark' ? 'contain' : 'auto',
     backgroundPosition: theme === 'dark' ? 'center' : 'initial',
     backgroundAttachment: theme === 'dark' ? 'fixed' : 'initial',
-    backgroundRepeat: theme === 'dark' ? 'no-repeat' : 'initial'
+    backgroundRepeat: theme === 'dark' ? 'repeat' : 'initial'
   }}
 >
     <div style={styles.content}>
