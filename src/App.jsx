@@ -31,7 +31,9 @@ if (!document.getElementById('agritrack-animations')) {
 const themes = {
   dark: {
     background: '#0a0a0a',
-    backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("https://agritrack-manager.vercel.app/John_Deere_Combine_App_background.jpg")',
+    backgroundImage: window.innerWidth < 768 
+  ? 'linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("https://agritrack-manager.vercel.app/Mobile-friendly_John_Deere_Starry_Night.png")'
+  : 'linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("https://agritrack-manager.vercel.app/John_Deere_Combine_App_background.jpg")',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundAttachment: 'fixed',
