@@ -3551,6 +3551,10 @@ key={theme}
     </div>
   </div>
 )}
+
+{/* Only show machinery list when reminders panel is hidden */}
+{!showRemindersPanel && (
+  <>
      {machinery.length === 0 ? (
   <div style={styles.emptyState}>
     <Truck size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
@@ -4042,8 +4046,11 @@ key={theme}
         }}
       >
         Last
-      </button>
+        </button>
+      </div>
     </div>
+  </>
+)}
   </>
 )}          
 </div>
