@@ -6053,13 +6053,14 @@ key={theme}
   </Modal>
 )}
 {/* Zoomable Image Viewer Modal */}
-       {viewingImage && <ZoomableImageViewer 
-          imageUrl={viewingImage} 
-          title={imageModalTitle} 
-          onClose={() => setViewingImage(null)}
-          theme={currentTheme}
-        />}
+{viewingImage && <ZoomableImageViewer 
+  imageUrl={viewingImage} 
+  title={imageModalTitle} 
+  onClose={() => setViewingImage(null)}
+  theme={currentTheme}
+/>}
       </div>
+    </div>
   );
 }
 // Zoomable Image Viewer Component
