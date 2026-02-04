@@ -6060,10 +6060,8 @@ key={theme}
           theme={currentTheme}
         />}
       </div>
-    </div>
   );
 }
-
 // Zoomable Image Viewer Component
 function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
   const [scale, setScale] = React.useState(1);
