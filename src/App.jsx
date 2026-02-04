@@ -4627,9 +4627,7 @@ key={theme}
             </>                
           )}
       </div>
-        )}
-  </div>
-)}
+    )}
 
 {showingReminders && (
   <div>
