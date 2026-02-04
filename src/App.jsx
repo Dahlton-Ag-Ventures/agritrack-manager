@@ -160,6 +160,19 @@ const [serviceForm, setServiceForm] = useState({
   const [machineryItemsPerPage, setMachineryItemsPerPage] = useState(50);
   const [servicePage, setServicePage] = useState(1);
   const [serviceItemsPerPage, setServiceItemsPerPage] = useState(50);
+  const [machineHours, setMachineHours] = useState([]);
+  const [serviceReminders, setServiceReminders] = useState([]);
+  const [showReminderModal, setShowReminderModal] = useState(false);
+  const [showHoursModal, setShowHoursModal] = useState(false);
+  const [selectedMachineForReminder, setSelectedMachineForReminder] = useState('');
+  const [reminderForm, setReminderForm] = useState({
+  reminderName: '',
+  hoursInterval: ''
+});
+const [hoursForm, setHoursForm] = useState({
+  machineName: '',
+  hoursToAdd: ''
+});
   
   // Get current theme object
   const currentTheme = themes[theme];
@@ -499,9 +512,35 @@ if (item.photo_urls) {
     }
     
     setServiceHistory(mappedServiceRecords);
-    console.log(`✅ Successfully mapped ${mappedServiceRecords.length} service records`);
-    
-    setLastSync(new Date());
+console.log(`✅ Successfully mapped ${mappedServiceRecords.length} service records`);
+
+// Load machine hours
+const { data: hoursData, error: hoursError } = await supabase
+  .from('machine_hours')
+  .select('*')
+  .order('machine_name', { ascending: true });
+
+if (hoursError) {
+  console.error('❌ Machine hours load error:', hoursError);
+} else {
+  console.log(`✅ Loaded ${hoursData?.length || 0} machine hour records`);
+  setMachineHours(hoursData || []);
+}
+
+// Load service reminders
+const { data: remindersData, error: remindersError } = await supabase
+  .from('service_reminders')
+  .select('*')
+  .order('machine_name', { ascending: true });
+
+if (remindersError) {
+  console.error('❌ Service reminders load error:', remindersError);
+} else {
+  console.log(`✅ Loaded ${remindersData?.length || 0} service reminders`);
+  setServiceReminders(remindersData || []);
+}
+
+setLastSync(new Date());
   } catch (error) {
     console.error('❌ CRITICAL Load error:', error);
     console.error('Error details:', JSON.stringify(error, null, 2));
@@ -614,8 +653,41 @@ supabase
     }
     setLastSync(new Date());
   })
+.subscribe();
+
+// Watch machine_hours table
+supabase
+  .channel('hours-changes')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'machine_hours' }, (payload) => {
+    console.log('🔔 Machine hours change');
+    if (payload.eventType === 'INSERT') {
+      setMachineHours(prev => [...prev, payload.new]);
+    } else if (payload.eventType === 'UPDATE') {
+      setMachineHours(prev => prev.map(item => item.id === payload.new.id ? payload.new : item));
+    } else if (payload.eventType === 'DELETE') {
+      setMachineHours(prev => prev.filter(item => item.id !== payload.old.id));
+    }
+    setLastSync(new Date());
+  })
   .subscribe();
-  setRealtimeStatus('connected');
+
+// Watch service_reminders table
+supabase
+  .channel('reminders-changes')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'service_reminders' }, (payload) => {
+    console.log('🔔 Service reminders change');
+    if (payload.eventType === 'INSERT') {
+      setServiceReminders(prev => [...prev, payload.new]);
+    } else if (payload.eventType === 'UPDATE') {
+      setServiceReminders(prev => prev.map(item => item.id === payload.new.id ? payload.new : item));
+    } else if (payload.eventType === 'DELETE') {
+      setServiceReminders(prev => prev.filter(item => item.id !== payload.old.id));
+    }
+    setLastSync(new Date());
+  })
+  .subscribe();
+
+setRealtimeStatus('connected');
 };
 
 const handlePhotoUpload = async (file, formType) => {
@@ -1170,7 +1242,135 @@ const cancelServiceEdit = () => {
   });
   setMachineSearchModal('');
 };
+// Get machine hours
+const getMachineHours = (machineName) => {
+  const record = machineHours.find(h => h.machine_name === machineName);
+  return record ? parseFloat(record.current_hours || 0) : 0;
+};
 
+// Get active reminders for a machine
+const getMachineReminders = (machineName) => {
+  return serviceReminders.filter(r => 
+    r.machine_name === machineName && r.is_active
+  );
+};
+
+// Check if reminder is due
+const isReminderDue = (reminder, currentHours) => {
+  const hoursSinceLastService = currentHours - (parseFloat(reminder.last_service_hours) || 0);
+  const interval = parseFloat(reminder.hours_interval) || 0;
+  return hoursSinceLastService >= interval;
+};
+
+// Add hours to machine
+const addMachineHours = async () => {
+  if (!hoursForm.machineName || !hoursForm.hoursToAdd) {
+    alert('Please fill in all fields');
+    return;
+  }
+
+  try {
+    const hoursToAdd = parseFloat(hoursForm.hoursToAdd);
+    if (hoursToAdd <= 0) {
+      alert('Hours must be greater than 0');
+      return;
+    }
+
+    const existingRecord = machineHours.find(h => h.machine_name === hoursForm.machineName);
+    
+    if (existingRecord) {
+      // Update existing
+      const newTotal = parseFloat(existingRecord.current_hours) + hoursToAdd;
+      await supabase.from('machine_hours').update({
+        current_hours: newTotal,
+        updated_at: new Date().toISOString()
+      }).eq('id', existingRecord.id);
+    } else {
+      // Create new
+      await supabase.from('machine_hours').insert([{
+        id: Date.now().toString(),
+        machine_name: hoursForm.machineName,
+        current_hours: hoursToAdd,
+        user_id: user.id
+      }]);
+    }
+
+    setHoursForm({ machineName: '', hoursToAdd: '' });
+    setShowHoursModal(false);
+    alert(`Added ${hoursToAdd} hours to ${hoursForm.machineName}`);
+  } catch (error) {
+    console.error('Error adding hours:', error);
+    alert('Failed to add hours');
+  }
+};
+
+// Create service reminder
+const createReminder = async () => {
+  if (!selectedMachineForReminder || !reminderForm.reminderName || !reminderForm.hoursInterval) {
+    alert('Please fill in all fields');
+    return;
+  }
+
+  try {
+    const interval = parseFloat(reminderForm.hoursInterval);
+    if (interval <= 0) {
+      alert('Hours interval must be greater than 0');
+      return;
+    }
+
+    const currentHours = getMachineHours(selectedMachineForReminder);
+
+    await supabase.from('service_reminders').insert([{
+      id: Date.now().toString(),
+      machine_name: selectedMachineForReminder,
+      reminder_name: reminderForm.reminderName,
+      reminder_type: 'hours',
+      hours_interval: interval,
+      last_service_hours: currentHours,
+      user_id: user.id
+    }]);
+
+    setReminderForm({ reminderName: '', hoursInterval: '' });
+    setSelectedMachineForReminder('');
+    setShowReminderModal(false);
+    alert('Reminder created!');
+  } catch (error) {
+    console.error('Error creating reminder:', error);
+    alert('Failed to create reminder');
+  }
+};
+
+// Mark reminder as completed
+const completeReminder = async (reminderId) => {
+  try {
+    const reminder = serviceReminders.find(r => r.id === reminderId);
+    if (!reminder) return;
+
+    const currentHours = getMachineHours(reminder.machine_name);
+
+    await supabase.from('service_reminders').update({
+      last_service_hours: currentHours
+    }).eq('id', reminderId);
+
+    alert('Reminder marked as completed!');
+  } catch (error) {
+    console.error('Error completing reminder:', error);
+    alert('Failed to complete reminder');
+  }
+};
+
+// Delete reminder
+const deleteReminder = async (reminderId) => {
+  if (!confirm('Delete this reminder?')) return;
+
+  try {
+    await supabase.from('service_reminders').delete().eq('id', reminderId);
+    alert('Reminder deleted');
+  } catch (error) {
+    console.error('Error deleting reminder:', error);
+    alert('Failed to delete reminder');
+  }
+};
 const quickUpdateQuantity = async (id, delta) => {
   try {
     const item = inventory.find(i => i.id === id);
@@ -2054,7 +2254,7 @@ key={theme}
         )}
 
         <div style={styles.tabs}>
-  {['home', 'inventory', 'machinery', 'service'].map(tab => (
+  {['home', 'inventory', 'machinery', 'service', 'reminders'].map(tab => (
     <button
       key={tab}
       onClick={() => setActiveTab(tab)}
@@ -3465,7 +3665,34 @@ key={theme}
                 )}
               </div>
               <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{item.name}</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
+  <h3 style={{ fontSize: '1.25rem', margin: 0 }}>{item.name}</h3>
+  {(() => {
+    const reminders = getMachineReminders(item.name);
+    const currentHours = getMachineHours(item.name);
+    const dueReminders = reminders.filter(r => isReminderDue(r, currentHours));
+    
+    if (dueReminders.length > 0) {
+      return (
+        <span style={{
+          padding: '4px 12px',
+          background: 'rgba(239, 68, 68, 0.2)',
+          border: '1px solid #ef4444',
+          borderRadius: '12px',
+          fontSize: '0.75rem',
+          color: '#ef4444',
+          fontWeight: 'bold',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px'
+        }}>
+          ⚠️ {dueReminders.length} Service{dueReminders.length > 1 ? 's' : ''} Due
+        </span>
+      );
+    }
+    return null;
+  })()}
+</div>
                 <div style={styles.itemDetails}>
                   <div>
                     <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>VIN/Serial</p>
@@ -4897,6 +5124,182 @@ key={theme}
             </div>
           </div>
         )}
+      {activeTab === 'reminders' && (
+  <div>
+    <div style={styles.tabHeader}>
+      <h2 style={{ fontSize: '1.5rem' }}>⏰ Service Reminders</h2>
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        {userRole !== 'employee' && (
+          <>
+            <button
+              onClick={() => setShowHoursModal(true)}
+              style={{
+                ...styles.addButton,
+                background: '#8b5cf6'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = '#7c3aed';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = '#8b5cf6';
+              }}
+            >
+              <Plus size={20} /> Add Hours
+            </button>
+            <button
+              onClick={() => setShowReminderModal(true)}
+              style={styles.addButton}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.4)';
+                e.target.style.background = '#059669';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                e.target.style.background = '#10b981';
+              }}
+            >
+              <Plus size={20} /> Create Reminder
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+
+    {/* Machine Hours Overview */}
+    <div style={{ marginBottom: '24px' }}>
+      <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Machine Hours</h3>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' }}>
+        {machinery.map(machine => {
+          const hours = getMachineHours(machine.name);
+          const reminders = getMachineReminders(machine.name);
+          const dueCount = reminders.filter(r => isReminderDue(r, hours)).length;
+          
+          return (
+            <div key={machine.id} style={{
+              ...styles.itemCard,
+              background: dueCount > 0 ? 'rgba(239, 68, 68, 0.1)' : currentTheme.cardBackground,
+              border: dueCount > 0 ? '2px solid #ef4444' : `1px solid ${currentTheme.cardBorder}`
+            }}>
+              <div style={{ flex: 1 }}>
+                <h4 style={{ fontSize: '1.1rem', marginBottom: '8px' }}>{machine.name}</h4>
+                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981', margin: '8px 0' }}>
+                  {hours.toFixed(1)} hrs
+                </p>
+                {dueCount > 0 && (
+                  <p style={{ color: '#ef4444', fontSize: '0.875rem', fontWeight: 'bold' }}>
+                    ⚠️ {dueCount} service{dueCount > 1 ? 's' : ''} due
+                  </p>
+                )}
+                {reminders.length > 0 && (
+                  <p style={{ color: currentTheme.textSecondary, fontSize: '0.75rem', marginTop: '4px' }}>
+                    {reminders.length} reminder{reminders.length > 1 ? 's' : ''} set
+                  </p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+
+    {/* Active Reminders */}
+    <div>
+      <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Active Reminders</h3>
+      {serviceReminders.length === 0 ? (
+        <div style={styles.emptyState}>
+          <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+          <p>No service reminders set</p>
+        </div>
+      ) : (
+        <div style={styles.itemsList}>
+          {serviceReminders.map(reminder => {
+            const currentHours = getMachineHours(reminder.machine_name);
+            const hoursSinceService = currentHours - (parseFloat(reminder.last_service_hours) || 0);
+            const interval = parseFloat(reminder.hours_interval) || 0;
+            const isDue = hoursSinceService >= interval;
+            const hoursUntilDue = Math.max(0, interval - hoursSinceService);
+            
+            return (
+              <div key={reminder.id} style={{
+                ...styles.itemCard,
+                background: isDue ? 'rgba(239, 68, 68, 0.1)' : currentTheme.cardBackground,
+                border: isDue ? '2px solid #ef4444' : `1px solid ${currentTheme.cardBorder}`
+              }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <h4 style={{ fontSize: '1.1rem', margin: 0 }}>{reminder.machine_name}</h4>
+                    {isDue && (
+                      <span style={{
+                        padding: '4px 12px',
+                        background: 'rgba(239, 68, 68, 0.2)',
+                        border: '1px solid #ef4444',
+                        borderRadius: '12px',
+                        fontSize: '0.75rem',
+                        color: '#ef4444',
+                        fontWeight: 'bold'
+                      }}>
+                        ⚠️ DUE NOW
+                      </span>
+                    )}
+                  </div>
+                  <p style={{ fontSize: '1rem', color: '#06b6d4', marginBottom: '12px' }}>
+                    {reminder.reminder_name}
+                  </p>
+                  <div style={styles.itemDetails}>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Current Hours</p>
+                      <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{currentHours.toFixed(1)}</p>
+                    </div>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Service Interval</p>
+                      <p>Every {interval} hours</p>
+                    </div>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Last Service</p>
+                      <p>{parseFloat(reminder.last_service_hours || 0).toFixed(1)} hrs</p>
+                    </div>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
+                        {isDue ? 'Hours Overdue' : 'Hours Until Due'}
+                      </p>
+                      <p style={{ 
+                        fontWeight: 'bold',
+                        color: isDue ? '#ef4444' : '#10b981'
+                      }}>
+                        {isDue ? hoursSinceService.toFixed(1) : hoursUntilDue.toFixed(1)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                {userRole !== 'employee' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <button
+                      onClick={() => completeReminder(reminder.id)}
+                      style={{
+                        ...styles.saveButton,
+                        background: '#10b981'
+                      }}
+                    >
+                      ✓ Complete
+                    </button>
+                    <button
+                      onClick={() => deleteReminder(reminder.id)}
+                      style={styles.deleteButton}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  </div>
+)}
 {activeTab === 'admin' && (
           <div>
             <div style={styles.tabHeader}>
@@ -5536,6 +5939,86 @@ key={theme}
             </button>
           </Modal>
         )}
+      {/* Add Hours Modal */}
+{showHoursModal && (
+  <Modal title="Add Machine Hours" onClose={() => {
+    setShowHoursModal(false);
+    setHoursForm({ machineName: '', hoursToAdd: '' });
+  }}>
+    <select
+      style={styles.input}
+      value={hoursForm.machineName}
+      onChange={(e) => setHoursForm({ ...hoursForm, machineName: e.target.value })}
+    >
+      <option value="">-- Select Machine --</option>
+      {machinery.map(machine => (
+        <option key={machine.id} value={machine.name}>
+          {machine.name} (Current: {getMachineHours(machine.name).toFixed(1)} hrs)
+        </option>
+      ))}
+    </select>
+    <input
+      style={styles.input}
+      type="number"
+      step="0.1"
+      placeholder="Hours to add"
+      value={hoursForm.hoursToAdd}
+      onChange={(e) => setHoursForm({ ...hoursForm, hoursToAdd: e.target.value })}
+    />
+    <div style={{ display: 'flex', gap: '12px' }}>
+      <button onClick={addMachineHours} style={styles.primaryButton}>
+        Add Hours
+      </button>
+      <button onClick={() => setShowHoursModal(false)} style={styles.secondaryButton}>
+        Cancel
+      </button>
+    </div>
+  </Modal>
+)}
+
+{/* Create Reminder Modal */}
+{showReminderModal && (
+  <Modal title="Create Service Reminder" onClose={() => {
+    setShowReminderModal(false);
+    setSelectedMachineForReminder('');
+    setReminderForm({ reminderName: '', hoursInterval: '' });
+  }}>
+    <select
+      style={styles.input}
+      value={selectedMachineForReminder}
+      onChange={(e) => setSelectedMachineForReminder(e.target.value)}
+    >
+      <option value="">-- Select Machine --</option>
+      {machinery.map(machine => (
+        <option key={machine.id} value={machine.name}>
+          {machine.name}
+        </option>
+      ))}
+    </select>
+    <input
+      style={styles.input}
+      placeholder="Reminder name (e.g., Oil Change)"
+      value={reminderForm.reminderName}
+      onChange={(e) => setReminderForm({ ...reminderForm, reminderName: e.target.value })}
+    />
+    <input
+      style={styles.input}
+      type="number"
+      step="1"
+      placeholder="Hours interval (e.g., 50)"
+      value={reminderForm.hoursInterval}
+      onChange={(e) => setReminderForm({ ...reminderForm, hoursInterval: e.target.value })}
+    />
+    <div style={{ display: 'flex', gap: '12px' }}>
+      <button onClick={createReminder} style={styles.primaryButton}>
+        Create Reminder
+      </button>
+      <button onClick={() => setShowReminderModal(false)} style={styles.secondaryButton}>
+        Cancel
+      </button>
+    </div>
+  </Modal>
+)}
 {/* Zoomable Image Viewer Modal */}
        {viewingImage && <ZoomableImageViewer 
           imageUrl={viewingImage} 
