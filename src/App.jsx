@@ -3856,12 +3856,11 @@ key={theme}
           opacity: machineryPage === getPaginatedMachinery().totalPages ? 0.5 : 1
         }}
       >
-        Last
-      </button>
-    </div>
-  </>
-)}          
-</div>
+            Last
+        </button>
+      </div>
+    </>
+  )}
 )}
 {activeTab === 'service' && (
           <div>
@@ -4627,11 +4626,12 @@ key={theme}
               </div>
             </>                
           )}
-        </div>
-      )}
-    </>
+      </div>
+        )}
+  </div>
 )}
-      {showingReminders && (
+
+{showingReminders && (
   <div>
     <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '24px' }}>
       {userRole !== 'employee' && (
