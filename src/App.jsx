@@ -5884,6 +5884,7 @@ key={theme}
 />}
       </div>
     </div>
+    </div>
   );
 }
 // Zoomable Image Viewer Component
