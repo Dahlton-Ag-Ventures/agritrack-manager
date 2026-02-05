@@ -3361,6 +3361,64 @@ key={theme}
     <option value="99999">Show All</option>
   </select>
 </div>
+            
+{/* Category Filter Tabs */}
+<div style={{
+  display: 'flex',
+  gap: '8px',
+  marginBottom: '16px',
+  flexWrap: 'wrap',
+  padding: '12px',
+  background: currentTheme.cardBackground,
+  border: `1px solid ${currentTheme.cardBorder}`,
+  borderRadius: '12px'
+}}>
+  <button
+    onClick={() => setMachinerySearch('')}
+    style={{
+      padding: '8px 16px',
+      background: machinerySearch === '' ? 'linear-gradient(to right, #10b981, #06b6d4)' : currentTheme.tabInactive,
+      border: machinerySearch === '' ? '2px solid #10b981' : `1px solid ${currentTheme.cardBorder}`,
+      borderRadius: '8px',
+      color: currentTheme.text,
+      cursor: 'pointer',
+      fontSize: '0.875rem',
+      fontWeight: machinerySearch === '' ? 'bold' : 'normal'
+    }}
+  >
+    All Categories ({machinery.length})
+  </button>
+  
+  {(() => {
+    // Get unique categories
+    const categories = [...new Set(machinery.map(m => m.category).filter(c => c))].sort();
+    
+    return categories.map(category => {
+      const count = machinery.filter(m => m.category === category).length;
+      const isActive = machinerySearch.toLowerCase() === category.toLowerCase();
+      
+      return (
+        <button
+          key={category}
+          onClick={() => setMachinerySearch(category)}
+          style={{
+            padding: '8px 16px',
+            background: isActive ? 'linear-gradient(to right, #10b981, #06b6d4)' : currentTheme.tabInactive,
+            border: isActive ? '2px solid #10b981' : `1px solid ${currentTheme.cardBorder}`,
+            borderRadius: '8px',
+            color: currentTheme.text,
+            cursor: 'pointer',
+            fontSize: '0.875rem',
+            fontWeight: isActive ? 'bold' : 'normal'
+          }}
+        >
+          {category} ({count})
+        </button>
+      );
+    });
+  })()}
+</div>
+            
 {/* REMINDERS PANEL - Shows when button is clicked */}
 {showRemindersPanel && (
   <div style={{
