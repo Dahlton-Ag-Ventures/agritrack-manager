@@ -3455,109 +3455,102 @@ key={theme}
       </div>
     </div>
 
-   {/* Active Reminders */}
+    {/* Active Reminders */}
     <div>
       <h4 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Active Reminders</h4>
-      {(() => {
-        const filteredMachineNames = getFilteredAndSortedMachinery().map(m => m.name);
-        const filteredReminders = serviceReminders.filter(r => filteredMachineNames.includes(r.machine_name));
-        
-        if (filteredReminders.length === 0) {
-          return (
-            <div style={styles.emptyState}>
-              <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
-              <p>{serviceReminders.length === 0 ? 'No service reminders set' : 'No reminders match your search'}</p>
-            </div>
-          );
-        }
-        
-        return (
-          <div style={styles.itemsList}>
-            {filteredReminders.map(reminder => {
-              const currentHours = getMachineHours(reminder.machine_name);
-              const hoursSinceService = currentHours - (parseFloat(reminder.last_service_hours) || 0);
-              const interval = parseFloat(reminder.hours_interval) || 0;
-              const isDue = hoursSinceService >= interval;
-              const hoursUntilDue = Math.max(0, interval - hoursSinceService);
-              
-              return (
-                <div key={reminder.id} style={{
-                  ...styles.itemCard,
-                  background: isDue ? 'rgba(239, 68, 68, 0.1)' : currentTheme.cardBackground,
-                  border: isDue ? '2px solid #ef4444' : `1px solid ${currentTheme.cardBorder}`
-                }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                      <h4 style={{ fontSize: '1.1rem', margin: 0 }}>{reminder.machine_name}</h4>
-                      {isDue && (
-                        <span style={{
-                          padding: '4px 12px',
-                          background: 'rgba(239, 68, 68, 0.2)',
-                          border: '1px solid #ef4444',
-                          borderRadius: '12px',
-                          fontSize: '0.75rem',
-                          color: '#ef4444',
-                          fontWeight: 'bold'
-                        }}>
-                          ⚠️ DUE NOW
-                        </span>
-                      )}
+      {serviceReminders.length === 0 ? (
+        <div style={styles.emptyState}>
+          <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+          <p>No service reminders set</p>
+        </div>
+      ) : (
+        <div style={styles.itemsList}>
+          {serviceReminders.map(reminder => {
+            const currentHours = getMachineHours(reminder.machine_name);
+            const hoursSinceService = currentHours - (parseFloat(reminder.last_service_hours) || 0);
+            const interval = parseFloat(reminder.hours_interval) || 0;
+            const isDue = hoursSinceService >= interval;
+            const hoursUntilDue = Math.max(0, interval - hoursSinceService);
+            
+            return (
+              <div key={reminder.id} style={{
+                ...styles.itemCard,
+                background: isDue ? 'rgba(239, 68, 68, 0.1)' : currentTheme.cardBackground,
+                border: isDue ? '2px solid #ef4444' : `1px solid ${currentTheme.cardBorder}`
+              }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <h4 style={{ fontSize: '1.1rem', margin: 0 }}>{reminder.machine_name}</h4>
+                    {isDue && (
+                      <span style={{
+                        padding: '4px 12px',
+                        background: 'rgba(239, 68, 68, 0.2)',
+                        border: '1px solid #ef4444',
+                        borderRadius: '12px',
+                        fontSize: '0.75rem',
+                        color: '#ef4444',
+                        fontWeight: 'bold'
+                      }}>
+                        ⚠️ DUE NOW
+                      </span>
+                    )}
+                  </div>
+                  <p style={{ fontSize: '1rem', color: '#06b6d4', marginBottom: '12px' }}>
+                    {reminder.reminder_name}
+                  </p>
+                  <div style={styles.itemDetails}>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Current Hours</p>
+                      <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{currentHours.toFixed(1)}</p>
                     </div>
-                    <p style={{ fontSize: '1rem', color: '#06b6d4', marginBottom: '12px' }}>
-                      {reminder.reminder_name}
-                    </p>
-                    <div style={styles.itemDetails}>
-                      <div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Current Hours</p>
-                        <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{currentHours.toFixed(1)}</p>
-                      </div>
-                      <div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Service Interval</p>
-                        <p>Every {interval} hours</p>
-                      </div>
-                      <div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Last Service</p>
-                        <p>{parseFloat(reminder.last_service_hours || 0).toFixed(1)} hrs</p>
-                      </div>
-                      <div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
-                          {isDue ? 'Hours Overdue' : 'Hours Until Due'}
-                        </p>
-                        <p style={{ 
-                          fontWeight: 'bold',
-                          color: isDue ? '#ef4444' : '#10b981'
-                        }}>
-                          {isDue ? hoursSinceService.toFixed(1) : hoursUntilDue.toFixed(1)}
-                        </p>
-                      </div>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Service Interval</p>
+                      <p>Every {interval} hours</p>
+                    </div>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Last Service</p>
+                      <p>{parseFloat(reminder.last_service_hours || 0).toFixed(1)} hrs</p>
+                    </div>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
+                        {isDue ? 'Hours Overdue' : 'Hours Until Due'}
+                      </p>
+                      <p style={{ 
+                        fontWeight: 'bold',
+                        color: isDue ? '#ef4444' : '#10b981'
+                      }}>
+                        {isDue ? hoursSinceService.toFixed(1) : hoursUntilDue.toFixed(1)}
+                      </p>
                     </div>
                   </div>
-                  {userRole !== 'employee' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <button
-                        onClick={() => completeReminder(reminder.id)}
-                        style={{
-                          ...styles.saveButton,
-                          background: '#10b981'
-                        }}
-                      >
-                        ✓ Complete
-                      </button>
-                      <button
-                        onClick={() => deleteReminder(reminder.id)}
-                        style={styles.deleteButton}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  )}
                 </div>
-              );
-            })}
-          </div>
-        );
-      })()}
+                {userRole !== 'employee' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <button
+                      onClick={() => completeReminder(reminder.id)}
+                      style={{
+                        ...styles.saveButton,
+                        background: '#10b981'
+                      }}
+                    >
+                      ✓ Complete
+                    </button>
+                    <button
+                      onClick={() => deleteReminder(reminder.id)}
+                      style={styles.deleteButton}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
+  </div>
+)}
 
 {/* Only show machinery list when reminders panel is hidden */}
 {!showRemindersPanel && (
