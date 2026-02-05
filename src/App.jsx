@@ -3422,7 +3422,7 @@ key={theme}
     <div style={{ marginBottom: '24px' }}>
       <h4 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Machine Hours</h4>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' }}>
-        {machinery.map(machine => {
+        {getFilteredAndSortedMachinery().map(machine => {
           const hours = getMachineHours(machine.name);
           const reminders = getMachineReminders(machine.name);
           const dueCount = reminders.filter(r => isReminderDue(r, hours)).length;
@@ -3458,14 +3458,23 @@ key={theme}
     {/* Active Reminders */}
     <div>
       <h4 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Active Reminders</h4>
-      {serviceReminders.length === 0 ? (
-        <div style={styles.emptyState}>
-          <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
-          <p>No service reminders set</p>
-        </div>
-      ) : (
-        <div style={styles.itemsList}>
-          {serviceReminders.map(reminder => {
+     {(() => {
+  // Filter reminders based on the filtered machinery list
+  const filteredMachineNames = getFilteredAndSortedMachinery().map(m => m.name);
+  const filteredReminders = serviceReminders.filter(r => filteredMachineNames.includes(r.machine_name));
+  
+  if (filteredReminders.length === 0) {
+    return (
+      <div style={styles.emptyState}>
+        <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+        <p>{serviceReminders.length === 0 ? 'No service reminders set' : 'No reminders match your search'}</p>
+      </div>
+    );
+  }
+  
+  return (
+    <div style={styles.itemsList}>
+      {filteredReminders.map(reminder => {
             const currentHours = getMachineHours(reminder.machine_name);
             const hoursSinceService = currentHours - (parseFloat(reminder.last_service_hours) || 0);
             const interval = parseFloat(reminder.hours_interval) || 0;
