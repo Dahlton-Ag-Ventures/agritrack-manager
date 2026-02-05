@@ -2721,50 +2721,77 @@ key={theme}
       )}
     </div>
 
-    <div style={styles.searchSortContainer}>
-      <input
-        type="text"
-        placeholder="🔍 Search inventory (name, part number, location)..."
-        value={inventorySearch}
-        onChange={(e) => {
-          setInventorySearch(e.target.value);
-          setInventoryPage(1);
-        }}
-        style={styles.searchInput}
-      />
-      <select
-        value={inventorySort}
-        onChange={(e) => {
-          setInventorySort(e.target.value);
-          setInventoryPage(1);
-        }}
-        style={styles.sortSelect}
-      >
-        <option value="name-asc">Name (A → Z)</option>
-        <option value="name-desc">Name (Z → A)</option>
-        <option value="quantity-asc">Stock (Low → High)</option>
-        <option value="quantity-desc">Stock (High → Low)</option>
-        <option value="location">Location</option>
-      </select>
-      <select
-        value={inventoryItemsPerPage}
-        onChange={(e) => {
-          setInventoryItemsPerPage(Number(e.target.value));
-          setInventoryPage(1);
-        }}
-        style={styles.sortSelect}
-      >
-        <option value="25">Show 25</option>
-        <option value="50">Show 50</option>
-        <option value="100">Show 100</option>
-        <option value="200">Show 200</option>
-        <option value="500">Show 500</option>
-        <option value="1000">Show 1000</option>
-        <option value="2000">Show 2000</option>
-        <option value="99999">Show All</option>
-      </select>
-    </div>
-
+   <div style={{
+  display: 'flex',
+  gap: '8px',
+  marginBottom: '16px',
+  flexWrap: 'nowrap',
+  overflow: 'auto'
+}}>
+  <input
+    type="text"
+    placeholder="🔍 Search inventory (name, part number, location)..."
+    value={inventorySearch}
+    onChange={(e) => {
+      setInventorySearch(e.target.value);
+      setInventoryPage(1);
+    }}
+    style={styles.searchInput}
+  />
+  <select
+    value={inventorySort}
+    onChange={(e) => {
+      setInventorySort(e.target.value);
+      setInventoryPage(1);
+    }}
+    style={{
+      padding: '10px 12px',
+      background: currentTheme.inputBackground,
+      border: `1px solid ${currentTheme.cardBorder}`,
+      borderRadius: '8px',
+      color: currentTheme.text,
+      fontSize: '0.875rem',
+      cursor: 'pointer',
+      outline: 'none',
+      minWidth: '180px',
+      flexShrink: 0
+    }}
+  >
+    <option value="name-asc">Name (A → Z)</option>
+    <option value="name-desc">Name (Z → A)</option>
+    <option value="quantity-asc">Stock (Low → High)</option>
+    <option value="quantity-desc">Stock (High → Low)</option>
+    <option value="location">Location</option>
+  </select>
+  <select
+    value={inventoryItemsPerPage}
+    onChange={(e) => {
+      setInventoryItemsPerPage(Number(e.target.value));
+      setInventoryPage(1);
+    }}
+    style={{
+      padding: '10px 12px',
+      background: currentTheme.inputBackground,
+      border: `1px solid ${currentTheme.cardBorder}`,
+      borderRadius: '8px',
+      color: currentTheme.text,
+      fontSize: '0.875rem',
+      cursor: 'pointer',
+      outline: 'none',
+      minWidth: '100px',
+      flexShrink: 0
+    }}
+  >
+    <option value="25">Show 25</option>
+    <option value="50">Show 50</option>
+    <option value="100">Show 100</option>
+    <option value="200">Show 200</option>
+    <option value="500">Show 500</option>
+    <option value="1000">Show 1000</option>
+    <option value="2000">Show 2000</option>
+    <option value="99999">Show All</option>
+  </select>
+</div>
     {inventory.length === 0 ? (
       <div style={styles.emptyState}>
         <Package size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
@@ -4328,7 +4355,13 @@ key={theme}
   </button>
 )}
 </div>
-<div style={styles.searchSortContainer}>
+<div style={{
+  display: 'flex',
+  gap: '8px',
+  marginBottom: '16px',
+  flexWrap: 'nowrap',
+  overflow: 'auto'
+}}>
   <input
     type="text"
     placeholder="🔍 Search service records (machine, service type, technician, notes)..."
@@ -4345,7 +4378,18 @@ key={theme}
       setServiceSort(e.target.value);
       setServicePage(1);
     }}
-    style={styles.sortSelect}
+    style={{
+      padding: '10px 12px',
+      background: currentTheme.inputBackground,
+      border: `1px solid ${currentTheme.cardBorder}`,
+      borderRadius: '8px',
+      color: currentTheme.text,
+      fontSize: '0.875rem',
+      cursor: 'pointer',
+      outline: 'none',
+      minWidth: '180px',
+      flexShrink: 0
+    }}
   >
     <option value="date-desc">Date (Newest First)</option>
     <option value="date-asc">Date (Oldest First)</option>
@@ -4356,7 +4400,18 @@ key={theme}
       setServiceItemsPerPage(Number(e.target.value));
       setServicePage(1);
     }}
-    style={styles.sortSelect}
+    style={{
+      padding: '10px 12px',
+      background: currentTheme.inputBackground,
+      border: `1px solid ${currentTheme.cardBorder}`,
+      borderRadius: '8px',
+      color: currentTheme.text,
+      fontSize: '0.875rem',
+      cursor: 'pointer',
+      outline: 'none',
+      minWidth: '100px',
+      flexShrink: 0
+    }}
   >
     <option value="25">Show 25</option>
     <option value="50">Show 50</option>
