@@ -121,6 +121,7 @@ export default function App() {
   const [showMachineryModal, setShowMachineryModal] = useState(false);
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [showDebugModal, setShowDebugModal] = useState(false);
+  const [showCategoryTabs, setShowCategoryTabs] = useState(false);
 
   const [editingInventoryId, setEditingInventoryId] = useState(null);
   const [editingMachineryId, setEditingMachineryId] = useState(null);
@@ -3362,7 +3363,29 @@ key={theme}
   </select>
 </div>
             
+{/* Toggle Category Filter Button */}
+<button
+  onClick={() => setShowCategoryTabs(!showCategoryTabs)}
+  style={{
+    padding: '10px 20px',
+    background: showCategoryTabs ? 'linear-gradient(to right, #10b981, #06b6d4)' : currentTheme.tabInactive,
+    border: showCategoryTabs ? '2px solid #10b981' : `1px solid ${currentTheme.cardBorder}`,
+    borderRadius: '8px',
+    color: currentTheme.text,
+    cursor: 'pointer',
+    fontSize: '0.875rem',
+    fontWeight: showCategoryTabs ? 'bold' : 'normal',
+    marginBottom: '16px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px'
+  }}
+>
+  {showCategoryTabs ? '👁️ Hide' : '👁️ Show'} Category Filters
+</button>
+            
 {/* Category Filter Tabs */}
+{showCategoryTabs && (
 <div style={{
   display: 'flex',
   gap: '8px',
@@ -3418,6 +3441,7 @@ key={theme}
     });
   })()}
 </div>
+)}
             
 {/* REMINDERS PANEL - Shows when button is clicked */}
 {showRemindersPanel && (
