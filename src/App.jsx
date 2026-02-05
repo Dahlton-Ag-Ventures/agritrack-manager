@@ -3276,52 +3276,68 @@ key={theme}
 
         {activeTab === 'machinery' && (
           <div>
-<div style={styles.tabHeader}>
-  <h2 style={{ fontSize: '1.5rem' }}>Machinery</h2>
-  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+<div style={{
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: '24px',
+  gap: '12px'
+}}>
+  <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Machinery</h2>
+  <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
     <button
-      onClick={() => setShowRemindersPanel(!showRemindersPanel)}
-      style={{
-        ...styles.addButton,
-        background: showRemindersPanel ? 'linear-gradient(to right, #8b5cf6, #7c3aed)' : '#8b5cf6'
-      }}
-      onMouseEnter={(e) => {
-        e.target.style.transform = 'translateY(-2px)';
-        e.target.style.boxShadow = '0 6px 12px rgba(139, 92, 246, 0.4)';
-        e.target.style.background = '#7c3aed';
-      }}
-      onMouseLeave={(e) => {
-        e.target.style.transform = 'translateY(0)';
-        e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-        e.target.style.background = showRemindersPanel ? 'linear-gradient(to right, #8b5cf6, #7c3aed)' : '#8b5cf6';
-      }}
-    >
-      <Wrench size={20} /> {showRemindersPanel ? 'Hide' : 'Show'} Reminders
-    </button>
+  onClick={() => setShowRemindersPanel(!showRemindersPanel)}
+  style={{
+    padding: '10px 16px',
+    background: showRemindersPanel ? 'linear-gradient(to right, #8b5cf6, #7c3aed)' : '#8b5cf6',
+    border: `1px solid ${showRemindersPanel ? '#06b6d4' : '#10b981'}`,
+    borderRadius: '8px',
+    fontSize: '0.875rem',
+    fontWeight: 'bold',
+    color: 'white',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    whiteSpace: 'nowrap',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px'
+  }}
+>
+  <Wrench size={16} /> {showRemindersPanel ? 'Hide' : 'Show'}
+</button>
     {userRole !== 'employee' && (
-      <button 
-        onClick={() => {
-          setShowMachineryModal(true);
-        }} 
-        style={styles.addButton}
-        onMouseEnter={(e) => {
-          e.target.style.transform = 'translateY(-2px)';
-          e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.4)';
-          e.target.style.background = '#059669';
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.transform = 'translateY(0)';
-          e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-          e.target.style.background = '#10b981';
-        }}
-      >
-        <Plus size={20} /> Add Machine
-      </button>
+     <button 
+  onClick={() => {
+    setShowMachineryModal(true);
+  }} 
+  style={{
+    padding: '10px 16px',
+    background: '#10b981',
+    border: 'none',
+    borderRadius: '8px',
+    color: 'white',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    fontSize: '0.875rem',
+    transition: 'all 0.2s ease',
+    whiteSpace: 'nowrap'
+  }}
+>
+  <Plus size={16} /> Add
+</button>
     )}
   </div>
 </div>
 
-<div style={styles.searchSortContainer}>
+<div style={{
+  display: 'flex',
+  gap: '8px',
+  marginBottom: '16px',
+  flexWrap: 'nowrap',
+  overflow: 'auto'
+}}>
   <input
     type="text"
     placeholder="🔍 Search machinery (name, VIN/serial, category)..."
@@ -3332,35 +3348,57 @@ key={theme}
     }}
     style={styles.searchInput}
   />
-  <select
-    value={machinerySort}
-    onChange={(e) => {
-      setMachinerySort(e.target.value);
-      setMachineryPage(1);
-    }}
-    style={styles.sortSelect}
-  >
-    <option value="name-asc">Name (A → Z)</option>
-    <option value="name-desc">Name (Z → A)</option>
-    <option value="category">Category</option>
-  </select>
-  <select
-    value={machineryItemsPerPage}
-    onChange={(e) => {
-      setMachineryItemsPerPage(Number(e.target.value));
-      setMachineryPage(1);
-    }}
-    style={styles.sortSelect}
-  >
-    <option value="25">Show 25</option>
-    <option value="50">Show 50</option>
-    <option value="100">Show 100</option>
-    <option value="200">Show 200</option>
-    <option value="500">Show 500</option>
-    <option value="1000">Show 1000</option>
-    <option value="2000">Show 2000</option>
-    <option value="99999">Show All</option>
-  </select>
+<select
+  value={machinerySort}
+  onChange={(e) => {
+    setMachinerySort(e.target.value);
+    setMachineryPage(1);
+  }}
+  style={{
+    padding: '10px 12px',
+    background: currentTheme.inputBackground,
+    border: `1px solid ${currentTheme.cardBorder}`,
+    borderRadius: '8px',
+    color: currentTheme.text,
+    fontSize: '0.875rem',
+    cursor: 'pointer',
+    outline: 'none',
+    minWidth: '140px',
+    flexShrink: 0
+  }}
+>
+  <option value="name-asc">Name (A → Z)</option>
+  <option value="name-desc">Name (Z → A)</option>
+  <option value="category">Category</option>
+</select>
+ <select
+  value={machineryItemsPerPage}
+  onChange={(e) => {
+    setMachineryItemsPerPage(Number(e.target.value));
+    setMachineryPage(1);
+  }}
+  style={{
+    padding: '10px 12px',
+    background: currentTheme.inputBackground,
+    border: `1px solid ${currentTheme.cardBorder}`,
+    borderRadius: '8px',
+    color: currentTheme.text,
+    fontSize: '0.875rem',
+    cursor: 'pointer',
+    outline: 'none',
+    minWidth: '100px',
+    flexShrink: 0
+  }}
+>
+  <option value="25">Show 25</option>
+  <option value="50">Show 50</option>
+  <option value="100">Show 100</option>
+  <option value="200">Show 200</option>
+  <option value="500">Show 500</option>
+  <option value="1000">Show 1000</option>
+  <option value="2000">Show 2000</option>
+  <option value="99999">Show All</option>
+</select>
 </div>
             
 {/* Toggle Category Filter Button */}
