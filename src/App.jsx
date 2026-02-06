@@ -3503,7 +3503,7 @@ key={theme}
       fontWeight: machinerySearch === '' ? 'bold' : 'normal'
     }}
   >
-    All Categories ({machinery.length})
+    All Machines ({machinery.length})
   </button>
   
   {(() => {
