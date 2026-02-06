@@ -5189,12 +5189,6 @@ key={theme}
                         <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Language</p>
                         <p>English (US)</p>
                       </div>
-```
-
-**TIP:** Use Ctrl+F (or Cmd+F on Mac) and search for:
-```
-Language</p>
-                        <p>English (US)</p>
                     </div>
                   </div>
                 </div>
