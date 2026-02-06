@@ -4954,73 +4954,7 @@ key={theme}
     )}
   </div>
 ))}
-      <div style={{ flex: 1 }}>
-        <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
-        <p style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '12px' }}>{record.serviceType}</p>
-        <div style={styles.itemDetails}>
-          <div>
-            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Date</p>
-            <p>{record.date || 'N/A'}</p>
-          </div>
-          <div>
-            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Technician</p>
-            <p>{record.technician || 'N/A'}</p>
-          </div>
-        </div>
-        {record.notes && (
-          <div style={{ marginTop: '12px', padding: '12px', background: '#1f2937', borderRadius: '8px' }}>
-            <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Notes:</p>
-            <p style={{ fontSize: '0.875rem' }}>{record.notes}</p>
-          </div>
-        )}
-      </div>
-      {window.innerWidth >= 768 && userRole !== 'employee' && (
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={() => startEditService(record)} style={styles.editButton}>
-            <Edit2 size={16} />
-          </button>
-          <button onClick={() => deleteServiceRecord(record.id)} style={styles.deleteButton}>
-         <Trash2 size={16} />
-              </button>
-            </div>
-        )}
-        </div>
-      )}
-      <div style={{ flex: 1 }}>
-        <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
-        <p style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '12px' }}>{record.serviceType}</p>
-        <div style={styles.itemDetails}>
-          <div>
-            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Date</p>
-            <p>{record.date || 'N/A'}</p>
-          </div>
-          <div>
-            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Technician</p>
-            <p>{record.technician || 'N/A'}</p>
-          </div>
-        </div>
-        {record.notes && (
-          <div style={{ marginTop: '12px', padding: '12px', background: '#1f2937', borderRadius: '8px' }}>
-            <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Notes:</p>
-            <p style={{ fontSize: '0.875rem' }}>{record.notes}</p>
-          </div>
-        )}
-      </div>
-      {window.innerWidth >= 768 && userRole !== 'employee' && (
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={() => startEditService(record)} style={styles.editButton}>
-            <Edit2 size={16} />
-          </button>
-          <button onClick={() => deleteServiceRecord(record.id)} style={styles.deleteButton}>
-         <Trash2 size={16} />
-          </button>
-        </div>
-      )}
-    </>
-  )}
-</div>
-                ))}
-              </div>
+    
               {/* BOTTOM PAGINATION CONTROLS */}
               <div style={{
                 padding: '16px',
