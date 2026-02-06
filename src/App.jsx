@@ -4559,174 +4559,307 @@ key={theme}
 
     {/* SERVICE RECORDS LIST */}
     <div style={styles.itemsList}>
-    {getPaginatedService().items.map(record => (
-  <div key={record.id} className="item-card" style={styles.itemCard}>
-    {editingServiceId === record.id ? (
-      <div style={{ flex: 1 }}>
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
-            Select Machine
-          </label>
-          <input
-            type="text"
-            placeholder="🔍 Search machines..."
-            value={machineSearchModal}
-            onChange={(e) => setMachineSearchModal(e.target.value)}
-            style={{
-              ...styles.input,
-              marginBottom: '8px'
-            }}
-          />
-          <select
-            style={styles.input}
-            value={serviceForm.machineName}
-            onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
-            required
-          >
-            <option value="">-- Select a machine --</option>
-            {machinery
-              .filter(machine => {
-                const searchLower = machineSearchModal.toLowerCase();
-                return (
-                  machine.name?.toLowerCase().includes(searchLower) ||
-                  machine.category?.toLowerCase().includes(searchLower) ||
-                  machine.vinSerial?.toLowerCase().includes(searchLower)
-                );
-              })
-              .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
-              .map(machine => (
-                <option key={machine.id} value={machine.name}>
-                  {machine.name} {machine.category ? `(${machine.category})` : ''}
-                </option>
-              ))}
-          </select>
-          {machineSearchModal && (
-            <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginTop: '4px' }}>
-              Showing {machinery.filter(m => {
-                const searchLower = machineSearchModal.toLowerCase();
-                return (
-                  m.name?.toLowerCase().includes(searchLower) ||
-                  m.category?.toLowerCase().includes(searchLower) ||
-                  m.vinSerial?.toLowerCase().includes(searchLower)
-                );
-              }).length} of {machinery.length} machines
-            </p>
-          )}
-          {machinery.length === 0 && (
-            <p style={{ color: '#ef4444', fontSize: '0.875rem', marginTop: '8px' }}>
-              ⚠️ No machinery available. Please add machinery first.
-            </p>
-          )}
-        </div>
+      {getPaginatedService().items.map(record => (
+   <div key={record.id} className="item-card" style={styles.itemCard}>
+  {editingServiceId === record.id ? (
+    <div style={{ flex: 1 }}>
+      <div style={{ marginBottom: '16px' }}>
+        <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+          Select Machine
+        </label>
         <input
-          style={styles.input}
-          placeholder="Service Type (e.g., Oil Change, Repair)"
-          value={serviceForm.serviceType}
-          onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
+          type="text"
+          placeholder="🔍 Search machines..."
+          value={machineSearchModal}
+          onChange={(e) => setMachineSearchModal(e.target.value)}
+          style={{
+            ...styles.input,
+            marginBottom: '8px'
+          }}
         />
+        <select
+          style={styles.input}
+          value={serviceForm.machineName}
+          onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
+          required
+        >
+          <option value="">-- Select a machine --</option>
+          {machinery
+            .filter(machine => {
+              const searchLower = machineSearchModal.toLowerCase();
+              return (
+                machine.name?.toLowerCase().includes(searchLower) ||
+                machine.category?.toLowerCase().includes(searchLower) ||
+                machine.vinSerial?.toLowerCase().includes(searchLower)
+              );
+            })
+            .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+            .map(machine => (
+              <option key={machine.id} value={machine.name}>
+                {machine.name} {machine.category ? `(${machine.category})` : ''}
+              </option>
+            ))}
+        </select>
+        {machineSearchModal && (
+          <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginTop: '4px' }}>
+            Showing {machinery.filter(m => {
+              const searchLower = machineSearchModal.toLowerCase();
+              return (
+                m.name?.toLowerCase().includes(searchLower) ||
+                m.category?.toLowerCase().includes(searchLower) ||
+                m.vinSerial?.toLowerCase().includes(searchLower)
+              );
+            }).length} of {machinery.length} machines
+          </p>
+        )}
+        {machinery.length === 0 && (
+          <p style={{ color: '#ef4444', fontSize: '0.875rem', marginTop: '8px' }}>
+            ⚠️ No machinery available. Please add machinery first.
+          </p>
+        )}
+      </div>
+      <input
+        style={styles.input}
+        placeholder="Service Type (e.g., Oil Change, Repair)"
+        value={serviceForm.serviceType}
+        onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
+      />
+      <input
+        style={styles.input}
+        type="date"
+        placeholder="Date"
+        value={serviceForm.date}
+        onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
+      />
+      <input
+        style={styles.input}
+        placeholder="Technician"
+        value={serviceForm.technician}
+        onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
+      />
+      <textarea
+        style={{ ...styles.input, minHeight: '80px', resize: 'vertical' }}
+        placeholder="Notes"
+        value={serviceForm.notes}
+        onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
+      />
+      <div style={{ marginBottom: '12px' }}>
+        <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+          📸 Upload Photos (up to 10)
+        </label>
         <input
-          style={styles.input}
-          type="date"
-          placeholder="Date"
-          value={serviceForm.date}
-          onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
-        />
-        <input
-          style={styles.input}
-          placeholder="Technician"
-          value={serviceForm.technician}
-          onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
-        />
-        <textarea
-          style={{ ...styles.input, minHeight: '80px', resize: 'vertical' }}
-          placeholder="Notes"
-          value={serviceForm.notes}
-          onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
-        />
-        <div style={{ marginBottom: '12px' }}>
-          <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
-            📸 Upload Photos (up to 10)
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={async (e) => {
-              const files = Array.from(e.target.files);
-              if (files.length === 0) return;
-              const currentCount = serviceForm.photoUrls.length;
-              const remainingSlots = 10 - currentCount;
-              if (remainingSlots === 0) {
-                alert('Maximum 10 photos allowed');
-                e.target.value = '';
-                return;
-              }
-              const filesToUpload = files.slice(0, remainingSlots);
-              if (files.length > remainingSlots) {
-                alert(`Only uploading ${remainingSlots} photo(s) to stay within 10 photo limit`);
-              }
-              for (const file of filesToUpload) {
-                const photoUrl = await handlePhotoUpload(file, 'service');
-                if (photoUrl) {
-                  setServiceForm(prev => ({
-                    ...prev,
-                    photoUrls: [...prev.photoUrls, photoUrl]
-                  }));
-                }
-              }
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={async (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+            const currentCount = serviceForm.photoUrls.length;
+            const remainingSlots = 10 - currentCount;
+            if (remainingSlots === 0) {
+              alert('Maximum 10 photos allowed');
               e.target.value = '';
-            }}
-            style={{ ...styles.input, padding: '8px' }}
-            disabled={serviceForm.photoUrls.length >= 10 || uploadingPhoto}
-          />
-          {uploadingPhoto && (
-            <p style={{ color: '#10b981', fontSize: '0.875rem', marginTop: '8px' }}>
-              Compressing photo...
-            </p>
+              return;
+            }
+            const filesToUpload = files.slice(0, remainingSlots);
+            if (files.length > remainingSlots) {
+              alert(`Only uploading ${remainingSlots} photo(s) to stay within 10 photo limit`);
+            }
+            for (const file of filesToUpload) {
+              const photoUrl = await handlePhotoUpload(file, 'service');
+              if (photoUrl) {
+                setServiceForm(prev => ({
+                  ...prev,
+                  photoUrls: [...prev.photoUrls, photoUrl]
+                }));
+              }
+            }
+            e.target.value = '';
+          }}
+          style={{ ...styles.input, padding: '8px' }}
+          disabled={serviceForm.photoUrls.length >= 10 || uploadingPhoto}
+        />
+        {uploadingPhoto && (
+          <p style={{ color: '#10b981', fontSize: '0.875rem', marginTop: '8px' }}>
+            Compressing photo...
+          </p>
+        )}
+        {serviceForm.photoUrls.length > 0 && (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
+            gap: '12px',
+            marginTop: '12px'
+          }}>
+            {serviceForm.photoUrls.map((url, index) => (
+              <div key={index} style={{ position: 'relative', display: 'inline-block' }}>
+                <img 
+                  src={url} 
+                  alt={`Photo ${index + 1}`}
+                  style={{ 
+                    width: '100%', 
+                    height: '100px', 
+                    objectFit: 'cover', 
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s ease',
+                    border: '2px solid transparent'
+                  }} 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setViewingImage(url);
+                    setImageModalTitle(`Service Photo ${index + 1}`);
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                    e.currentTarget.style.borderColor = '#10b981';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.borderColor = 'transparent';
+                  }}
+                />
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setServiceForm(prev => ({
+                      ...prev,
+                      photoUrls: prev.photoUrls.filter((_, i) => i !== index)
+                    }));
+                  }}
+                  style={{
+                    position: 'absolute',
+                    top: '4px',
+                    right: '4px',
+                    background: '#ef4444',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '24px',
+                    height: '24px',
+                    color: 'white',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                  }}
+                  title="Remove photo"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <p style={{ 
+          color: '#9ca3af', 
+          fontSize: '0.75rem', 
+          marginTop: '8px' 
+        }}>
+          {serviceForm.photoUrls.length} / 10 photos
+        </p>
+      </div>
+      <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+        <button 
+          onClick={() => saveServiceEdit(record.id)} 
+          style={{
+            ...styles.saveButton,
+            opacity: savingService ? 0.7 : 1,
+            cursor: savingService ? 'not-allowed' : 'pointer'
+          }}
+          disabled={savingService}
+        >
+          {savingService ? (
+            <>
+              <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} /> 
+              Saving...
+            </>
+          ) : (
+            <>
+              <Save size={16} /> Save
+            </>
           )}
-          {serviceForm.photoUrls.length > 0 && (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
-              gap: '12px',
-              marginTop: '12px'
-            }}>
-              {serviceForm.photoUrls.map((url, index) => (
-                <div key={index} style={{ position: 'relative', display: 'inline-block' }}>
-                  <img 
-                    src={url} 
-                    alt={`Photo ${index + 1}`}
-                    style={{ 
-                      width: '100%', 
-                      height: '100px', 
-                      objectFit: 'cover', 
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s ease',
-                      border: '2px solid transparent'
-                    }} 
-                    onClick={(e) => {
+        </button>
+        <button 
+          onClick={cancelServiceEdit} 
+          style={styles.cancelButton}
+          disabled={savingService}
+        >
+          <X size={16} /> Cancel
+        </button>
+      </div>
+    </div>
+  ) : (
+    <>
+      {record.photoUrls && record.photoUrls.length > 0 && (
+        <div style={{ 
+          marginRight: '16px',
+          flexShrink: 0
+        }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: record.photoUrls.length === 1 
+              ? '1fr' 
+              : 'repeat(2, 1fr)',
+            gap: '8px',
+            width: record.photoUrls.length === 1 ? '100px' : '208px'
+          }}>
+            {record.photoUrls.map((url, index) => (
+              <div key={index} style={{ position: 'relative', width: '100%', height: '100px' }}>
+                <img 
+                  src={url} 
+                  alt={`Service photo ${index + 1}`}
+                  style={{ 
+                    width: '100%', 
+                    height: '100%',
+                    objectFit: 'cover', 
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s ease',
+                    border: '2px solid transparent',
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    pointerEvents: 'auto',
+                    display: 'block'
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setViewingImage(url);
+                    setImageModalTitle(`${record.machineName} - ${record.serviceType} (${index + 1}/${record.photoUrls.length})`);
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                    e.currentTarget.style.borderColor = '#10b981';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.borderColor = 'transparent';
+                  }}
+                />
+                {userRole !== 'employee' && (
+                  <button
+                    onClick={async (e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      setViewingImage(url);
-                      setImageModalTitle(`Service Photo ${index + 1}`);
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'scale(1.05)';
-                      e.currentTarget.style.borderColor = '#10b981';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'scale(1)';
-                      e.currentTarget.style.borderColor = 'transparent';
-                    }}
-                  />
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setServiceForm(prev => ({
-                        ...prev,
-                        photoUrls: prev.photoUrls.filter((_, i) => i !== index)
-                      }));
+                      if (confirm('Remove this photo from the service record?')) {
+                        try {
+                          const updatedPhotos = record.photoUrls.filter((_, i) => i !== index);
+                          await supabase.from('service_records').update({
+                            photo_urls: JSON.stringify(updatedPhotos)
+                          }).eq('id', record.id);
+                          setServiceHistory(prev => prev.map(r => 
+                            r.id === record.id ? { ...r, photoUrls: updatedPhotos } : r
+                          ));
+                          console.log('✅ Photo removed from service record');
+                        } catch (error) {
+                          console.error('Error removing photo:', error);
+                          alert('Failed to remove photo');
+                        }
+                      }
                     }}
                     style={{
                       position: 'absolute',
@@ -4744,171 +4877,27 @@ key={theme}
                       justifyContent: 'center',
                       fontSize: '14px',
                       fontWeight: 'bold',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                      zIndex: 10
                     }}
                     title="Remove photo"
                   >
                     ✕
                   </button>
-                </div>
-              ))}
-            </div>
-          )}
+                )}
+              </div>
+            ))}
+          </div>
           <p style={{ 
             color: '#9ca3af', 
             fontSize: '0.75rem', 
-            marginTop: '8px' 
+            marginTop: '4px',
+            textAlign: 'center'
           }}>
-            {serviceForm.photoUrls.length} / 10 photos
+            {record.photoUrls.length} photo{record.photoUrls.length !== 1 ? 's' : ''}
           </p>
-        </div>
-        <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-          <button 
-            onClick={() => saveServiceEdit(record.id)} 
-            style={{
-              ...styles.saveButton,
-              opacity: savingService ? 0.7 : 1,
-              cursor: savingService ? 'not-allowed' : 'pointer'
-            }}
-            disabled={savingService}
-          >
-            {savingService ? (
-              <>
-                <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} /> 
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save size={16} /> Save
-              </>
-            )}
-          </button>
-          <button 
-            onClick={cancelServiceEdit} 
-            style={styles.cancelButton}
-            disabled={savingService}
-          >
-            <X size={16} /> Cancel
-          </button>
-        </div>
-      </div>
-    ) : (
-      <>
-        <div style={{ 
-          marginRight: '16px',
-          flexShrink: 0,
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
-          {record.photoUrls && record.photoUrls.length > 0 && (
-            <>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: record.photoUrls.length === 1 
-                  ? '1fr' 
-                  : 'repeat(2, 1fr)',
-                gap: '8px',
-                width: record.photoUrls.length === 1 ? '100px' : '208px'
-              }}>
-                {record.photoUrls.map((url, index) => (
-                  <div key={index} style={{ position: 'relative', width: '100%', height: '100px' }}>
-                    <img 
-                      src={url} 
-                      alt={`Service photo ${index + 1}`}
-                      style={{ 
-                        width: '100%', 
-                        height: '100%',
-                        objectFit: 'cover', 
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        transition: 'transform 0.2s ease',
-                        border: '2px solid transparent',
-                        userSelect: 'none',
-                        WebkitUserSelect: 'none',
-                        pointerEvents: 'auto',
-                        display: 'block'
-                      }}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setViewingImage(url);
-                        setImageModalTitle(`${record.machineName} - ${record.serviceType} (${index + 1}/${record.photoUrls.length})`);
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'scale(1.05)';
-                        e.currentTarget.style.borderColor = '#10b981';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'scale(1)';
-                        e.currentTarget.style.borderColor = 'transparent';
-                      }}
-                    />
-                    {userRole !== 'employee' && (
-                      <button
-                        onClick={async (e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          if (confirm('Remove this photo from the service record?')) {
-                            try {
-                              const updatedPhotos = record.photoUrls.filter((_, i) => i !== index);
-                              await supabase.from('service_records').update({
-                                photo_urls: JSON.stringify(updatedPhotos)
-                              }).eq('id', record.id);
-                              setServiceHistory(prev => prev.map(r => 
-                                r.id === record.id ? { ...r, photoUrls: updatedPhotos } : r
-                              ));
-                              console.log('✅ Photo removed from service record');
-                            } catch (error) {
-                              console.error('Error removing photo:', error);
-                              alert('Failed to remove photo');
-                            }
-                          }
-                        }}
-                        style={{
-                          position: 'absolute',
-                          top: '4px',
-                          right: '4px',
-                          background: '#ef4444',
-                          border: 'none',
-                          borderRadius: '50%',
-                          width: '24px',
-                          height: '24px',
-                          color: 'white',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '14px',
-                          fontWeight: 'bold',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                          zIndex: 10
-                        }}
-                        title="Remove photo"
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <p style={{ 
-                color: '#9ca3af', 
-                fontSize: '0.75rem', 
-                marginTop: '4px',
-                textAlign: 'center'
-              }}>
-                {record.photoUrls.length} photo{record.photoUrls.length !== 1 ? 's' : ''}
-              </p>
-            </>
-          )}
-          
           {window.innerWidth < 768 && userRole !== 'employee' && (
-            <div style={{ 
-              display: 'flex', 
-              gap: '8px', 
-              marginTop: record.photoUrls && record.photoUrls.length > 0 ? '8px' : '0', 
-              justifyContent: 'center' 
-            }}>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '8px', justifyContent: 'center' }}>
               <button onClick={() => startEditService(record)} style={styles.editButton}>
                 <Edit2 size={16} />
               </button>
@@ -4916,45 +4905,44 @@ key={theme}
                 <Trash2 size={16} />
               </button>
             </div>
-          )}
+        )}
         </div>
-        
-        <div style={{ flex: 1 }}>
-          <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
-          <p style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '12px' }}>{record.serviceType}</p>
-          <div style={styles.itemDetails}>
-            <div>
-              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Date</p>
-              <p>{record.date || 'N/A'}</p>
-            </div>
-            <div>
-              <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Technician</p>
-              <p>{record.technician || 'N/A'}</p>
-            </div>
+      )}
+      <div style={{ flex: 1 }}>
+        <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
+        <p style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '12px' }}>{record.serviceType}</p>
+        <div style={styles.itemDetails}>
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Date</p>
+            <p>{record.date || 'N/A'}</p>
           </div>
-          {record.notes && (
-            <div style={{ marginTop: '12px', padding: '12px', background: '#1f2937', borderRadius: '8px' }}>
-              <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Notes:</p>
-              <p style={{ fontSize: '0.875rem' }}>{record.notes}</p>
-            </div>
-          )}
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Technician</p>
+            <p>{record.technician || 'N/A'}</p>
+          </div>
         </div>
-        
-        {window.innerWidth >= 768 && userRole !== 'employee' && (
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={() => startEditService(record)} style={styles.editButton}>
-              <Edit2 size={16} />
-            </button>
-            <button onClick={() => deleteServiceRecord(record.id)} style={styles.deleteButton}>
-              <Trash2 size={16} />
-            </button>
+        {record.notes && (
+          <div style={{ marginTop: '12px', padding: '12px', background: '#1f2937', borderRadius: '8px' }}>
+            <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Notes:</p>
+            <p style={{ fontSize: '0.875rem' }}>{record.notes}</p>
           </div>
         )}
-      </>
-    )}
-  </div>
-))}
-    
+      </div>
+      {window.innerWidth >= 768 && userRole !== 'employee' && (
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button onClick={() => startEditService(record)} style={styles.editButton}>
+            <Edit2 size={16} />
+          </button>
+          <button onClick={() => deleteServiceRecord(record.id)} style={styles.deleteButton}>
+         <Trash2 size={16} />
+          </button>
+        </div>
+      )}
+    </>
+  )}
+</div>
+                ))}
+              </div>
               {/* BOTTOM PAGINATION CONTROLS */}
               <div style={{
                 padding: '16px',
