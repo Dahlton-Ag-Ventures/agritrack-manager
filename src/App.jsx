@@ -1933,7 +1933,7 @@ itemCard: {
     width: '100%', 
     height: '100%', 
     objectFit: 'contain',
-    marginLeft: '-3px'
+    marginLeft: '-6px'
   }} 
   onLoad={(e) => {
     // Load actual logo
