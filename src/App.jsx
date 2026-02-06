@@ -1207,23 +1207,38 @@ const startEditService = (record) => {
 const saveServiceEdit = async (id) => {
   setSavingService(true);
   try {
-    await supabase.from('service_records').update({
+    const updates = {
       machine_name: serviceForm.machineName,
       service_type: serviceForm.serviceType,
       date: serviceForm.date,
       notes: serviceForm.notes,
       technician: serviceForm.technician,
       photo_urls: JSON.stringify(serviceForm.photoUrls || [])
-    }).eq('id', id);
+    };
+    
+    await supabase.from('service_records').update(updates).eq('id', id);
+
+    // ✅ UPDATE LOCAL STATE IMMEDIATELY
+    setServiceHistory(prev => prev.map(item => 
+      item.id === id ? {
+        id: item.id,
+        machineName: updates.machine_name,
+        serviceType: updates.service_type,
+        date: updates.date,
+        notes: updates.notes,
+        technician: updates.technician,
+        photoUrls: serviceForm.photoUrls || []  // ✅ USE ARRAY, NOT STRING
+      } : item
+    ));
 
     console.log('✅ Service updated - FAST!');
     setEditingServiceId(null);
     setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrls: [] });
     setMachineSearchModal('');
-    setSavingService(false);
   } catch (error) {
     console.error('Update error:', error);
     alert('Error: ' + error.message);
+  } finally {
     setSavingService(false);
   }
 };
