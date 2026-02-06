@@ -1923,7 +1923,7 @@ itemCard: {
         justifyContent: 'center',
         marginBottom: '30px',
         boxShadow: '0 0 60px rgba(255, 255, 255, 0.5), 0 20px 40px rgba(0, 0, 0, 0.4)',
-        padding: '10px',
+        padding: '5px',
         animation: 'floatIn 1s ease-out'
       }}>
 <img 
