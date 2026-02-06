@@ -1927,7 +1927,7 @@ itemCard: {
         animation: 'floatIn 1s ease-out'
       }}>
         <img 
-          src="/mnt/user-data/uploads/DAV_-_no_background.png"
+          src="/dav-logo.png"
           alt="Dahlton Ag Ventures" 
           style={{ 
             width: '100%', 
