@@ -1927,12 +1927,14 @@ itemCard: {
         animation: 'floatIn 1s ease-out'
       }}>
 <img 
-  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+  src="/dav-logo.png"
   alt="Dahlton Ag Ventures" 
   style={{ 
     width: '100%', 
     height: '100%', 
-    objectFit: 'contain' 
+    objectFit: 'contain',
+    display: 'block',
+    margin: 'auto'
   }} 
   onLoad={(e) => {
     // Load actual logo
