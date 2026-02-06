@@ -27,39 +27,6 @@ if (!document.getElementById('agritrack-animations')) {
   document.head.appendChild(styleSheet);
 }
 
-// 🌐 Network Quality Detection
-const useNetworkQuality = () => {
-  const [networkQuality, setNetworkQuality] = useState('unknown');
-  const [connectionType, setConnectionType] = useState('unknown');
-
-  useEffect(() => {
-    if ('connection' in navigator || 'mozConnection' in navigator || 'webkitConnection' in navigator) {
-      const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-      
-      const updateConnectionInfo = () => {
-        const effectiveType = connection.effectiveType;
-        const downlink = connection.downlink;
-        
-        setConnectionType(effectiveType);
-        
-        if (effectiveType === '4g' && downlink > 5) {
-          setNetworkQuality('excellent');
-        } else if (effectiveType === '4g' || (effectiveType === '3g' && downlink > 2)) {
-          setNetworkQuality('good');
-        } else {
-          setNetworkQuality('poor');
-        }
-      };
-
-      updateConnectionInfo();
-      connection.addEventListener('change', updateConnectionInfo);
-      return () => connection.removeEventListener('change', updateConnectionInfo);
-    }
-  }, []);
-
-  return { networkQuality, connectionType };
-};
-
 // Theme configurations
 const themes = {
 dark: {
@@ -140,10 +107,6 @@ export default function App() {
   const isEditingRef = useRef(false);
   const recentlyUpdatedIdsRef = useRef(new Set());
   const [showRemindersPanel, setShowRemindersPanel] = useState(false);
-
-// 🌐 Network state
-  const { networkQuality, connectionType } = useNetworkQuality();
-  const [dataMode, setDataMode] = useState('auto');
   
   const [activeTab, setActiveTab] = useState('home');
   const [inventory, setInventory] = useState([]);
@@ -751,24 +714,12 @@ const handlePhotoUpload = async (file, formType) => {
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-
-    // 🌐 ADAPTIVE QUALITY based on network
-    let MAX_WIDTH, MAX_HEIGHT, quality;
     
-    if (networkQuality === 'poor' || dataMode === 'data-saver') {
-      MAX_WIDTH = 800;
-      MAX_HEIGHT = 800;
-      quality = 0.6; // More compression for slow networks
-    } else if (networkQuality === 'good') {
-      MAX_WIDTH = 1000;
-      MAX_HEIGHT = 1000;
-      quality = 0.75; // Balanced
-    } else {
-      MAX_WIDTH = 1200;
-      MAX_HEIGHT = 1200;
-      quality = 0.85; // High quality for fast connections
-    }
-
+// Fixed quality settings
+const MAX_WIDTH = 1200;
+const MAX_HEIGHT = 1200;
+const quality = 0.85;
+    
     let width = img.width;
     let height = img.height;
 
@@ -808,7 +759,7 @@ const handlePhotoUpload = async (file, formType) => {
     setUploadingPhoto(false);
 
     const finalSizeMB = (base64Result.length / (1024 * 1024)).toFixed(2);
-    console.log(`✅ Image compressed to ${finalSizeMB}MB (${networkQuality} network)`);
+    console.log(`✅ Image compressed to ${finalSizeMB}MB`);
 
     return base64Result;
 
@@ -2299,25 +2250,6 @@ key={theme}
 )}
           </div>
          <div style={styles.statusContainer}>
-            {/* 🌐 Network Indicator */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 16px',
-              background: networkQuality === 'excellent' ? 'rgba(16, 185, 129, 0.2)' : 
-                          networkQuality === 'good' ? 'rgba(251, 191, 36, 0.2)' : 
-                          'rgba(239, 68, 68, 0.2)',
-              border: `1px solid ${networkQuality === 'excellent' ? '#10b981' : 
-                                   networkQuality === 'good' ? '#fbbf24' : '#ef4444'}`,
-              borderRadius: '8px',
-              fontSize: '0.875rem',
-              color: networkQuality === 'excellent' ? '#10b981' : 
-                     networkQuality === 'good' ? '#fbbf24' : '#ef4444'
-            }}>
-              {networkQuality === 'excellent' ? <Wifi size={16} /> : <WifiOff size={16} />}
-              {connectionType === '4g' ? '5G/4G' : connectionType.toUpperCase()}
-            </div>
             
             {syncing && (
               <div style={styles.syncingBadge}>
@@ -5162,39 +5094,7 @@ key={theme}
                             ☀️ Light Mode
                           </button>
                         </div>
-                      </div>
-                      
-                      {/* 🌐 Data Mode Setting */}
-                      <div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '8px' }}>Data Mode</p>
-                        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                          {['auto', 'wifi-only', 'data-saver'].map(mode => (
-                            <button
-                              key={mode}
-                              onClick={() => setDataMode(mode)}
-                              style={{
-                                padding: '10px 20px',
-                                background: dataMode === mode ? 'linear-gradient(to right, #10b981, #06b6d4)' : '#374151',
-                                border: dataMode === mode ? '2px solid #10b981' : '1px solid #4b5563',
-                                borderRadius: '8px',
-                                color: 'white',
-                                cursor: 'pointer',
-                                fontSize: '0.875rem',
-                                fontWeight: dataMode === mode ? 'bold' : 'normal',
-                                textTransform: 'capitalize'
-                              }}
-                            >
-                              {mode.replace('-', ' ')}
-                            </button>
-                          ))}
-                        </div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginTop: '8px' }}>
-                          {dataMode === 'auto' && '⚡ Automatically adjusts quality based on connection'}
-                          {dataMode === 'wifi-only' && '📶 Only sync when on WiFi'}
-                          {dataMode === 'data-saver' && '💾 Reduces image quality and data usage'}
-                        </p>
-                      </div>
-                      
+                      </div>     
                       <div>
                         <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Language</p>
                         <p>English (US)</p>
