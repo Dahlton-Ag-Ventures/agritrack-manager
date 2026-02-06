@@ -1912,6 +1912,30 @@ itemCard: {
   if (!user) {
     return (
       <div style={styles.loginContainer}>
+        {/* Dahlton Ag Ventures Logo */}
+      <div style={{
+        width: '180px',
+        height: '180px',
+        background: 'rgba(255, 255, 255, 0.95)',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: '30px',
+        boxShadow: '0 0 60px rgba(255, 255, 255, 0.5), 0 20px 40px rgba(0, 0, 0, 0.4)',
+        padding: '20px',
+        animation: 'floatIn 1s ease-out'
+      }}>
+        <img 
+          src="/mnt/user-data/uploads/DAV_-_no_background.png"
+          alt="Dahlton Ag Ventures" 
+          style={{ 
+            width: '100%', 
+            height: '100%', 
+            objectFit: 'contain' 
+          }} 
+        />
+      </div>
         <div style={styles.loginCard}>
           <h2 style={{
   fontSize: '1.75rem',
