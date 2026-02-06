@@ -2325,7 +2325,7 @@ key={theme}
                 Syncing...
               </div>
             )}
-{realtimeStatus === 'connected' && (
+{realtimeStatus === 'connected' ? (
   <button onClick={() => setShowDebugModal(true)} style={{
     ...styles.statusBadge,
     background: 'rgba(16, 185, 129, 0.2)',
@@ -2334,6 +2334,16 @@ key={theme}
   }}>
     <Users size={16} />
     Live Sync Active
+  </button>
+) : (
+  <button onClick={() => setShowDebugModal(true)} style={{
+    ...styles.statusBadge,
+    background: 'rgba(239, 68, 68, 0.2)',
+    borderColor: '#ef4444',
+    color: '#ef4444'
+  }}>
+    <AlertCircle size={16} />
+    {realtimeStatus === 'connecting' ? 'Connecting...' : 'Connection Lost'}
   </button>
 )}
             <button onClick={handleLogout} style={styles.logoutButton}>
