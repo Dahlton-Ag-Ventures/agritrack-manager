@@ -103,6 +103,8 @@ export default function App() {
   const settingsDropdownRef = useRef(null);
   const [viewingImage, setViewingImage] = useState(null);
   const [imageModalTitle, setImageModalTitle] = useState('');
+  const [viewingImageIndex, setViewingImageIndex] = useState(0);
+  const [viewingImageArray, setViewingImageArray] = useState([]);
   const lastLocalUpdateRef = useRef(0);
   const isEditingRef = useRef(false);
   const recentlyUpdatedIdsRef = useRef(new Set());
@@ -4852,12 +4854,14 @@ key={theme}
                       pointerEvents: 'auto',
                       display: 'block'
                     }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setViewingImage(url);
-                      setImageModalTitle(`${record.machineName} - ${record.serviceType} (${index + 1}/${record.photoUrls.length})`);
-                    }}
+  onClick={(e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  setViewingImage(url);
+  setViewingImageArray(record.photoUrls);
+  setViewingImageIndex(index);
+  setImageModalTitle(`${record.machineName} - ${record.serviceType}`);
+}}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = 'scale(1.05)';
                       e.currentTarget.style.borderColor = '#10b981';
@@ -6310,24 +6314,61 @@ key={theme}
   </Modal>
 )}
 {/* Zoomable Image Viewer Modal */}
-       {viewingImage && <ZoomableImageViewer 
-          imageUrl={viewingImage} 
-          title={imageModalTitle} 
-          onClose={() => setViewingImage(null)}
-          theme={currentTheme}
-        />}
+      {viewingImage && <ZoomableImageViewer 
+  imageUrl={viewingImage} 
+  title={imageModalTitle} 
+  onClose={() => {
+    setViewingImage(null);
+    setViewingImageArray([]);
+    setViewingImageIndex(0);
+  }}
+  theme={currentTheme}
+  allPhotos={viewingImageArray}
+  startIndex={viewingImageIndex}
+/>}
       </div>
     </div>
   );
 }
 
-// Zoomable Image Viewer Component
-function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
+// Zoomable Image Viewer Component with Photo Navigation
+function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, startIndex }) {
   const [scale, setScale] = React.useState(1);
+  const [currentIndex, setCurrentIndex] = React.useState(startIndex || 0);
+  
+  const photos = allPhotos || [imageUrl];
+  const hasMultiplePhotos = photos.length > 1;
+  const currentPhoto = photos[currentIndex];
   
   const zoomIn = () => setScale(prev => Math.min(prev + 0.5, 3));
   const zoomOut = () => setScale(prev => Math.max(prev - 0.5, 1));
   const resetZoom = () => setScale(1);
+  
+  const nextPhoto = () => {
+    if (currentIndex < photos.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+      resetZoom();
+    }
+  };
+  
+  const prevPhoto = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(prev => prev - 1);
+      resetZoom();
+    }
+  };
+  
+  // Keyboard navigation
+  React.useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === 'ArrowLeft') prevPhoto();
+      if (e.key === 'ArrowRight') nextPhoto();
+      if (e.key === 'Escape') onClose();
+    };
+    
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [currentIndex, photos.length]);
   
   return (
     <div 
@@ -6347,6 +6388,7 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
       }}
       onClick={onClose}
     >
+      {/* Header */}
       <div 
         style={{
           background: theme.cardBackground,
@@ -6355,11 +6397,15 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
           marginBottom: '20px',
           display: 'flex',
           gap: '20px',
-          alignItems: 'center'
+          alignItems: 'center',
+          position: 'relative',
+          zIndex: 10
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 style={{ color: theme.text, margin: 0 }}>{title}</h3>
+        <h3 style={{ color: theme.text, margin: 0 }}>
+          {title} {hasMultiplePhotos && `(${currentIndex + 1}/${photos.length})`}
+        </h3>
         <button
           onClick={onClose}
           style={{
@@ -6376,29 +6422,120 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
         </button>
       </div>
       
+      {/* Image Container with Navigation Arrows */}
       <div 
         style={{ 
           flex: 1, 
           display: 'flex', 
           alignItems: 'center', 
-          justifyContent: 'center' 
+          justifyContent: 'center',
+          position: 'relative',
+          width: '100%',
+          zIndex: 1,
+          gap: '20px'
         }}
       >
+        {/* Left Arrow */}
+        {hasMultiplePhotos && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              prevPhoto();
+            }}
+            disabled={currentIndex === 0}
+            style={{
+              position: 'absolute',
+              left: '20px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              padding: '16px 20px',
+              background: currentIndex === 0 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(16, 185, 129, 0.9)',
+              border: 'none',
+              borderRadius: '50%',
+              color: 'white',
+              cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              zIndex: 10,
+              opacity: currentIndex === 0 ? 0.5 : 1,
+              transition: 'all 0.2s ease',
+              boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
+            }}
+            onMouseEnter={(e) => {
+              if (currentIndex !== 0) {
+                e.target.style.background = 'rgba(16, 185, 129, 1)';
+                e.target.style.transform = 'translateY(-50%) scale(1.1)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = currentIndex === 0 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(16, 185, 129, 0.9)';
+              e.target.style.transform = 'translateY(-50%) scale(1)';
+            }}
+          >
+            ◀
+          </button>
+        )}
+        
+        {/* Image */}
         <img 
-          src={imageUrl} 
+          src={currentPhoto} 
           alt="View" 
           style={{ 
             maxWidth: '90vw', 
             maxHeight: '70vh',
             objectFit: 'contain',
             borderRadius: '8px',
-            transform: 'scale(' + scale + ')',
-            transition: 'transform 0.3s ease'
+            transform: `scale(${scale})`,
+            transition: 'transform 0.3s ease',
+            position: 'relative',
+            zIndex: 1
           }} 
           onClick={(e) => e.stopPropagation()}
         />
+        
+        {/* Right Arrow */}
+        {hasMultiplePhotos && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              nextPhoto();
+            }}
+            disabled={currentIndex === photos.length - 1}
+            style={{
+              position: 'absolute',
+              right: '20px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              padding: '16px 20px',
+              background: currentIndex === photos.length - 1 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(16, 185, 129, 0.9)',
+              border: 'none',
+              borderRadius: '50%',
+              color: 'white',
+              cursor: currentIndex === photos.length - 1 ? 'not-allowed' : 'pointer',
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              zIndex: 10,
+              opacity: currentIndex === photos.length - 1 ? 0.5 : 1,
+              transition: 'all 0.2s ease',
+              boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
+            }}
+            onMouseEnter={(e) => {
+              if (currentIndex !== photos.length - 1) {
+                e.target.style.background = 'rgba(16, 185, 129, 1)';
+                e.target.style.transform = 'translateY(-50%) scale(1.1)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = currentIndex === photos.length - 1 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(16, 185, 129, 0.9)';
+              e.target.style.transform = 'translateY(-50%) scale(1)';
+            }}
+          >
+            ▶
+          </button>
+        )}
       </div>
       
+      {/* Zoom Controls */}
       <div 
         style={{
           background: theme.cardBackground,
@@ -6406,7 +6543,9 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme }) {
           borderRadius: '12px',
           display: 'flex',
           gap: '12px',
-          alignItems: 'center'
+          alignItems: 'center',
+          position: 'relative',
+          zIndex: 10
         }}
         onClick={(e) => e.stopPropagation()}
       >
