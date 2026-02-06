@@ -1926,15 +1926,19 @@ itemCard: {
         padding: '20px',
         animation: 'floatIn 1s ease-out'
       }}>
-        <img 
-          src="/dav-logo.png"
-          alt="Dahlton Ag Ventures" 
-          style={{ 
-            width: '100%', 
-            height: '100%', 
-            objectFit: 'contain' 
-          }} 
-        />
+<img 
+  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+  alt="Dahlton Ag Ventures" 
+  style={{ 
+    width: '100%', 
+    height: '100%', 
+    objectFit: 'contain' 
+  }} 
+  onLoad={(e) => {
+    // Load actual logo
+    e.target.src = '/dav-logo.png';
+  }}
+/>
       </div>
         <div style={styles.loginCard}>
           <h2 style={{
