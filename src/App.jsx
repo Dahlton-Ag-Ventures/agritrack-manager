@@ -6331,10 +6331,14 @@ key={theme}
   );
 }
 
-// Zoomable Image Viewer Component with Photo Navigation
+// Zoomable Image Viewer Component with Photo Navigation, Pan/Drag, Pinch & Scroll Zoom
 function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, startIndex }) {
   const [scale, setScale] = React.useState(1);
   const [currentIndex, setCurrentIndex] = React.useState(startIndex || 0);
+  const [position, setPosition] = React.useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
+  const [lastPinchDistance, setLastPinchDistance] = React.useState(null);
   
   const photos = allPhotos || [imageUrl];
   const hasMultiplePhotos = photos.length > 1;
@@ -6342,7 +6346,10 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
   
   const zoomIn = () => setScale(prev => Math.min(prev + 0.5, 3));
   const zoomOut = () => setScale(prev => Math.max(prev - 0.5, 1));
-  const resetZoom = () => setScale(1);
+  const resetZoom = () => {
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  };
   
   const nextPhoto = () => {
     if (currentIndex < photos.length - 1) {
@@ -6357,6 +6364,99 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
       resetZoom();
     }
   };
+  
+  // Mouse drag handlers
+  const handleMouseDown = (e) => {
+    if (scale > 1) {
+      setIsDragging(true);
+      setDragStart({
+        x: e.clientX - position.x,
+        y: e.clientY - position.y
+      });
+    }
+  };
+  
+  const handleMouseMove = (e) => {
+    if (isDragging && scale > 1) {
+      setPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+  
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+  
+  // Mouse wheel zoom
+  const handleWheel = (e) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    setScale(prev => Math.max(1, Math.min(3, prev + delta)));
+  };
+  
+  // Touch drag handlers for mobile
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 1 && scale > 1) {
+      // Single finger drag (only when zoomed)
+      setIsDragging(true);
+      const touch = e.touches[0];
+      setDragStart({
+        x: touch.clientX - position.x,
+        y: touch.clientY - position.y
+      });
+    } else if (e.touches.length === 2) {
+      // Two finger pinch zoom
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.hypot(
+        touch2.clientX - touch1.clientX,
+        touch2.clientY - touch1.clientY
+      );
+      setLastPinchDistance(distance);
+    }
+  };
+  
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 1 && isDragging && scale > 1) {
+      // Single finger drag
+      const touch = e.touches[0];
+      setPosition({
+        x: touch.clientX - dragStart.x,
+        y: touch.clientY - dragStart.y
+      });
+    } else if (e.touches.length === 2 && lastPinchDistance) {
+      // Two finger pinch zoom
+      e.preventDefault();
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.hypot(
+        touch2.clientX - touch1.clientX,
+        touch2.clientY - touch1.clientY
+      );
+      
+      const delta = (distance - lastPinchDistance) * 0.01;
+      setScale(prev => Math.max(1, Math.min(3, prev + delta)));
+      setLastPinchDistance(distance);
+    }
+  };
+  
+  const handleTouchEnd = (e) => {
+    if (e.touches.length < 2) {
+      setLastPinchDistance(null);
+    }
+    if (e.touches.length === 0) {
+      setIsDragging(false);
+    }
+  };
+  
+  // Reset position when scale changes
+  React.useEffect(() => {
+    if (scale === 1) {
+      setPosition({ x: 0, y: 0 });
+    }
+  }, [scale]);
   
   // Keyboard navigation
   React.useEffect(() => {
@@ -6432,49 +6532,56 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
           position: 'relative',
           width: '100%',
           zIndex: 1,
-          gap: '20px'
+          gap: '20px',
+          overflow: 'hidden'
         }}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onWheel={handleWheel}
       >
         {/* Left Arrow */}
-      {hasMultiplePhotos && (
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      prevPhoto();
-    }}
-    disabled={currentIndex === 0}
-    style={{
-      position: 'absolute',
-      left: '20px',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      padding: '8px 12px',  // ✅ Even smaller padding
-      background: currentIndex === 0 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)',
-      border: 'none',
-      borderRadius: '50%',
-      color: currentIndex === 0 ? '#6b7280' : '#000000',
-      cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
-      fontSize: '1rem',  // ✅ Even smaller arrow
-      fontWeight: 'bold',
-      zIndex: 10,
-      opacity: currentIndex === 0 ? 0.5 : 1,
-      transition: 'all 0.2s ease',
-      boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
-    }}
-    onMouseEnter={(e) => {
-      if (currentIndex !== 0) {
-        e.target.style.background = 'rgba(255, 255, 255, 1)';
-        e.target.style.transform = 'translateY(-50%) scale(1.1)';
-      }
-    }}
-    onMouseLeave={(e) => {
-      e.target.style.background = currentIndex === 0 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)';
-      e.target.style.transform = 'translateY(-50%) scale(1)';
-    }}
-  >
-    ◀
-  </button>
-)}
+        {hasMultiplePhotos && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              prevPhoto();
+            }}
+            disabled={currentIndex === 0}
+            style={{
+              position: 'absolute',
+              left: '20px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              padding: '8px 12px',
+              background: currentIndex === 0 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)',
+              border: 'none',
+              borderRadius: '50%',
+              color: currentIndex === 0 ? '#6b7280' : '#000000',
+              cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              zIndex: 10,
+              opacity: currentIndex === 0 ? 0.5 : 1,
+              transition: 'all 0.2s ease',
+              boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
+            }}
+            onMouseEnter={(e) => {
+              if (currentIndex !== 0) {
+                e.target.style.background = 'rgba(255, 255, 255, 1)';
+                e.target.style.transform = 'translateY(-50%) scale(1.1)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = currentIndex === 0 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)';
+              e.target.style.transform = 'translateY(-50%) scale(1)';
+            }}
+          >
+            ◀
+          </button>
+        )}
         
         {/* Image */}
         <img 
@@ -6485,126 +6592,133 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
             maxHeight: '70vh',
             objectFit: 'contain',
             borderRadius: '8px',
-            transform: `scale(${scale})`,
-            transition: 'transform 0.3s ease',
+            transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
+            transition: isDragging ? 'none' : 'transform 0.3s ease',
             position: 'relative',
-            zIndex: 1
+            zIndex: 1,
+            cursor: scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            touchAction: 'none'
           }} 
           onClick={(e) => e.stopPropagation()}
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
+          draggable={false}
         />
         
         {/* Right Arrow */}
-{hasMultiplePhotos && (
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      nextPhoto();
-    }}
-    disabled={currentIndex === photos.length - 1}
-    style={{
-      position: 'absolute',
-      right: '20px',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      padding: '8px 12px',  // ✅ Even smaller padding
-      background: currentIndex === photos.length - 1 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)',
-      border: 'none',
-      borderRadius: '50%',
-      color: currentIndex === photos.length - 1 ? '#6b7280' : '#000000',
-      cursor: currentIndex === photos.length - 1 ? 'not-allowed' : 'pointer',
-      fontSize: '1rem',  // ✅ Even smaller arrow
-      fontWeight: 'bold',
-      zIndex: 10,
-      opacity: currentIndex === photos.length - 1 ? 0.5 : 1,
-      transition: 'all 0.2s ease',
-      boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
-    }}
-    onMouseEnter={(e) => {
-      if (currentIndex !== photos.length - 1) {
-        e.target.style.background = 'rgba(255, 255, 255, 1)';
-        e.target.style.transform = 'translateY(-50%) scale(1.1)';
-      }
-    }}
-    onMouseLeave={(e) => {
-      e.target.style.background = currentIndex === photos.length - 1 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)';
-      e.target.style.transform = 'translateY(-50%) scale(1)';
-    }}
-  >
-    ▶
-  </button>
-)}
+        {hasMultiplePhotos && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              nextPhoto();
+            }}
+            disabled={currentIndex === photos.length - 1}
+            style={{
+              position: 'absolute',
+              right: '20px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              padding: '8px 12px',
+              background: currentIndex === photos.length - 1 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)',
+              border: 'none',
+              borderRadius: '50%',
+              color: currentIndex === photos.length - 1 ? '#6b7280' : '#000000',
+              cursor: currentIndex === photos.length - 1 ? 'not-allowed' : 'pointer',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              zIndex: 10,
+              opacity: currentIndex === photos.length - 1 ? 0.5 : 1,
+              transition: 'all 0.2s ease',
+              boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
+            }}
+            onMouseEnter={(e) => {
+              if (currentIndex !== photos.length - 1) {
+                e.target.style.background = 'rgba(255, 255, 255, 1)';
+                e.target.style.transform = 'translateY(-50%) scale(1.1)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = currentIndex === photos.length - 1 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)';
+              e.target.style.transform = 'translateY(-50%) scale(1)';
+            }}
+          >
+            ▶
+          </button>
+        )}
       </div>
       
-     {/* Zoom Controls */}
-<div 
-  style={{
-    background: theme.cardBackground,
-    padding: '12px',
-    borderRadius: '12px',
-    display: 'flex',
-    gap: '12px',
-    alignItems: 'center',
-    position: 'relative',
-    zIndex: 10
-  }}
-  onClick={(e) => e.stopPropagation()}
->
-  <button 
-    onClick={zoomOut} 
-    disabled={scale <= 1} 
-    style={{ 
-      padding: '8px 16px', 
-      background: scale <= 1 ? '#6b7280' : '#10b981', 
-      border: 'none', 
-      borderRadius: '8px', 
-      color: 'white', 
-      cursor: scale <= 1 ? 'not-allowed' : 'pointer', 
-      fontWeight: 'bold' 
-    }}
-  >
-    −
-  </button>
-  <span 
-    style={{ 
-      color: theme.text, 
-      fontWeight: 'bold', 
-      minWidth: '60px', 
-      textAlign: 'center' 
-    }}
-  >
-    {Math.round(scale * 100)}%
-  </span>
-  <button 
-    onClick={zoomIn} 
-    disabled={scale >= 3} 
-    style={{ 
-      padding: '8px 16px', 
-      background: scale >= 3 ? '#6b7280' : '#10b981', 
-      border: 'none', 
-      borderRadius: '8px', 
-      color: 'white', 
-      cursor: scale >= 3 ? 'not-allowed' : 'pointer', 
-      fontWeight: 'bold' 
-    }}
-  >
-    +
-  </button>
-  <button 
-    onClick={resetZoom} 
-    disabled={scale === 1} 
-    style={{ 
-      padding: '8px 16px', 
-      background: scale === 1 ? '#6b7280' : '#2563eb', 
-      border: 'none', 
-      borderRadius: '8px', 
-      color: 'white', 
-      cursor: scale === 1 ? 'not-allowed' : 'pointer', 
-      fontWeight: 'bold' 
-    }}
-  >
-    Reset
-  </button>
-</div>
+      {/* Zoom Controls */}
+      <div 
+        style={{
+          background: theme.cardBackground,
+          padding: '12px',
+          borderRadius: '12px',
+          display: 'flex',
+          gap: '12px',
+          alignItems: 'center',
+          position: 'relative',
+          zIndex: 10
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button 
+          onClick={zoomOut} 
+          disabled={scale <= 1} 
+          style={{ 
+            padding: '8px 16px', 
+            background: scale <= 1 ? '#6b7280' : '#10b981', 
+            border: 'none', 
+            borderRadius: '8px', 
+            color: 'white', 
+            cursor: scale <= 1 ? 'not-allowed' : 'pointer', 
+            fontWeight: 'bold' 
+          }}
+        >
+          −
+        </button>
+        <span 
+          style={{ 
+            color: theme.text, 
+            fontWeight: 'bold', 
+            minWidth: '60px', 
+            textAlign: 'center' 
+          }}
+        >
+          {Math.round(scale * 100)}%
+        </span>
+        <button 
+          onClick={zoomIn} 
+          disabled={scale >= 3} 
+          style={{ 
+            padding: '8px 16px', 
+            background: scale >= 3 ? '#6b7280' : '#10b981', 
+            border: 'none', 
+            borderRadius: '8px', 
+            color: 'white', 
+            cursor: scale >= 3 ? 'not-allowed' : 'pointer', 
+            fontWeight: 'bold' 
+          }}
+        >
+          +
+        </button>
+        <button 
+          onClick={resetZoom} 
+          disabled={scale === 1} 
+          style={{ 
+            padding: '8px 16px', 
+            background: scale === 1 ? '#6b7280' : '#2563eb', 
+            border: 'none', 
+            borderRadius: '8px', 
+            color: 'white', 
+            cursor: scale === 1 ? 'not-allowed' : 'pointer', 
+            fontWeight: 'bold' 
+          }}
+        >
+          Reset
+        </button>
+      </div>
     </div>
   );
 }
