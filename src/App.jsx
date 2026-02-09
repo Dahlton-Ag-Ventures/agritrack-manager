@@ -4583,7 +4583,7 @@ key={theme}
 
     {/* SERVICE RECORDS LIST */}
     <div style={styles.itemsList}>
-  {getPaginatedService().items.map(record => (
+{getPaginatedService().items.map(record => (
    <div key={record.id} className="item-card" style={styles.itemCard}>
   {editingServiceId === record.id ? (
     <div style={{ flex: 1 }}>
@@ -4818,6 +4818,7 @@ key={theme}
     </div>
   ) : (
     <>
+      {/* Left side - Photo Button instead of photo grid */}
       <div style={{ 
         marginRight: '16px',
         flexShrink: 0,
@@ -4825,112 +4826,51 @@ key={theme}
         flexDirection: 'column',
         gap: '8px'
       }}>
-        {/* Photo Grid - only show if photos exist */}
+        {/* Photo Button - only show if photos exist */}
         {record.photoUrls && record.photoUrls.length > 0 && (
-          <>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: record.photoUrls.length === 1 
-                ? '1fr' 
-                : 'repeat(2, 1fr)',
-              gap: '8px',
-              width: record.photoUrls.length === 1 ? '100px' : '208px'
-            }}>
-              {record.photoUrls.map((url, index) => (
-                <div key={index} style={{ position: 'relative', width: '100%', height: '100px' }}>
-                  <img 
-                    src={url} 
-                    alt={`Service photo ${index + 1}`}
-                    style={{ 
-                      width: '100%', 
-                      height: '100%',
-                      objectFit: 'cover', 
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s ease',
-                      border: '2px solid transparent',
-                      userSelect: 'none',
-                      WebkitUserSelect: 'none',
-                      pointerEvents: 'auto',
-                      display: 'block'
-                    }}
-  onClick={(e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  setViewingImage(url);
-  setViewingImageArray(record.photoUrls);
-  setViewingImageIndex(index);
-  setImageModalTitle(`${record.machineName} - ${record.serviceType}`);
-}}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'scale(1.05)';
-                      e.currentTarget.style.borderColor = '#10b981';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'scale(1)';
-                      e.currentTarget.style.borderColor = 'transparent';
-                    }}
-                  />
-                  {userRole !== 'employee' && (
-                    <button
-                      onClick={async (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (confirm('Remove this photo from the service record?')) {
-                          try {
-                            const updatedPhotos = record.photoUrls.filter((_, i) => i !== index);
-                            await supabase.from('service_records').update({
-                              photo_urls: JSON.stringify(updatedPhotos)
-                            }).eq('id', record.id);
-                            setServiceHistory(prev => prev.map(r => 
-                              r.id === record.id ? { ...r, photoUrls: updatedPhotos } : r
-                            ));
-                            console.log('✅ Photo removed from service record');
-                          } catch (error) {
-                            console.error('Error removing photo:', error);
-                            alert('Failed to remove photo');
-                          }
-                        }
-                      }}
-                      style={{
-                        position: 'absolute',
-                        top: '4px',
-                        right: '4px',
-                        background: '#ef4444',
-                        border: 'none',
-                        borderRadius: '50%',
-                        width: '24px',
-                        height: '24px',
-                        color: 'white',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '14px',
-                        fontWeight: 'bold',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                        zIndex: 10
-                      }}
-                      title="Remove photo"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-            <p style={{ 
-              color: '#9ca3af', 
-              fontSize: '0.75rem', 
-              marginTop: '4px',
-              textAlign: 'center'
-            }}>
-              {record.photoUrls.length} photo{record.photoUrls.length !== 1 ? 's' : ''}
-            </p>
-          </>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setViewingImage(record.photoUrls[0]);
+              setViewingImageArray(record.photoUrls);
+              setViewingImageIndex(0);
+              setImageModalTitle(`${record.machineName} - ${record.serviceType}`);
+            }}
+            style={{
+              padding: '12px 16px',
+              background: '#8b5cf6',
+              border: 'none',
+              borderRadius: '8px',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: 'bold',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '4px',
+              minWidth: '100px',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = '#7c3aed';
+              e.target.style.transform = 'scale(1.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = '#8b5cf6';
+              e.target.style.transform = 'scale(1)';
+            }}
+          >
+            <span style={{ fontSize: '1.5rem' }}>📸</span>
+            <span>Open Photos</span>
+            <span style={{ fontSize: '0.75rem', opacity: 0.9 }}>
+              ({record.photoUrls.length} photo{record.photoUrls.length !== 1 ? 's' : ''})
+            </span>
+          </button>
         )}
         
-        {/* Mobile Edit/Delete Buttons - ALWAYS show on mobile if user is not employee */}
+        {/* Mobile Edit/Delete Buttons */}
         {window.innerWidth < 768 && userRole !== 'employee' && (
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
             <button onClick={() => startEditService(record)} style={styles.editButton}>
@@ -4942,23 +4882,24 @@ key={theme}
           </div>
         )}
       </div>
+
+      {/* Right side - Service details */}
       <div style={{ flex: 1 }}>
-  <h3 style={{ 
-    fontSize: window.innerWidth < 768 ? '0.95rem' : '1.25rem',
-    marginBottom: '8px',
-    wordBreak: 'break-word',
-    lineHeight: '1.2'
-  }}>
-    {record.machineName}
-  </h3>
-  <p style={{ 
-    color: '#06b6d4', 
-    fontSize: window.innerWidth < 768 ? '0.85rem' : '1rem',
-    marginBottom: '12px',
-    wordBreak: 'break-word'
-  }}>
-    {record.serviceType}
-  </p>
+        <h3 style={{ 
+          fontSize: '1rem',
+          marginBottom: '8px',
+          wordBreak: 'break-word'
+        }}>
+          {record.machineName}
+        </h3>
+        <p style={{ 
+          color: '#06b6d4', 
+          fontSize: '0.875rem',
+          marginBottom: '12px',
+          wordBreak: 'break-word'
+        }}>
+          {record.serviceType}
+        </p>
         <div style={styles.itemDetails}>
           <div>
             <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Date</p>
@@ -4976,6 +4917,8 @@ key={theme}
           </div>
         )}
       </div>
+
+      {/* Desktop Edit/Delete Buttons */}
       {window.innerWidth >= 768 && userRole !== 'employee' && (
         <div style={{ display: 'flex', gap: '8px' }}>
           <button onClick={() => startEditService(record)} style={styles.editButton}>
