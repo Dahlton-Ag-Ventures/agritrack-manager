@@ -6488,39 +6488,44 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
       }}
       onClick={onClose}
     >
-      {/* Header */}
-      <div 
-        style={{
-          background: theme.cardBackground,
-          padding: '12px 24px',
-          borderRadius: '12px',
-          marginBottom: '20px',
-          display: 'flex',
-          gap: '20px',
-          alignItems: 'center',
-          position: 'relative',
-          zIndex: 10
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h3 style={{ color: theme.text, margin: 0 }}>
-          {title} {hasMultiplePhotos && `(${currentIndex + 1}/${photos.length})`}
-        </h3>
-        <button
-          onClick={onClose}
-          style={{
-            padding: '8px 16px',
-            background: '#2563eb',
-            border: 'none',
-            borderRadius: '8px',
-            color: 'white',
-            cursor: 'pointer',
-            fontWeight: 'bold'
-          }}
-        >
-          Close ✕
-        </button>
-      </div>
+    {/* Header */}
+<div 
+  style={{
+    background: theme.cardBackground,
+    padding: window.innerWidth < 768 ? '8px 12px' : '12px 24px',
+    borderRadius: '12px',
+    marginBottom: window.innerWidth < 768 ? '12px' : '20px',
+    display: 'flex',
+    gap: window.innerWidth < 768 ? '8px' : '20px',
+    alignItems: 'center',
+    position: 'relative',
+    zIndex: 10
+  }}
+  onClick={(e) => e.stopPropagation()}
+>
+  <h3 style={{ 
+    color: theme.text, 
+    margin: 0,
+    fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem'
+  }}>
+    {title} {hasMultiplePhotos && `(${currentIndex + 1}/${photos.length})`}
+  </h3>
+  <button
+    onClick={onClose}
+    style={{
+      padding: window.innerWidth < 768 ? '6px 12px' : '8px 16px',
+      background: '#2563eb',
+      border: 'none',
+      borderRadius: '8px',
+      color: 'white',
+      cursor: 'pointer',
+      fontWeight: 'bold',
+      fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem'
+    }}
+  >
+    Close ✕
+  </button>
+</div>
       
       {/* Image Container with Navigation Arrows */}
       <div 
