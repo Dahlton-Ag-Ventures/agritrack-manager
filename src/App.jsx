@@ -6470,7 +6470,7 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [currentIndex, photos.length]);
   
-  return (
+ return (
     <div 
       style={{
         position: 'fixed',
@@ -6483,26 +6483,26 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '24px',
+        padding: window.innerWidth < 768 ? '8px' : '24px',
         zIndex: 100
       }}
       onClick={onClose}
     >
-  {/* Header */}
+{/* Header */}
 <div 
   style={{
     background: theme.cardBackground,
-    padding: '8px 12px',
-    borderRadius: '12px',
-    marginBottom: '12px',
+    padding: '6px 10px',
+    borderRadius: '8px',
+    marginBottom: '6px',
     display: 'flex',
     flexDirection: 'column',
-    gap: '8px',
+    gap: '6px',
     alignItems: 'center',
     position: 'relative',
     zIndex: 10,
     width: '100%',
-    maxWidth: '90vw',
+    maxWidth: '95vw',
     boxSizing: 'border-box'
   }}
   onClick={(e) => e.stopPropagation()}
@@ -6510,11 +6510,11 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
   <h3 style={{ 
     color: theme.text, 
     margin: 0,
-    fontSize: '0.75rem',
+    fontSize: '0.7rem',
     textAlign: 'center',
     width: '100%',
     wordBreak: 'break-word',
-    lineHeight: '1.2',
+    lineHeight: '1.1',
     overflow: 'hidden',
     display: '-webkit-box',
     WebkitLineClamp: 2,
@@ -6525,14 +6525,14 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
   <button
     onClick={onClose}
     style={{
-      padding: '4px 10px',
+      padding: '3px 8px',
       background: '#2563eb',
       border: 'none',
-      borderRadius: '6px',
+      borderRadius: '5px',
       color: 'white',
       cursor: 'pointer',
       fontWeight: 'bold',
-      fontSize: '0.75rem',
+      fontSize: '0.7rem',
       whiteSpace: 'nowrap',
       flexShrink: 0
     }}
