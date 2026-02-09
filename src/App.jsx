@@ -3186,9 +3186,9 @@ key={theme}
                       </div>
                     )}
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                      <h3 style={{ fontSize: '1.25rem' }}>{item.name}</h3>
+                 <div style={{ flex: 1 }}>
+  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+    <h3 style={{ fontSize: '1rem', wordBreak: 'break-word' }}>{item.name}</h3>
                     {getStockStatus(item) === 'low' && (
   <span className="stock-badge-low" style={styles.stockBadgeLow}>⚠️ Low Stock</span>
 )}
@@ -4094,8 +4094,8 @@ key={theme}
                 )}
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
-  <h3 style={{ fontSize: '1.25rem', margin: 0 }}>{item.name}</h3>
+  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
+    <h3 style={{ fontSize: '1rem', margin: 0, wordBreak: 'break-word' }}>{item.name}</h3>
   {(() => {
     const reminders = getMachineReminders(item.name);
     const currentHours = getMachineHours(item.name);
