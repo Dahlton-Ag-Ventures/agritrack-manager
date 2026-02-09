@@ -6535,76 +6535,76 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
 )}
       </div>
       
-      {/* Zoom Controls */}
-      <div 
-        style={{
-          background: theme.cardBackground,
-          padding: '12px',
-          borderRadius: '12px',
-          display: 'flex',
-          gap: '12px',
-          alignItems: 'center',
-          position: 'relative',
-          zIndex: 10
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button 
-          onClick={zoomOut} 
-          disabled={scale <= 1} 
-          style={{ 
-            padding: '8px 16px', 
-            background: scale <= 1 ? '#6b7280' : '#10b981', 
-            border: 'none', 
-            borderRadius: '8px', 
-            color: 'white', 
-            cursor: scale <= 1 ? 'not-allowed' : 'pointer', 
-            fontWeight: 'bold' 
-          }}
-        >
-          −
-        </button>
-        <span 
-          style={{ 
-            color: theme.text, 
-            fontWeight: 'bold', 
-            minWidth: '60px', 
-            textAlign: 'center' 
-          }}
-        >
-          {Math.round(scale * 100)}%
-        </span>
-        <button 
-          onClick={zoomIn} 
-          disabled={scale >= 3} 
-          style={{ 
-            padding: '8px 16px', 
-            background: scale >= 3 ? '#6b7280' : '#10b981', 
-            border: 'none', 
-            borderRadius: '8px', 
-            color: 'white', 
-            cursor: scale >= 3 ? 'not-allowed' : 'pointer', 
-            fontWeight: 'bold' 
-          }}
-        >
-          +
-        </button>
-        <button 
-          onClick={resetZoom} 
-          disabled={scale === 1} 
-          style={{ 
-            padding: '8px 16px', 
-            background: scale === 1 ? '#6b7280' : '#2563eb', 
-            border: 'none', 
-            borderRadius: '8px', 
-            color: 'white', 
-            cursor: scale === 1 ? 'not-allowed' : 'pointer', 
-            fontWeight: 'bold' 
-          }}
-        >
-          Reset
-        </button>
-      </div>
+     {/* Zoom Controls */}
+<div 
+  style={{
+    background: theme.cardBackground,
+    padding: '12px',
+    borderRadius: '12px',
+    display: 'flex',
+    gap: '12px',
+    alignItems: 'center',
+    position: 'relative',
+    zIndex: 10
+  }}
+  onClick={(e) => e.stopPropagation()}
+>
+  <button 
+    onClick={zoomOut} 
+    disabled={scale <= 1} 
+    style={{ 
+      padding: '8px 16px', 
+      background: scale <= 1 ? '#6b7280' : '#10b981', 
+      border: 'none', 
+      borderRadius: '8px', 
+      color: 'white', 
+      cursor: scale <= 1 ? 'not-allowed' : 'pointer', 
+      fontWeight: 'bold' 
+    }}
+  >
+    −
+  </button>
+  <span 
+    style={{ 
+      color: theme.text, 
+      fontWeight: 'bold', 
+      minWidth: '60px', 
+      textAlign: 'center' 
+    }}
+  >
+    {Math.round(scale * 100)}%
+  </span>
+  <button 
+    onClick={zoomIn} 
+    disabled={scale >= 3} 
+    style={{ 
+      padding: '8px 16px', 
+      background: scale >= 3 ? '#6b7280' : '#10b981', 
+      border: 'none', 
+      borderRadius: '8px', 
+      color: 'white', 
+      cursor: scale >= 3 ? 'not-allowed' : 'pointer', 
+      fontWeight: 'bold' 
+    }}
+  >
+    +
+  </button>
+  <button 
+    onClick={resetZoom} 
+    disabled={scale === 1} 
+    style={{ 
+      padding: '8px 16px', 
+      background: scale === 1 ? '#6b7280' : '#2563eb', 
+      border: 'none', 
+      borderRadius: '8px', 
+      color: 'white', 
+      cursor: scale === 1 ? 'not-allowed' : 'pointer', 
+      fontWeight: 'bold' 
+    }}
+  >
+    Reset
+  </button>
+</div>
     </div>
   );
 }
