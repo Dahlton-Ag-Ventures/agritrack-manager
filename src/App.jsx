@@ -4943,8 +4943,22 @@ key={theme}
         )}
       </div>
       <div style={{ flex: 1 }}>
-        <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{record.machineName}</h3>
-        <p style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '12px' }}>{record.serviceType}</p>
+  <h3 style={{ 
+    fontSize: window.innerWidth < 768 ? '0.95rem' : '1.25rem',
+    marginBottom: '8px',
+    wordBreak: 'break-word',
+    lineHeight: '1.2'
+  }}>
+    {record.machineName}
+  </h3>
+  <p style={{ 
+    color: '#06b6d4', 
+    fontSize: window.innerWidth < 768 ? '0.85rem' : '1rem',
+    marginBottom: '12px',
+    wordBreak: 'break-word'
+  }}>
+    {record.serviceType}
+  </p>
         <div style={styles.itemDetails}>
           <div>
             <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Date</p>
