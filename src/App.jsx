@@ -6436,45 +6436,45 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
         }}
       >
         {/* Left Arrow */}
-        {hasMultiplePhotos && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              prevPhoto();
-            }}
-            disabled={currentIndex === 0}
-            style={{
-              position: 'absolute',
-              left: '20px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              padding: '16px 20px',
-              background: currentIndex === 0 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(16, 185, 129, 0.9)',
-              border: 'none',
-              borderRadius: '50%',
-              color: 'white',
-              cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
-              fontSize: '1.5rem',
-              fontWeight: 'bold',
-              zIndex: 10,
-              opacity: currentIndex === 0 ? 0.5 : 1,
-              transition: 'all 0.2s ease',
-              boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
-            }}
-            onMouseEnter={(e) => {
-              if (currentIndex !== 0) {
-                e.target.style.background = 'rgba(16, 185, 129, 1)';
-                e.target.style.transform = 'translateY(-50%) scale(1.1)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = currentIndex === 0 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(16, 185, 129, 0.9)';
-              e.target.style.transform = 'translateY(-50%) scale(1)';
-            }}
-          >
-            ◀
-          </button>
-        )}
+       {hasMultiplePhotos && (
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      prevPhoto();
+    }}
+    disabled={currentIndex === 0}
+    style={{
+      position: 'absolute',
+      left: '20px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      padding: '12px 16px',  // ✅ Smaller padding
+      background: currentIndex === 0 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)',  // ✅ White background
+      border: 'none',
+      borderRadius: '50%',
+      color: currentIndex === 0 ? '#6b7280' : '#000000',  // ✅ Black arrow
+      cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
+      fontSize: '1.2rem',  // ✅ Slightly smaller arrow
+      fontWeight: 'bold',
+      zIndex: 10,
+      opacity: currentIndex === 0 ? 0.5 : 1,
+      transition: 'all 0.2s ease',
+      boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
+    }}
+    onMouseEnter={(e) => {
+      if (currentIndex !== 0) {
+        e.target.style.background = 'rgba(255, 255, 255, 1)';  // ✅ Solid white on hover
+        e.target.style.transform = 'translateY(-50%) scale(1.1)';
+      }
+    }}
+    onMouseLeave={(e) => {
+      e.target.style.background = currentIndex === 0 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)';  // ✅ Back to white
+      e.target.style.transform = 'translateY(-50%) scale(1)';
+    }}
+  >
+    ◀
+  </button>
+)}
         
         {/* Image */}
         <img 
@@ -6494,45 +6494,45 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
         />
         
         {/* Right Arrow */}
-        {hasMultiplePhotos && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              nextPhoto();
-            }}
-            disabled={currentIndex === photos.length - 1}
-            style={{
-              position: 'absolute',
-              right: '20px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              padding: '16px 20px',
-              background: currentIndex === photos.length - 1 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(16, 185, 129, 0.9)',
-              border: 'none',
-              borderRadius: '50%',
-              color: 'white',
-              cursor: currentIndex === photos.length - 1 ? 'not-allowed' : 'pointer',
-              fontSize: '1.5rem',
-              fontWeight: 'bold',
-              zIndex: 10,
-              opacity: currentIndex === photos.length - 1 ? 0.5 : 1,
-              transition: 'all 0.2s ease',
-              boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
-            }}
-            onMouseEnter={(e) => {
-              if (currentIndex !== photos.length - 1) {
-                e.target.style.background = 'rgba(16, 185, 129, 1)';
-                e.target.style.transform = 'translateY(-50%) scale(1.1)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = currentIndex === photos.length - 1 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(16, 185, 129, 0.9)';
-              e.target.style.transform = 'translateY(-50%) scale(1)';
-            }}
-          >
-            ▶
-          </button>
-        )}
+{hasMultiplePhotos && (
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      nextPhoto();
+    }}
+    disabled={currentIndex === photos.length - 1}
+    style={{
+      position: 'absolute',
+      right: '20px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      padding: '12px 16px',  // ✅ Smaller padding
+      background: currentIndex === photos.length - 1 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)',  // ✅ White background
+      border: 'none',
+      borderRadius: '50%',
+      color: currentIndex === photos.length - 1 ? '#6b7280' : '#000000',  // ✅ Black arrow
+      cursor: currentIndex === photos.length - 1 ? 'not-allowed' : 'pointer',
+      fontSize: '1.2rem',  // ✅ Slightly smaller arrow
+      fontWeight: 'bold',
+      zIndex: 10,
+      opacity: currentIndex === photos.length - 1 ? 0.5 : 1,
+      transition: 'all 0.2s ease',
+      boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
+    }}
+    onMouseEnter={(e) => {
+      if (currentIndex !== photos.length - 1) {
+        e.target.style.background = 'rgba(255, 255, 255, 1)';  // ✅ Solid white on hover
+        e.target.style.transform = 'translateY(-50%) scale(1.1)';
+      }
+    }}
+    onMouseLeave={(e) => {
+      e.target.style.background = currentIndex === photos.length - 1 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)';  // ✅ Back to white
+      e.target.style.transform = 'translateY(-50%) scale(1)';
+    }}
+  >
+    ▶
+  </button>
+)}
       </div>
       
       {/* Zoom Controls */}
