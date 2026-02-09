@@ -3187,22 +3187,23 @@ key={theme}
                     )}
                   </div>
                  <div style={{ flex: 1 }}>
-  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-    <h3 style={{ fontSize: '1rem', wordBreak: 'break-word' }}>{item.name}</h3>
-                    {getStockStatus(item) === 'low' && (
-  <span className="stock-badge-low" style={styles.stockBadgeLow}>⚠️ Low Stock</span>
-)}
-                      {getStockStatus(item) === 'high' && (
-                        <span style={styles.stockBadgeHigh}>⚠️ Overstocked</span>
-                      )}
-                    </div>
-                    <div style={styles.itemDetails}>
-                      <div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Part Number</p>
-                        <p>{item.partNumber || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Quantity</p>
+ <div style={{ flex: 1 }}>
+  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
+    <h3 style={{ fontSize: '1rem', margin: 0, wordBreak: 'break-word' }}>{item.name}</h3>
+    {getStockStatus(item) === 'low' && (
+      <span className="stock-badge-low" style={styles.stockBadgeLow}>⚠️ Low Stock</span>
+    )}
+    {getStockStatus(item) === 'high' && (
+      <span style={styles.stockBadgeHigh}>⚠️ Overstocked</span>
+    )}
+  </div>
+  <div style={styles.itemDetails}>
+    <div>
+      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Part Number</p>
+      <p>{item.partNumber || 'N/A'}</p>
+    </div>
+    <div>
+      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Quantity</p>
                         {userRole === 'employee' ? (
                           <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
                         ) : (
