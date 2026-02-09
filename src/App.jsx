@@ -6488,7 +6488,7 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
       }}
       onClick={onClose}
     >
-    {/* Header */}
+   {/* Header */}
 <div 
   style={{
     background: theme.cardBackground,
@@ -6496,6 +6496,7 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
     borderRadius: '12px',
     marginBottom: window.innerWidth < 768 ? '12px' : '20px',
     display: 'flex',
+    flexDirection: window.innerWidth < 768 ? 'column' : 'row',
     gap: window.innerWidth < 768 ? '8px' : '20px',
     alignItems: 'center',
     position: 'relative',
@@ -6506,7 +6507,10 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
   <h3 style={{ 
     color: theme.text, 
     margin: 0,
-    fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem'
+    fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+    textAlign: 'center',
+    width: window.innerWidth < 768 ? '100%' : 'auto',
+    wordBreak: 'break-word'
   }}>
     {title} {hasMultiplePhotos && `(${currentIndex + 1}/${photos.length})`}
   </h3>
@@ -6520,7 +6524,8 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
       color: 'white',
       cursor: 'pointer',
       fontWeight: 'bold',
-      fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem'
+      fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+      whiteSpace: 'nowrap'
     }}
   >
     Close ✕
