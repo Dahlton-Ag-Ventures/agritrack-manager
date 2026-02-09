@@ -6492,39 +6492,41 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
 <div 
   style={{
     background: theme.cardBackground,
-    padding: window.innerWidth < 768 ? '8px 12px' : '12px 24px',
+    padding: '8px 12px',
     borderRadius: '12px',
-    marginBottom: window.innerWidth < 768 ? '12px' : '20px',
+    marginBottom: '12px',
     display: 'flex',
-    flexDirection: window.innerWidth < 768 ? 'column' : 'row',
-    gap: window.innerWidth < 768 ? '8px' : '20px',
+    flexDirection: 'column',
+    gap: '8px',
     alignItems: 'center',
     position: 'relative',
-    zIndex: 10
+    zIndex: 10,
+    maxWidth: '90vw'
   }}
   onClick={(e) => e.stopPropagation()}
 >
   <h3 style={{ 
     color: theme.text, 
     margin: 0,
-    fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+    fontSize: '0.75rem',
     textAlign: 'center',
-    width: window.innerWidth < 768 ? '100%' : 'auto',
-    wordBreak: 'break-word'
+    width: '100%',
+    wordBreak: 'break-word',
+    lineHeight: '1.2'
   }}>
     {title} {hasMultiplePhotos && `(${currentIndex + 1}/${photos.length})`}
   </h3>
   <button
     onClick={onClose}
     style={{
-      padding: window.innerWidth < 768 ? '6px 12px' : '8px 16px',
+      padding: '4px 10px',
       background: '#2563eb',
       border: 'none',
-      borderRadius: '8px',
+      borderRadius: '6px',
       color: 'white',
       cursor: 'pointer',
       fontWeight: 'bold',
-      fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+      fontSize: '0.75rem',
       whiteSpace: 'nowrap'
     }}
   >
@@ -6593,29 +6595,29 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
           </button>
         )}
         
-        {/* Image */}
-        <img 
-          src={currentPhoto} 
-          alt="View" 
-          style={{ 
-            maxWidth: '90vw', 
-            maxHeight: '70vh',
-            objectFit: 'contain',
-            borderRadius: '8px',
-            transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
-            transition: isDragging ? 'none' : 'transform 0.3s ease',
-            position: 'relative',
-            zIndex: 1,
-            cursor: scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-            touchAction: 'none'
-          }} 
-          onClick={(e) => e.stopPropagation()}
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}
-          draggable={false}
-        />
+       {/* Image */}
+<img 
+  src={currentPhoto} 
+  alt="View" 
+  style={{ 
+    maxWidth: '95vw',
+    maxHeight: '75vh',
+    objectFit: 'contain',
+    borderRadius: '8px',
+    transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
+    transition: isDragging ? 'none' : 'transform 0.3s ease',
+    position: 'relative',
+    zIndex: 1,
+    cursor: scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
+    userSelect: 'none',
+    WebkitUserSelect: 'none',
+    touchAction: 'none'
+  }} 
+  onClick={(e) => e.stopPropagation()}
+  onMouseDown={handleMouseDown}
+  onTouchStart={handleTouchStart}
+  draggable={false}
+/>
         
         {/* Right Arrow */}
         {hasMultiplePhotos && (
