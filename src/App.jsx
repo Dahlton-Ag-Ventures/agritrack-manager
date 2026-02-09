@@ -6436,7 +6436,7 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
         }}
       >
         {/* Left Arrow */}
-       {hasMultiplePhotos && (
+      {hasMultiplePhotos && (
   <button
     onClick={(e) => {
       e.stopPropagation();
@@ -6448,13 +6448,13 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
       left: '20px',
       top: '50%',
       transform: 'translateY(-50%)',
-      padding: '12px 16px',  // ✅ Smaller padding
-      background: currentIndex === 0 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)',  // ✅ White background
+      padding: '8px 12px',  // ✅ Even smaller padding
+      background: currentIndex === 0 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)',
       border: 'none',
       borderRadius: '50%',
-      color: currentIndex === 0 ? '#6b7280' : '#000000',  // ✅ Black arrow
+      color: currentIndex === 0 ? '#6b7280' : '#000000',
       cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
-      fontSize: '1.2rem',  // ✅ Slightly smaller arrow
+      fontSize: '1rem',  // ✅ Even smaller arrow
       fontWeight: 'bold',
       zIndex: 10,
       opacity: currentIndex === 0 ? 0.5 : 1,
@@ -6463,12 +6463,12 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
     }}
     onMouseEnter={(e) => {
       if (currentIndex !== 0) {
-        e.target.style.background = 'rgba(255, 255, 255, 1)';  // ✅ Solid white on hover
+        e.target.style.background = 'rgba(255, 255, 255, 1)';
         e.target.style.transform = 'translateY(-50%) scale(1.1)';
       }
     }}
     onMouseLeave={(e) => {
-      e.target.style.background = currentIndex === 0 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)';  // ✅ Back to white
+      e.target.style.background = currentIndex === 0 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)';
       e.target.style.transform = 'translateY(-50%) scale(1)';
     }}
   >
@@ -6506,13 +6506,13 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
       right: '20px',
       top: '50%',
       transform: 'translateY(-50%)',
-      padding: '12px 16px',  // ✅ Smaller padding
-      background: currentIndex === photos.length - 1 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)',  // ✅ White background
+      padding: '8px 12px',  // ✅ Even smaller padding
+      background: currentIndex === photos.length - 1 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)',
       border: 'none',
       borderRadius: '50%',
-      color: currentIndex === photos.length - 1 ? '#6b7280' : '#000000',  // ✅ Black arrow
+      color: currentIndex === photos.length - 1 ? '#6b7280' : '#000000',
       cursor: currentIndex === photos.length - 1 ? 'not-allowed' : 'pointer',
-      fontSize: '1.2rem',  // ✅ Slightly smaller arrow
+      fontSize: '1rem',  // ✅ Even smaller arrow
       fontWeight: 'bold',
       zIndex: 10,
       opacity: currentIndex === photos.length - 1 ? 0.5 : 1,
@@ -6521,12 +6521,12 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
     }}
     onMouseEnter={(e) => {
       if (currentIndex !== photos.length - 1) {
-        e.target.style.background = 'rgba(255, 255, 255, 1)';  // ✅ Solid white on hover
+        e.target.style.background = 'rgba(255, 255, 255, 1)';
         e.target.style.transform = 'translateY(-50%) scale(1.1)';
       }
     }}
     onMouseLeave={(e) => {
-      e.target.style.background = currentIndex === photos.length - 1 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)';  // ✅ Back to white
+      e.target.style.background = currentIndex === photos.length - 1 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)';
       e.target.style.transform = 'translateY(-50%) scale(1)';
     }}
   >
