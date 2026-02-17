@@ -2468,25 +2468,33 @@ key={theme}
         <div>
           <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Real-Time Sync:</h4>
           <ul style={{ paddingLeft: '18px', lineHeight: '1.5', fontSize: 'clamp(0.88rem, 2.8vw, 1rem)', margin: '0 0 12px 0' }}>
-            <li>All changes sync instantly across all devices - no manual refresh needed</li>
+            <li>All changes sync instantly across all devices — no manual refresh needed. The Live Sync indicator in the top right confirms your connection status</li>
           </ul>
         </div>
         <div>
-          <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Search & Sort:</h4>
+          <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Search, Sort & Paginate:</h4>
           <ul style={{ paddingLeft: '18px', lineHeight: '1.5', fontSize: 'clamp(0.88rem, 2.8vw, 1rem)', margin: '0 0 12px 0' }}>
-            <li>Every tab has powerful search and sorting options to find what you need</li>
+            <li>Every tab has a search bar, sort options, and page size controls (25 up to Show All) to quickly find any record</li>
           </ul>
         </div>
         <div>
           <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Mobile Friendly:</h4>
           <ul style={{ paddingLeft: '18px', lineHeight: '1.5', fontSize: 'clamp(0.88rem, 2.8vw, 1rem)', margin: '0 0 12px 0' }}>
-            <li>Works perfectly on phones, tablets, and computers</li>
+            <li>Fully responsive on phones, tablets, and desktop — edit and delete buttons automatically reposition for touch screens</li>
           </ul>
         </div>
+        {userRole !== 'employee' && (
+          <div>
+            <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Import/Export (Admin):</h4>
+            <ul style={{ paddingLeft: '18px', lineHeight: '1.5', fontSize: 'clamp(0.88rem, 2.8vw, 1rem)', margin: '0 0 12px 0' }}>
+              <li>Bulk import inventory, machinery, or service records from CSV files — or export any dataset for backups via Settings → Import/Export Data</li>
+            </ul>
+          </div>
+        )}
         <div>
-          <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Import/Export:</h4>
+          <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Photo Viewer:</h4>
           <ul style={{ paddingLeft: '18px', lineHeight: '1.5', fontSize: 'clamp(0.88rem, 2.8vw, 1rem)', margin: '0 0 12px 0' }}>
-            <li>Bulk import data from CSV files or export for backups via Settings</li>
+            <li>Click any photo to open the full-screen viewer — supports zoom, pan/drag, pinch-to-zoom on mobile, and arrow navigation between multiple photos</li>
           </ul>
         </div>
       </div>
@@ -2540,28 +2548,39 @@ key={theme}
             Add New Items:
           </h4>
           <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
-            <li>Click "Add Item" to create inventory entries with photos, part numbers, and stock levels</li>
+            <li>Click "Add Item" to create inventory entries with photos, part numbers, quantities, and storage locations</li>
           </ul>
 
-          <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
-            Edit Items:
-          </h4>
-          <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
-            <li>Click the blue edit icon to modify item details, locations, or min/max quantities</li>
-          </ul>
+          {userRole !== 'employee' && (
+            <>
+              <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
+                Edit Items:
+              </h4>
+              <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+                <li>Click the blue edit icon on any item to update details, adjust locations, or change min/max quantities</li>
+              </ul>
 
-          <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
-            Quick Updates:
-          </h4>
-          <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
-            <li>Use + and - buttons for fast quantity adjustments</li>
-          </ul>
+              <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
+                Quick Quantity Updates:
+              </h4>
+              <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+                <li>Use the + and − buttons directly on any item card for fast quantity adjustments without opening the edit form</li>
+              </ul>
+            </>
+          )}
 
           <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
             Stock Alerts:
           </h4>
           <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
-            <li>Set min/max quantities to get automatic low stock and overstock warnings</li>
+            <li>Items with quantities at or below their minimum show a red <strong>⚠️ Low Stock</strong> badge — overstock shows in yellow</li>
+          </ul>
+
+          <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
+            Search & Filter:
+          </h4>
+          <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+            <li>Search by name, part number, or location — sort by name, quantity, or location — paginate with 25 to "Show All" options</li>
           </ul>
         </div>
       </div>
@@ -2601,34 +2620,41 @@ key={theme}
           <h3 style={{ fontSize: 'clamp(1.2rem, 4vw, 1.5rem)', color: '#06b6d4', margin: 0 }}>Machinery Tracking</h3>
         </div>
 
-        {/* Card Content */}
+       {/* Card Content */}
         <div style={{ color: theme === 'dark' ? '#d1d5db' : '#374151', lineHeight: '1.8' }}>
-          <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
-            Add Machines:
-          </h4>
-          <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
-            <li>Click "Add Machine" to register new equipment with photos and VIN/serial numbers</li>
-          </ul>
+          {userRole !== 'employee' && (
+            <>
+              <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
+                Add & Edit Machines:
+              </h4>
+              <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+                <li>Click "Add" to register equipment with a name, VIN/serial number, category, and optional photo — edit or delete any machine at any time</li>
+              </ul>
+            </>
+          )}
 
           <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
-            Categorize:
+            Categories & Filters:
           </h4>
           <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
-            <li>Organize equipment by type (tractors, combines, sprayers, etc.)</li>
+            <li>Use "Show Category Filters" to instantly narrow the list by equipment type — tractors, combines, sprayers, semi trucks, and more</li>
           </ul>
 
           <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
             View Service History:
           </h4>
           <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
-            <li>Click the purple "Services" button to jump to that machine's maintenance records</li>
+            <li>Each machine shows a purple button with its service count — click it to jump directly to that machine's filtered service records</li>
           </ul>
 
           <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
-            Edit Records:
+            Service Reminders & Hours:
           </h4>
           <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
-            <li>Update machine information, categories, or add photos anytime</li>
+            <li>Click "Show" to open the Reminders panel — track machine hours, set hour-based service intervals, and see which machines have services due</li>
+            {userRole !== 'employee' && (
+              <li>Admins can log hours and create reminders (e.g., "Oil Change every 50 hours") — machines with overdue service show a red <strong>⚠️ Services Due</strong> badge</li>
+            )}
           </ul>
         </div>
       </div>
@@ -2668,35 +2694,43 @@ key={theme}
           <h3 style={{ fontSize: '1.5rem', color: '#06b6d4', margin: 0 }}>Service History</h3>
         </div>
 
-        {/* Card Content */}
+       {/* Card Content */}
         <div style={{ color: theme === 'dark' ? '#d1d5db' : '#374151', lineHeight: '1.8' }}>
+          {userRole !== 'employee' && (
+            <>
+              <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
+                Log Services:
+              </h4>
+              <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+                <li>Click "Add Service Record" — search for a machine by name, category, or VIN, then fill in service type, date, technician, and notes</li>
+              </ul>
+            </>
+          )}
+
           <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
-            Log Services:
+            Photos:
           </h4>
           <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
-            <li>Click "Add Service Record" and select a machine from the dropdown menu</li>
+            <li>Each service record supports up to 10 photos — click the purple <strong>📸 Open Photos</strong> button on any record to browse them in the full-screen viewer</li>
           </ul>
 
           <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
-            Add Details:
+            Filter by Machine:
           </h4>
           <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
-            <li>Include service type, date, technician names, and detailed notes</li>
+            <li>Coming from the Machinery tab via the purple Services button automatically filters records to that machine — use "Clear Filter" to see all records again</li>
           </ul>
 
-          <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
-            Attach Photos:
-          </h4>
-          <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
-            <li>Upload service photos or receipts for complete documentation</li>
-          </ul>
-
-          <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
-            Export Data:
-          </h4>
-          <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
-            <li>Generate reports and export service history via Settings</li>
-          </ul>
+          {userRole !== 'employee' && (
+            <>
+              <h4 style={{ color: '#10b981', marginTop: '16px', marginBottom: '12px', fontSize: '1.1rem' }}>
+                Edit & Export:
+              </h4>
+              <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+                <li>Edit or delete any record at any time — export the full service history to CSV via Settings → Import/Export Data</li>
+              </ul>
+            </>
+          )}
         </div>
       </div>
     </div>
