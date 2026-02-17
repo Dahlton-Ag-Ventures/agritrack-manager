@@ -2209,14 +2209,12 @@ key={theme}
     minHeight: '100vh',
     color: currentTheme.text,
     padding: '24px',
-    background: theme === 'dark' ? currentTheme.background : '#f3f4f6',
-    backgroundImage: theme === 'dark' 
-      ? currentTheme.backgroundImage
-      : 'repeating-radial-gradient(circle at 0 0, transparent 0, #f3f4f6 40px), repeating-linear-gradient(rgba(6, 182, 212, 0.03), rgba(16, 185, 129, 0.03))',
-    backgroundSize: theme === 'dark' ? currentTheme.backgroundSize : 'auto',
-    backgroundPosition: theme === 'dark' ? currentTheme.backgroundPosition : 'initial',
-    backgroundAttachment: theme === 'dark' ? currentTheme.backgroundAttachment : 'initial',
-    backgroundRepeat: theme === 'dark' ? currentTheme.backgroundRepeat : 'initial'
+    background: currentTheme.background,
+    backgroundImage: currentTheme.backgroundImage,
+    backgroundSize: currentTheme.backgroundSize,
+    backgroundPosition: currentTheme.backgroundPosition,
+    backgroundAttachment: currentTheme.backgroundAttachment,
+    backgroundRepeat: currentTheme.backgroundRepeat
   }}
 >
     <div style={styles.content}>
