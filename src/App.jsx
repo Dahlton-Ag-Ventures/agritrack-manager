@@ -1494,16 +1494,12 @@ container: {
   color: currentTheme.text,
   padding: '24px',
 },
-    homeContainer: {
-      background: currentTheme.homeBackground,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      minHeight: '500px',
-      borderRadius: '16px',
-      padding: '24px',
-      backdropFilter: 'blur(5px)',
-    },
+homeContainer: {
+  minHeight: '500px',
+  borderRadius: '16px',
+  padding: '24px',
+  backdropFilter: 'blur(5px)',
+},
     content: {
       maxWidth: '1200px',
       margin: '0 auto',
