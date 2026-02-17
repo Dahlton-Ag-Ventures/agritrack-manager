@@ -2736,50 +2736,62 @@ key={theme}
       </div>
     </div>
 
-    {/* Stats Footer */}
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-      gap: '16px',
-      marginTop: '30px'
-    }}>
-    <div style={{
-        background: 'rgba(6, 182, 212, 0.15)',
-        border: '2px solid #2563eb',
-        borderRadius: '8px',
-        padding: '16px',
-        textAlign: 'center'
-      }}>
-        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Inventory</p>
-        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
-          {loading ? '...' : inventory.length}
-        </p>
-      </div>
-      <div style={{
-        background: 'rgba(6, 182, 212, 0.15)',
-        border: '2px solid #2563eb',
-        borderRadius: '8px',
-        padding: '16px',
-        textAlign: 'center'
-      }}>
-        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Total Machinery</p>
-        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
-          {loading ? '...' : machinery.length}
-        </p>
-      </div>
-      <div style={{
-        background: 'rgba(6, 182, 212, 0.15)',
-        border: '2px solid #2563eb',
-        borderRadius: '8px',
-        padding: '16px',
-        textAlign: 'center'
-      }}>
-        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Service Records</p>
-        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
-          {loading ? '...' : serviceHistory.length}
-        </p>
-      </div>
-    </div>
+   {/* Stats Footer */}
+<div style={{
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+  gap: '16px',
+  marginTop: '30px'
+}}>
+  <div style={{
+    background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff',
+    border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #111827',
+    borderRadius: '8px',
+    padding: '16px',
+    textAlign: 'center'
+  }}>
+    <p style={{ 
+      color: theme === 'dark' ? '#9ca3af' : '#111827', 
+      fontSize: '0.875rem', 
+      marginBottom: '4px' 
+    }}>Total Inventory</p>
+    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+      {loading ? '...' : inventory.length}
+    </p>
+  </div>
+  <div style={{
+    background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff',
+    border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #111827',
+    borderRadius: '8px',
+    padding: '16px',
+    textAlign: 'center'
+  }}>
+    <p style={{ 
+      color: theme === 'dark' ? '#9ca3af' : '#111827', 
+      fontSize: '0.875rem', 
+      marginBottom: '4px' 
+    }}>Total Machinery</p>
+    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+      {loading ? '...' : machinery.length}
+    </p>
+  </div>
+  <div style={{
+    background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff',
+    border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #111827',
+    borderRadius: '8px',
+    padding: '16px',
+    textAlign: 'center'
+  }}>
+    <p style={{ 
+      color: theme === 'dark' ? '#9ca3af' : '#111827', 
+      fontSize: '0.875rem', 
+      marginBottom: '4px' 
+    }}>Service Records</p>
+    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+      {loading ? '...' : serviceHistory.length}
+    </p>
+  </div>
+</div>
   </div>
 )}
      
