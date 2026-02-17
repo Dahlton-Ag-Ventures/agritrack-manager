@@ -5769,24 +5769,28 @@ key={theme}
       </div>
     </div>
 
-    {/* Key Takeaway */}
-    <div style={{
-      ...styles.itemCard,
-      marginTop: '24px',
-      background: 'rgba(139, 92, 246, 0.1)',
-      border: '1px solid #8b5cf6'
+  {/* Key Takeaway */}
+<div style={{
+  ...styles.itemCard,
+  marginTop: '24px',
+  background: theme === 'dark' ? 'rgba(139, 92, 246, 0.1)' : '#ffffff',
+  border: theme === 'dark' ? '1px solid #8b5cf6' : '2px solid #111827'
+}}>
+  <div style={{ flex: 1 }}>
+    <h3 style={{ 
+      fontSize: '1.25rem', 
+      marginBottom: '12px', 
+      color: theme === 'dark' ? '#a78bfa' : '#111827'
     }}>
-      <div style={{ flex: 1 }}>
-        <h3 style={{ fontSize: '1.25rem', marginBottom: '12px', color: '#a78bfa' }}>
-          💡 Key Takeaway
-        </h3>
-        <p style={{ color: currentTheme.text, lineHeight: '1.8' }}>
-          <strong>Employees have read-only access</strong> across all tabs — they can view, search, and browse everything but cannot make any changes.
-          As an admin, you have full create, edit, and delete control across inventory, machinery, service records, reminders, and hours tracking.
-          The Settings tab and all import/export tools are admin-only and will not appear in an employee's navigation.
-        </p>
-      </div>
-    </div>
+      💡 Key Takeaway
+    </h3>
+    <p style={{ color: currentTheme.text, lineHeight: '1.8' }}>
+      <strong>Employees have read-only access</strong> across all tabs — they can view, search, and browse everything but cannot make any changes.
+      As an admin, you have full create, edit, and delete control across inventory, machinery, service records, reminders, and hours tracking.
+      The Settings tab and all import/export tools are admin-only and will not appear in an employee's navigation.
+    </p>
+  </div>
+</div>
   </div>
 )}
 {showInventoryModal && (
