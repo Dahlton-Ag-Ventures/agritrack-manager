@@ -5596,49 +5596,60 @@ key={theme}
       <h2 style={{ fontSize: '1.5rem' }}>👑 Admin Dashboard</h2>
     </div>
 
-    {/* Admin Overview Card */}
-    <div style={{
-      ...styles.itemCard,
-      background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%)',
-      border: '1px solid #10b981',
-      marginBottom: '24px'
+   {/* Admin Overview Card */}
+<div style={{
+  ...styles.itemCard,
+  background: theme === 'dark' 
+    ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%)'
+    : '#ffffff',
+  border: theme === 'dark' ? '1px solid #10b981' : '2px solid #111827',
+  marginBottom: '24px'
+}}>
+  <div style={{ flex: 1 }}>
+    <h3 style={{
+      fontSize: '1.5rem',
+      marginBottom: '16px',
+      background: 'linear-gradient(to right, #10b981, #06b6d4)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent'
     }}>
-      <div style={{ flex: 1 }}>
-        <h3 style={{
-          fontSize: '1.5rem',
-          marginBottom: '16px',
-          background: 'linear-gradient(to right, #10b981, #06b6d4)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent'
-        }}>
-          Administrative Access & Permissions
-        </h3>
-        <p style={{ color: currentTheme.textSecondary, marginBottom: '8px', fontSize: '1rem' }}>
-          As an administrator, you have full control over AgriTrack Manager. Below is a complete comparison of admin versus employee access across every feature in the app.
-        </p>
-        <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem' }}>
-          Logged in as: <strong style={{ color: '#10b981' }}>{user?.email}</strong> &nbsp;|&nbsp; Role: <strong style={{ color: '#10b981', textTransform: 'capitalize' }}>{userRole}</strong>
-        </p>
-      </div>
-    </div>
+      Administrative Access & Permissions
+    </h3>
+    <p style={{ 
+      color: theme === 'dark' ? currentTheme.textSecondary : '#111827', 
+      marginBottom: '8px', 
+      fontSize: '1rem' 
+    }}>
+      As an administrator, you have full control over AgriTrack Manager. Below is a complete comparison of admin versus employee access across every feature in the app.
+    </p>
+    <p style={{ 
+      color: theme === 'dark' ? currentTheme.textSecondary : '#111827', 
+      fontSize: '0.875rem' 
+    }}>
+      Logged in as: <strong style={{ color: '#10b981' }}>{user?.email}</strong> &nbsp;|&nbsp; Role: <strong style={{ color: '#10b981', textTransform: 'capitalize' }}>{userRole}</strong>
+    </p>
+  </div>
+</div>
 
     {/* Permissions Comparison Grid */}
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '20px' }}>
 
-      {/* Admin Permissions Card */}
-      <div style={styles.itemCard}>
-        <div style={{ flex: 1 }}>
-          <h3 style={{
-            fontSize: '1.25rem',
-            marginBottom: '20px',
-            color: '#10b981',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            ✅ Admin / Manager — Full Access
-          </h3>
-
+     {/* Admin Permissions Card */}
+<div style={{
+  ...styles.itemCard,
+  border: theme === 'dark' ? `1px solid ${currentTheme.cardBorder}` : '2px solid #111827'
+}}>
+  <div style={{ flex: 1 }}>
+    <h3 style={{
+      fontSize: '1.25rem',
+      marginBottom: '20px',
+      color: '#10b981',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px'
+    }}>
+      ✅ Admin / Manager — Full Access
+    </h3>
           <div style={{ marginBottom: '20px' }}>
             <h4 style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '8px' }}>📦 Inventory</h4>
             <ul style={{ paddingLeft: '20px', color: currentTheme.text, lineHeight: '1.8' }}>
@@ -5697,19 +5708,22 @@ key={theme}
         </div>
       </div>
 
-      {/* Employee Permissions Card */}
-      <div style={styles.itemCard}>
-        <div style={{ flex: 1 }}>
-          <h3 style={{
-            fontSize: '1.25rem',
-            marginBottom: '20px',
-            color: '#9ca3af',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            👁️ Employee — View Only
-          </h3>
+    {/* Employee Permissions Card */}
+<div style={{
+  ...styles.itemCard,
+  border: theme === 'dark' ? `1px solid ${currentTheme.cardBorder}` : '2px solid #111827'
+}}>
+  <div style={{ flex: 1 }}>
+    <h3 style={{
+      fontSize: '1.25rem',
+      marginBottom: '20px',
+      color: '#9ca3af',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px'
+    }}>
+      👁️ Employee — View Only
+    </h3>
 
           <div style={{ marginBottom: '20px' }}>
             <h4 style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '8px' }}>📦 Inventory</h4>
