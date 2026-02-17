@@ -34,7 +34,6 @@ dark: {
     backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop")',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    backgroundAttachment: window.innerWidth < 768 ? 'scroll' : 'fixed',
     backgroundRepeat: 'no-repeat',
     cardBackground: '#1e3a5f',
     cardBorder: '#2563eb',
@@ -51,7 +50,6 @@ dark: {
     backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.70), rgba(255, 248, 240, 0.80)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop")',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    backgroundAttachment: window.innerWidth < 768 ? 'scroll' : 'fixed',
     backgroundRepeat: 'no-repeat',
     cardBackground: '#ffffff',
     cardBorder: '#e5e7eb',
@@ -1510,15 +1508,18 @@ container: {
       maxWidth: '1200px',
       margin: '0 auto',
     },
-    loading: {
-      minHeight: '100vh',
-      background: 'linear-gradient(to bottom right, #1a202c, #2d3748)',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: 'white',
-    },
+  loading: {
+  minHeight: '100vh',
+  background: 'linear-gradient(to bottom right, #1a202c, #2d3748)',
+  backgroundAttachment: 'fixed',
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: 'white',
+},
     spinner: {
       width: '64px',
       height: '64px',
@@ -2211,10 +2212,11 @@ key={theme}
     padding: '24px',
     background: currentTheme.background,
     backgroundImage: currentTheme.backgroundImage,
-    backgroundSize: currentTheme.backgroundSize,
-    backgroundPosition: currentTheme.backgroundPosition,
-    backgroundAttachment: currentTheme.backgroundAttachment,
-    backgroundRepeat: currentTheme.backgroundRepeat
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundAttachment: 'fixed',
+    backgroundRepeat: 'no-repeat',
+    position: 'relative'
   }}
 >
     <div style={styles.content}>
