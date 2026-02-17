@@ -1913,12 +1913,9 @@ itemCard: {
     },
   };
 
-  if (loading) {
+ if (loading) {
     return (
-      <div style={styles.loading}>
-        <div style={styles.spinner} />
-        <p>Loading AgriTrack...</p>
-      </div>
+      <LoadingScreen />
     );
   }
 
@@ -6342,6 +6339,191 @@ key={theme}
   startIndex={viewingImageIndex}
 />}
       </div>
+    </div>
+  );
+}
+
+function LoadingScreen() {
+  const [progress, setProgress] = React.useState(0);
+  const [statusIndex, setStatusIndex] = React.useState(0);
+
+  const statusMessages = [
+    '🌱 Connecting to database...',
+    '📦 Loading inventory...',
+    '🚜 Loading machinery...',
+    '🔧 Loading service records...',
+    '⏰ Loading reminders...',
+    '✅ Almost ready...',
+  ];
+
+  React.useEffect(() => {
+    const progressInterval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 95) {
+          clearInterval(progressInterval);
+          return 95;
+        }
+        const increment = prev < 60 ? 3 : prev < 85 ? 1.5 : 0.5;
+        return Math.min(95, prev + increment);
+      });
+    }, 80);
+
+    const statusInterval = setInterval(() => {
+      setStatusIndex(prev =>
+        prev < statusMessages.length - 1 ? prev + 1 : prev
+      );
+    }, 900);
+
+    return () => {
+      clearInterval(progressInterval);
+      clearInterval(statusInterval);
+    };
+  }, []);
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop")',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '24px',
+    }}>
+
+      {/* Tractor Icon with pulse ring */}
+      <div style={{ position: 'relative', marginBottom: '32px' }}>
+        {/* Outer pulse ring */}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '130px',
+          height: '130px',
+          borderRadius: '50%',
+          border: '2px solid rgba(16, 185, 129, 0.4)',
+          animation: 'loadingPulse 2s ease-in-out infinite',
+        }} />
+        {/* Inner pulse ring */}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '110px',
+          height: '110px',
+          borderRadius: '50%',
+          border: '2px solid rgba(16, 185, 129, 0.25)',
+          animation: 'loadingPulse 2s ease-in-out infinite 0.3s',
+        }} />
+        {/* Icon circle */}
+        <div style={{
+          width: '90px',
+          height: '90px',
+          background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(6, 182, 212, 0.3))',
+          border: '2px solid rgba(16, 185, 129, 0.6)',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '2.8rem',
+          animation: 'tractorBounce 1.8s ease-in-out infinite',
+          backdropFilter: 'blur(8px)',
+          boxShadow: '0 0 30px rgba(16, 185, 129, 0.3)',
+        }}>
+          🚜
+        </div>
+      </div>
+
+      {/* Title */}
+      <h1 style={{
+        fontSize: '2rem',
+        fontWeight: 'bold',
+        background: 'linear-gradient(to right, #10b981, #06b6d4)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        marginBottom: '8px',
+        textAlign: 'center',
+        filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.6))',
+      }}>
+        AgriTrack Manager
+      </h1>
+      <p style={{
+        color: 'rgba(255,255,255,0.6)',
+        fontSize: '0.875rem',
+        marginBottom: '40px',
+        letterSpacing: '0.05em',
+      }}>
+        Dahlton Ag Ventures
+      </p>
+
+      {/* Progress bar */}
+      <div style={{
+        width: '100%',
+        maxWidth: '320px',
+        marginBottom: '16px',
+      }}>
+        <div style={{
+          width: '100%',
+          height: '6px',
+          background: 'rgba(255,255,255,0.15)',
+          borderRadius: '999px',
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            height: '100%',
+            width: `${progress}%`,
+            background: 'linear-gradient(to right, #10b981, #06b6d4)',
+            borderRadius: '999px',
+            transition: 'width 0.15s ease-out',
+            boxShadow: '0 0 8px rgba(16, 185, 129, 0.6)',
+          }} />
+        </div>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          marginTop: '6px',
+        }}>
+          <span style={{
+            color: 'rgba(255,255,255,0.4)',
+            fontSize: '0.75rem',
+          }}>
+            {Math.round(progress)}%
+          </span>
+        </div>
+      </div>
+
+      {/* Status message */}
+      <p style={{
+        color: 'rgba(255,255,255,0.75)',
+        fontSize: '0.9rem',
+        textAlign: 'center',
+        minHeight: '24px',
+        animation: 'statusFade 0.5s ease-in-out',
+        key: statusIndex,
+      }}>
+        {statusMessages[statusIndex]}
+      </p>
+
+      {/* Inline keyframes */}
+      <style>{`
+        @keyframes loadingPulse {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+          50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.15; }
+        }
+        @keyframes tractorBounce {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+        }
+        @keyframes statusFade {
+          0% { opacity: 0; transform: translateY(4px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
