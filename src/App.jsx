@@ -2300,11 +2300,14 @@ key={theme}
           </div>
         </div>
 
-        {lastSync && (
-          <div style={styles.lastSyncBanner}>
-            Last synced: {lastSync.toLocaleTimeString()}
-          </div>
-        )}
+       {lastSync && (
+  <div style={{
+    ...styles.lastSyncBanner,
+    color: theme === 'dark' ? '#9ca3af' : '#111827'
+  }}>
+    Last synced: {lastSync.toLocaleTimeString()}
+  </div>
+)}
 
         <div style={styles.tabs}>
   {['home', 'inventory', 'machinery', 'service'].map(tab => (
@@ -5566,19 +5569,23 @@ key={theme}
                 </div>
               )}
 
-              <div
-                style={{
-                  marginTop: '24px',
-                  padding: '16px',
-                  background: currentTheme.cardBackground,
-                  border: `1px solid ${currentTheme.cardBorder}`,
-                  borderRadius: '12px'
-                }}
-              >
-                <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center' }}>
-                  AgriTrack Manager • Created by Dahlton Ag Ventures • Powered by Vercel & Supabase
-                </p>
-              </div>
+             <div
+  style={{
+    marginTop: '24px',
+    padding: '16px',
+    background: currentTheme.cardBackground,
+    border: `1px solid ${currentTheme.cardBorder}`,
+    borderRadius: '12px'
+  }}
+>
+  <p style={{ 
+    color: theme === 'dark' ? '#9ca3af' : '#111827', 
+    fontSize: '0.875rem', 
+    textAlign: 'center' 
+  }}>
+    AgriTrack Manager • Created by Dahlton Ag Ventures • Powered by Vercel & Supabase
+  </p>
+</div>
             </div>
           </div>
         )}
