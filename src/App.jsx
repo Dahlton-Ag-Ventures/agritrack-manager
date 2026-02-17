@@ -31,11 +31,9 @@ if (!document.getElementById('agritrack-animations')) {
 const themes = {
 dark: {
     background: '#0a0a0a',
-    backgroundImage: window.innerWidth >= 768 
-      ? 'linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("https://agritrack-manager.vercel.app/space_background_agritrack.png")'
-      : 'none',
-    backgroundSize: window.innerWidth < 768 ? 'auto' : 'cover',
-    backgroundPosition: window.innerWidth < 768 ? 'initial' : 'center',
+    backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop")',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
     backgroundAttachment: window.innerWidth < 768 ? 'scroll' : 'fixed',
     backgroundRepeat: 'no-repeat',
     cardBackground: '#1e3a5f',
@@ -46,10 +44,15 @@ dark: {
     modalBackground: '#1e3a5f',
     tabInactive: '#1e3a5f',
     gradient: 'linear-gradient(to right, #10b981, #06b6d4)',
-    homeBackground: 'linear-gradient(135deg, #1e3a5f 0%, #1a2942 100%)',
+    homeBackground: 'linear-gradient(135deg, rgba(30, 58, 95, 0.85) 0%, rgba(26, 41, 66, 0.85) 100%)',
   },
   light: {
     background: '#f3f4f6',
+    backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.70), rgba(255, 248, 240, 0.80)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop")',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundAttachment: window.innerWidth < 768 ? 'scroll' : 'fixed',
+    backgroundRepeat: 'no-repeat',
     cardBackground: '#ffffff',
     cardBorder: '#e5e7eb',
     text: '#111827',
@@ -58,7 +61,7 @@ dark: {
     modalBackground: '#ffffff',
     tabInactive: '#dbeafe',
     gradient: 'linear-gradient(to right, #10b981, #06b6d4)',
-    homeBackground: 'linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%)',
+    homeBackground: 'linear-gradient(135deg, rgba(219, 234, 254, 0.75) 0%, rgba(224, 242, 254, 0.80) 100%)',
   }
 };
 
