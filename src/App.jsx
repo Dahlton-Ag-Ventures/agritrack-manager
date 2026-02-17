@@ -2200,32 +2200,21 @@ itemCard: {
 // This continues from: if (!user) { return ( ... login screen ... ); }
 
 return (
-<>
-  {/* Fixed Background Layer */}
-  <div style={{
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+<div 
+key={theme}
+  style={{
+    minHeight: '100vh',
+    color: currentTheme.text,
+    padding: '24px',
     background: currentTheme.background,
     backgroundImage: currentTheme.backgroundImage,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
+    backgroundAttachment: 'fixed',
     backgroundRepeat: 'no-repeat',
-    zIndex: -1
-  }} />
-  
-  {/* Scrollable Content Layer */}
-  <div 
-    key={theme}
-    style={{
-      minHeight: '100vh',
-      color: currentTheme.text,
-      padding: '24px',
-      position: 'relative'
-    }}
-  >
+    position: 'relative'
+  }}
+>
     <div style={styles.content}>
       <div style={styles.header}>
 <div>
@@ -6386,7 +6375,7 @@ return (
   startIndex={viewingImageIndex}
 />}
       </div>
-    </>
+    </div>
   );
 }
 
