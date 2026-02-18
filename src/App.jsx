@@ -1428,7 +1428,8 @@ const quickUpdateQuantity = async (id, delta) => {
   minHeight: '100vh',
   background: 'linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop")',
   backgroundSize: 'cover',
-  backgroundPosition: 'center bottom',
+  backgroundPosition: 'center',
+  backgroundAttachment: 'fixed',
   backgroundRepeat: 'no-repeat',
   display: 'flex',
   flexDirection: 'column',
@@ -1968,7 +1969,7 @@ itemCard: {
   }}
 />
       </div>
-        <div style={styles.loginCard}>
+        <div style={{ ...styles.loginCard, marginTop: '-40px' }}>
           <h2 style={{
   fontSize: '1.75rem',
   fontWeight: '600',
