@@ -1949,7 +1949,7 @@ itemCard: {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  marginBottom: '40px',
+  marginBottom: '70px',
   boxShadow: '0 0 60px rgba(255, 255, 255, 0.5), 0 20px 40px rgba(0, 0, 0, 0.4)',
   padding: '5px',
   animation: 'floatIn 1s ease-out'
