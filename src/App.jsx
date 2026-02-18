@@ -71,18 +71,20 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 {/*Machinery categories for dropdown */}
 const MACHINERY_CATEGORIES = [
+  'Attachments',
   'Augers and Conveyors',
   'Bikes and Small Motors',
   'Bulldozer Blades',
   'Cars and Trucks',
   'Combines',
-  'Construction Equipment',
   'Dryers',
   'Grain Handling',
   'Harvest Equipment',
   'Heavy Trucks',
+  'Land Improvement Equipment',
   'Landscape Equipment',
-  'Lifts and Cranes',
+  'Lifts & Cranes',
+  'Other',
   'Spreaders',
   'Spraying',
   'Straight Cut/Pick-Up Headers',
