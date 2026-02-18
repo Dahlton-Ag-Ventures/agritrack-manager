@@ -1079,14 +1079,21 @@ const deleteMachineryItem = async (id) => {
   if (!confirm(confirmMessage)) return;
 
   try {
-    
     await supabase.from('machinery_items').delete().eq('id', id);
     
     if (serviceCount > 0) {
       await supabase.from('service_records')
         .delete()
         .eq('machine_name', machineToDelete.name);
+      
+      // ✅ Remove associated service records from local state
+      setServiceHistory(prev => 
+        prev.filter(record => record.machineName !== machineToDelete.name)
+      );
     }
+
+    // ✅ Remove machine from local state immediately
+    setMachinery(prev => prev.filter(item => item.id !== id));
 
     console.log(`✅ Deleted machine "${machineToDelete.name}" and ${serviceCount} service record(s)`);
   } catch (error) {
