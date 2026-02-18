@@ -2202,23 +2202,23 @@ itemCard: {
 return (
 <>
   {/* Fixed Background Layer */}
-  <div style={{
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: currentTheme.background,
-    backgroundImage: currentTheme.backgroundImage,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    zIndex: -1
-  }} />
+<div style={{
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  background: currentTheme.background,
+  backgroundImage: currentTheme.backgroundImage,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center center',
+  backgroundRepeat: 'no-repeat',
+  backgroundAttachment: 'scroll',
+  zIndex: -1
+}} />
   
   {/* Scrollable Content Layer */}
-  <div 
-    key={theme}
+  <div
     style={{
       minHeight: '100vh',
       color: currentTheme.text,
