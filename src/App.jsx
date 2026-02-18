@@ -1942,18 +1942,18 @@ itemCard: {
       <div style={styles.loginContainer}>
         {/* Dahlton Ag Ventures Logo */}
       <div style={{
-        width: '180px',
-        height: '180px',
-        background: 'rgba(255, 255, 255, 0.25)',
-        borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: '30px',
-        boxShadow: '0 0 60px rgba(255, 255, 255, 0.5), 0 20px 40px rgba(0, 0, 0, 0.4)',
-        padding: '5px',
-        animation: 'floatIn 1s ease-out'
-      }}>
+  width: '120px',
+  height: '120px',
+  background: 'rgba(255, 255, 255, 0.25)',
+  borderRadius: '50%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginBottom: '20px',
+  boxShadow: '0 0 60px rgba(255, 255, 255, 0.5), 0 20px 40px rgba(0, 0, 0, 0.4)',
+  padding: '5px',
+  animation: 'floatIn 1s ease-out'
+}}>
 <img 
   src="/dav-logo.png"
   alt="Dahlton Ag Ventures" 
