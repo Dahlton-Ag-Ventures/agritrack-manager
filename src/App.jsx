@@ -2241,7 +2241,7 @@ return (
   bottom: 0,
   background: theme === 'dark'
     ? 'rgba(0, 0, 0, 0.85)'
-    : 'rgba(255, 248, 240, 0.70)',
+    : 'rgba(255, 248, 240, 0.88)',
   zIndex: -1
 }} />
   
