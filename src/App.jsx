@@ -49,7 +49,7 @@ dark: {
     background: '#f3f4f6',
     backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.70), rgba(255, 248, 240, 0.80)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop")',
     backgroundSize: 'cover',
-    backgroundPosition: 'center',
+    backgroundPosition: 'center bottom',
     backgroundRepeat: 'no-repeat',
     cardBackground: '#ffffff',
     cardBorder: '#e5e7eb',
@@ -1411,7 +1411,7 @@ const quickUpdateQuantity = async (id, delta) => {
   minHeight: '100vh',
   background: 'linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop")',
   backgroundSize: 'cover',
-  backgroundPosition: 'center',
+  backgroundPosition: 'center bottom',
   backgroundRepeat: 'no-repeat',
   display: 'flex',
   flexDirection: 'column',
@@ -2201,19 +2201,30 @@ itemCard: {
 
 return (
 <>
-  {/* Fixed Background Layer */}
+ {/* Fixed Background Layer - Image (never changes) */}
 <div style={{
   position: 'fixed',
   top: 0,
   left: 0,
   right: 0,
   bottom: 0,
-  background: currentTheme.background,
-  backgroundImage: currentTheme.backgroundImage,
+  backgroundImage: 'url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop")',
   backgroundSize: 'cover',
-  backgroundPosition: 'center center',
+  backgroundPosition: 'center bottom',
   backgroundRepeat: 'no-repeat',
-  backgroundAttachment: 'scroll',
+  zIndex: -2
+}} />
+
+{/* Fixed Background Layer - Overlay (only this changes on theme switch) */}
+<div style={{
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  background: theme === 'dark'
+    ? 'rgba(0, 0, 0, 0.75)'
+    : 'rgba(255, 248, 240, 0.70)',
   zIndex: -1
 }} />
   
