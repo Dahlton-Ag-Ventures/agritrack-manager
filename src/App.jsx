@@ -3970,16 +3970,33 @@ return (
                 value={machineryForm.vinSerial}
                 onChange={(e) => setMachineryForm({ ...machineryForm, vinSerial: e.target.value })}
               />
-              <select
-                style={styles.input}
-                value={machineryForm.category}
-                onChange={(e) => setMachineryForm({ ...machineryForm, category: e.target.value })}
-              >
-                <option value="">Select Category...</option>
-                {MACHINERY_CATEGORIES.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
+<select
+  style={{...styles.input, position: 'relative', zIndex: 9999}}
+  value={machineryForm.category}
+  onChange={(e) => setMachineryForm({ ...machineryForm, category: e.target.value })}
+>
+  <option value="">Select Category...</option>
+  <option value="Attachments">Attachments</option>
+  <option value="Augers and Conveyors">Augers and Conveyors</option>
+  <option value="Bikes and Small Motors">Bikes and Small Motors</option>
+  <option value="Bulldozer Blades">Bulldozer Blades</option>
+  <option value="Cars and Trucks">Cars and Trucks</option>
+  <option value="Combines">Combines</option>
+  <option value="Dryers">Dryers</option>
+  <option value="Grain Handling">Grain Handling</option>
+  <option value="Harvest Equipment">Harvest Equipment</option>
+  <option value="Heavy Trucks">Heavy Trucks</option>
+  <option value="Land Improvement Equipment">Land Improvement Equipment</option>
+  <option value="Landscape Equipment">Landscape Equipment</option>
+  <option value="Lifts &amp; Cranes">Lifts &amp; Cranes</option>
+  <option value="Other">Other</option>
+  <option value="Spreaders">Spreaders</option>
+  <option value="Spraying">Spraying</option>
+  <option value="Straight Cut/Pick-Up Headers">Straight Cut/Pick-Up Headers</option>
+  <option value="Tillage and Seeding">Tillage and Seeding</option>
+  <option value="Tractors">Tractors</option>
+  <option value="Trailers">Trailers</option>
+</select>
               <div style={{ marginBottom: '12px' }}>
                 <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
                   📸 Upload Photo
@@ -5993,16 +6010,33 @@ return (
               value={machineryForm.vinSerial}
               onChange={(e) => setMachineryForm({ ...machineryForm, vinSerial: e.target.value })}
             />
-            <select
-              style={styles.input}
-              value={machineryForm.category}
-              onChange={(e) => setMachineryForm({ ...machineryForm, category: e.target.value })}
-            >
-              <option value="">Select Category...</option>
-              {MACHINERY_CATEGORIES.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
+         <select
+  style={{...styles.input, position: 'relative', zIndex: 9999}}
+  value={machineryForm.category}
+  onChange={(e) => setMachineryForm({ ...machineryForm, category: e.target.value })}
+>
+  <option value="">Select Category...</option>
+  <option value="Attachments">Attachments</option>
+  <option value="Augers and Conveyors">Augers and Conveyors</option>
+  <option value="Bikes and Small Motors">Bikes and Small Motors</option>
+  <option value="Bulldozer Blades">Bulldozer Blades</option>
+  <option value="Cars and Trucks">Cars and Trucks</option>
+  <option value="Combines">Combines</option>
+  <option value="Dryers">Dryers</option>
+  <option value="Grain Handling">Grain Handling</option>
+  <option value="Harvest Equipment">Harvest Equipment</option>
+  <option value="Heavy Trucks">Heavy Trucks</option>
+  <option value="Land Improvement Equipment">Land Improvement Equipment</option>
+  <option value="Landscape Equipment">Landscape Equipment</option>
+  <option value="Lifts &amp; Cranes">Lifts &amp; Cranes</option>
+  <option value="Other">Other</option>
+  <option value="Spreaders">Spreaders</option>
+  <option value="Spraying">Spraying</option>
+  <option value="Straight Cut/Pick-Up Headers">Straight Cut/Pick-Up Headers</option>
+  <option value="Tillage and Seeding">Tillage and Seeding</option>
+  <option value="Tractors">Tractors</option>
+  <option value="Trailers">Trailers</option>
+</select>
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
                 📸 Upload Photo (Optional)
