@@ -71,16 +71,24 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 {/*Machinery categories for dropdown */}
 const MACHINERY_CATEGORIES = [
-  'Land Improvement Equipment',
-  'Augers & Conveyors',
-  'Straight Cut/Pick Up Headers',
-  'Tillage and Seeding',
-  'Heavy Trucks/Semi Trucks',
-  'Tractors',
-  'Blades',
+  'Augers and Conveyors',
+  'Bikes and Small Motors',
+  'Bulldozer Blades',
+  'Cars and Trucks',
   'Combines',
-  'Sprayers',
-  'Other'
+  'Construction Equipment',
+  'Dryers',
+  'Grain Handling',
+  'Harvest Equipment',
+  'Heavy Trucks',
+  'Landscape Equipment',
+  'Lifts and Cranes',
+  'Spreaders',
+  'Spraying',
+  'Straight Cut/Pick-Up Headers',
+  'Tillage and Seeding',
+  'Tractors',
+  'Trailers',
 ];
 
 export default function App() {
