@@ -4944,11 +4944,11 @@ return (
               setImageModalTitle(`${record.machineName} - ${record.serviceType}`);
             }}
             style={{
-              padding: '12px 16px',
-              background: '#8b5cf6',
-              border: 'none',
-              borderRadius: '8px',
-              color: 'white',
+            padding: '12px 16px',
+            background: theme === 'light' ? '#bae6fd' : '#8b5cf6',
+            border: 'none',
+            borderRadius: '8px',
+            color: theme === 'light' ? '#0c4a6e' : 'white',
               cursor: 'pointer',
               fontSize: '0.875rem',
               fontWeight: 'bold',
@@ -4959,12 +4959,12 @@ return (
               minWidth: '100px',
               transition: 'all 0.2s ease'
             }}
-            onMouseEnter={(e) => {
-              e.target.style.background = '#7c3aed';
+           onMouseEnter={(e) => {
+              e.target.style.background = theme === 'light' ? '#7dd3fc' : '#7c3aed';
               e.target.style.transform = 'scale(1.05)';
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = '#8b5cf6';
+              e.target.style.background = theme === 'light' ? '#bae6fd' : '#8b5cf6';
               e.target.style.transform = 'scale(1)';
             }}
           >
