@@ -1442,7 +1442,7 @@ loginCard: {
   background: 'rgba(255, 255, 255, 0.25)',
   border: '1px solid rgba(255, 255, 255, 0.4)',
   borderRadius: '16px',
-  padding: '48px',
+  padding: '30px',
   maxWidth: '400px',
   width: '100%',
   boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)',
