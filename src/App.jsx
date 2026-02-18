@@ -1595,18 +1595,18 @@ homeContainer: {
       cursor: 'pointer',
       background: 'transparent',
     },
-    logoutButton: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      padding: '8px 16px',
-      background: '#2563eb',
-      border: 'none',
-      borderRadius: '8px',
-      color: 'white',
-      cursor: 'pointer',
-      fontSize: '0.875rem',
-    },
+   logoutButton: {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '8px 16px',
+  background: theme === 'light' ? '#bae6fd' : '#2563eb',
+  border: 'none',
+  borderRadius: '8px',
+  color: theme === 'light' ? '#0c4a6e' : 'white',
+  cursor: 'pointer',
+  fontSize: '0.875rem',
+},
     lastSyncBanner: {
       padding: '12px',
       background: 'rgba(16, 185, 129, 0.1)',
@@ -2963,7 +2963,8 @@ return (
               disabled={inventoryPage === 1}
               style={{
                 padding: '8px 16px',
-                background: inventoryPage === 1 ? '#4b5563' : '#10b981',
+                background: inventoryPage === 1 ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
+                color: inventoryPage === 1 ? 'white' : (theme === 'light' ? '#14532d' : 'white'),
                 border: 'none',
                 borderRadius: '8px',
                 color: 'white',
@@ -2979,7 +2980,7 @@ return (
               disabled={inventoryPage === 1}
               style={{
                 padding: '8px 16px',
-                background: inventoryPage === 1 ? '#4b5563' : '#10b981',
+                background: inventoryPage === 1 ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
                 border: 'none',
                 borderRadius: '8px',
                 color: 'white',
@@ -3003,7 +3004,7 @@ return (
               disabled={inventoryPage === getPaginatedInventory().totalPages}
               style={{
                 padding: '8px 16px',
-                background: inventoryPage === getPaginatedInventory().totalPages ? '#4b5563' : '#10b981',
+                background: inventoryPage === getPaginatedInventory().totalPages ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
                 border: 'none',
                 borderRadius: '8px',
                 color: 'white',
@@ -3019,7 +3020,7 @@ return (
               disabled={inventoryPage === getPaginatedInventory().totalPages}
               style={{
                 padding: '8px 16px',
-                background: inventoryPage === getPaginatedInventory().totalPages ? '#4b5563' : '#10b981',
+                background: inventoryPage === getPaginatedInventory().totalPages ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
                 border: 'none',
                 borderRadius: '8px',
                 color: 'white',
@@ -3365,7 +3366,7 @@ return (
             disabled={inventoryPage === 1}
             style={{
               padding: '8px 16px',
-              background: inventoryPage === 1 ? '#4b5563' : '#10b981',
+              background: inventoryPage === 1 ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
               border: 'none',
               borderRadius: '8px',
               color: 'white',
@@ -3381,7 +3382,7 @@ return (
             disabled={inventoryPage === 1}
             style={{
               padding: '8px 16px',
-              background: inventoryPage === 1 ? '#4b5563' : '#10b981',
+              background: inventoryPage === 1 ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
               border: 'none',
               borderRadius: '8px',
               color: 'white',
@@ -3405,7 +3406,7 @@ return (
             disabled={inventoryPage === getPaginatedInventory().totalPages}
             style={{
               padding: '8px 16px',
-              background: inventoryPage === getPaginatedInventory().totalPages ? '#4b5563' : '#10b981',
+              background: inventoryPage === getPaginatedInventory().totalPages ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
               border: 'none',
               borderRadius: '8px',
               color: 'white',
@@ -3421,7 +3422,7 @@ return (
             disabled={inventoryPage === getPaginatedInventory().totalPages}
             style={{
               padding: '8px 16px',
-              background: inventoryPage === getPaginatedInventory().totalPages ? '#4b5563' : '#10b981',
+              background: inventoryPage === getPaginatedInventory().totalPages ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
               border: 'none',
               borderRadius: '8px',
               color: 'white',
@@ -3884,7 +3885,7 @@ return (
           disabled={machineryPage === 1}
           style={{
             padding: '8px 16px',
-            background: machineryPage === 1 ? '#4b5563' : '#10b981',
+            background: machineryPage === 1 ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
             border: 'none',
             borderRadius: '8px',
             color: 'white',
@@ -3900,7 +3901,7 @@ return (
           disabled={machineryPage === 1}
           style={{
             padding: '8px 16px',
-            background: machineryPage === 1 ? '#4b5563' : '#10b981',
+            background: machineryPage === 1 ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
             border: 'none',
             borderRadius: '8px',
             color: 'white',
@@ -3924,7 +3925,7 @@ return (
           disabled={machineryPage === getPaginatedMachinery().totalPages}
           style={{
             padding: '8px 16px',
-            background: machineryPage === getPaginatedMachinery().totalPages ? '#4b5563' : '#10b981',
+            background: machineryPage === getPaginatedMachinery().totalPages ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
             border: 'none',
             borderRadius: '8px',
             color: 'white',
@@ -3940,7 +3941,7 @@ return (
           disabled={machineryPage === getPaginatedMachinery().totalPages}
           style={{
             padding: '8px 16px',
-            background: machineryPage === getPaginatedMachinery().totalPages ? '#4b5563' : '#10b981',
+            background: machineryPage === getPaginatedMachinery().totalPages ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
             border: 'none',
             borderRadius: '8px',
             color: 'white',
@@ -4294,7 +4295,7 @@ return (
         disabled={machineryPage === 1}
         style={{
           padding: '8px 16px',
-          background: machineryPage === 1 ? '#4b5563' : '#10b981',
+          background: machineryPage === 1 ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
           border: 'none',
           borderRadius: '8px',
           color: 'white',
@@ -4310,7 +4311,7 @@ return (
         disabled={machineryPage === 1}
         style={{
           padding: '8px 16px',
-          background: machineryPage === 1 ? '#4b5563' : '#10b981',
+          background: machineryPage === 1 ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
           border: 'none',
           borderRadius: '8px',
           color: 'white',
@@ -4334,7 +4335,7 @@ return (
         disabled={machineryPage === getPaginatedMachinery().totalPages}
         style={{
           padding: '8px 16px',
-          background: machineryPage === getPaginatedMachinery().totalPages ? '#4b5563' : '#10b981',
+          background: machineryPage === getPaginatedMachinery().totalPages ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
           border: 'none',
           borderRadius: '8px',
           color: 'white',
@@ -4350,7 +4351,7 @@ return (
         disabled={machineryPage === getPaginatedMachinery().totalPages}
         style={{
           padding: '8px 16px',
-          background: machineryPage === getPaginatedMachinery().totalPages ? '#4b5563' : '#10b981',
+          background: machineryPage === getPaginatedMachinery().totalPages ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
           border: 'none',
           borderRadius: '8px',
           color: 'white',
@@ -4616,7 +4617,7 @@ return (
           disabled={servicePage === 1}
           style={{
             padding: '8px 16px',
-            background: servicePage === 1 ? '#4b5563' : '#10b981',
+            background: servicePage === 1 ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
             border: 'none',
             borderRadius: '8px',
             color: 'white',
@@ -4632,7 +4633,7 @@ return (
           disabled={servicePage === 1}
           style={{
             padding: '8px 16px',
-            background: servicePage === 1 ? '#4b5563' : '#10b981',
+            background: servicePage === 1 ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
             border: 'none',
             borderRadius: '8px',
             color: 'white',
@@ -4656,7 +4657,7 @@ return (
           disabled={servicePage === getPaginatedService().totalPages}
           style={{
             padding: '8px 16px',
-            background: servicePage === getPaginatedService().totalPages ? '#4b5563' : '#10b981',
+            background: servicePage === getPaginatedService().totalPages ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
             border: 'none',
             borderRadius: '8px',
             color: 'white',
@@ -4672,7 +4673,7 @@ return (
           disabled={servicePage === getPaginatedService().totalPages}
           style={{
             padding: '8px 16px',
-            background: servicePage === getPaginatedService().totalPages ? '#4b5563' : '#10b981',
+            background: servicePage === getPaginatedService().totalPages ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
             border: 'none',
             borderRadius: '8px',
             color: 'white',
@@ -5057,7 +5058,7 @@ return (
                   disabled={servicePage === 1}
                   style={{
                     padding: '8px 16px',
-                    background: servicePage === 1 ? '#4b5563' : '#10b981',
+                    background: servicePage === 1 ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
                     border: 'none',
                     borderRadius: '8px',
                     color: 'white',
@@ -5073,7 +5074,7 @@ return (
                   disabled={servicePage === 1}
                   style={{
                     padding: '8px 16px',
-                    background: servicePage === 1 ? '#4b5563' : '#10b981',
+                    background: servicePage === 1 ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
                     border: 'none',
                     borderRadius: '8px',
                     color: 'white',
@@ -5097,7 +5098,7 @@ return (
                   disabled={servicePage === getPaginatedService().totalPages}
                   style={{
                     padding: '8px 16px',
-                    background: servicePage === getPaginatedService().totalPages ? '#4b5563' : '#10b981',
+                    background: servicePage === getPaginatedService().totalPages ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
                     border: 'none',
                     borderRadius: '8px',
                     color: 'white',
@@ -5113,7 +5114,7 @@ return (
                   disabled={servicePage === getPaginatedService().totalPages}
                   style={{
                     padding: '8px 16px',
-                    background: servicePage === getPaginatedService().totalPages ? '#4b5563' : '#10b981',
+                    background: servicePage === getPaginatedService().totalPages ? '#4b5563' : (theme === 'light' ? '#86efac' : '#10b981'),
                     border: 'none',
                     borderRadius: '8px',
                     color: 'white',
