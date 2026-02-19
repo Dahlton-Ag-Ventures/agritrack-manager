@@ -5051,8 +5051,8 @@ onMouseLeave={(e) => e.target.style.background = theme === 'light' ? '#eff6ff' :
     background: theme === 'light' ? '#f0f9ff' : '#1f2937', 
     borderRadius: '8px', 
     minHeight: '80px',
-    width: window.innerWidth < 768 ? 'calc(100% + 60px)' : '100%',
-    marginLeft: window.innerWidth < 768 ? '-60px' : '0'
+    width: window.innerWidth < 768 ? 'calc(100% + 90px)' : '100%',
+    marginLeft: window.innerWidth < 768 ? '-90px' : '0'
   }}>
     <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Notes:</p>
     <p style={{ fontSize: '0.875rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{record.notes}</p>
