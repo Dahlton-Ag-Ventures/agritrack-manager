@@ -4768,12 +4768,12 @@ return (
         value={serviceForm.technician}
         onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
       />
-      <textarea
-        style={{ ...styles.input, minHeight: '80px', resize: 'vertical' }}
-        placeholder="Notes"
-        value={serviceForm.notes}
-        onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
-      />
+     <textarea
+  style={{ ...styles.input, minHeight: '80px', resize: 'vertical', fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif', fontSize: '1rem', whiteSpace: 'pre-wrap', letterSpacing: 'normal' }}
+  placeholder="Notes"
+  value={serviceForm.notes}
+  onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
+/>
       <div style={{ marginBottom: '12px' }}>
         <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
           📸 Upload Photos (up to 10)
@@ -6197,7 +6197,7 @@ return (
       onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
     />
     <textarea
-  style={{ ...styles.input, minHeight: '100px', resize: 'vertical', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', fontSize: '0.875rem', whiteSpace: 'pre-wrap' }}
+  style={{ ...styles.input, minHeight: '100px', resize: 'vertical', fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif', fontSize: '1rem', whiteSpace: 'pre-wrap', letterSpacing: 'normal' }}
   placeholder="Service notes and details..."
       value={serviceForm.notes}
       onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
