@@ -2461,18 +2461,18 @@ return (
     {/* Welcome Header */}
     <div style={{ 
       ...styles.welcomeCard, 
-      background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.4) 0%, rgba(16, 185, 129, 0.3) 100%)',
+     background: theme === 'light' ? 'linear-gradient(135deg, rgba(134, 239, 172, 0.85) 0%, rgba(110, 231, 183, 0.85) 100%)' : 'linear-gradient(135deg, rgba(6, 182, 212, 0.4) 0%, rgba(16, 185, 129, 0.3) 100%)',
       border: '2px solid #10b981',
       marginBottom: '30px'
     }}>
 <h1 style={{ 
-  color: '#ffffff',
+  color: theme === 'light' ? '#111827' : '#ffffff',
   marginBottom: '16px', 
   fontSize: '2.5rem', 
   fontWeight: '700',
   textAlign: 'center',
   filter: theme === 'dark' ? 'drop-shadow(2px 4px 8px rgba(0, 0, 0, 0.8)) drop-shadow(4px 6px 12px rgba(0, 0, 0, 0.6))' : 'none',
-  textShadow: theme === 'light' ? '2px 2px 4px rgba(0, 0, 0, 0.3)' : 'none',
+  textShadow: theme === 'light' ? '2px 2px 4px rgba(0, 0, 0, 0.1)' : 'none',
   animation: 'floatIn 1.2s ease-out',
   opacity: 1
 }}>
