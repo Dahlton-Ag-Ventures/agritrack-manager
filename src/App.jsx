@@ -6197,7 +6197,7 @@ return (
       onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
     />
     <textarea
-  style={{ ...styles.input, minHeight: '100px', resize: 'vertical', fontFamily: 'inherit', whiteSpace: 'pre-wrap' }}
+  style={{ ...styles.input, minHeight: '100px', resize: 'vertical', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', fontSize: '0.875rem', whiteSpace: 'pre-wrap' }}
   placeholder="Service notes and details..."
       value={serviceForm.notes}
       onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
