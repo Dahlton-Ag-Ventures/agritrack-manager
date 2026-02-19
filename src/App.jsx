@@ -3498,7 +3498,7 @@ return (
     gap: '6px'
   }}
 >
-  <Wrench size={16} /> {showRemindersPanel ? 'Hide' : 'Show'}
+  <Wrench size={16} /> {showRemindersPanel ? 'Hide' : (window.innerWidth >= 768 ? 'Show Service Reminders' : 'Show')}
 </button>
     {userRole !== 'employee' && (
 <button 
@@ -3520,7 +3520,7 @@ return (
     whiteSpace: 'nowrap'
   }}
 >
-  <Plus size={16} /> Add
+  <Plus size={16} /> {window.innerWidth >= 768 ? 'Add Machinery' : 'Add'}
 </button>
     )}
   </div>
@@ -3679,8 +3679,8 @@ return (
 {/* REMINDERS PANEL - Shows when button is clicked */}
 {showRemindersPanel && (
   <div style={{
-    background: theme === 'dark' ? 'rgba(139, 92, 246, 0.1)' : 'rgba(196, 181, 253, 0.2)',
-    border: '2px solid #8b5cf6',
+background: theme === 'dark' ? 'rgba(139, 92, 246, 0.1)' : '#ffffff',
+border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
     borderRadius: '12px',
     padding: '24px',
     marginBottom: '24px'
@@ -3745,8 +3745,8 @@ return (
           return (
             <div key={machine.id} style={{
               ...styles.itemCard,
-              background: dueCount > 0 ? 'rgba(239, 68, 68, 0.1)' : currentTheme.cardBackground,
-              border: dueCount > 0 ? '2px solid #ef4444' : `1px solid ${currentTheme.cardBorder}`
+        background: dueCount > 0 ? 'rgba(239, 68, 68, 0.1)' : (theme === 'light' ? '#eff6ff' : currentTheme.cardBackground),
+        border: dueCount > 0 ? '2px solid #ef4444' : (theme === 'light' ? '1px solid #bfdbfe' : `1px solid ${currentTheme.cardBorder}`)
             }}>
               <div style={{ flex: 1 }}>
                 <h4 style={{ fontSize: '1.1rem', marginBottom: '8px' }}>{machine.name}</h4>
@@ -3796,11 +3796,11 @@ return (
               const hoursUntilDue = Math.max(0, interval - hoursSinceService);
               
               return (
-                <div key={reminder.id} style={{
-                  ...styles.itemCard,
-                  background: isDue ? 'rgba(239, 68, 68, 0.1)' : currentTheme.cardBackground,
-                  border: isDue ? '2px solid #ef4444' : `1px solid ${currentTheme.cardBorder}`
-                }}>
+           <div key={reminder.id} style={{
+          ...styles.itemCard,
+          background: isDue ? 'rgba(239, 68, 68, 0.1)' : (theme === 'light' ? '#eff6ff' : currentTheme.cardBackground),
+          border: isDue ? '2px solid #ef4444' : (theme === 'light' ? '1px solid #bfdbfe' : `1px solid ${currentTheme.cardBorder}`)
+        }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                       <h4 style={{ fontSize: '1.1rem', margin: 0 }}>{reminder.machine_name}</h4>
