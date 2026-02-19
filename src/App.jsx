@@ -2532,34 +2532,34 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
   padding: '0 10px'
 }}>
         <div>
-          <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Real-Time Sync:</h4>
-          <ul style={{ paddingLeft: '18px', lineHeight: '1.5', fontSize: 'clamp(0.88rem, 2.8vw, 1rem)', margin: '0 0 12px 0' }}>
+          <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)', fontWeight: '600' }}>Real-Time Sync:</h4>
+          <ul style={{ paddingLeft: '18px', lineHeight: '1.8', fontSize: 'clamp(0.95rem, 3vw, 1rem)', margin: '0 0 12px 0' }}>
             <li>All changes sync instantly across all devices — no manual refresh needed. The Live Sync indicator in the top right confirms your connection status</li>
           </ul>
         </div>
         <div>
-          <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Search, Sort & Paginate:</h4>
-          <ul style={{ paddingLeft: '18px', lineHeight: '1.5', fontSize: 'clamp(0.88rem, 2.8vw, 1rem)', margin: '0 0 12px 0' }}>
+          <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)', fontWeight: '600' }}>Search, Sort & Paginate:</h4>
+          <ul style={{ paddingLeft: '18px', lineHeight: '1.8', fontSize: 'clamp(0.95rem, 3vw, 1rem)', margin: '0 0 12px 0' }}>
             <li>Every tab has a search bar, sort options, and page size controls (25 up to Show All) to quickly find any record</li>
           </ul>
         </div>
         <div>
-          <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Mobile Friendly:</h4>
-          <ul style={{ paddingLeft: '18px', lineHeight: '1.5', fontSize: 'clamp(0.88rem, 2.8vw, 1rem)', margin: '0 0 12px 0' }}>
+          <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)', fontWeight: '600' }}>Mobile Friendly:</h4>
+          <ul style={{ paddingLeft: '18px', lineHeight: '1.8', fontSize: 'clamp(0.95rem, 3vw, 1rem)', margin: '0 0 12px 0' }}>
             <li>Fully responsive on phones, tablets, and desktop — edit and delete buttons automatically reposition for touch screens</li>
           </ul>
         </div>
         {userRole !== 'employee' && (
           <div>
-            <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Import/Export (Admin):</h4>
-            <ul style={{ paddingLeft: '18px', lineHeight: '1.5', fontSize: 'clamp(0.88rem, 2.8vw, 1rem)', margin: '0 0 12px 0' }}>
+            <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)', fontWeight: '600' }}>Import/Export (Admin):</h4>
+            <ul style={{ paddingLeft: '18px', lineHeight: '1.8', fontSize: 'clamp(0.95rem, 3vw, 1rem)', margin: '0 0 12px 0' }}>
               <li>Bulk import inventory, machinery, or service records from CSV files — or export any dataset for backups via Settings → Import/Export Data</li>
             </ul>
           </div>
         )}
         <div>
-          <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)' }}>Photo Viewer:</h4>
-          <ul style={{ paddingLeft: '18px', lineHeight: '1.5', fontSize: 'clamp(0.88rem, 2.8vw, 1rem)', margin: '0 0 12px 0' }}>
+          <h4 style={{ color: '#10b981', marginBottom: '10px', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)', fontWeight: '600' }}>Photo Viewer:</h4>
+          <ul style={{ paddingLeft: '18px', lineHeight: '1.8', fontSize: 'clamp(0.95rem, 3vw, 1rem)', margin: '0 0 12px 0' }}>
             <li>Click any photo to open the full-screen viewer — supports zoom, pan/drag, pinch-to-zoom on mobile, and arrow navigation between multiple photos</li>
           </ul>
         </div>
