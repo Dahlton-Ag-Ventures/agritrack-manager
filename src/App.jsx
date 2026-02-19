@@ -2526,7 +2526,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
       {/* Card Content */}
 <div style={{
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
   gap: '20px',
   color: theme === 'dark' ? '#d1d5db' : '#374151',
   padding: '0 10px'
