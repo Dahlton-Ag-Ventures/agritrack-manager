@@ -960,10 +960,13 @@ const addInventoryItem = async () => {
     alert('Error: ' + error.message);
   }
 };
-  const deleteInventoryItem = async (id) => {
+ const deleteInventoryItem = async (id) => {
   if (!confirm('Are you sure you want to delete this item?')) return;
 
   try {
+    // ✅ UPDATE LOCAL STATE IMMEDIATELY
+    setInventory(prev => prev.filter(item => item.id !== id));
+    
     await supabase.from('inventory_items').delete().eq('id', id);
     console.log('✅ Item deleted');
   } catch (error) {
