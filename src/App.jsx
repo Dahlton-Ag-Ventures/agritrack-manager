@@ -5017,12 +5017,12 @@ return (
             <p>{record.technician || 'N/A'}</p>
           </div>
         </div>
-        {record.notes && (
-          <div style={{ marginTop: '12px', padding: '12px', background: '#1f2937', borderRadius: '8px' }}>
-            <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Notes:</p>
-            <p style={{ fontSize: '0.875rem' }}>{record.notes}</p>
-          </div>
-        )}
+       {record.notes && (
+  <div style={{ marginTop: '12px', padding: '12px', background: theme === 'light' ? '#f0f9ff' : '#1f2937', borderRadius: '8px', minHeight: '80px' }}>
+    <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Notes:</p>
+    <p style={{ fontSize: '0.875rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{record.notes}</p>
+  </div>
+)}
       </div>
 
       {/* Desktop Edit/Delete Buttons */}
