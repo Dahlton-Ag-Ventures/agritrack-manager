@@ -999,13 +999,13 @@ const saveInventoryEdit = async (id) => {
       photo_url: inventoryForm.photoUrl || ''
     };
     
-    await supabase.from('inventory_items').update(updates).eq('id', id);
+   recentlyUpdatedIdsRef.current.add(id);
 
-    recentlyUpdatedIdsRef.current.add(id);
-    
-    setTimeout(() => {
-      recentlyUpdatedIdsRef.current.delete(id);
-    }, 2000);
+setTimeout(() => {
+  recentlyUpdatedIdsRef.current.delete(id);
+}, 3000);
+
+await supabase.from('inventory_items').update(updates).eq('id', id);
 
     setInventory(prev => prev.map(item => 
       item.id === id ? {
