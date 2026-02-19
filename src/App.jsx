@@ -1850,19 +1850,19 @@ itemCard: {
       gap: '8px',
       fontSize: '0.875rem',
     },
-    quantityButton: {
-      width: '32px',
-      height: '32px',
-      background: '#10b981',
-      border: 'none',
-      borderRadius: '6px',
-      color: 'white',
-      cursor: 'pointer',
-      fontSize: '1.25rem',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
+   quantityButton: {
+  width: '32px',
+  height: '32px',
+  background: theme === 'light' ? '#86efac' : '#10b981',
+  border: 'none',
+  borderRadius: '6px',
+  color: theme === 'light' ? '#14532d' : 'white',
+  cursor: 'pointer',
+  fontSize: '1.25rem',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+},
     modalOverlay: {
       position: 'fixed',
       top: 0,
@@ -3686,26 +3686,26 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
     marginBottom: '24px'
   }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-      <h3 style={{ fontSize: '1.5rem', color: '#a78bfa', margin: 0 }}>⏰ Service Reminders</h3>
+      <h3 style={{ fontSize: '1.5rem', color: theme === 'light' ? '#111827' : '#a78bfa', margin: 0 }}>⏰ Service Reminders</h3>
       {userRole !== 'employee' && (
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           <button
             onClick={() => setShowHoursModal(true)}
-            style={{
-              padding: '10px 20px',
-              background: '#8b5cf6',
-              border: 'none',
-              borderRadius: '8px',
-              color: 'white',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '0.875rem',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => e.target.style.background = '#7c3aed'}
-            onMouseLeave={(e) => e.target.style.background = '#8b5cf6'}
+        style={{
+  padding: '10px 20px',
+  background: theme === 'light' ? '#eff6ff' : '#8b5cf6',
+  border: theme === 'light' ? '1px solid #bfdbfe' : 'none',
+  borderRadius: '8px',
+  color: theme === 'light' ? '#1e3a5f' : 'white',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  fontSize: '0.875rem',
+  transition: 'all 0.2s ease'
+}}
+onMouseEnter={(e) => e.target.style.background = theme === 'light' ? '#dbeafe' : '#7c3aed'}
+onMouseLeave={(e) => e.target.style.background = theme === 'light' ? '#eff6ff' : '#8b5cf6'}
           >
             <Plus size={16} /> Add Hours
           </button>
