@@ -585,17 +585,19 @@ supabase
         photoUrl: payload.new.photo_url
       }]);
     } else if (payload.eventType === 'UPDATE') {
-      setInventory(prev => prev.map(item => item.id === payload.new.id ? {
-        id: payload.new.id,
-        name: payload.new.name,
-        partNumber: payload.new.part_number,
-        quantity: payload.new.quantity,
-        location: payload.new.location,
-        minQuantity: payload.new.min_quantity,
-        maxQuantity: payload.new.max_quantity,
-        photoUrl: payload.new.photo_url
-      } : item));
-    } else if (payload.eventType === 'DELETE') {
+  // ✅ Skip realtime update if we just updated this item locally
+  if (recentlyUpdatedIdsRef.current.has(payload.new.id)) return;
+  setInventory(prev => prev.map(item => item.id === payload.new.id ? {
+    id: payload.new.id,
+    name: payload.new.name,
+    partNumber: payload.new.part_number,
+    quantity: payload.new.quantity,
+    location: payload.new.location,
+    minQuantity: payload.new.min_quantity,
+    maxQuantity: payload.new.max_quantity,
+    photoUrl: payload.new.photo_url
+  } : item));
+} else if (payload.eventType === 'DELETE') {
       setInventory(prev => prev.filter(item => item.id !== payload.old.id));
     }
     setLastSync(new Date());
@@ -1422,6 +1424,16 @@ const quickUpdateQuantity = async (id, delta) => {
     if (!item) return;
     
     const newQuantity = Math.max(0, (parseInt(item.quantity) || 0) + delta).toString();
+
+    // ✅ UPDATE LOCAL STATE IMMEDIATELY
+    setInventory(prev => prev.map(i => 
+      i.id === id ? { ...i, quantity: newQuantity } : i
+    ));
+
+    recentlyUpdatedIdsRef.current.add(id);
+setTimeout(() => {
+  recentlyUpdatedIdsRef.current.delete(id);
+}, 2000);
     
     await supabase.from('inventory_items').update({
       quantity: newQuantity
