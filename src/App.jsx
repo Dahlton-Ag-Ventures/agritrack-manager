@@ -5892,7 +5892,7 @@ return (
   </div>
 )}
 {showInventoryModal && (
-  <Modal title="Add Inventory Item" onClose={() => {
+  <Modal title="Add Inventory Item" theme={theme} onClose={() => {
     setShowInventoryModal(false);
     isEditingRef.current = false;
   }}>
@@ -6012,7 +6012,7 @@ return (
         )}
 
 {showMachineryModal && (
-  <Modal title="Add Machinery" onClose={() => {
+  <Modal title="Add Machinery" theme={theme} onClose={() => {
   setShowMachineryModal(false);
   isEditingRef.current = false;
 }}>
@@ -6127,7 +6127,7 @@ return (
         )}
 
 {showServiceModal && (
-<Modal title="Add Service Record" onClose={() => {
+<Modal title="Add Service Record" theme={theme} onClose={() => {
   setShowServiceModal(false);
   setMachineSearchModal('');
   isEditingRef.current = false;
@@ -6359,7 +6359,7 @@ return (
 )}
      
       {showDebugModal && (
-          <Modal title="System Status" onClose={() => setShowDebugModal(false)}>
+  <Modal title="System Status" theme={theme} onClose={() => setShowDebugModal(false)}>
             <div style={styles.debugInfo}>
               <p><strong>Real-time Status:</strong> {realtimeStatus}</p>
               <p><strong>Last Sync:</strong> {lastSync?.toLocaleString() || 'Never'}</p>
@@ -6374,7 +6374,7 @@ return (
         )}
       {/* Add Hours Modal */}
 {showHoursModal && (
-  <Modal title="Add Machine Hours" onClose={() => {
+  <Modal title="Add Machine Hours" theme={theme} onClose={() => {
     setShowHoursModal(false);
     setHoursForm({ machineName: '', hoursToAdd: '' });
   }}>
@@ -6411,7 +6411,7 @@ return (
 
 {/* Create Reminder Modal */}
 {showReminderModal && (
-  <Modal title="Create Service Reminder" onClose={() => {
+  <Modal title="Create Service Reminder" theme={theme} onClose={() => {
     setShowReminderModal(false);
     setSelectedMachineForReminder('');
     setReminderForm({ reminderName: '', hoursInterval: '' });
@@ -7067,7 +7067,7 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
   );
 }
 // Modal component - defined outside to avoid recreation on each render
-function Modal({ children, onClose, title }) {
+function Modal({ children, onClose, title, theme }) {
   const modalStyles = {
     modalOverlay: {
       position: 'fixed',
@@ -7082,17 +7082,17 @@ function Modal({ children, onClose, title }) {
       padding: '16px',
       zIndex: 50,
     },
-    modal: {
-      background: '#1e3a5f',
-      border: '1px solid #2563eb',
-      borderRadius: '12px',
-      padding: '24px',
-      maxWidth: '500px',
-      width: '100%',
-      maxHeight: '90vh',
-      overflowY: 'auto',
-      color: 'white',
-    },
+   modal: {
+  background: theme === 'light' ? '#eff6ff' : '#1e3a5f',
+  border: `1px solid ${theme === 'light' ? '#bfdbfe' : '#2563eb'}`,
+  borderRadius: '12px',
+  padding: '24px',
+  maxWidth: '500px',
+  width: '100%',
+  maxHeight: '90vh',
+  overflowY: 'auto',
+  color: theme === 'light' ? '#111827' : 'white',
+},
     closeButton: {
       background: '#2563eb',
       border: 'none',
