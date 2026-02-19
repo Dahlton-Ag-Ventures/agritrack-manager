@@ -1178,9 +1178,10 @@ const addServiceRecord = async () => {
   setSavingService(true);
   try {
     const finalDate = serviceForm.date || new Date().toISOString().split('T')[0];
+    const newId = Date.now().toString();
     
     await supabase.from('service_records').insert([{
-      id: Date.now().toString(),
+      id: newId,
       user_id: user.id,
       machine_name: serviceForm.machineName,
       service_type: serviceForm.serviceType,
@@ -1189,6 +1190,17 @@ const addServiceRecord = async () => {
       technician: serviceForm.technician,
       photo_urls: JSON.stringify(serviceForm.photoUrls || [])
     }]);
+
+    // ✅ UPDATE LOCAL STATE IMMEDIATELY
+    setServiceHistory(prev => [{
+      id: newId,
+      machineName: serviceForm.machineName,
+      serviceType: serviceForm.serviceType,
+      date: finalDate,
+      notes: serviceForm.notes,
+      technician: serviceForm.technician,
+      photoUrls: serviceForm.photoUrls || []
+    }, ...prev]);
     
     console.log('✅ Service saved - FAST!');
     setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrls: [] });
