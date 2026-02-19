@@ -97,7 +97,7 @@ export default function App() {
   // Authentication state
   const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState('light');
   const [loading, setLoading] = useState(true);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
