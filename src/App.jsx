@@ -4413,8 +4413,8 @@ return (
       gap: '12px',
       marginTop: '8px',
       padding: '12px 16px',
-      background: theme === 'dark' ? 'rgba(139, 92, 246, 0.2)' : 'rgba(196, 181, 253, 0.3)',
-      border: theme === 'dark' ? '1px solid #8b5cf6' : '1px solid #c4b5fd',
+      background: theme === 'dark' ? 'rgba(139, 92, 246, 0.2)' : 'rgba(219, 234, 254, 0.8)',
+      border: theme === 'dark' ? '1px solid #8b5cf6' : '1px solid #93c5fd',
       borderRadius: '8px',
       flexWrap: 'wrap'
     }}>
@@ -4423,7 +4423,7 @@ return (
         alignItems: 'center',
         gap: '8px',
         fontSize: '0.875rem',
-        color: theme === 'dark' ? '#a78bfa' : '#7c3aed'
+        color: theme === 'dark' ? '#a78bfa' : '#1e3a5f'
       }}>
         <AlertCircle size={16} />
         {filteredCount === 0 ? (
@@ -4452,7 +4452,7 @@ return (
               alignItems: 'center',
               gap: '6px',
               padding: '6px 12px',
-              background: theme === 'dark' ? '#8b5cf6' : '#c4b5fd',
+              background: theme === 'dark' ? '#8b5cf6' : '#3b82f6',
               border: 'none',
               borderRadius: '6px',
               color: 'white',
@@ -4462,10 +4462,10 @@ return (
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-              e.target.style.background = theme === 'dark' ? '#7c3aed' : '#a78bfa';
+              e.target.style.background = theme === 'dark' ? '#7c3aed' : '#2563eb';
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = theme === 'dark' ? '#8b5cf6' : '#c4b5fd';
+              e.target.style.background = theme === 'dark' ? '#8b5cf6' : '#3b82f6';
             }}
           >
             <Plus size={16} />
@@ -4477,7 +4477,7 @@ return (
           onClick={() => setServiceFilter('')}
           style={{
             padding: '6px 12px',
-            background: theme === 'dark' ? '#8b5cf6' : '#c4b5fd',
+            background: theme === 'dark' ? '#8b5cf6' : '#3b82f6',
             border: 'none',
             borderRadius: '6px',
             color: 'white',
@@ -4487,10 +4487,10 @@ return (
             transition: 'all 0.2s ease'
           }}
           onMouseEnter={(e) => {
-            e.target.style.background = theme === 'dark' ? '#7c3aed' : '#a78bfa';
+           e.target.style.background = theme === 'dark' ? '#7c3aed' : '#2563eb';
           }}
           onMouseLeave={(e) => {
-            e.target.style.background = theme === 'dark' ? '#8b5cf6' : '#c4b5fd';
+            e.target.style.background = theme === 'dark' ? '#8b5cf6' : '#3b82f6';
           }}
         >
           Clear Filter
