@@ -4755,13 +4755,13 @@ return (
         value={serviceForm.serviceType}
         onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
       />
-      <input
-        style={styles.input}
-        type="date"
-        placeholder="Date"
-        value={serviceForm.date}
-        onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
-      />
+ <input
+  style={{ ...styles.input, fontFamily: 'inherit' }}
+  type="date"
+  placeholder="Date"
+  value={serviceForm.date}
+  onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
+/>
       <input
         style={styles.input}
         placeholder="Technician"
@@ -6183,7 +6183,7 @@ return (
       onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
     />
 <input
-  style={styles.input}
+  style={{ ...styles.input, fontFamily: 'inherit' }}
   type="date"
   value={serviceForm.date}
   onChange={(e) => {
@@ -6197,8 +6197,8 @@ return (
       onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
     />
     <textarea
-      style={{ ...styles.input, minHeight: '100px', resize: 'vertical' }}
-      placeholder="Service notes and details..."
+  style={{ ...styles.input, minHeight: '100px', resize: 'vertical', fontFamily: 'inherit', whiteSpace: 'pre-wrap' }}
+  placeholder="Service notes and details..."
       value={serviceForm.notes}
       onChange={(e) => setServiceForm({ ...serviceForm, notes: e.target.value })}
     />
