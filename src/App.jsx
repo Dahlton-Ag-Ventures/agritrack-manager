@@ -2739,12 +2739,13 @@ className="flip-card"
         </div>
       </div>
     </div>
-    <div style={{
+<div style={{
       background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff',
       border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #111827',
       borderRadius: '8px',
       padding: '16px',
-      textAlign: 'center'
+      textAlign: 'center',
+      marginTop: window.innerWidth < 768 ? '-8px' : '0px'
     }}>
       <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Total Inventory</p>
       <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
@@ -2801,12 +2802,13 @@ className="flip-card"
         </div>
       </div>
     </div>
-    <div style={{
+<div style={{
       background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff',
       border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #111827',
       borderRadius: '8px',
       padding: '16px',
-      textAlign: 'center'
+      textAlign: 'center',
+      marginTop: window.innerWidth < 768 ? '-8px' : '0px'
     }}>
       <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Total Machinery</p>
       <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
@@ -2867,12 +2869,13 @@ className="flip-card"
         </div>
       </div>
     </div>
-    <div style={{
+  <div style={{
       background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff',
       border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #111827',
       borderRadius: '8px',
       padding: '16px',
-      textAlign: 'center'
+      textAlign: 'center',
+      marginTop: window.innerWidth < 768 ? '-8px' : '0px'
     }}>
       <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Service Records</p>
       <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
