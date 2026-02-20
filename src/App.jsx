@@ -86,6 +86,11 @@ styleSheet.innerText = `
       padding: 16px !important;
       min-height: 100px !important;
       gap: 8px !important;
+      height: 100px !important;
+    }
+
+    .flip-card-inner {
+      height: 100px !important;
     }
 
 .flip-card {
