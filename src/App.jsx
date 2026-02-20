@@ -6583,7 +6583,6 @@ onMouseLeave={(e) => e.target.style.background = theme === 'light' ? '#eff6ff' :
       </div>
     </div>
   </div>
-  </div>
   );
 }
 
