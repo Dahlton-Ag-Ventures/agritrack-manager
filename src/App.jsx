@@ -57,7 +57,7 @@ styleSheet.innerText = `
     overflow-y: auto;
   }
 
-  @media (max-width: 768px) {
+@media (max-width: 768px) {
     .flip-card {
       perspective: none;
     }
@@ -82,9 +82,32 @@ styleSheet.innerText = `
       -webkit-backface-visibility: visible;
     }
 
+    .flip-card-front {
+      padding: 16px !important;
+      min-height: 100px !important;
+      gap: 8px !important;
+    }
+
+    .flip-card-front span {
+      font-size: 2rem !important;
+    }
+
+    .flip-card-front h3 {
+      font-size: 1rem !important;
+    }
+
+    .flip-card-front p {
+      font-size: 0.75rem !important;
+    }
+
     .flip-card-back {
       transform: none;
       display: none;
+      padding: 16px !important;
+    }
+
+    .flip-card-back h3.flip-card-back-title {
+      display: none !important;
     }
 
     .flip-card-inner.flipped .flip-card-front {
@@ -2605,7 +2628,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
         maxHeight: '420px',
       }}
     >
-      <h3 style={{ fontSize: '1.1rem', color: '#06b6d4', marginBottom: '12px' }}>👥 General Features</h3>
+      <h3 className="flip-card-back-title" style={{ fontSize: '1.1rem', color: '#06b6d4', marginBottom: '12px' }}>👥 General Features</h3>
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
@@ -2679,7 +2702,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
             maxHeight: '420px',
           }}
         >
-          <h3 style={{ fontSize: '1.1rem', color: '#06b6d4', marginBottom: '12px' }}>📦 Inventory Management</h3>
+          <h3 className="flip-card-back-title" style={{ fontSize: '1.1rem', color: '#06b6d4', marginBottom: '12px' }}>📦 Inventory Management</h3>
           <div style={{ color: theme === 'dark' ? '#d1d5db' : '#374151', fontSize: '0.9rem', lineHeight: '1.7' }}>
             <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Add & Edit Items:</p>
             <p style={{ marginBottom: '10px' }}>Create entries with photos, part numbers, quantities, and storage locations.</p>
@@ -2741,7 +2764,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
             maxHeight: '420px',
           }}
         >
-          <h3 style={{ fontSize: '1.1rem', color: '#06b6d4', marginBottom: '12px' }}>🚜 Machinery Tracking</h3>
+          <h3 className="flip-card-back-title" style={{ fontSize: '1.1rem', color: '#06b6d4', marginBottom: '12px' }}>🚜 Machinery Tracking</h3>
           <div style={{ color: theme === 'dark' ? '#d1d5db' : '#374151', fontSize: '0.9rem', lineHeight: '1.7' }}>
             <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Add & Edit Machines:</p>
             <p style={{ marginBottom: '10px' }}>Register equipment with name, VIN/serial, category, and optional photo.</p>
@@ -2803,7 +2826,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
             maxHeight: '420px',
           }}
         >
-          <h3 style={{ fontSize: '1.1rem', color: '#06b6d4', marginBottom: '12px' }}>🔧 Service History</h3>
+          <h3 className="flip-card-back-title" style={{ fontSize: '1.1rem', color: '#06b6d4', marginBottom: '12px' }}>🔧 Service History</h3>
           <div style={{ color: theme === 'dark' ? '#d1d5db' : '#374151', fontSize: '0.9rem', lineHeight: '1.7' }}>
             <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Log Services:</p>
             <p style={{ marginBottom: '10px' }}>Search for a machine by name, category, or VIN — fill in service type, date, technician, and notes.</p>
