@@ -66,6 +66,7 @@ styleSheet.innerText = `
       transform-style: flat;
       transition: none;
       min-height: unset !important;
+      height: auto !important;
     }
 
     .flip-card-inner.flipped {
@@ -80,25 +81,17 @@ styleSheet.innerText = `
       right: unset;
       backface-visibility: visible;
       -webkit-backface-visibility: visible;
-    }
-
-.flip-card-front {
+      min-height: unset !important;
+      height: auto !important;
       padding: 16px !important;
-      min-height: 100px !important;
+    }
+
+    .flip-card-front {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       gap: 8px !important;
-      height: 100px !important;
-    }
-
-    .flip-card-inner {
-      height: 100px !important;
-    }
-
-.flip-card {
-      margin-bottom: 0 !important;
-    }
-
-    .flip-card-inner.flipped .flip-card-back {
-      margin-top: 0 !important;
     }
 
     .flip-card-front span {
@@ -116,7 +109,6 @@ styleSheet.innerText = `
     .flip-card-back {
       transform: none;
       display: none;
-      padding: 16px !important;
     }
 
     .flip-card-back h3.flip-card-back-title {
@@ -127,23 +119,8 @@ styleSheet.innerText = `
       display: none;
     }
 
-.flip-card-inner.flipped .flip-card-back {
+    .flip-card-inner.flipped .flip-card-back {
       display: block;
-    }
-
-    .flip-card-back {
-      margin: 0 !important;
-      padding-top: 12px !important;
-    }
-
-    .flip-card-front {
-      margin: 0 !important;
-    }
-
-    .stats-column {
-      gap: 4px !important;
-      margin: 0 !important;
-      padding: 0 !important;
     }
   }
 `;
@@ -2697,7 +2674,7 @@ className="flip-card"
 }}>
 
   {/* Inventory Column */}
-  <div className="stats-column" style={{ display: 'flex', flexDirection: 'column', gap: window.innerWidth < 768 ? '2px' : '4px', marginBottom: window.innerWidth < 768 ? '4px' : '0px' }}>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
     <div
       className="flip-card"
       onClick={() => toggleCard('inventory')}
@@ -2750,7 +2727,6 @@ className="flip-card"
       borderRadius: '8px',
       padding: '16px',
       textAlign: 'center',
-      marginTop: window.innerWidth < 768 ? '-8px' : '0px'
     }}>
       <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Total Inventory</p>
       <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
@@ -2760,7 +2736,7 @@ className="flip-card"
   </div>
 
 {/* Machinery Column */}
-  <div className="stats-column" style={{ display: 'flex', flexDirection: 'column', gap: window.innerWidth < 768 ? '2px' : '4px', marginBottom: window.innerWidth < 768 ? '4px' : '0px' }}>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
     <div
       className="flip-card"
       onClick={() => toggleCard('machinery')}
@@ -2813,7 +2789,6 @@ className="flip-card"
       borderRadius: '8px',
       padding: '16px',
       textAlign: 'center',
-      marginTop: window.innerWidth < 768 ? '-8px' : '0px'
     }}>
       <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Total Machinery</p>
       <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
@@ -2823,7 +2798,7 @@ className="flip-card"
   </div>
 
   {/* Service Column */}
-  <div className="stats-column" style={{ display: 'flex', flexDirection: 'column', gap: window.innerWidth < 768 ? '2px' : '4px', marginBottom: window.innerWidth < 768 ? '4px' : '0px' }}>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
     <div
       className="flip-card"
       onClick={() => toggleCard('service')}
@@ -2874,13 +2849,12 @@ className="flip-card"
         </div>
       </div>
     </div>
-  <div style={{
+<div style={{
       background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff',
       border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #111827',
       borderRadius: '8px',
       padding: '16px',
-      textAlign: 'center',
-      marginTop: window.innerWidth < 768 ? '-8px' : '0px'
+      textAlign: 'center'
     }}>
       <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Service Records</p>
       <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
