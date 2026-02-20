@@ -40,7 +40,7 @@ styleSheet.innerText = `
     transform: rotateY(180deg);
   }
 
-  .flip-card-front,
+.flip-card-front,
   .flip-card-back {
     position: absolute;
     top: 0;
@@ -55,6 +55,45 @@ styleSheet.innerText = `
   .flip-card-back {
     transform: rotateY(180deg);
     overflow-y: auto;
+  }
+
+  @media (max-width: 768px) {
+    .flip-card {
+      perspective: none;
+    }
+
+    .flip-card-inner {
+      transform-style: flat;
+      transition: none;
+      min-height: unset !important;
+    }
+
+    .flip-card-inner.flipped {
+      transform: none;
+    }
+
+    .flip-card-front,
+    .flip-card-back {
+      position: relative;
+      top: unset;
+      left: unset;
+      right: unset;
+      backface-visibility: visible;
+      -webkit-backface-visibility: visible;
+    }
+
+    .flip-card-back {
+      transform: none;
+      display: none;
+    }
+
+    .flip-card-inner.flipped .flip-card-front {
+      display: none;
+    }
+
+    .flip-card-inner.flipped .flip-card-back {
+      display: block;
+    }
   }
 `;
 if (!document.getElementById('agritrack-animations')) {
