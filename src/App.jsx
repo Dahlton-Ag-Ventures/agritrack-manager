@@ -2773,9 +2773,16 @@ className="flip-card"
             <p style={{ marginBottom: '10px' }}>Each machine shows a button with its service count — click to jump to filtered records.</p>
             <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Service Reminders & Hours:</p>
             <p>Track machine hours and set hour-based service intervals with automatic due alerts.</p>
-          </div>
-        </div>
+</div>
       </div>
+    </div>
+    {window.innerWidth >= 768 && (
+      <div style={{ background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff', border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
+        <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Total Machinery</p>
+        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>{loading ? '...' : machinery.length}</p>
+      </div>
+    )}
+  </div>
 
   {/* Service Column */}
   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -6576,7 +6583,7 @@ onMouseLeave={(e) => e.target.style.background = theme === 'light' ? '#eff6ff' :
       </div>
     </div>
   </div>
-  </>
+  </div>
   );
 }
 
