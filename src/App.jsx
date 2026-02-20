@@ -82,10 +82,14 @@ styleSheet.innerText = `
       -webkit-backface-visibility: visible;
     }
 
-    .flip-card-front {
+.flip-card-front {
       padding: 16px !important;
       min-height: 100px !important;
       gap: 8px !important;
+    }
+
+    .flip-card {
+      margin-bottom: -8px !important;
     }
 
     .flip-card-front span {
@@ -2664,8 +2668,8 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
 <div style={{
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-  gap: '16px',
-  marginTop: '16px'
+  gap: '8px',
+  marginTop: '0px'
 }}>
 
   {/* Inventory Column */}
