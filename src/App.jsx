@@ -2673,7 +2673,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
 }}>
 
   {/* Inventory Column */}
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
     <div
       className="flip-card"
       onClick={() => toggleCard('inventory')}
@@ -2734,8 +2734,8 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
     </div>
   </div>
 
-  {/* Machinery Column */}
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+{/* Machinery Column */}
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
     <div
       className="flip-card"
       onClick={() => toggleCard('machinery')}
@@ -2797,7 +2797,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
   </div>
 
   {/* Service Column */}
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
     <div
       className="flip-card"
       onClick={() => toggleCard('service')}
