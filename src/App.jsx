@@ -2678,7 +2678,7 @@ className="flip-card"
     <div
       className="flip-card"
       onClick={() => toggleCard('inventory')}
-      style={{ minHeight: '260px' }}
+      style={{ minHeight: window.innerWidth < 768 ? 'unset' : '260px' }}
     >
       <div className={`flip-card-inner ${flippedCards['inventory'] ? 'flipped' : ''}`}>
         <div
@@ -2740,7 +2740,7 @@ className="flip-card"
     <div
       className="flip-card"
       onClick={() => toggleCard('machinery')}
-      style={{ minHeight: '260px' }}
+      style={{ minHeight: window.innerWidth < 768 ? 'unset' : '260px' }}
     >
       <div className={`flip-card-inner ${flippedCards['machinery'] ? 'flipped' : ''}`}>
         <div
@@ -2802,7 +2802,7 @@ className="flip-card"
     <div
       className="flip-card"
       onClick={() => toggleCard('service')}
-      style={{ minHeight: '260px' }}
+      style={{ minHeight: window.innerWidth < 768 ? 'unset' : '260px' }}
     >
       <div className={`flip-card-inner ${flippedCards['service'] ? 'flipped' : ''}`}>
         <div
