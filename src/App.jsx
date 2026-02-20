@@ -2622,7 +2622,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
 <div
 className="flip-card"
   onClick={() => toggleCard('general')}
-  style={{ minHeight: '260px', marginBottom: '4px' }}
+  style={{ minHeight: window.innerWidth < 768 ? '100px' : '260px', marginBottom: window.innerWidth < 768 ? '4px' : '16px' }}
 >
   <div className={`flip-card-inner ${flippedCards['general'] ? 'flipped' : ''}`}>
     <div
@@ -2687,12 +2687,12 @@ className="flip-card"
 <div style={{
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-  gap: '8px',
+  gap: window.innerWidth < 768 ? '4px' : '8px',
   marginTop: '0px'
 }}>
 
   {/* Inventory Column */}
-  <div className="stats-column" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+  <div className="stats-column" style={{ display: 'flex', flexDirection: 'column', gap: window.innerWidth < 768 ? '2px' : '4px', marginBottom: window.innerWidth < 768 ? '4px' : '0px' }}>
     <div
       className="flip-card"
       onClick={() => toggleCard('inventory')}
@@ -2754,7 +2754,7 @@ className="flip-card"
   </div>
 
 {/* Machinery Column */}
-  <div className="stats-column" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+  <div className="stats-column" style={{ display: 'flex', flexDirection: 'column', gap: window.innerWidth < 768 ? '2px' : '4px', marginBottom: window.innerWidth < 768 ? '4px' : '0px' }}>
     <div
       className="flip-card"
       onClick={() => toggleCard('machinery')}
@@ -2816,7 +2816,7 @@ className="flip-card"
   </div>
 
   {/* Service Column */}
-  <div className="stats-column" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+  <div className="stats-column" style={{ display: 'flex', flexDirection: 'column', gap: window.innerWidth < 768 ? '2px' : '4px', marginBottom: window.innerWidth < 768 ? '4px' : '0px' }}>
     <div
       className="flip-card"
       onClick={() => toggleCard('service')}
