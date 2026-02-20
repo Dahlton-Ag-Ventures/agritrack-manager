@@ -88,8 +88,12 @@ styleSheet.innerText = `
       gap: 8px !important;
     }
 
-    .flip-card {
-      margin-bottom: -8px !important;
+.flip-card {
+      margin-bottom: 0 !important;
+    }
+
+    .flip-card-inner.flipped .flip-card-back {
+      margin-top: 0 !important;
     }
 
     .flip-card-front span {
@@ -118,8 +122,23 @@ styleSheet.innerText = `
       display: none;
     }
 
-    .flip-card-inner.flipped .flip-card-back {
+.flip-card-inner.flipped .flip-card-back {
       display: block;
+    }
+
+    .flip-card-back {
+      margin: 0 !important;
+      padding-top: 12px !important;
+    }
+
+    .flip-card-front {
+      margin: 0 !important;
+    }
+
+    .stats-column {
+      gap: 4px !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
   }
 `;
@@ -2601,9 +2620,9 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
 
   {/* General Features Flip Card - Full Width */}
 <div
-  className="flip-card"
+className="flip-card"
   onClick={() => toggleCard('general')}
-  style={{ minHeight: '260px', marginBottom: '16px' }}
+  style={{ minHeight: '260px', marginBottom: '4px' }}
 >
   <div className={`flip-card-inner ${flippedCards['general'] ? 'flipped' : ''}`}>
     <div
@@ -2673,7 +2692,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
 }}>
 
   {/* Inventory Column */}
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+  <div className="stats-column" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
     <div
       className="flip-card"
       onClick={() => toggleCard('inventory')}
@@ -2735,7 +2754,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
   </div>
 
 {/* Machinery Column */}
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+  <div className="stats-column" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
     <div
       className="flip-card"
       onClick={() => toggleCard('machinery')}
@@ -2797,7 +2816,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
   </div>
 
   {/* Service Column */}
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+  <div className="stats-column" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
     <div
       className="flip-card"
       onClick={() => toggleCard('service')}
