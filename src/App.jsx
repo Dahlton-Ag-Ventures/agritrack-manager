@@ -2861,12 +2861,9 @@ className="flip-card"
     </div>
   </div>
 )}
-
-</div>
   </div>
 )}
-
-     
+  
   {activeTab === 'inventory' && (
   <div>
     <div style={styles.tabHeader}>
