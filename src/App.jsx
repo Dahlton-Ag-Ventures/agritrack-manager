@@ -2719,14 +2719,14 @@ className="flip-card"
             <p>Search by name, part number, or location — sort and paginate results.</p>
           </div>
         </div>
-      </div>
-      {window.innerWidth >= 768 && (
+</div>
+  </div>
+    {window.innerWidth >= 768 && (
       <div style={{ background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff', border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
         <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Total Inventory</p>
         <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>{loading ? '...' : inventory.length}</p>
       </div>
     )}
-    </div>
   </div>
 
 {/* Machinery Column */}
@@ -2776,15 +2776,6 @@ className="flip-card"
           </div>
         </div>
       </div>
-      {/* Machinery Column */}
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-    <div
-      className="flip-card"
-      onClick={() => toggleCard('machinery')}
-      style={{ minHeight: window.innerWidth < 768 ? 'unset' : '260px' }}
-    >
-    </div>
-  </div>
 
   {/* Service Column */}
   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -2837,15 +2828,6 @@ className="flip-card"
           </div>
         </div>
       </div>
-      {/* Service Column */}
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-    <div
-      className="flip-card"
-      onClick={() => toggleCard('service')}
-      style={{ minHeight: window.innerWidth < 768 ? 'unset' : '260px' }}
-    >
-    </div>
-</div>
 
 {window.innerWidth < 768 && (
   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
