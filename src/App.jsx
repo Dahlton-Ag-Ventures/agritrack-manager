@@ -169,6 +169,7 @@ const [serviceForm, setServiceForm] = useState({
   const [serviceSort, setServiceSort] = useState('date-desc');
   const [serviceFilter, setServiceFilter] = useState('');
   const [machineSearchModal, setMachineSearchModal] = useState('');
+  const [machineDropdownOpen, setMachineDropdownOpen] = useState(false);
   const [inventoryPage, setInventoryPage] = useState(1);
   const [inventoryItemsPerPage, setInventoryItemsPerPage] = useState(50);
   const [machineryPage, setMachineryPage] = useState(1);
@@ -1291,6 +1292,7 @@ const cancelServiceEdit = () => {
     photoUrls: [] 
   });
   setMachineSearchModal('');
+  setMachineDropdownOpen(false);
 };
 // Get machine hours
 const getMachineHours = (machineName) => {
@@ -4721,54 +4723,104 @@ onMouseLeave={(e) => e.target.style.background = theme === 'light' ? '#eff6ff' :
    <div key={record.id} className="item-card" style={styles.itemCard}>
   {editingServiceId === record.id ? (
     <div style={{ flex: 1 }}>
-      <div style={{ marginBottom: '16px' }}>
+
+<div style={{ marginBottom: '16px', position: 'relative' }}>
         <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
           Select Machine
         </label>
         <input
           type="text"
-          placeholder="🔍 Search machines..."
-          value={machineSearchModal}
-          onChange={(e) => setMachineSearchModal(e.target.value)}
+          placeholder="🔍 Search or select a machine..."
+          value={serviceForm.machineName || machineSearchModal}
+          onChange={(e) => {
+            setMachineSearchModal(e.target.value);
+            setServiceForm({ ...serviceForm, machineName: '' });
+            setMachineDropdownOpen(true);
+          }}
+          onFocus={() => setMachineDropdownOpen(true)}
+          onBlur={() => setTimeout(() => setMachineDropdownOpen(false), 150)}
           style={{
             ...styles.input,
-            marginBottom: '8px'
+            marginBottom: 0,
+            backgroundColor: serviceForm.machineName ? (theme === 'light' ? '#f0fdf4' : '#1a3a2a') : styles.input.background,
+            borderColor: serviceForm.machineName ? '#10b981' : styles.input.borderColor,
           }}
         />
-        <select
-          style={styles.input}
-          value={serviceForm.machineName}
-          onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
-          required
-        >
-          <option value="">-- Select a machine --</option>
-          {machinery
-            .filter(machine => {
-              const searchLower = machineSearchModal.toLowerCase();
-              return (
-                machine.name?.toLowerCase().includes(searchLower) ||
-                machine.category?.toLowerCase().includes(searchLower) ||
-                machine.vinSerial?.toLowerCase().includes(searchLower)
-              );
-            })
-            .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
-            .map(machine => (
-              <option key={machine.id} value={machine.name}>
-                {machine.name} {machine.category ? `(${machine.category})` : ''}
-              </option>
-            ))}
-        </select>
-        {machineSearchModal && (
-          <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginTop: '4px' }}>
-            Showing {machinery.filter(m => {
-              const searchLower = machineSearchModal.toLowerCase();
-              return (
-                m.name?.toLowerCase().includes(searchLower) ||
-                m.category?.toLowerCase().includes(searchLower) ||
-                m.vinSerial?.toLowerCase().includes(searchLower)
-              );
-            }).length} of {machinery.length} machines
-          </p>
+        {serviceForm.machineName && (
+          <button
+            onClick={() => {
+              setServiceForm({ ...serviceForm, machineName: '' });
+              setMachineSearchModal('');
+            }}
+            style={{
+              position: 'absolute',
+              right: '10px',
+              top: '30px',
+              background: 'transparent',
+              border: 'none',
+              color: '#9ca3af',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              padding: '4px'
+            }}
+          >✕</button>
+        )}
+        {machineDropdownOpen && !serviceForm.machineName && (
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            background: theme === 'light' ? '#ffffff' : '#1e3a5f',
+            border: `1px solid ${theme === 'light' ? '#bfdbfe' : '#2563eb'}`,
+            borderRadius: '8px',
+            zIndex: 1000,
+            maxHeight: '220px',
+            overflowY: 'auto',
+            boxShadow: '0 8px 16px rgba(0,0,0,0.3)',
+            marginTop: '4px'
+          }}>
+            {machinery
+              .filter(machine => {
+                const searchLower = machineSearchModal.toLowerCase();
+                return !searchLower || (
+                  machine.name?.toLowerCase().includes(searchLower) ||
+                  machine.category?.toLowerCase().includes(searchLower) ||
+                  machine.vinSerial?.toLowerCase().includes(searchLower)
+                );
+              })
+              .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+              .map(machine => (
+                <div
+                  key={machine.id}
+                  onMouseDown={() => {
+                    setServiceForm({ ...serviceForm, machineName: machine.name });
+                    setMachineSearchModal('');
+                    setMachineDropdownOpen(false);
+                  }}
+                  style={{
+                    padding: '10px 14px',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    color: theme === 'light' ? '#111827' : 'white',
+                    borderBottom: `1px solid ${theme === 'light' ? '#e5e7eb' : '#2d4a6b'}`,
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = theme === 'light' ? '#eff6ff' : '#2d4a6b'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  {machine.name}
+                  {machine.category && <span style={{ color: '#9ca3af', fontSize: '0.8rem' }}> — {machine.category}</span>}
+                </div>
+              ))}
+            {machinery.filter(m => {
+              const s = machineSearchModal.toLowerCase();
+              return !s || m.name?.toLowerCase().includes(s) || m.category?.toLowerCase().includes(s) || m.vinSerial?.toLowerCase().includes(s);
+            }).length === 0 && (
+              <div style={{ padding: '12px 14px', color: '#9ca3af', fontSize: '0.875rem' }}>
+                No machines match your search
+              </div>
+            )}
+          </div>
         )}
         {machinery.length === 0 && (
           <p style={{ color: '#ef4444', fontSize: '0.875rem', marginTop: '8px' }}>
@@ -4776,6 +4828,7 @@ onMouseLeave={(e) => e.target.style.background = theme === 'light' ? '#eff6ff' :
           </p>
         )}
       </div>
+      
       <input
         style={styles.input}
         placeholder="Service Type (e.g., Oil Change, Repair)"
@@ -6153,62 +6206,106 @@ onMouseLeave={(e) => e.target.style.background = theme === 'light' ? '#eff6ff' :
 <Modal title="Add Service Record" theme={theme} onClose={() => {
   setShowServiceModal(false);
   setMachineSearchModal('');
+  setMachineDropdownOpen(false);
   isEditingRef.current = false;
 }}>
-    <div style={{ marginBottom: '16px' }}>
+   <div style={{ marginBottom: '16px', position: 'relative' }}>
       <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
         Select Machine
       </label>
-      
-      {/* ✅ SEARCH INPUT */}
       <input
         type="text"
-        placeholder="🔍 Search machines..."
-        value={machineSearchModal}
-        onChange={(e) => setMachineSearchModal(e.target.value)}
+        placeholder="🔍 Search or select a machine..."
+        value={serviceForm.machineName || machineSearchModal}
+        onChange={(e) => {
+          setMachineSearchModal(e.target.value);
+          setServiceForm({ ...serviceForm, machineName: '' });
+          setMachineDropdownOpen(true);
+        }}
+        onFocus={() => setMachineDropdownOpen(true)}
+        onBlur={() => setTimeout(() => setMachineDropdownOpen(false), 150)}
         style={{
           ...styles.input,
-          marginBottom: '8px'
+          marginBottom: 0,
+          backgroundColor: serviceForm.machineName ? (theme === 'light' ? '#f0fdf4' : '#1a3a2a') : styles.input.background,
+          borderColor: serviceForm.machineName ? '#10b981' : styles.input.borderColor,
         }}
       />
-      
-      {/* ✅ FILTERED DROPDOWN */}
-      <select
-        style={styles.input}
-        value={serviceForm.machineName}
-        onChange={(e) => setServiceForm({ ...serviceForm, machineName: e.target.value })}
-        required
-      >
-        <option value="">-- Select a machine --</option>
-        {machinery
-          .filter(machine => {
-            const searchLower = machineSearchModal.toLowerCase();
-            return (
-              machine.name?.toLowerCase().includes(searchLower) ||
-              machine.category?.toLowerCase().includes(searchLower) ||
-              machine.vinSerial?.toLowerCase().includes(searchLower)
-            );
-          })
-          .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
-          .map(machine => (
-            <option key={machine.id} value={machine.name}>
-              {machine.name} {machine.category ? `(${machine.category})` : ''}
-            </option>
-          ))}
-      </select>
-      
-      {/* ✅ SHOW COUNT OF FILTERED RESULTS */}
-      {machineSearchModal && (
-        <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginTop: '4px' }}>
-          Showing {machinery.filter(m => {
-            const searchLower = machineSearchModal.toLowerCase();
-            return (
-              m.name?.toLowerCase().includes(searchLower) ||
-              m.category?.toLowerCase().includes(searchLower) ||
-              m.vinSerial?.toLowerCase().includes(searchLower)
-            );
-          }).length} of {machinery.length} machines
-        </p>
+      {serviceForm.machineName && (
+        <button
+          onClick={() => {
+            setServiceForm({ ...serviceForm, machineName: '' });
+            setMachineSearchModal('');
+          }}
+          style={{
+            position: 'absolute',
+            right: '10px',
+            top: '30px',
+            background: 'transparent',
+            border: 'none',
+            color: '#9ca3af',
+            cursor: 'pointer',
+            fontSize: '1rem',
+            padding: '4px'
+          }}
+        >✕</button>
+      )}
+      {machineDropdownOpen && !serviceForm.machineName && (
+        <div style={{
+          position: 'absolute',
+          top: '100%',
+          left: 0,
+          right: 0,
+          background: theme === 'light' ? '#ffffff' : '#1e3a5f',
+          border: `1px solid ${theme === 'light' ? '#bfdbfe' : '#2563eb'}`,
+          borderRadius: '8px',
+          zIndex: 1000,
+          maxHeight: '220px',
+          overflowY: 'auto',
+          boxShadow: '0 8px 16px rgba(0,0,0,0.3)',
+          marginTop: '4px'
+        }}>
+          {machinery
+            .filter(machine => {
+              const searchLower = machineSearchModal.toLowerCase();
+              return !searchLower || (
+                machine.name?.toLowerCase().includes(searchLower) ||
+                machine.category?.toLowerCase().includes(searchLower) ||
+                machine.vinSerial?.toLowerCase().includes(searchLower)
+              );
+            })
+            .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+            .map(machine => (
+              <div
+                key={machine.id}
+                onMouseDown={() => {
+                  setServiceForm({ ...serviceForm, machineName: machine.name });
+                  setMachineSearchModal('');
+                  setMachineDropdownOpen(false);
+                }}
+                style={{
+                  padding: '10px 14px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  color: theme === 'light' ? '#111827' : 'white',
+                  borderBottom: `1px solid ${theme === 'light' ? '#e5e7eb' : '#2d4a6b'}`,
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = theme === 'light' ? '#eff6ff' : '#2d4a6b'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                {machine.name}
+                {machine.category && <span style={{ color: '#9ca3af', fontSize: '0.8rem' }}> — {machine.category}</span>}
+              </div>
+            ))}
+          {machinery.filter(m => {
+            const s = machineSearchModal.toLowerCase();
+            return !s || m.name?.toLowerCase().includes(s) || m.category?.toLowerCase().includes(s) || m.vinSerial?.toLowerCase().includes(s);
+          }).length === 0 && (
+            <div style={{ padding: '12px 14px', color: '#9ca3af', fontSize: '0.875rem' }}>
+              No machines match your search
+            </div>
+          )}
+        </div>
       )}
     </div>
     <input
