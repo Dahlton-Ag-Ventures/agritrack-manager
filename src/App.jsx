@@ -2611,7 +2611,7 @@ className="flip-card"
       className="flip-card-front"
       style={{
         background: theme === 'dark' ? 'rgba(30, 58, 95, 0.6)' : 'white',
-        border: '2px solid #2563eb',
+        border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -2628,7 +2628,7 @@ className="flip-card"
       className="flip-card-back"
       style={{
         background: theme === 'dark' ? 'rgba(30, 58, 95, 0.95)' : 'white',
-        border: '2px solid #10b981',
+        border: theme === 'dark' ? '2px solid #10b981' : '2px solid #fde047',
         minHeight: '260px',
         maxHeight: '420px',
       }}
@@ -2685,7 +2685,7 @@ className="flip-card"
           className="flip-card-front"
           style={{
             background: theme === 'dark' ? 'rgba(30, 58, 95, 0.6)' : 'white',
-            border: '2px solid #2563eb',
+            border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -2702,7 +2702,7 @@ className="flip-card"
           className="flip-card-back"
           style={{
             background: theme === 'dark' ? 'rgba(30, 58, 95, 0.95)' : 'white',
-            border: '2px solid #10b981',
+            border: theme === 'dark' ? '2px solid #10b981' : '2px solid #fde047',
             minHeight: '260px',
             maxHeight: '420px',
           }}
@@ -2735,7 +2735,7 @@ className="flip-card"
           className="flip-card-front"
           style={{
             background: theme === 'dark' ? 'rgba(30, 58, 95, 0.6)' : 'white',
-            border: '2px solid #2563eb',
+            border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -2752,7 +2752,7 @@ className="flip-card"
           className="flip-card-back"
           style={{
             background: theme === 'dark' ? 'rgba(30, 58, 95, 0.95)' : 'white',
-            border: '2px solid #10b981',
+            border: theme === 'dark' ? '2px solid #10b981' : '2px solid #fde047',
             minHeight: '260px',
             maxHeight: '420px',
           }}
@@ -2785,7 +2785,7 @@ className="flip-card"
           className="flip-card-front"
           style={{
             background: theme === 'dark' ? 'rgba(30, 58, 95, 0.6)' : 'white',
-            border: '2px solid #2563eb',
+            border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -2802,7 +2802,7 @@ className="flip-card"
           className="flip-card-back"
           style={{
             background: theme === 'dark' ? 'rgba(30, 58, 95, 0.95)' : 'white',
-            border: '2px solid #10b981',
+            border: theme === 'dark' ? '2px solid #10b981' : '2px solid #fde047',
             minHeight: '260px',
             maxHeight: '420px',
           }}
@@ -2829,15 +2829,15 @@ className="flip-card"
 
 {/* Stacked Stats at Bottom */}
 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
-  <div style={{ background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff', border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #111827', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
+  <div style={{ background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff', border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
     <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Total Inventory</p>
     <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>{loading ? '...' : inventory.length}</p>
   </div>
-  <div style={{ background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff', border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #111827', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
+  <div style={{ background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff', border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
     <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Total Machinery</p>
     <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>{loading ? '...' : machinery.length}</p>
   </div>
-  <div style={{ background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff', border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #111827', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
+  <div style={{ background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff', border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
     <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Service Records</p>
     <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>{loading ? '...' : serviceHistory.length}</p>
   </div>
