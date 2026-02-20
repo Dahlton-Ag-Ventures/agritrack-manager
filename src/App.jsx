@@ -27,11 +27,11 @@ styleSheet.innerText = `
     cursor: pointer;
   }
 
-  .flip-card-inner {
+.flip-card-inner {
     position: relative;
     width: 100%;
     height: 100%;
-    min-height: 160px;
+    min-height: 260px;
     transition: transform 0.6s ease;
     transform-style: preserve-3d;
   }
@@ -2544,7 +2544,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
   <div
     className="flip-card"
     onClick={() => toggleCard('general')}
-    style={{ minHeight: '160px' }}
+    style={{ minHeight: '260px' }}
   >
     <div className={`flip-card-inner ${flippedCards['general'] ? 'flipped' : ''}`}>
       <div
@@ -2557,7 +2557,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
           alignItems: 'center',
           justifyContent: 'center',
           gap: '16px',
-          minHeight: '160px',
+          minHeight: '260px',
         }}
       >
         <span style={{ fontSize: '3rem' }}>👥</span>
@@ -2569,7 +2569,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
         style={{
           background: theme === 'dark' ? 'rgba(30, 58, 95, 0.95)' : 'white',
           border: '2px solid #10b981',
-          minHeight: '160px',
+          minHeight: '260px',
           maxHeight: '420px',
         }}
       >
@@ -2596,7 +2596,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
   <div
     className="flip-card"
     onClick={() => toggleCard('inventory')}
-    style={{ minHeight: '160px' }}
+    style={{ minHeight: '260px' }}
   >
     <div className={`flip-card-inner ${flippedCards['inventory'] ? 'flipped' : ''}`}>
       <div
@@ -2609,7 +2609,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
           alignItems: 'center',
           justifyContent: 'center',
           gap: '16px',
-          minHeight: '160px',
+          minHeight: '260px',
         }}
       >
         <span style={{ fontSize: '3rem' }}>📦</span>
@@ -2621,7 +2621,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
         style={{
           background: theme === 'dark' ? 'rgba(30, 58, 95, 0.95)' : 'white',
           border: '2px solid #10b981',
-          minHeight: '160px',
+          minHeight: '260px',
           maxHeight: '420px',
         }}
       >
@@ -2644,7 +2644,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
   <div
     className="flip-card"
     onClick={() => toggleCard('machinery')}
-    style={{ minHeight: '160px' }}
+    style={{ minHeight: '260px' }}
   >
     <div className={`flip-card-inner ${flippedCards['machinery'] ? 'flipped' : ''}`}>
       <div
@@ -2657,7 +2657,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
           alignItems: 'center',
           justifyContent: 'center',
           gap: '16px',
-          minHeight: '160px',
+          minHeight: '260px',
         }}
       >
         <span style={{ fontSize: '3rem' }}>🚜</span>
@@ -2669,7 +2669,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
         style={{
           background: theme === 'dark' ? 'rgba(30, 58, 95, 0.95)' : 'white',
           border: '2px solid #10b981',
-          minHeight: '160px',
+          minHeight: '260px',
           maxHeight: '420px',
         }}
       >
@@ -2692,7 +2692,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
   <div
     className="flip-card"
     onClick={() => toggleCard('service')}
-    style={{ minHeight: '160px' }}
+    style={{ minHeight: '260px' }}
   >
     <div className={`flip-card-inner ${flippedCards['service'] ? 'flipped' : ''}`}>
       <div
@@ -2705,7 +2705,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
           alignItems: 'center',
           justifyContent: 'center',
           gap: '16px',
-          minHeight: '160px',
+          minHeight: '260px',
         }}
       >
         <span style={{ fontSize: '3rem' }}>🔧</span>
@@ -2717,7 +2717,7 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
         style={{
           background: theme === 'dark' ? 'rgba(30, 58, 95, 0.95)' : 'white',
           border: '2px solid #10b981',
-          minHeight: '160px',
+          minHeight: '260px',
           maxHeight: '420px',
         }}
       >
