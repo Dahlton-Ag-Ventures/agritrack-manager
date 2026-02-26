@@ -296,6 +296,10 @@ const [hoursForm, setHoursForm] = useState({
   machineName: '',
   hoursToAdd: ''
 });
+const [selectedHoursRecord, setSelectedHoursRecord] = useState(null);
+const [showHoursDetailModal, setShowHoursDetailModal] = useState(false);
+const [editingHours, setEditingHours] = useState(false);
+const [newTotalHours, setNewTotalHours] = useState('');;
   
   // Get current theme object
   const currentTheme = themes[theme];
@@ -1401,6 +1405,56 @@ const cancelServiceEdit = () => {
   setMachineSearchModal('');
   setMachineDropdownOpen(false);
 };
+
+const openHoursDetail = (machine) => {
+  const record = machineHours.find(h => h.machine_name === machine.name);
+  setSelectedHoursRecord({ machine, record });
+  setNewTotalHours(record ? parseFloat(record.current_hours).toFixed(1) : '0');
+  setEditingHours(false);
+  setShowHoursDetailModal(true);
+};
+
+const saveHoursEdit = async () => {
+  if (!selectedHoursRecord) return;
+  const machineName = selectedHoursRecord.machine.name;
+  const newHours = parseFloat(newTotalHours);
+  if (isNaN(newHours) || newHours < 0) {
+    alert('Please enter a valid number');
+    return;
+  }
+  try {
+    const existing = machineHours.find(h => h.machine_name === machineName);
+    if (existing) {
+      await supabase.from('machine_hours').update({
+        current_hours: newHours,
+        updated_at: new Date().toISOString()
+      }).eq('id', existing.id);
+    } else {
+      await supabase.from('machine_hours').insert([{
+        id: Date.now().toString(),
+        machine_name: machineName,
+        current_hours: newHours,
+        user_id: user.id
+      }]);
+    }
+    setEditingHours(false);
+    setShowHoursDetailModal(false);
+  } catch (error) {
+    alert('Failed to save hours');
+  }
+};
+
+const deleteHoursRecord = async () => {
+  if (!selectedHoursRecord?.record) return;
+  if (!confirm('Delete all hours for this machine? This cannot be undone.')) return;
+  try {
+    await supabase.from('machine_hours').delete().eq('id', selectedHoursRecord.record.id);
+    setShowHoursDetailModal(false);
+  } catch (error) {
+    alert('Failed to delete hours');
+  }
+};
+  
 // Get machine hours
 const getMachineHours = (machineName) => {
   const record = machineHours.find(h => h.machine_name === machineName);
@@ -3746,12 +3800,17 @@ onMouseLeave={(e) => e.target.style.background = theme === 'light' ? '#eff6ff' :
           const reminders = getMachineReminders(machine.name);
           const dueCount = reminders.filter(r => isReminderDue(r, hours)).length;
           
-          return (
-            <div key={machine.id} style={{
-              ...styles.itemCard,
-        background: dueCount > 0 ? 'rgba(239, 68, 68, 0.1)' : (theme === 'light' ? '#eff6ff' : currentTheme.cardBackground),
-        border: dueCount > 0 ? '2px solid #ef4444' : (theme === 'light' ? '1px solid #bfdbfe' : `1px solid ${currentTheme.cardBorder}`)
-            }}>
+return (
+  <div key={machine.id} onClick={() => openHoursDetail(machine)} style={{
+    ...styles.itemCard,
+    background: dueCount > 0 ? 'rgba(239, 68, 68, 0.1)' : (theme === 'light' ? '#eff6ff' : currentTheme.cardBackground),
+    border: dueCount > 0 ? '2px solid #ef4444' : (theme === 'light' ? '1px solid #bfdbfe' : `1px solid ${currentTheme.cardBorder}`),
+    cursor: 'pointer',
+    transition: 'transform 0.15s ease, box-shadow 0.15s ease'
+  }}
+  onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+  onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+  >
               <div style={{ flex: 1 }}>
                 <h4 style={{ fontSize: '1.1rem', marginBottom: '8px' }}>{machine.name}</h4>
                 <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981', margin: '8px 0' }}>
@@ -6531,6 +6590,59 @@ onMouseLeave={(e) => e.target.style.background = theme === 'light' ? '#eff6ff' :
   </Modal>
 )}
 
+{/* Hours Detail Modal */}
+{showHoursDetailModal && selectedHoursRecord && (
+  <Modal title={`${selectedHoursRecord.machine.name} — Hours`} theme={theme} onClose={() => setShowHoursDetailModal(false)}>
+    <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+      <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '8px' }}>Current Hours</p>
+      <p style={{ fontSize: '3rem', fontWeight: 'bold', color: '#10b981' }}>
+        {getMachineHours(selectedHoursRecord.machine.name).toFixed(1)} hrs
+      </p>
+    </div>
+
+    {editingHours ? (
+      <div>
+        <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+          Set total hours to:
+        </label>
+        <input
+          type="number"
+          step="0.1"
+          value={newTotalHours}
+          onChange={(e) => setNewTotalHours(e.target.value)}
+          style={{ width: '100%', padding: '12px', background: '#1a2942', border: '1px solid #2563eb', borderRadius: '8px', color: 'white', fontSize: '1rem', marginBottom: '16px', boxSizing: 'border-box' }}
+        />
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button onClick={saveHoursEdit} style={{ flex: 1, padding: '12px', background: '#10b981', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '1rem' }}>
+            Save
+          </button>
+          <button onClick={() => setEditingHours(false)} style={{ flex: 1, padding: '12px', background: '#4b5563', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '1rem' }}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    ) : (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {userRole !== 'employee' && (
+          <>
+            <button onClick={() => setEditingHours(true)} style={{ padding: '12px', background: '#2563eb', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              ✏️ Edit Hours
+            </button>
+            {selectedHoursRecord.record && (
+              <button onClick={deleteHoursRecord} style={{ padding: '12px', background: '#7f1d1d', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                🗑️ Delete Hours Record
+              </button>
+            )}
+          </>
+        )}
+        <button onClick={() => setShowHoursDetailModal(false)} style={{ padding: '12px', background: '#4b5563', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '1rem' }}>
+          Close
+        </button>
+      </div>
+    )}
+  </Modal>
+)}
+      
 {/* Create Reminder Modal */}
 {showReminderModal && (
   <Modal title="Create Service Reminder" theme={theme} onClose={() => {
