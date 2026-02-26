@@ -251,9 +251,9 @@ const [inventoryForm, setInventoryForm] = useState({
   name: '', partNumber: '', quantity: '', location: '', 
   minQuantity: '', maxQuantity: '', photoUrl: ''
 });
-  const [machineryForm, setMachineryForm] = useState({ 
-    name: '', vinSerial: '', category: '', status: 'Active', photoUrl: ''
-  });
+const [machineryForm, setMachineryForm] = useState({ 
+  name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '', requirements: ''
+});
 const [serviceForm, setServiceForm] = useState({
   machineName: '', 
   serviceType: '', 
@@ -560,14 +560,15 @@ const loadData = async () => {
     }
     
     console.log(`✅ Loaded ${allMachinery.length} machinery items from database`);
-    setMachinery(allMachinery.map(item => ({
-      id: item.id,
-      name: item.name || '',
-      vinSerial: item.vin_serial || '',
-      category: item.category || '',
-      status: item.status || 'Active',
-      photoUrl: item.photo_url || ''
-    })));
+setMachinery(allMachinery.map(item => ({
+  id: item.id,
+  name: item.name || '',
+  vinSerial: item.vin_serial || '',
+  category: item.category || '',
+  status: item.status || 'Active',
+  photoUrl: item.photo_url || '',
+  requirements: item.requirements || ''
+})));
     
     let allServiceRecords = [];
     let servicePage = 0;
@@ -721,24 +722,26 @@ supabase
     .channel('machinery-changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'machinery_items' }, (payload) => {
       console.log('🔔 Machinery change');
-      if (payload.eventType === 'INSERT') {
-        setMachinery(prev => [...prev, {
-          id: payload.new.id,
-          name: payload.new.name,
-          vinSerial: payload.new.vin_serial,
-          category: payload.new.category,
-          status: payload.new.status,
-          photoUrl: payload.new.photo_url
-        }]);
-      } else if (payload.eventType === 'UPDATE') {
-        setMachinery(prev => prev.map(item => item.id === payload.new.id ? {
-          id: payload.new.id,
-          name: payload.new.name,
-          vinSerial: payload.new.vin_serial,
-          category: payload.new.category,
-          status: payload.new.status,
-          photoUrl: payload.new.photo_url
-        } : item));
+if (payload.eventType === 'INSERT') {
+  setMachinery(prev => [...prev, {
+    id: payload.new.id,
+    name: payload.new.name,
+    vinSerial: payload.new.vin_serial,
+    category: payload.new.category,
+    status: payload.new.status,
+    photoUrl: payload.new.photo_url,
+    requirements: payload.new.requirements || ''
+  }]);
+} else if (payload.eventType === 'UPDATE') {
+  setMachinery(prev => prev.map(item => item.id === payload.new.id ? {
+    id: payload.new.id,
+    name: payload.new.name,
+    vinSerial: payload.new.vin_serial,
+    category: payload.new.category,
+    status: payload.new.status,
+    photoUrl: payload.new.photo_url,
+    requirements: payload.new.requirements || ''
+  } : item));
       } else if (payload.eventType === 'DELETE') {
         setMachinery(prev => prev.filter(item => item.id !== payload.old.id));
       }
@@ -1228,18 +1231,18 @@ const deleteMachineryItem = async (id) => {
     alert('Error: ' + error.message);
   }
 };
-  const startEditMachinery = (item) => {
-    isEditingRef.current = true;
-    setEditingMachineryId(item.id);
-    setMachineryForm({
-      name: item.name || '',
-      vinSerial: item.vinSerial || '',
-      category: item.category || '',
-      status: item.status || 'Active',
-      photoUrl: item.photoUrl || ''
-    });
-  };
-
+const startEditMachinery = (item) => {
+  isEditingRef.current = true;
+  setEditingMachineryId(item.id);
+  setMachineryForm({
+    name: item.name || '',
+    vinSerial: item.vinSerial || '',
+    category: item.category || '',
+    status: item.status || 'Active',
+    photoUrl: item.photoUrl || '',
+    requirements: item.requirements || ''
+  });
+};
 const saveMachineryEdit = async (id) => {
   setSavingMachinery(true);
   try {
@@ -1248,7 +1251,8 @@ const saveMachineryEdit = async (id) => {
       vin_serial: machineryForm.vinSerial,
       category: machineryForm.category,
       status: machineryForm.status,
-      photo_url: machineryForm.photoUrl || ''
+      photo_url: machineryForm.photoUrl || '',
+      requirements: machineryForm.requirements || ''
     };
     
     await supabase.from('machinery_items').update(updates).eq('id', id);
@@ -1260,7 +1264,8 @@ const saveMachineryEdit = async (id) => {
         vinSerial: updates.vin_serial,
         category: updates.category,
         status: updates.status,
-        photoUrl: updates.photo_url
+        photoUrl: updates.photo_url,
+        requirements: updates.requirements
       } : item
     ));
 
@@ -1275,11 +1280,11 @@ const saveMachineryEdit = async (id) => {
   }
 };
 
-  const cancelMachineryEdit = () => {
-    setEditingMachineryId(null);
-    isEditingRef.current = false;
-    setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '' });
-  };
+const cancelMachineryEdit = () => {
+  setEditingMachineryId(null);
+  isEditingRef.current = false;
+  setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '', requirements: '' });
+};
   
 const viewMachineServiceHistory = (machineName) => {
   setServiceFilter(machineName);
@@ -4091,6 +4096,13 @@ return (
   <option value="Tractors">Tractors</option>
   <option value="Trailers">Trailers</option>
 </select>
+              
+              <textarea
+                style={{ ...styles.input, minHeight: '100px', resize: 'vertical', fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif', fontSize: '1rem' }}
+                placeholder="Machine Requirements (e.g., oil type, tire pressure, fluid specs...)"
+                value={machineryForm.requirements}
+                onChange={(e) => setMachineryForm({ ...machineryForm, requirements: e.target.value })}
+              />
               <div style={{ marginBottom: '12px' }}>
                 <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
                   📸 Upload Photo
@@ -4328,6 +4340,20 @@ return (
                     <p>{item.category || 'N/A'}</p>
                   </div>
                 </div>
+
+              {item.requirements ? (
+                <div style={{
+                  marginTop: '12px',
+                  padding: '12px',
+                  background: theme === 'light' ? '#fefce8' : '#1f2937',
+                  border: theme === 'light' ? '1px solid #fde047' : '1px solid #374151',
+                  borderRadius: '8px'
+                }}>
+                  <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Machine Requirements</p>
+                  <p style={{ fontSize: '0.875rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.requirements}</p>
+                </div>
+              ) : null}
+                
               </div>
               {window.innerWidth >= 768 && (
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
