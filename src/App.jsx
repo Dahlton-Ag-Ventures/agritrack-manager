@@ -6592,7 +6592,7 @@ return (
 
 {/* Hours Detail Modal */}
 {showHoursDetailModal && selectedHoursRecord && (
-  <Modal title={`${selectedHoursRecord.machine.name} — Hours`} theme={theme} onClose={() => setShowHoursDetailModal(false)}>
+  <Modal title={selectedHoursRecord.machine.name} theme={theme} onClose={() => setShowHoursDetailModal(false)}>
     <div style={{ textAlign: 'center', marginBottom: '24px' }}>
       <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '8px' }}>Current Hours</p>
       <p style={{ fontSize: '3rem', fontWeight: 'bold', color: '#10b981' }}>
