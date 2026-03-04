@@ -1732,7 +1732,7 @@ const completeReminder = (reminderId) => {
     console.error('Error completing reminder:', error);
     alert('Failed to complete reminder');
   }
-};}
+};
 
     // Optionally log a service record
     if (shouldLog) {
@@ -1776,7 +1776,7 @@ const completeReminder = (reminderId) => {
       date: '',
       notes: '',
       technician: '',
-
+    });
   } catch (error) {
     console.error('Error completing reminder:', error);
     alert('Failed to complete reminder');
