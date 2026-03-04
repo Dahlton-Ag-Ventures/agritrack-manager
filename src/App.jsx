@@ -4259,11 +4259,18 @@ return (
         );
       })()}
     </div>
-    {/* Active km Reminders */}
+{/* Active km Reminders */}
+{(() => {
+  const kmOnlyMachines = getFilteredAndSortedMachinery().filter(m => {
+    const t = getTrackingType(m);
+    return t === 'km' || t === 'both';
+  });
+  if (kmOnlyMachines.length === 0) return null;
+  return (
 <div style={{ marginTop: '24px' }}>
   <h4 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Active km Reminders</h4>
   {(() => {
-    const filteredMachineNames = getFilteredAndSortedMachinery().map(m => m.name);
+    const filteredMachineNames = kmOnlyMachines.map(m => m.name);
     const filteredKmReminders = serviceReminders.filter(r =>
       filteredMachineNames.includes(r.machine_name) && r.reminder_type === 'km'
     );
@@ -4344,7 +4351,7 @@ return (
                     ✓ Complete
                   </button>
                   <button
-                    onClick={() => deleteReminder(reminder.id)}
+                      onClick={() => deleteReminder(reminder.id)}
                     style={styles.deleteButton}
                   >
                     <Trash2 size={16} />
@@ -4358,6 +4365,8 @@ return (
     );
   })()}
 </div>
+  );
+})()}
   </div>
 )}
 
