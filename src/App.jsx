@@ -3952,102 +3952,114 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
       <h3 style={{ fontSize: '1.5rem', color: theme === 'light' ? '#111827' : '#a78bfa', margin: 0 }}>⏰ Service Reminders</h3>
       {userRole !== 'employee' && (
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-  <button
-    onClick={() => setShowHoursModal(true)}
-    style={{
-      padding: '10px 20px',
-      background: theme === 'light' ? '#eff6ff' : '#8b5cf6',
-      border: theme === 'light' ? '1px solid #bfdbfe' : 'none',
-      borderRadius: '8px',
-      color: theme === 'light' ? '#1e3a5f' : 'white',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      fontSize: '0.875rem',
-      transition: 'all 0.2s ease'
-    }}
-    onMouseEnter={(e) => e.target.style.background = theme === 'light' ? '#dbeafe' : '#7c3aed'}
-    onMouseLeave={(e) => e.target.style.background = theme === 'light' ? '#eff6ff' : '#8b5cf6'}
-  >
-    <Plus size={16} /> Add Hours
-  </button>
-  <button
-    onClick={() => setShowKmModal(true)}
-    style={{
-      padding: '10px 20px',
-      background: theme === 'light' ? '#ecfeff' : '#0891b2',
-      border: theme === 'light' ? '1px solid #a5f3fc' : 'none',
-      borderRadius: '8px',
-      color: theme === 'light' ? '#164e63' : 'white',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      fontSize: '0.875rem',
-      transition: 'all 0.2s ease'
-    }}
-    onMouseEnter={(e) => e.target.style.background = theme === 'light' ? '#cffafe' : '#0e7490'}
-    onMouseLeave={(e) => e.target.style.background = theme === 'light' ? '#ecfeff' : '#0891b2'}
-  >
-    <Plus size={16} /> Add Kilometres
-  </button>
-  <button
-    onClick={() => setShowReminderModal(true)}
-    style={{
-      padding: '10px 20px',
-      background: '#10b981',
-      border: 'none',
-      borderRadius: '8px',
-      color: 'white',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      fontSize: '0.875rem',
-      transition: 'all 0.2s ease'
-    }}
-    onMouseEnter={(e) => e.target.style.background = '#059669'}
-    onMouseLeave={(e) => e.target.style.background = '#10b981'}
-  >
-    <Plus size={16} /> Create Reminder
-  </button>
-  <button
-    onClick={() => setShowKmReminderModal(true)}
-    style={{
-      padding: '10px 20px',
-      background: '#0891b2',
-      border: 'none',
-      borderRadius: '8px',
-      color: 'white',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      fontSize: '0.875rem',
-      transition: 'all 0.2s ease'
-    }}
-    onMouseEnter={(e) => e.target.style.background = '#0e7490'}
-    onMouseLeave={(e) => e.target.style.background = '#0891b2'}
-  >
-    <Plus size={16} /> Create km Reminder
-  </button>
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+  {getFilteredAndSortedMachinery().some(m => { const t = getTrackingType(m); return t === 'hours' || t === 'both'; }) && (
+    <>
+      <button
+        onClick={() => setShowHoursModal(true)}
+        style={{
+          padding: '10px 20px',
+          background: theme === 'light' ? '#eff6ff' : '#8b5cf6',
+          border: theme === 'light' ? '1px solid #bfdbfe' : 'none',
+          borderRadius: '8px',
+          color: theme === 'light' ? '#1e3a5f' : 'white',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '0.875rem',
+          transition: 'all 0.2s ease'
+        }}
+        onMouseEnter={(e) => e.target.style.background = theme === 'light' ? '#dbeafe' : '#7c3aed'}
+        onMouseLeave={(e) => e.target.style.background = theme === 'light' ? '#eff6ff' : '#8b5cf6'}
+      >
+        <Plus size={16} /> Add Hours
+      </button>
+      <button
+        onClick={() => setShowReminderModal(true)}
+        style={{
+          padding: '10px 20px',
+          background: '#10b981',
+          border: 'none',
+          borderRadius: '8px',
+          color: 'white',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '0.875rem',
+          transition: 'all 0.2s ease'
+        }}
+        onMouseEnter={(e) => e.target.style.background = '#059669'}
+        onMouseLeave={(e) => e.target.style.background = '#10b981'}
+      >
+        <Plus size={16} /> Create Reminder
+      </button>
+    </>
+  )}
+  {getFilteredAndSortedMachinery().some(m => { const t = getTrackingType(m); return t === 'km' || t === 'both'; }) && (
+    <>
+      <button
+        onClick={() => setShowKmModal(true)}
+        style={{
+          padding: '10px 20px',
+          background: theme === 'light' ? '#ecfeff' : '#0891b2',
+          border: theme === 'light' ? '1px solid #a5f3fc' : 'none',
+          borderRadius: '8px',
+          color: theme === 'light' ? '#164e63' : 'white',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '0.875rem',
+          transition: 'all 0.2s ease'
+        }}
+        onMouseEnter={(e) => e.target.style.background = theme === 'light' ? '#cffafe' : '#0e7490'}
+        onMouseLeave={(e) => e.target.style.background = theme === 'light' ? '#ecfeff' : '#0891b2'}
+      >
+        <Plus size={16} /> Add Kilometres
+      </button>
+      <button
+        onClick={() => setShowKmReminderModal(true)}
+        style={{
+          padding: '10px 20px',
+          background: '#0891b2',
+          border: 'none',
+          borderRadius: '8px',
+          color: 'white',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '0.875rem',
+          transition: 'all 0.2s ease'
+        }}
+        onMouseEnter={(e) => e.target.style.background = '#0e7490'}
+        onMouseLeave={(e) => e.target.style.background = '#0891b2'}
+      >
+        <Plus size={16} /> Create km Reminder
+      </button>
+    </>
+  )}
 </div>
       )}
     </div>
 
-    {/* Machine Hours Overview */}
-    <div style={{ marginBottom: '24px' }}>
-      <h4 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Machine Hours</h4>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' }}>
-{getFilteredAndSortedMachinery().filter(machine => {
-  const t = getTrackingType(machine);
-  return t === 'hours' || t === 'both';
-}).map(machine => {
-  const hours = getMachineHours(machine.name);
-          const reminders = getMachineReminders(machine.name);
-          const dueCount = reminders.filter(r => isReminderDue(r, hours)).length;
+   {/* Machine Hours Overview */}
+{(() => {
+  const hoursMachines = getFilteredAndSortedMachinery().filter(m => {
+    const t = getTrackingType(m);
+    return t === 'hours' || t === 'both';
+  });
+  if (hoursMachines.length === 0) return null;
+  return (
+<div style={{ marginBottom: '24px' }}>
+  <h4 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Machine Hours</h4>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' }}>
+    {hoursMachines.map(machine => {
+      const hours = getMachineHours(machine.name);
+      const reminders = getMachineReminders(machine.name);
+      const dueCount = reminders.filter(r => isReminderDue(r, hours)).length;
           
 return (
   <div key={machine.id} onClick={() => openHoursDetail(machine)} style={{
@@ -4081,16 +4093,22 @@ return (
         })}
       </div>
     </div>
+  );
+})()}
 
-    {/* Machine Kilometres Overview */}
+   {/* Machine Kilometres Overview */}
+{(() => {
+  const kmMachines = getFilteredAndSortedMachinery().filter(m => {
+    const t = getTrackingType(m);
+    return t === 'km' || t === 'both';
+  });
+  if (kmMachines.length === 0) return null;
+  return (
 <div style={{ marginBottom: '24px' }}>
   <h4 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Machine Kilometres</h4>
   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' }}>
-{getFilteredAndSortedMachinery().filter(machine => {
-  const t = getTrackingType(machine);
-  return t === 'km' || t === 'both';
-}).map(machine => {
-  const km = getMachineKm(machine.name);
+    {kmMachines.map(machine => {
+      const km = getMachineKm(machine.name);
       const kmReminders = getMachineKmReminders(machine.name);
       const dueCount = kmReminders.filter(r => isKmReminderDue(r, km)).length;
       return (
@@ -4124,23 +4142,32 @@ return (
             )}
           </div>
         </div>
-      );
-    })}
-  </div>
-</div>
+          );
+        })}
+      </div>
+    </div>
+  );
+})()}
 
     {/* Active Reminders */}
     <div>
       <h4 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Active Reminders</h4>
 {(() => {
-        const filteredMachineNames = getFilteredAndSortedMachinery().map(m => m.name);
-        const filteredReminders = serviceReminders.filter(r => filteredMachineNames.includes(r.machine_name));
-        
+        const hoursOnlyMachines = getFilteredAndSortedMachinery().filter(m => {
+          const t = getTrackingType(m);
+          return t === 'hours' || t === 'both';
+        });
+        if (hoursOnlyMachines.length === 0) return null;
+        const hoursOnlyMachineNames = hoursOnlyMachines.map(m => m.name);
+        const filteredReminders = serviceReminders.filter(r =>
+          hoursOnlyMachineNames.includes(r.machine_name) && r.reminder_type !== 'km'
+        );
+
         if (filteredReminders.length === 0) {
           return (
             <div style={styles.emptyState}>
               <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
-              <p>{serviceReminders.length === 0 ? 'No service reminders set' : 'No reminders match your search'}</p>
+              <p>{serviceReminders.filter(r => r.reminder_type !== 'km').length === 0 ? 'No service reminders set' : 'No reminders match your search'}</p>
             </div>
           );
         }
