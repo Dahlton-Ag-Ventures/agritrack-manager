@@ -4160,16 +4160,21 @@ return (
         const filteredReminders = serviceReminders.filter(r =>
           hoursOnlyMachineNames.includes(r.machine_name) && r.reminder_type !== 'km'
         );
-        if (filteredReminders.length === 0) {
+       if (filteredReminders.length === 0) {
           return (
-            <div style={styles.emptyState}>
-              <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
-              <p>{serviceReminders.filter(r => r.reminder_type !== 'km').length === 0 ? 'No service reminders set' : 'No reminders match your search'}</p>
-            </div>
+            <>
+              <h4 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Active Hour Reminders</h4>
+              <div style={styles.emptyState}>
+                <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+                <p>{serviceReminders.filter(r => r.reminder_type !== 'km').length === 0 ? 'No hour reminders set' : 'No reminders match your search'}</p>
+              </div>
+            </>
           );
         }
         
-        return (
+return (
+          <>
+            <h4 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Active Hour Reminders</h4>
           <div style={styles.itemsList}>
             {filteredReminders.map(reminder => {
               const currentHours = getMachineHours(reminder.machine_name);
@@ -4252,8 +4257,9 @@ return (
                 </div>
               );
             })}
-          </div>
-          );
+           </div>
+          </>
+        );
       })()}
 
 {/* Active km Reminders */}
