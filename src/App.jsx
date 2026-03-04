@@ -1776,7 +1776,6 @@ const completeReminder = (reminderId) => {
       date: '',
       notes: '',
       technician: '',
-    });
 
   } catch (error) {
     console.error('Error completing reminder:', error);
