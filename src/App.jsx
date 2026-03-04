@@ -1549,7 +1549,7 @@ const getMachineHours = (machineName) => {
 // Get active reminders for a machine
 const getMachineReminders = (machineName) => {
   return serviceReminders.filter(r => 
-    r.machine_name === machineName && r.is_active
+    r.machine_name === machineName && r.is_active !== false
   );
 };
 
@@ -1741,7 +1741,7 @@ const getMachineKm = (machineName) => {
 
 const getMachineKmReminders = (machineName) => {
   return serviceReminders.filter(r =>
-    r.machine_name === machineName && r.is_active && r.reminder_type === 'km'
+    r.machine_name === machineName && r.is_active !== false && r.reminder_type === 'km'
   );
 };
 
