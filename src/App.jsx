@@ -3993,7 +3993,7 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
         onMouseEnter={(e) => e.target.style.background = '#059669'}
         onMouseLeave={(e) => e.target.style.background = '#10b981'}
       >
-        <Plus size={16} /> Create Reminder
+        <Plus size={16} /> Create Hour Reminder
       </button>
     </>
   )}
