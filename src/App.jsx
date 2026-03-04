@@ -1417,13 +1417,16 @@ const deleteServiceRecord = async (id) => {
   if (!confirm('Are you sure you want to delete this service record?')) return;
 
   try {
+    // ✅ UPDATE LOCAL STATE IMMEDIATELY
+    setServiceHistory(prev => prev.filter(item => item.id !== id));
+    
     await supabase.from('service_records').delete().eq('id', id);
     console.log('✅ Service record deleted');
   } catch (error) {
     console.error('Delete error:', error);
     alert('Error: ' + error.message);
   }
-};
+};;
 const startEditService = (record) => {
   isEditingRef.current = true;
   setEditingServiceId(record.id);
@@ -4550,16 +4553,18 @@ return (
         }}>
           {reminder.completed_at && (
             <div style={{
-              position: 'absolute',
-              top: '12px',
-              right: '12px',
-              padding: '4px 12px',
-              background: 'linear-gradient(to right, #10b981, #06b6d4)',
-              borderRadius: '20px',
-              fontSize: '0.75rem',
-              fontWeight: 'bold',
-              color: 'white',
-              zIndex: 2
+position: 'absolute',
+top: '12px',
+left: '50%',
+transform: 'translateX(-50%)',
+padding: '8px 20px',
+background: 'linear-gradient(to right, #10b981, #06b6d4)',
+borderRadius: '20px',
+fontSize: '1rem',
+fontWeight: 'bold',
+color: 'white',
+zIndex: 2,
+whiteSpace: 'nowrap'
             }}>
               ✅ Completed at {parseFloat(reminder.completed_at_metric || 0).toFixed(1)} hrs
             </div>
@@ -4612,15 +4617,17 @@ return (
                   </div>
                   {userRole !== 'employee' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <button
-                        onClick={() => completeReminder(reminder.id)}
-                        style={{
-                          ...styles.saveButton,
-                          background: '#10b981'
-                        }}
-                      >
-                        ✓ Complete
-                      </button>
+{!reminder.completed_at && (
+  <button
+    onClick={() => completeReminder(reminder.id)}
+    style={{
+      ...styles.saveButton,
+      background: '#10b981'
+    }}
+  >
+    ✓ Complete
+  </button>
+)}
                       <button
                         onClick={() => deleteReminder(reminder.id)}
                         style={styles.deleteButton}
@@ -4682,16 +4689,18 @@ const allKmFiltered = serviceReminders.filter(r =>
             }}>
               {reminder.completed_at && (
                 <div style={{
-                  position: 'absolute',
-                  top: '12px',
-                  right: '12px',
-                  padding: '4px 12px',
-                  background: 'linear-gradient(to right, #0891b2, #06b6d4)',
-                  borderRadius: '20px',
-                  fontSize: '0.75rem',
-                  fontWeight: 'bold',
-                  color: 'white',
-                  zIndex: 2
+position: 'absolute',
+top: '12px',
+left: '50%',
+transform: 'translateX(-50%)',
+padding: '8px 20px',
+background: 'linear-gradient(to right, #10b981, #06b6d4)',
+borderRadius: '20px',
+fontSize: '1rem',
+fontWeight: 'bold',
+color: 'white',
+zIndex: 2,
+whiteSpace: 'nowrap'
                 }}>
                   ✅ Completed at {parseFloat(reminder.completed_at_metric || 0).toFixed(1)} km
                 </div>
@@ -4741,15 +4750,17 @@ const allKmFiltered = serviceReminders.filter(r =>
               </div>
               {userRole !== 'employee' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <button
-                    onClick={() => completeKmReminder(reminder.id)}
-                    style={{
-                      ...styles.saveButton,
-                      background: '#0891b2'
-                    }}
-                  >
-                    ✓ Complete
-                  </button>
+{!reminder.completed_at && (
+  <button
+    onClick={() => completeKmReminder(reminder.id)}
+    style={{
+      ...styles.saveButton,
+      background: '#0891b2'
+    }}
+  >
+    ✓ Complete
+  </button>
+)}
                   <button
                       onClick={() => deleteReminder(reminder.id)}
                     style={styles.deleteButton}
