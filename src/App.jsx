@@ -251,6 +251,8 @@ export default function App() {
   const recentlyUpdatedIdsRef = useRef(new Set());
   const [showRemindersPanel, setShowRemindersPanel] = useState(false);
   const [flippedCards, setFlippedCards] = useState({});
+  const [hoursExpanded, setHoursExpanded] = useState(false);
+  const [kmExpanded, setKmExpanded] = useState(false);
 
 const toggleCard = (cardId) => {
   setFlippedCards(prev => ({ ...prev, [cardId]: !prev[cardId] }));
@@ -4045,6 +4047,270 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
       )}
     </div>
 
+{/* === HOURS BANNER CARD === */}
+{(() => {
+  const hoursMachines = getFilteredAndSortedMachinery().filter(m => {
+    const t = getTrackingType(m);
+    return t === 'hours' || t === 'both';
+  });
+  if (hoursMachines.length === 0) return null;
+  return (
+    <div style={{ marginBottom: '16px' }}>
+      <button
+        onClick={() => setHoursExpanded(prev => !prev)}
+        style={{
+          width: '100%',
+          padding: '20px 24px',
+          background: hoursExpanded
+            ? 'linear-gradient(135deg, #059669 0%, #10b981 100%)'
+            : 'linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.25) 100%)',
+          border: '2px solid #10b981',
+          borderRadius: hoursExpanded ? '12px 12px 0 0' : '12px',
+          cursor: 'pointer',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          transition: 'all 0.3s ease',
+          textAlign: 'left',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span style={{ fontSize: '2rem' }}>⏱️</span>
+          <div>
+            <p style={{
+              color: 'white',
+              fontSize: '1.2rem',
+              fontWeight: 'bold',
+              margin: 0,
+              textShadow: '0 1px 3px rgba(0,0,0,0.3)'
+            }}>
+              Hour-Tracked Machines
+            </p>
+            <p style={{
+              color: 'rgba(255,255,255,0.8)',
+              fontSize: '0.85rem',
+              margin: '4px 0 0',
+            }}>
+              {hoursMachines.length} machine{hoursMachines.length !== 1 ? 's' : ''} &nbsp;·&nbsp;
+              {hoursMachines.filter(m => {
+                const hrs = getMachineHours(m.name);
+                return getMachineReminders(m.name).some(r => isReminderDue(r, hrs));
+              }).length} with service due
+            </p>
+          </div>
+        </div>
+        <span style={{
+          color: 'white',
+          fontSize: '1.5rem',
+          transition: 'transform 0.3s ease',
+          transform: hoursExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+          display: 'inline-block'
+        }}>▼</span>
+      </button>
+
+      {hoursExpanded && (
+        <div style={{
+          background: theme === 'dark' ? 'rgba(16, 185, 129, 0.08)' : '#f0fdf4',
+          border: '2px solid #10b981',
+          borderTop: 'none',
+          borderRadius: '0 0 12px 12px',
+          padding: '16px',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+          gap: '12px',
+        }}>
+          {hoursMachines.map(machine => {
+            const hours = getMachineHours(machine.name);
+            const reminders = getMachineReminders(machine.name);
+            const dueCount = reminders.filter(r => isReminderDue(r, hours)).length;
+            return (
+              <div
+                key={machine.id}
+                onClick={() => openHoursDetail(machine)}
+                style={{
+                  background: dueCount > 0
+                    ? 'rgba(239, 68, 68, 0.12)'
+                    : (theme === 'dark' ? 'rgba(16, 185, 129, 0.15)' : 'white'),
+                  border: dueCount > 0 ? '2px solid #ef4444' : '2px solid #10b981',
+                  borderRadius: '10px',
+                  padding: '16px',
+                  cursor: 'pointer',
+                  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+              >
+                <p style={{
+                  fontWeight: 'bold',
+                  fontSize: '0.95rem',
+                  marginBottom: '8px',
+                  color: theme === 'dark' ? 'white' : '#111827',
+                  wordBreak: 'break-word'
+                }}>
+                  {machine.name}
+                </p>
+                <p style={{
+                  fontSize: '1.6rem',
+                  fontWeight: 'bold',
+                  color: '#10b981',
+                  margin: '4px 0'
+                }}>
+                  {hours.toFixed(1)} hrs
+                </p>
+                {dueCount > 0 && (
+                  <p style={{ color: '#ef4444', fontSize: '0.8rem', fontWeight: 'bold', marginTop: '4px' }}>
+                    ⚠️ {dueCount} service{dueCount > 1 ? 's' : ''} due
+                  </p>
+                )}
+                {reminders.length > 0 && dueCount === 0 && (
+                  <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginTop: '4px' }}>
+                    ✓ {reminders.length} reminder{reminders.length > 1 ? 's' : ''} active
+                  </p>
+                )}
+                <p style={{ color: '#6b7280', fontSize: '0.7rem', marginTop: '6px' }}>
+                  Tap to edit
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+})()}
+
+{/* === KM BANNER CARD === */}
+{(() => {
+  const kmMachines = getFilteredAndSortedMachinery().filter(m => {
+    const t = getTrackingType(m);
+    return t === 'km' || t === 'both';
+  });
+  if (kmMachines.length === 0) return null;
+  return (
+    <div style={{ marginBottom: '24px' }}>
+      <button
+        onClick={() => setKmExpanded(prev => !prev)}
+        style={{
+          width: '100%',
+          padding: '20px 24px',
+          background: kmExpanded
+            ? 'linear-gradient(135deg, #0e7490 0%, #0891b2 100%)'
+            : 'linear-gradient(135deg, rgba(8, 145, 178, 0.25) 0%, rgba(14, 116, 144, 0.25) 100%)',
+          border: '2px solid #0891b2',
+          borderRadius: kmExpanded ? '12px 12px 0 0' : '12px',
+          cursor: 'pointer',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          transition: 'all 0.3s ease',
+          textAlign: 'left',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span style={{ fontSize: '2rem' }}>🛣️</span>
+          <div>
+            <p style={{
+              color: 'white',
+              fontSize: '1.2rem',
+              fontWeight: 'bold',
+              margin: 0,
+              textShadow: '0 1px 3px rgba(0,0,0,0.3)'
+            }}>
+              Kilometre-Tracked Machines
+            </p>
+            <p style={{
+              color: 'rgba(255,255,255,0.8)',
+              fontSize: '0.85rem',
+              margin: '4px 0 0',
+            }}>
+              {kmMachines.length} machine{kmMachines.length !== 1 ? 's' : ''} &nbsp;·&nbsp;
+              {kmMachines.filter(m => {
+                const km = getMachineKm(m.name);
+                return getMachineKmReminders(m.name).some(r => isKmReminderDue(r, km));
+              }).length} with service due
+            </p>
+          </div>
+        </div>
+        <span style={{
+          color: 'white',
+          fontSize: '1.5rem',
+          transition: 'transform 0.3s ease',
+          transform: kmExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+          display: 'inline-block'
+        }}>▼</span>
+      </button>
+
+      {kmExpanded && (
+        <div style={{
+          background: theme === 'dark' ? 'rgba(8, 145, 178, 0.08)' : '#ecfeff',
+          border: '2px solid #0891b2',
+          borderTop: 'none',
+          borderRadius: '0 0 12px 12px',
+          padding: '16px',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+          gap: '12px',
+        }}>
+          {kmMachines.map(machine => {
+            const km = getMachineKm(machine.name);
+            const kmReminders = getMachineKmReminders(machine.name);
+            const dueCount = kmReminders.filter(r => isKmReminderDue(r, km)).length;
+            return (
+              <div
+                key={machine.id}
+                onClick={() => openKmDetail(machine)}
+                style={{
+                  background: dueCount > 0
+                    ? 'rgba(239, 68, 68, 0.12)'
+                    : (theme === 'dark' ? 'rgba(8, 145, 178, 0.15)' : 'white'),
+                  border: dueCount > 0 ? '2px solid #ef4444' : '2px solid #0891b2',
+                  borderRadius: '10px',
+                  padding: '16px',
+                  cursor: 'pointer',
+                  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+              >
+                <p style={{
+                  fontWeight: 'bold',
+                  fontSize: '0.95rem',
+                  marginBottom: '8px',
+                  color: theme === 'dark' ? 'white' : '#111827',
+                  wordBreak: 'break-word'
+                }}>
+                  {machine.name}
+                </p>
+                <p style={{
+                  fontSize: '1.6rem',
+                  fontWeight: 'bold',
+                  color: '#0891b2',
+                  margin: '4px 0'
+                }}>
+                  {km.toFixed(1)} km
+                </p>
+                {dueCount > 0 && (
+                  <p style={{ color: '#ef4444', fontSize: '0.8rem', fontWeight: 'bold', marginTop: '4px' }}>
+                    ⚠️ {dueCount} service{dueCount > 1 ? 's' : ''} due
+                  </p>
+                )}
+                {kmReminders.length > 0 && dueCount === 0 && (
+                  <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginTop: '4px' }}>
+                    ✓ {kmReminders.length} reminder{kmReminders.length > 1 ? 's' : ''} active
+                  </p>
+                )}
+                <p style={{ color: '#6b7280', fontSize: '0.7rem', marginTop: '6px' }}>
+                  Tap to edit
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+})()}
+    
    {/* Machine Hours Overview */}
 {(() => {
   const hoursMachines = getFilteredAndSortedMachinery().filter(m => {
