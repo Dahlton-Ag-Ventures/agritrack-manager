@@ -1734,55 +1734,6 @@ const completeReminder = (reminderId) => {
   }
 };
 
-    // Optionally log a service record
-    if (shouldLog) {
-      const metric = isKm
-        ? `${completingReminder.currentKm?.toFixed(1)} km`
-        : `${completingReminder.currentHours?.toFixed(1)} hrs`;
-
-      const newId = Date.now().toString();
-      const finalDate = completeServiceForm.date || new Date().toISOString().split('T')[0];
-      const fullNotes = completeServiceForm.notes
-        ? `${completeServiceForm.notes}\n\n[Logged via reminder — ${metric} at time of service]`
-        : `[Logged via reminder — ${metric} at time of service]`;
-
-      await supabase.from('service_records').insert([{
-        id: newId,
-        user_id: user.id,
-        machine_name: completingReminder.machine_name,
-        service_type: completeServiceForm.serviceType,
-        date: finalDate,
-        notes: fullNotes,
-        technician: completeServiceForm.technician,
-        photo_urls: JSON.stringify([])
-      }]);
-
-      setServiceHistory(prev => [{
-        id: newId,
-        machineName: completingReminder.machine_name,
-        serviceType: completeServiceForm.serviceType,
-        date: finalDate,
-        notes: fullNotes,
-        technician: completeServiceForm.technician,
-        photoUrls: []
-      }, ...prev]);
-    }
-
-    setShowCompleteReminderModal(false);
-    setCompletingReminder(null);
-    setCompleteServiceForm({
-      logService: null,
-      serviceType: '',
-      date: '',
-      notes: '',
-      technician: '',
-    });
-  } catch (error) {
-    console.error('Error completing reminder:', error);
-    alert('Failed to complete reminder');
-  }
-};
-
 const loadDeletedReminders = async () => {
   try {
     const { data, error } = await supabase
