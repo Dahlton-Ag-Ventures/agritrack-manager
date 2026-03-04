@@ -4150,8 +4150,6 @@ return (
 })()}
 
     {/* Active Reminders */}
-    <div>
-      <h4 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Active Reminders</h4>
 {(() => {
         const hoursOnlyMachines = getFilteredAndSortedMachinery().filter(m => {
           const t = getTrackingType(m);
@@ -4159,8 +4157,6 @@ return (
         });
         if (hoursOnlyMachines.length === 0) return null;
         const hoursOnlyMachineNames = hoursOnlyMachines.map(m => m.name);
-        const filteredReminders = serviceReminders.filter(r =>
-          hoursOnlyMachineNames.includes(r.machine_name) && r.reminder_type !== 'km'
         );
 
         if (filteredReminders.length === 0) {
@@ -4259,6 +4255,7 @@ return (
         );
       })()}
     </div>
+})()}
 {/* Active km Reminders */}
 {(() => {
   const kmOnlyMachines = getFilteredAndSortedMachinery().filter(m => {
