@@ -4078,19 +4078,19 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
           <span style={{ fontSize: '2rem' }}>⏱️</span>
           <div>
             <p style={{
-              color: 'white',
-              fontSize: '1.2rem',
-              fontWeight: 'bold',
-              margin: 0,
-              textShadow: '0 1px 3px rgba(0,0,0,0.3)'
-            }}>
-              Hour-Tracked Machines
-            </p>
-            <p style={{
-              color: 'rgba(255,255,255,0.8)',
-              fontSize: '0.85rem',
-              margin: '4px 0 0',
-            }}>
+  color: theme === 'light' ? '#111827' : 'white',
+  fontSize: '1.2rem',
+  fontWeight: 'bold',
+  margin: 0,
+  textShadow: theme === 'light' ? 'none' : '0 1px 3px rgba(0,0,0,0.3)'
+}}>
+  Hour-Tracked Machines
+</p>
+<p style={{
+  color: theme === 'light' ? '#374151' : 'rgba(255,255,255,0.8)',
+  fontSize: '0.85rem',
+  margin: '4px 0 0',
+}}>
               {hoursMachines.length} machine{hoursMachines.length !== 1 ? 's' : ''} &nbsp;·&nbsp;
               {hoursMachines.filter(m => {
                 const hrs = getMachineHours(m.name);
@@ -4099,13 +4099,13 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
             </p>
           </div>
         </div>
-        <span style={{
-          color: 'white',
-          fontSize: '1.5rem',
-          transition: 'transform 0.3s ease',
-          transform: hoursExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-          display: 'inline-block'
-        }}>▼</span>
+       <span style={{
+  color: theme === 'light' ? '#111827' : 'white',
+  fontSize: '1.5rem',
+  transition: 'transform 0.3s ease',
+  transform: hoursExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+  display: 'inline-block'
+}}>▼</span>
       </button>
 
       {hoursExpanded && (
@@ -4210,19 +4210,19 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
           <span style={{ fontSize: '2rem' }}>🛣️</span>
           <div>
             <p style={{
-              color: 'white',
-              fontSize: '1.2rem',
-              fontWeight: 'bold',
-              margin: 0,
-              textShadow: '0 1px 3px rgba(0,0,0,0.3)'
-            }}>
-              Kilometre-Tracked Machines
-            </p>
-            <p style={{
-              color: 'rgba(255,255,255,0.8)',
-              fontSize: '0.85rem',
-              margin: '4px 0 0',
-            }}>
+  color: theme === 'light' ? '#111827' : 'white',
+  fontSize: '1.2rem',
+  fontWeight: 'bold',
+  margin: 0,
+  textShadow: theme === 'light' ? 'none' : '0 1px 3px rgba(0,0,0,0.3)'
+}}>
+  Kilometre-Tracked Machines
+</p>
+<p style={{
+  color: theme === 'light' ? '#374151' : 'rgba(255,255,255,0.8)',
+  fontSize: '0.85rem',
+  margin: '4px 0 0',
+}}>
               {kmMachines.length} machine{kmMachines.length !== 1 ? 's' : ''} &nbsp;·&nbsp;
               {kmMachines.filter(m => {
                 const km = getMachineKm(m.name);
@@ -4231,13 +4231,13 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
             </p>
           </div>
         </div>
-        <span style={{
-          color: 'white',
-          fontSize: '1.5rem',
-          transition: 'transform 0.3s ease',
-          transform: kmExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-          display: 'inline-block'
-        }}>▼</span>
+<span style={{
+  color: theme === 'light' ? '#111827' : 'white',
+  fontSize: '1.5rem',
+  transition: 'transform 0.3s ease',
+  transform: kmExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+  display: 'inline-block'
+}}>▼</span>
       </button>
 
       {kmExpanded && (
