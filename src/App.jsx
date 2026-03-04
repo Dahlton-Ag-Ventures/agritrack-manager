@@ -4041,8 +4041,11 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
     <div style={{ marginBottom: '24px' }}>
       <h4 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Machine Hours</h4>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' }}>
-        {getFilteredAndSortedMachinery().map(machine => {
-          const hours = getMachineHours(machine.name);
+{getFilteredAndSortedMachinery().filter(machine => {
+  const t = getTrackingType(machine);
+  return t === 'hours' || t === 'both';
+}).map(machine => {
+  const hours = getMachineHours(machine.name);
           const reminders = getMachineReminders(machine.name);
           const dueCount = reminders.filter(r => isReminderDue(r, hours)).length;
           
@@ -4083,8 +4086,11 @@ return (
 <div style={{ marginBottom: '24px' }}>
   <h4 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Machine Kilometres</h4>
   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' }}>
-    {getFilteredAndSortedMachinery().map(machine => {
-      const km = getMachineKm(machine.name);
+{getFilteredAndSortedMachinery().filter(machine => {
+  const t = getTrackingType(machine);
+  return t === 'km' || t === 'both';
+}).map(machine => {
+  const km = getMachineKm(machine.name);
       const kmReminders = getMachineKmReminders(machine.name);
       const dueCount = kmReminders.filter(r => isKmReminderDue(r, km)).length;
       return (
@@ -4689,9 +4695,16 @@ return (
   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
     <h3 style={{ fontSize: '1rem', margin: 0, wordBreak: 'break-word' }}>{item.name}</h3>
   {(() => {
-    const reminders = getMachineReminders(item.name);
-    const currentHours = getMachineHours(item.name);
-    const dueReminders = reminders.filter(r => isReminderDue(r, currentHours));
+const trackType = getTrackingType(item);
+const reminders = trackType === 'km'
+  ? getMachineKmReminders(item.name)
+  : getMachineReminders(item.name);
+const currentMetric = trackType === 'km'
+  ? getMachineKm(item.name)
+  : getMachineHours(item.name);
+const dueReminders = trackType === 'km'
+  ? reminders.filter(r => isKmReminderDue(r, currentMetric))
+  : reminders.filter(r => isReminderDue(r, currentMetric));;
     
     if (dueReminders.length > 0) {
       return (
