@@ -1658,7 +1658,7 @@ const completeReminder = (reminderId) => {
   setShowCompleteReminderModal(true);
 };
 
-constconst handleCompleteReminderSubmit = async (shouldLog) => {
+  const handleCompleteReminderSubmit = async (shouldLog) => {
   if (!completingReminder) return;
   try {
     const isKm = completingReminder.reminder_type === 'km';
