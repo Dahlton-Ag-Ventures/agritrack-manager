@@ -4157,8 +4157,9 @@ return (
         });
         if (hoursOnlyMachines.length === 0) return null;
         const hoursOnlyMachineNames = hoursOnlyMachines.map(m => m.name);
+        const filteredReminders = serviceReminders.filter(r =>
+          hoursOnlyMachineNames.includes(r.machine_name) && r.reminder_type !== 'km'
         );
-
         if (filteredReminders.length === 0) {
           return (
             <div style={styles.emptyState}>
@@ -4252,10 +4253,9 @@ return (
               );
             })}
           </div>
-        );
+          );
       })()}
-    </div>
-})()}
+  })()}
 {/* Active km Reminders */}
 {(() => {
   const kmOnlyMachines = getFilteredAndSortedMachinery().filter(m => {
