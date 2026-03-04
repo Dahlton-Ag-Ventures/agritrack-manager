@@ -195,6 +195,34 @@ const MACHINERY_CATEGORIES = [
   'Trailers',
 ];
 
+const CATEGORY_TRACKING_TYPE = {
+  'Attachments': 'hours',
+  'Augers and Conveyors': 'hours',
+  'Bikes and Small Motors': 'km',
+  'Bulldozer Blades': 'hours',
+  'Cars and Trucks': 'km',
+  'Combines': 'hours',
+  'Dryers': 'hours',
+  'Grain Handling': 'hours',
+  'Harvest Equipment': 'hours',
+  'Heavy Trucks': 'km',
+  'Land Improvement Equipment': 'hours',
+  'Landscape Equipment': 'hours',
+  'Lifts & Cranes': 'hours',
+  'Other': 'both',
+  'Spreaders': 'hours',
+  'Spraying': 'hours',
+  'Straight Cut/Pick-Up Headers': 'hours',
+  'Tillage and Seeding': 'hours',
+  'Tractors': 'hours',
+  'Trailers': 'km',
+};
+
+const getTrackingType = (machine) => {
+  if (machine.tracking_type) return machine.tracking_type;
+  return CATEGORY_TRACKING_TYPE[machine.category] || 'hours';
+};
+
 export default function App() {
   // Authentication state
   const [user, setUser] = useState(null);
@@ -252,7 +280,8 @@ const [inventoryForm, setInventoryForm] = useState({
   minQuantity: '', maxQuantity: '', photoUrl: ''
 });
 const [machineryForm, setMachineryForm] = useState({ 
-  name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '', requirements: ''
+  name: '', vinSerial: '', category: '', status: 'Active', 
+  photoUrl: '', requirements: '', tracking_type: ''
 });
 const [serviceForm, setServiceForm] = useState({
   machineName: '', 
@@ -300,6 +329,14 @@ const [selectedHoursRecord, setSelectedHoursRecord] = useState(null);
 const [showHoursDetailModal, setShowHoursDetailModal] = useState(false);
 const [editingHours, setEditingHours] = useState(false);
 const [newTotalHours, setNewTotalHours] = useState('');;
+const [machineKm, setMachineKm] = useState([]);
+const [showKmModal, setShowKmModal] = useState(false);
+const [showKmDetailModal, setShowKmDetailModal] = useState(false);
+const [selectedKmRecord, setSelectedKmRecord] = useState(null);
+const [editingKm, setEditingKm] = useState(false);
+const [newTotalKm, setNewTotalKm] = useState('');
+const [kmForm, setKmForm] = useState({ machineName: '', kmToAdd: '' });
+const [showKmReminderModal, setShowKmReminderModal] = useState(false);
   
   // Get current theme object
   const currentTheme = themes[theme];
@@ -567,7 +604,8 @@ setMachinery(allMachinery.map(item => ({
   category: item.category || '',
   status: item.status || 'Active',
   photoUrl: item.photo_url || '',
-  requirements: item.requirements || ''
+  requirements: item.requirements || '',
+  tracking_type: item.tracking_type || ''
 })));
     
     let allServiceRecords = [];
@@ -668,6 +706,16 @@ if (remindersError) {
   setServiceReminders(remindersData || []);
 }
 
+    const { data: kmData, error: kmError } = await supabase
+  .from('machine_km')
+  .select('*')
+  .order('machine_name', { ascending: true });
+if (kmError) console.error('❌ Machine km load error:', kmError);
+else {
+  console.log(`✅ Loaded ${kmData?.length || 0} machine km records`);
+  setMachineKm(kmData || []);
+}
+
 setLastSync(new Date());
   } catch (error) {
     console.error('❌ CRITICAL Load error:', error);
@@ -730,7 +778,8 @@ if (payload.eventType === 'INSERT') {
     category: payload.new.category,
     status: payload.new.status,
     photoUrl: payload.new.photo_url,
-    requirements: payload.new.requirements || ''
+    requirements: payload.new.requirements || '',
+    tracking_type: payload.new.tracking_type || ''
   }]);
 } else if (payload.eventType === 'UPDATE') {
   setMachinery(prev => prev.map(item => item.id === payload.new.id ? {
@@ -740,7 +789,8 @@ if (payload.eventType === 'INSERT') {
     category: payload.new.category,
     status: payload.new.status,
     photoUrl: payload.new.photo_url,
-    requirements: payload.new.requirements || ''
+    requirements: payload.new.requirements || '',
+    tracking_type: payload.new.tracking_type || ''
   } : item));
       } else if (payload.eventType === 'DELETE') {
         setMachinery(prev => prev.filter(item => item.id !== payload.old.id));
@@ -819,6 +869,16 @@ supabase
   })
   .subscribe();
 
+supabase
+  .channel('km-changes')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'machine_km' }, (payload) => {
+    if (payload.eventType === 'INSERT') setMachineKm(prev => [...prev, payload.new]);
+    else if (payload.eventType === 'UPDATE') setMachineKm(prev => prev.map(item => item.id === payload.new.id ? payload.new : item));
+    else if (payload.eventType === 'DELETE') setMachineKm(prev => prev.filter(item => item.id !== payload.old.id));
+    setLastSync(new Date());
+  })
+  .subscribe();
+  
 setRealtimeStatus('connected');
 };
 
@@ -1159,27 +1219,29 @@ const addMachineryItem = async () => {
   if (uploadingPhoto) return;
   
   try {
-    const newItem = {
-      id: Date.now().toString(),
-      user_id: user.id,
-      name: machineryForm.name,
-      vin_serial: machineryForm.vinSerial,
-      category: machineryForm.category,
-      status: machineryForm.status || 'Active',
-      photo_url: machineryForm.photoUrl || ''
-    };
+const newItem = {
+  id: Date.now().toString(),
+  user_id: user.id,
+  name: machineryForm.name,
+  vin_serial: machineryForm.vinSerial,
+  category: machineryForm.category,
+  status: machineryForm.status || 'Active',
+  photo_url: machineryForm.photoUrl || '',
+  tracking_type: machineryForm.tracking_type || null
+};;
     
     await supabase.from('machinery_items').insert([newItem]);
     
     // ✅ IMMEDIATELY update local state
-    setMachinery(prev => [...prev, {
-      id: newItem.id,
-      name: newItem.name,
-      vinSerial: newItem.vin_serial,
-      category: newItem.category,
-      status: newItem.status,
-      photoUrl: newItem.photo_url
-    }]);
+setMachinery(prev => [...prev, {
+  id: newItem.id,
+  name: newItem.name,
+  vinSerial: newItem.vin_serial,
+  category: newItem.category,
+  status: newItem.status,
+  photoUrl: newItem.photo_url,
+  tracking_type: newItem.tracking_type || ''
+}]);
     
     console.log('✅ Machinery saved - FAST!');
     setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '' });
@@ -1234,40 +1296,43 @@ const deleteMachineryItem = async (id) => {
 const startEditMachinery = (item) => {
   isEditingRef.current = true;
   setEditingMachineryId(item.id);
-  setMachineryForm({
-    name: item.name || '',
-    vinSerial: item.vinSerial || '',
-    category: item.category || '',
-    status: item.status || 'Active',
-    photoUrl: item.photoUrl || '',
-    requirements: item.requirements || ''
-  });
+setMachineryForm({
+  name: item.name || '',
+  vinSerial: item.vinSerial || '',
+  category: item.category || '',
+  status: item.status || 'Active',
+  photoUrl: item.photoUrl || '',
+  requirements: item.requirements || '',
+  tracking_type: item.tracking_type || ''
+});
 };
 const saveMachineryEdit = async (id) => {
   setSavingMachinery(true);
   try {
-    const updates = {
-      name: machineryForm.name,
-      vin_serial: machineryForm.vinSerial,
-      category: machineryForm.category,
-      status: machineryForm.status,
-      photo_url: machineryForm.photoUrl || '',
-      requirements: machineryForm.requirements || ''
-    };
+const updates = {
+  name: machineryForm.name,
+  vin_serial: machineryForm.vinSerial,
+  category: machineryForm.category,
+  status: machineryForm.status,
+  photo_url: machineryForm.photoUrl || '',
+  requirements: machineryForm.requirements || '',
+  tracking_type: machineryForm.tracking_type || null
+};
     
     await supabase.from('machinery_items').update(updates).eq('id', id);
 
-    setMachinery(prev => prev.map(item => 
-      item.id === id ? {
-        id: item.id,
-        name: updates.name,
-        vinSerial: updates.vin_serial,
-        category: updates.category,
-        status: updates.status,
-        photoUrl: updates.photo_url,
-        requirements: updates.requirements
-      } : item
-    ));
+setMachinery(prev => prev.map(item => 
+  item.id === id ? {
+    id: item.id,
+    name: updates.name,
+    vinSerial: updates.vin_serial,
+    category: updates.category,
+    status: updates.status,
+    photoUrl: updates.photo_url,
+    requirements: updates.requirements,
+    tracking_type: updates.tracking_type || ''
+  } : item
+));
 
     console.log('✅ Machinery updated - FAST!');
     setEditingMachineryId(null);
@@ -1283,7 +1348,7 @@ const saveMachineryEdit = async (id) => {
 const cancelMachineryEdit = () => {
   setEditingMachineryId(null);
   isEditingRef.current = false;
-  setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '', requirements: '' });
+  setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '', requirements: '', tracking_type: '' });
 };
   
 const viewMachineServiceHistory = (machineName) => {
@@ -1589,6 +1654,142 @@ const deleteReminder = async (reminderId) => {
     alert('Failed to delete reminder');
   }
 };
+
+const getMachineKm = (machineName) => {
+  const record = machineKm.find(h => h.machine_name === machineName);
+  return record ? parseFloat(record.current_km || 0) : 0;
+};
+
+const getMachineKmReminders = (machineName) => {
+  return serviceReminders.filter(r =>
+    r.machine_name === machineName && r.is_active && r.reminder_type === 'km'
+  );
+};
+
+const isKmReminderDue = (reminder, currentKm) => {
+  const kmSinceLastService = currentKm - (parseFloat(reminder.last_service_km) || 0);
+  const interval = parseFloat(reminder.km_interval) || 0;
+  return kmSinceLastService >= interval;
+};
+
+const addMachineKm = async () => {
+  if (!kmForm.machineName || !kmForm.kmToAdd) {
+    alert('Please fill in all fields');
+    return;
+  }
+  try {
+    const kmToAdd = parseFloat(kmForm.kmToAdd);
+    if (kmToAdd <= 0) { alert('km must be greater than 0'); return; }
+    const existingRecord = machineKm.find(h => h.machine_name === kmForm.machineName);
+    if (existingRecord) {
+      const newTotal = parseFloat(existingRecord.current_km) + kmToAdd;
+      await supabase.from('machine_km').update({
+        current_km: newTotal,
+        updated_at: new Date().toISOString()
+      }).eq('id', existingRecord.id);
+    } else {
+      await supabase.from('machine_km').insert([{
+        id: Date.now().toString(),
+        machine_name: kmForm.machineName,
+        current_km: kmToAdd,
+        user_id: user.id
+      }]);
+    }
+    setKmForm({ machineName: '', kmToAdd: '' });
+    setShowKmModal(false);
+    alert(`Added ${kmToAdd} km to ${kmForm.machineName}`);
+  } catch (error) {
+    alert('Failed to add km');
+  }
+};
+
+const openKmDetail = (machine) => {
+  const record = machineKm.find(h => h.machine_name === machine.name);
+  setSelectedKmRecord({ machine, record });
+  setNewTotalKm(record ? parseFloat(record.current_km).toFixed(1) : '0');
+  setEditingKm(false);
+  setShowKmDetailModal(true);
+};
+
+const saveKmEdit = async () => {
+  if (!selectedKmRecord) return;
+  const machineName = selectedKmRecord.machine.name;
+  const newKm = parseFloat(newTotalKm);
+  if (isNaN(newKm) || newKm < 0) { alert('Please enter a valid number'); return; }
+  try {
+    const existing = machineKm.find(h => h.machine_name === machineName);
+    if (existing) {
+      await supabase.from('machine_km').update({
+        current_km: newKm,
+        updated_at: new Date().toISOString()
+      }).eq('id', existing.id);
+    } else {
+      await supabase.from('machine_km').insert([{
+        id: Date.now().toString(),
+        machine_name: machineName,
+        current_km: newKm,
+        user_id: user.id
+      }]);
+    }
+    setEditingKm(false);
+    setShowKmDetailModal(false);
+  } catch (error) {
+    alert('Failed to save km');
+  }
+};
+
+const deleteKmRecord = async () => {
+  if (!selectedKmRecord?.record) return;
+  if (!confirm('Delete all km for this machine?')) return;
+  try {
+    await supabase.from('machine_km').delete().eq('id', selectedKmRecord.record.id);
+    setShowKmDetailModal(false);
+  } catch (error) {
+    alert('Failed to delete km record');
+  }
+};
+
+const createKmReminder = async () => {
+  if (!selectedMachineForReminder || !reminderForm.reminderName || !reminderForm.kmInterval) {
+    alert('Please fill in all fields');
+    return;
+  }
+  try {
+    const interval = parseFloat(reminderForm.kmInterval);
+    if (interval <= 0) { alert('km interval must be greater than 0'); return; }
+    const currentKm = getMachineKm(selectedMachineForReminder);
+    await supabase.from('service_reminders').insert([{
+      id: Date.now().toString(),
+      machine_name: selectedMachineForReminder,
+      reminder_name: reminderForm.reminderName,
+      reminder_type: 'km',
+      km_interval: interval,
+      last_service_km: currentKm,
+      user_id: user.id
+    }]);
+    setReminderForm({ reminderName: '', hoursInterval: '', kmInterval: '' });
+    setSelectedMachineForReminder('');
+    setShowKmReminderModal(false);
+    alert('km Reminder created!');
+  } catch (error) {
+    alert('Failed to create km reminder');
+  }
+};
+
+const completeKmReminder = async (reminderId) => {
+  try {
+    const reminder = serviceReminders.find(r => r.id === reminderId);
+    if (!reminder) return;
+    const currentKm = getMachineKm(reminder.machine_name);
+    await supabase.from('service_reminders').update({
+      last_service_km: currentKm
+    }).eq('id', reminderId);
+    alert('km Reminder marked as completed!');
+  } catch (error) {
+    alert('Failed to complete km reminder');
+  }
+};
+  
 const quickUpdateQuantity = async (id, delta) => {
   try {
     const item = inventory.find(i => i.id === id);
@@ -3752,47 +3953,87 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
       <h3 style={{ fontSize: '1.5rem', color: theme === 'light' ? '#111827' : '#a78bfa', margin: 0 }}>⏰ Service Reminders</h3>
       {userRole !== 'employee' && (
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <button
-            onClick={() => setShowHoursModal(true)}
-        style={{
-  padding: '10px 20px',
-  background: theme === 'light' ? '#eff6ff' : '#8b5cf6',
-  border: theme === 'light' ? '1px solid #bfdbfe' : 'none',
-  borderRadius: '8px',
-  color: theme === 'light' ? '#1e3a5f' : 'white',
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-  fontSize: '0.875rem',
-  transition: 'all 0.2s ease'
-}}
-onMouseEnter={(e) => e.target.style.background = theme === 'light' ? '#dbeafe' : '#7c3aed'}
-onMouseLeave={(e) => e.target.style.background = theme === 'light' ? '#eff6ff' : '#8b5cf6'}
-          >
-            <Plus size={16} /> Add Hours
-          </button>
-          <button
-            onClick={() => setShowReminderModal(true)}
-            style={{
-              padding: '10px 20px',
-              background: '#10b981',
-              border: 'none',
-              borderRadius: '8px',
-              color: 'white',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '0.875rem',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => e.target.style.background = '#059669'}
-            onMouseLeave={(e) => e.target.style.background = '#10b981'}
-          >
-            <Plus size={16} /> Create Reminder
-          </button>
-        </div>
+  <button
+    onClick={() => setShowHoursModal(true)}
+    style={{
+      padding: '10px 20px',
+      background: theme === 'light' ? '#eff6ff' : '#8b5cf6',
+      border: theme === 'light' ? '1px solid #bfdbfe' : 'none',
+      borderRadius: '8px',
+      color: theme === 'light' ? '#1e3a5f' : 'white',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      fontSize: '0.875rem',
+      transition: 'all 0.2s ease'
+    }}
+    onMouseEnter={(e) => e.target.style.background = theme === 'light' ? '#dbeafe' : '#7c3aed'}
+    onMouseLeave={(e) => e.target.style.background = theme === 'light' ? '#eff6ff' : '#8b5cf6'}
+  >
+    <Plus size={16} /> Add Hours
+  </button>
+  <button
+    onClick={() => setShowKmModal(true)}
+    style={{
+      padding: '10px 20px',
+      background: theme === 'light' ? '#ecfeff' : '#0891b2',
+      border: theme === 'light' ? '1px solid #a5f3fc' : 'none',
+      borderRadius: '8px',
+      color: theme === 'light' ? '#164e63' : 'white',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      fontSize: '0.875rem',
+      transition: 'all 0.2s ease'
+    }}
+    onMouseEnter={(e) => e.target.style.background = theme === 'light' ? '#cffafe' : '#0e7490'}
+    onMouseLeave={(e) => e.target.style.background = theme === 'light' ? '#ecfeff' : '#0891b2'}
+  >
+    <Plus size={16} /> Add Kilometres
+  </button>
+  <button
+    onClick={() => setShowReminderModal(true)}
+    style={{
+      padding: '10px 20px',
+      background: '#10b981',
+      border: 'none',
+      borderRadius: '8px',
+      color: 'white',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      fontSize: '0.875rem',
+      transition: 'all 0.2s ease'
+    }}
+    onMouseEnter={(e) => e.target.style.background = '#059669'}
+    onMouseLeave={(e) => e.target.style.background = '#10b981'}
+  >
+    <Plus size={16} /> Create Reminder
+  </button>
+  <button
+    onClick={() => setShowKmReminderModal(true)}
+    style={{
+      padding: '10px 20px',
+      background: '#0891b2',
+      border: 'none',
+      borderRadius: '8px',
+      color: 'white',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      fontSize: '0.875rem',
+      transition: 'all 0.2s ease'
+    }}
+    onMouseEnter={(e) => e.target.style.background = '#0e7490'}
+    onMouseLeave={(e) => e.target.style.background = '#0891b2'}
+  >
+    <Plus size={16} /> Create km Reminder
+  </button>
+</div>
       )}
     </div>
 
@@ -3837,6 +4078,50 @@ return (
         })}
       </div>
     </div>
+
+    {/* Machine Kilometres Overview */}
+<div style={{ marginBottom: '24px' }}>
+  <h4 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Machine Kilometres</h4>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' }}>
+    {getFilteredAndSortedMachinery().map(machine => {
+      const km = getMachineKm(machine.name);
+      const kmReminders = getMachineKmReminders(machine.name);
+      const dueCount = kmReminders.filter(r => isKmReminderDue(r, km)).length;
+      return (
+        <div
+          key={machine.id}
+          onClick={() => openKmDetail(machine)}
+          style={{
+            ...styles.itemCard,
+            background: dueCount > 0 ? 'rgba(239, 68, 68, 0.1)' : (theme === 'light' ? '#ecfeff' : currentTheme.cardBackground),
+            border: dueCount > 0 ? '2px solid #ef4444' : (theme === 'light' ? '1px solid #a5f3fc' : '1px solid #0891b2'),
+            cursor: 'pointer',
+            transition: 'transform 0.15s ease, box-shadow 0.15s ease'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+        >
+          <div style={{ flex: 1 }}>
+            <h4 style={{ fontSize: '1.1rem', marginBottom: '8px' }}>{machine.name}</h4>
+            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#0891b2', margin: '8px 0' }}>
+              {km.toFixed(1)} km
+            </p>
+            {dueCount > 0 && (
+              <p style={{ color: '#ef4444', fontSize: '0.875rem', fontWeight: 'bold' }}>
+                ⚠️ {dueCount} service{dueCount > 1 ? 's' : ''} due
+              </p>
+            )}
+            {kmReminders.length > 0 && (
+              <p style={{ color: currentTheme.textSecondary, fontSize: '0.75rem', marginTop: '4px' }}>
+                {kmReminders.length} reminder{kmReminders.length > 1 ? 's' : ''} set
+              </p>
+            )}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</div>
 
     {/* Active Reminders */}
     <div>
@@ -3941,6 +4226,105 @@ return (
         );
       })()}
     </div>
+    {/* Active km Reminders */}
+<div style={{ marginTop: '24px' }}>
+  <h4 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Active km Reminders</h4>
+  {(() => {
+    const filteredMachineNames = getFilteredAndSortedMachinery().map(m => m.name);
+    const filteredKmReminders = serviceReminders.filter(r =>
+      filteredMachineNames.includes(r.machine_name) && r.reminder_type === 'km'
+    );
+    if (filteredKmReminders.length === 0) {
+      return (
+        <div style={styles.emptyState}>
+          <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+          <p>No km reminders set</p>
+        </div>
+      );
+    }
+    return (
+      <div style={styles.itemsList}>
+        {filteredKmReminders.map(reminder => {
+          const currentKm = getMachineKm(reminder.machine_name);
+          const kmSinceService = currentKm - (parseFloat(reminder.last_service_km) || 0);
+          const interval = parseFloat(reminder.km_interval) || 0;
+          const isDue = kmSinceService >= interval;
+          const kmUntilDue = Math.max(0, interval - kmSinceService);
+          return (
+            <div key={reminder.id} style={{
+              ...styles.itemCard,
+              background: isDue ? 'rgba(239, 68, 68, 0.1)' : (theme === 'light' ? '#ecfeff' : currentTheme.cardBackground),
+              border: isDue ? '2px solid #ef4444' : (theme === 'light' ? '1px solid #a5f3fc' : '1px solid #0891b2')
+            }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <h4 style={{ fontSize: '1.1rem', margin: 0 }}>{reminder.machine_name}</h4>
+                  {isDue && (
+                    <span style={{
+                      padding: '4px 12px',
+                      background: 'rgba(239, 68, 68, 0.2)',
+                      border: '1px solid #ef4444',
+                      borderRadius: '12px',
+                      fontSize: '0.75rem',
+                      color: '#ef4444',
+                      fontWeight: 'bold'
+                    }}>
+                      ⚠️ DUE NOW
+                    </span>
+                  )}
+                </div>
+                <p style={{ fontSize: '1rem', color: '#0891b2', marginBottom: '12px' }}>
+                  {reminder.reminder_name}
+                </p>
+                <div style={styles.itemDetails}>
+                  <div>
+                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Current km</p>
+                    <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{currentKm.toFixed(1)}</p>
+                  </div>
+                  <div>
+                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Service Interval</p>
+                    <p>Every {interval} km</p>
+                  </div>
+                  <div>
+                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Last Service</p>
+                    <p>{parseFloat(reminder.last_service_km || 0).toFixed(1)} km</p>
+                  </div>
+                  <div>
+                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
+                      {isDue ? 'km Overdue' : 'km Until Due'}
+                    </p>
+                    <p style={{ fontWeight: 'bold', color: isDue ? '#ef4444' : '#0891b2' }}>
+                      {isDue ? kmSinceService.toFixed(1) : kmUntilDue.toFixed(1)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {userRole !== 'employee' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <button
+                    onClick={() => completeKmReminder(reminder.id)}
+                    style={{
+                      ...styles.saveButton,
+                      background: '#0891b2'
+                    }}
+                  >
+                    ✓ Complete
+                  </button>
+                  <button
+                    onClick={() => deleteReminder(reminder.id)}
+                    style={styles.deleteButton}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  })()}
+</div>
   </div>
 )}
 
@@ -6616,6 +7000,216 @@ return (
   </Modal>
 )}
 
+{showKmModal && (
+  <Modal title="Add Machine Kilometres" theme={theme} onClose={() => {
+    setShowKmModal(false);
+    setKmForm({ machineName: '', kmToAdd: '' });
+  }}>
+    <select
+      style={styles.input}
+      value={kmForm.machineName}
+      onChange={(e) => setKmForm({ ...kmForm, machineName: e.target.value })}
+    >
+      <option value="">-- Select Machine --</option>
+      {machinery.map(machine => (
+        <option key={machine.id} value={machine.name}>
+          {machine.name} (Current: {getMachineKm(machine.name).toFixed(1)} km)
+        </option>
+      ))}
+    </select>
+    <input
+      style={styles.input}
+      type="number"
+      step="0.1"
+      placeholder="Kilometres to add"
+      value={kmForm.kmToAdd}
+      onChange={(e) => setKmForm({ ...kmForm, kmToAdd: e.target.value })}
+    />
+    <div style={{ display: 'flex', gap: '12px' }}>
+      <button onClick={addMachineKm} style={styles.primaryButton}>Add km</button>
+      <button onClick={() => setShowKmModal(false)} style={styles.secondaryButton}>Cancel</button>
+    </div>
+  </Modal>
+)}
+
+{showKmDetailModal && selectedKmRecord && (
+  <Modal title={selectedKmRecord.machine.name} theme={theme} onClose={() => setShowKmDetailModal(false)}>
+    <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+      <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '8px' }}>Current Kilometres</p>
+      <p style={{ fontSize: '3rem', fontWeight: 'bold', color: '#0891b2' }}>
+        {getMachineKm(selectedKmRecord.machine.name).toFixed(1)} km
+      </p>
+    </div>
+    {editingKm ? (
+      <div>
+        <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+          Set total km to:
+        </label>
+        <input
+          type="number"
+          step="0.1"
+          value={newTotalKm}
+          onChange={(e) => setNewTotalKm(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '12px',
+            background: '#1a2942',
+            border: '1px solid #2563eb',
+            borderRadius: '8px',
+            color: 'white',
+            fontSize: '1rem',
+            marginBottom: '16px',
+            boxSizing: 'border-box'
+          }}
+        />
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            onClick={saveKmEdit}
+            style={{
+              flex: 1,
+              padding: '12px',
+              background: '#0891b2',
+              border: 'none',
+              borderRadius: '8px',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '1rem'
+            }}
+          >
+            Save
+          </button>
+          <button
+            onClick={() => setEditingKm(false)}
+            style={{
+              flex: 1,
+              padding: '12px',
+              background: '#4b5563',
+              border: 'none',
+              borderRadius: '8px',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '1rem'
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ) : (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {userRole !== 'employee' && (
+          <>
+            <button
+              onClick={() => setEditingKm(true)}
+              style={{
+                padding: '12px',
+                background: '#0891b2',
+                border: 'none',
+                borderRadius: '8px',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px'
+              }}
+            >
+              ✏️ Edit Kilometres
+            </button>
+            {selectedKmRecord.record && (
+              <button
+                onClick={deleteKmRecord}
+                style={{
+                  padding: '12px',
+                  background: '#7f1d1d',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+              >
+                🗑️ Delete km Record
+              </button>
+            )}
+          </>
+        )}
+        <button
+          onClick={() => setShowKmDetailModal(false)}
+          style={{
+            padding: '12px',
+            background: '#4b5563',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: 'pointer',
+            fontSize: '1rem'
+          }}
+        >
+          Close
+        </button>
+      </div>
+    )}
+  </Modal>
+)}      
+
+{showKmReminderModal && (
+  <Modal title="Create km Service Reminder" theme={theme} onClose={() => {
+    setShowKmReminderModal(false);
+    setSelectedMachineForReminder('');
+    setReminderForm({ reminderName: '', hoursInterval: '', kmInterval: '' });
+  }}>
+    <select
+      style={styles.input}
+      value={selectedMachineForReminder}
+      onChange={(e) => setSelectedMachineForReminder(e.target.value)}
+    >
+      <option value="">-- Select Machine --</option>
+      {machinery.map(machine => (
+        <option key={machine.id} value={machine.name}>
+          {machine.name}
+        </option>
+      ))}
+    </select>
+    <input
+      style={styles.input}
+      placeholder="Reminder name (e.g., Oil Change)"
+      value={reminderForm.reminderName}
+      onChange={(e) => setReminderForm({ ...reminderForm, reminderName: e.target.value })}
+    />
+    <input
+      style={styles.input}
+      type="number"
+      step="1"
+      placeholder="km interval (e.g., 5000)"
+      value={reminderForm.kmInterval || ''}
+      onChange={(e) => setReminderForm({ ...reminderForm, kmInterval: e.target.value })}
+    />
+    <div style={{ display: 'flex', gap: '12px' }}>
+      <button
+        onClick={createKmReminder}
+        style={{
+          ...styles.primaryButton,
+          background: '#0891b2'
+        }}
+      >
+        Create Reminder
+      </button>
+      <button
+        onClick={() => setShowKmReminderModal(false)}
+        style={styles.secondaryButton}
+      >
+        Cancel
+      </button>
+    </div>
+  </Modal>
+)}
+      
 {/* Hours Detail Modal */}
 {showHoursDetailModal && selectedHoursRecord && (
   <Modal title={selectedHoursRecord.machine.name} theme={theme} onClose={() => setShowHoursDetailModal(false)}>
