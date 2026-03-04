@@ -4255,7 +4255,7 @@ return (
           </div>
           );
       })()}
-  })()}
+
 {/* Active km Reminders */}
 {(() => {
   const kmOnlyMachines = getFilteredAndSortedMachinery().filter(m => {
