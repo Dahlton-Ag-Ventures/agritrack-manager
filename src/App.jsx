@@ -252,6 +252,9 @@ export default function App() {
   const [showRemindersPanel, setShowRemindersPanel] = useState(false);
   const [showCompleteReminderModal, setShowCompleteReminderModal] = useState(false);
   const [completingReminder, setCompletingReminder] = useState(null);
+  const [showDeletedRemindersModal, setShowDeletedRemindersModal] = useState(false);
+  const [deletedReminders, setDeletedReminders] = useState([]);
+  const [restoringReminder, setRestoringReminder] = useState(null);
   const [completeServiceForm, setCompleteServiceForm] = useState({
   logService: null,
   serviceType: '',
@@ -1550,7 +1553,7 @@ const getMachineHours = (machineName) => {
 // Get active reminders for a machine
 const getMachineReminders = (machineName) => {
   return serviceReminders.filter(r => 
-    r.machine_name === machineName && r.is_active !== false
+    r.machine_name === machineName && !r.deleted_at
   );
 };
 
@@ -1655,22 +1658,81 @@ const completeReminder = (reminderId) => {
   setShowCompleteReminderModal(true);
 };
 
-const handleCompleteReminderSubmit = async (shouldLog) => {
+constconst handleCompleteReminderSubmit = async (shouldLog) => {
   if (!completingReminder) return;
-
   try {
     const isKm = completingReminder.reminder_type === 'km';
+    const now = new Date().toISOString();
+    const currentMetric = isKm ? completingReminder.currentKm : completingReminder.currentHours;
 
-    // Reset the reminder counter
-    if (isKm) {
-      await supabase.from('service_reminders').update({
-        last_service_km: completingReminder.currentKm
-      }).eq('id', completingReminder.id);
-    } else {
-      await supabase.from('service_reminders').update({
-        last_service_hours: completingReminder.currentHours
-      }).eq('id', completingReminder.id);
+    const updates = isKm ? {
+      last_service_km: completingReminder.currentKm,
+      completed_at: now,
+      completed_at_metric: currentMetric
+    } : {
+      last_service_hours: completingReminder.currentHours,
+      completed_at: now,
+      completed_at_metric: currentMetric
+    };
+
+    const { error } = await supabase.from('service_reminders')
+      .update(updates)
+      .eq('id', completingReminder.id);
+
+    if (error) { alert('Failed to complete reminder: ' + error.message); return; }
+
+    setServiceReminders(prev => prev.map(r =>
+      r.id === completingReminder.id ? { ...r, ...updates } : r
+    ));
+
+    if (shouldLog) {
+      const metric = isKm
+        ? `${completingReminder.currentKm?.toFixed(1)} km`
+        : `${completingReminder.currentHours?.toFixed(1)} hrs`;
+
+      const newId = Date.now().toString();
+      const finalDate = completeServiceForm.date || new Date().toISOString().split('T')[0];
+      const fullNotes = completeServiceForm.notes
+        ? `${completeServiceForm.notes}\n\n[Logged via reminder — ${metric} at time of service]`
+        : `[Logged via reminder — ${metric} at time of service]`;
+
+      await supabase.from('service_records').insert([{
+        id: newId,
+        user_id: user.id,
+        machine_name: completingReminder.machine_name,
+        service_type: completeServiceForm.serviceType,
+        date: finalDate,
+        notes: fullNotes,
+        technician: completeServiceForm.technician,
+        photo_urls: JSON.stringify([])
+      }]);
+
+      setServiceHistory(prev => [{
+        id: newId,
+        machineName: completingReminder.machine_name,
+        serviceType: completeServiceForm.serviceType,
+        date: finalDate,
+        notes: fullNotes,
+        technician: completeServiceForm.technician,
+        photoUrls: []
+      }, ...prev]);
     }
+
+    setShowCompleteReminderModal(false);
+    setCompletingReminder(null);
+    setCompleteServiceForm({
+      logService: null,
+      serviceType: '',
+      date: '',
+      notes: '',
+      technician: '',
+    });
+
+  } catch (error) {
+    console.error('Error completing reminder:', error);
+    alert('Failed to complete reminder');
+  }
+};}
 
     // Optionally log a service record
     if (shouldLog) {
@@ -1721,14 +1783,83 @@ const handleCompleteReminderSubmit = async (shouldLog) => {
     alert('Failed to complete reminder');
   }
 };
-  
+
+const loadDeletedReminders = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('service_reminders')
+      .select('*')
+      .not('deleted_at', 'is', null)
+      .order('deleted_at', { ascending: false });
+    if (error) { alert('Failed to load deleted reminders'); return; }
+    setDeletedReminders(data || []);
+    setShowDeletedRemindersModal(true);
+  } catch (error) {
+    alert('Failed to load deleted reminders');
+  }
+};
+
+const restoreReminder = async (reminderId) => {
+  try {
+    setRestoringReminder(reminderId);
+    const reminder = deletedReminders.find(r => r.id === reminderId);
+    if (!reminder) return;
+
+    const isKm = reminder.reminder_type === 'km';
+    const currentMetric = isKm
+      ? getMachineKm(reminder.machine_name)
+      : getMachineHours(reminder.machine_name);
+
+    const updates = {
+      deleted_at: null,
+      is_active: true,
+      completed_at: null,
+      completed_at_metric: null,
+      ...(isKm
+        ? { last_service_km: currentMetric }
+        : { last_service_hours: currentMetric }
+      )
+    };
+
+    const { error } = await supabase
+      .from('service_reminders')
+      .update(updates)
+      .eq('id', reminderId);
+
+    if (error) { alert('Failed to restore reminder: ' + error.message); return; }
+
+    setServiceReminders(prev => {
+      const exists = prev.find(r => r.id === reminderId);
+      if (exists) {
+        return prev.map(r => r.id === reminderId ? { ...r, ...updates } : r);
+      } else {
+        return [...prev, { ...reminder, ...updates }];
+      }
+    });
+
+    setDeletedReminders(prev => prev.filter(r => r.id !== reminderId));
+    setRestoringReminder(null);
+
+  } catch (error) {
+    console.error('Error restoring reminder:', error);
+    alert('Failed to restore reminder');
+    setRestoringReminder(null);
+  }
+};
+
 // Delete reminder
 const deleteReminder = async (reminderId) => {
   if (!confirm('Delete this reminder?')) return;
-
   try {
-    await supabase.from('service_reminders').delete().eq('id', reminderId);
-    alert('Reminder deleted');
+    const now = new Date().toISOString();
+    const { error } = await supabase.from('service_reminders').update({
+      deleted_at: now,
+      is_active: false
+    }).eq('id', reminderId);
+    if (error) { alert('Failed to delete reminder: ' + error.message); return; }
+    setServiceReminders(prev => prev.map(r =>
+      r.id === reminderId ? { ...r, deleted_at: now, is_active: false } : r
+    ));
   } catch (error) {
     console.error('Error deleting reminder:', error);
     alert('Failed to delete reminder');
@@ -1742,7 +1873,7 @@ const getMachineKm = (machineName) => {
 
 const getMachineKmReminders = (machineName) => {
   return serviceReminders.filter(r =>
-    r.machine_name === machineName && r.is_active !== false && r.reminder_type === 'km'
+    r.machine_name === machineName && !r.deleted_at && r.reminder_type === 'km'
   );
 };
 
@@ -4042,7 +4173,27 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
     marginBottom: '24px'
   }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-      <h3 style={{ fontSize: '1.5rem', color: theme === 'light' ? '#111827' : '#a78bfa', margin: 0 }}>⏰ Service Reminders</h3>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+        <h3 style={{ fontSize: '1.5rem', color: theme === 'light' ? '#111827' : '#a78bfa', margin: 0 }}>⏰ Service Reminders</h3>
+        <button
+          onClick={loadDeletedReminders}
+          style={{
+            padding: '6px 14px',
+            background: theme === 'light' ? '#fee2e2' : 'rgba(239, 68, 68, 0.15)',
+            border: '1px solid #ef4444',
+            borderRadius: '8px',
+            color: '#ef4444',
+            cursor: 'pointer',
+            fontSize: '0.8rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontWeight: 'bold'
+          }}
+        >
+          <Trash2 size={14} /> View Deleted
+        </button>
+      </div>
       {userRole !== 'employee' && (
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
   {getFilteredAndSortedMachinery().some(m => { const t = getTrackingType(m); return t === 'hours' || t === 'both'; }) && (
@@ -4409,9 +4560,13 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
         });
         if (hoursOnlyMachines.length === 0) return null;
         const hoursOnlyMachineNames = hoursOnlyMachines.map(m => m.name);
-        const filteredReminders = serviceReminders.filter(r =>
-          hoursOnlyMachineNames.includes(r.machine_name) && r.reminder_type !== 'km'
+        const allFiltered = serviceReminders.filter(r =>
+          hoursOnlyMachineNames.includes(r.machine_name) && r.reminder_type !== 'km' && !r.deleted_at
         );
+        const filteredReminders = [
+          ...allFiltered.filter(r => !r.completed_at),
+          ...allFiltered.filter(r => r.completed_at)
+        ];
        if (filteredReminders.length === 0) {
           return (
             <>
@@ -4436,11 +4591,29 @@ return (
               const hoursUntilDue = Math.max(0, interval - hoursSinceService);
               
               return (
-           <div key={reminder.id} style={{
+<div key={reminder.id} style={{
           ...styles.itemCard,
-          background: isDue ? 'rgba(239, 68, 68, 0.1)' : (theme === 'light' ? '#eff6ff' : currentTheme.cardBackground),
-          border: isDue ? '2px solid #ef4444' : (theme === 'light' ? '1px solid #bfdbfe' : `1px solid ${currentTheme.cardBorder}`)
+          background: reminder.completed_at ? (theme === 'light' ? '#f0fdf4' : 'rgba(16, 185, 129, 0.08)') : isDue ? 'rgba(239, 68, 68, 0.1)' : (theme === 'light' ? '#eff6ff' : currentTheme.cardBackground),
+          border: reminder.completed_at ? '2px solid #10b981' : isDue ? '2px solid #ef4444' : (theme === 'light' ? '1px solid #bfdbfe' : `1px solid ${currentTheme.cardBorder}`),
+          position: 'relative',
+          overflow: 'hidden'
         }}>
+          {reminder.completed_at && (
+            <div style={{
+              position: 'absolute',
+              top: '12px',
+              right: '12px',
+              padding: '4px 12px',
+              background: 'linear-gradient(to right, #10b981, #06b6d4)',
+              borderRadius: '20px',
+              fontSize: '0.75rem',
+              fontWeight: 'bold',
+              color: 'white',
+              zIndex: 2
+            }}>
+              ✅ Completed at {parseFloat(reminder.completed_at_metric || 0).toFixed(1)} hrs
+            </div>
+          )}
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                       <h4 style={{ fontSize: '1.1rem', margin: 0 }}>{reminder.machine_name}</h4>
@@ -4526,9 +4699,13 @@ return (
   <h4 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Active km Reminders</h4>
   {(() => {
     const filteredMachineNames = kmOnlyMachines.map(m => m.name);
-    const filteredKmReminders = serviceReminders.filter(r =>
-      filteredMachineNames.includes(r.machine_name) && r.reminder_type === 'km'
+const allKmFiltered = serviceReminders.filter(r =>
+      filteredMachineNames.includes(r.machine_name) && r.reminder_type === 'km' && !r.deleted_at
     );
+    const filteredKmReminders = [
+      ...allKmFiltered.filter(r => !r.completed_at),
+      ...allKmFiltered.filter(r => r.completed_at)
+    ];
     if (filteredKmReminders.length === 0) {
       return (
         <div style={styles.emptyState}>
@@ -4546,11 +4723,29 @@ return (
           const isDue = kmSinceService >= interval;
           const kmUntilDue = Math.max(0, interval - kmSinceService);
           return (
-            <div key={reminder.id} style={{
+<div key={reminder.id} style={{
               ...styles.itemCard,
-              background: isDue ? 'rgba(239, 68, 68, 0.1)' : (theme === 'light' ? '#ecfeff' : currentTheme.cardBackground),
-              border: isDue ? '2px solid #ef4444' : (theme === 'light' ? '1px solid #a5f3fc' : '1px solid #0891b2')
+              background: reminder.completed_at ? (theme === 'light' ? '#ecfeff' : 'rgba(8, 145, 178, 0.08)') : isDue ? 'rgba(239, 68, 68, 0.1)' : (theme === 'light' ? '#ecfeff' : currentTheme.cardBackground),
+              border: reminder.completed_at ? '2px solid #0891b2' : isDue ? '2px solid #ef4444' : (theme === 'light' ? '1px solid #a5f3fc' : '1px solid #0891b2'),
+              position: 'relative',
+              overflow: 'hidden'
             }}>
+              {reminder.completed_at && (
+                <div style={{
+                  position: 'absolute',
+                  top: '12px',
+                  right: '12px',
+                  padding: '4px 12px',
+                  background: 'linear-gradient(to right, #0891b2, #06b6d4)',
+                  borderRadius: '20px',
+                  fontSize: '0.75rem',
+                  fontWeight: 'bold',
+                  color: 'white',
+                  zIndex: 2
+                }}>
+                  ✅ Completed at {parseFloat(reminder.completed_at_metric || 0).toFixed(1)} km
+                </div>
+              )}
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                   <h4 style={{ fontSize: '1.1rem', margin: 0 }}>{reminder.machine_name}</h4>
@@ -7611,6 +7806,108 @@ const dueReminders = trackType === 'km'
   </Modal>
 )}
 
+{/* Deleted Reminders Modal */}
+{showDeletedRemindersModal && (
+  <Modal
+    title="🗑️ Deleted Reminders"
+    theme={theme}
+    onClose={() => setShowDeletedRemindersModal(false)}
+  >
+    {deletedReminders.length === 0 ? (
+      <div style={{ textAlign: 'center', padding: '24px' }}>
+        <p style={{ fontSize: '2rem', marginBottom: '8px' }}>🗑️</p>
+        <p style={{ color: theme === 'light' ? '#6b7280' : '#9ca3af' }}>
+          No deleted reminders found
+        </p>
+      </div>
+    ) : (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <p style={{ color: theme === 'light' ? '#6b7280' : '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+          {deletedReminders.length} deleted reminder{deletedReminders.length !== 1 ? 's' : ''} found. Restore any to bring them back.
+        </p>
+        {deletedReminders.map(reminder => (
+          <div key={reminder.id} style={{
+            padding: '16px',
+            background: theme === 'light' ? '#f9fafb' : 'rgba(255,255,255,0.05)',
+            border: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+            borderRadius: '10px',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontWeight: 'bold', fontSize: '0.95rem', marginBottom: '4px', color: theme === 'light' ? '#111827' : 'white' }}>
+                  {reminder.machine_name}
+                </p>
+                <p style={{ color: reminder.reminder_type === 'km' ? '#0891b2' : '#10b981', fontSize: '0.875rem', marginBottom: '8px' }}>
+                  {reminder.reminder_name}
+                </p>
+                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                  <div>
+                    <p style={{ color: '#9ca3af', fontSize: '0.75rem' }}>Type</p>
+                    <p style={{ fontSize: '0.85rem', color: theme === 'light' ? '#111827' : 'white' }}>
+                      {reminder.reminder_type === 'km' ? '🛣️ Kilometres' : '⏱️ Hours'}
+                    </p>
+                  </div>
+                  <div>
+                    <p style={{ color: '#9ca3af', fontSize: '0.75rem' }}>Interval</p>
+                    <p style={{ fontSize: '0.85rem', color: theme === 'light' ? '#111827' : 'white' }}>
+                      Every {reminder.reminder_type === 'km' ? `${reminder.km_interval} km` : `${reminder.hours_interval} hrs`}
+                    </p>
+                  </div>
+                  <div>
+                    <p style={{ color: '#9ca3af', fontSize: '0.75rem' }}>Deleted</p>
+                    <p style={{ fontSize: '0.85rem', color: theme === 'light' ? '#111827' : 'white' }}>
+                      {new Date(reminder.deleted_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => restoreReminder(reminder.id)}
+                disabled={restoringReminder === reminder.id}
+                style={{
+                  padding: '10px 16px',
+                  background: restoringReminder === reminder.id ? '#6b7280' : 'linear-gradient(to right, #10b981, #06b6d4)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: 'white',
+                  cursor: restoringReminder === reminder.id ? 'not-allowed' : 'pointer',
+                  fontSize: '0.875rem',
+                  fontWeight: 'bold',
+                  whiteSpace: 'nowrap',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                {restoringReminder === reminder.id ? '...' : '↺ Restore'}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+
+    {/* Warning message shown after restore */}
+    {deletedReminders.length < (deletedReminders.length + 1) && restoringReminder === null && (
+      <div style={{
+        marginTop: '16px',
+        padding: '12px 16px',
+        background: 'rgba(251, 191, 36, 0.15)',
+        border: '1px solid #fbbf24',
+        borderRadius: '8px',
+        fontSize: '0.85rem',
+        color: '#fbbf24',
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '8px'
+      }}>
+        <span style={{ fontSize: '1rem', flexShrink: 0 }}>⚠️</span>
+        <span>Restored reminders are reset to current hours/km. Make sure the service interval is still correct before relying on it.</span>
+      </div>
+    )}
+  </Modal>
+)}
+      
 {/* Complete Reminder Modal */}
 {showCompleteReminderModal && completingReminder && (
   <Modal
