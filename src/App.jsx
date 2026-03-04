@@ -1808,15 +1808,13 @@ const saveKmEdit = async () => {
         item.id === existing.id ? { ...item, current_km: newKm } : item
       ));
     } else {
-      const { data, error } = await supabase.from('machine_km').insert([{
+const { error } = await supabase.from('machine_km').insert([{
         machine_name: machineName,
         current_km: newKm,
         user_id: user.id
-      }]).select();
+      }]);
       if (error) { console.error('❌ km insert error:', error); alert('Failed to save km: ' + error.message); return; }
-      if (data && data.length > 0) {
-        setMachineKm(prev => [...prev, data[0]]);
-      }
+      setMachineKm(prev => [...prev, { machine_name: machineName, current_km: newKm, user_id: user.id }]);
     }
     setEditingKm(false);
     setShowKmDetailModal(false);
@@ -1846,7 +1844,7 @@ const createKmReminder = async () => {
     const interval = parseFloat(reminderForm.kmInterval);
     if (interval <= 0) { alert('km interval must be greater than 0'); return; }
     const currentKm = getMachineKm(selectedMachineForReminder);
-    const { data, error } = await supabase.from('service_reminders').insert([{
+    const { error } = await supabase.from('service_reminders').insert([{
       machine_name: selectedMachineForReminder,
       reminder_name: reminderForm.reminderName,
       reminder_type: 'km',
@@ -1854,14 +1852,11 @@ const createKmReminder = async () => {
       last_service_km: currentKm,
       is_active: true,
       user_id: user.id
-    }]).select();
+    }]);
     if (error) {
       console.error('❌ createKmReminder error:', error);
       alert('Failed to create km reminder: ' + error.message);
       return;
-    }
-    if (data && data.length > 0) {
-      setServiceReminders(prev => [...prev, data[0]]);
     }
     setReminderForm({ reminderName: '', hoursInterval: '', kmInterval: '' });
     setSelectedMachineForReminder('');
