@@ -250,6 +250,15 @@ export default function App() {
   const isEditingRef = useRef(false);
   const recentlyUpdatedIdsRef = useRef(new Set());
   const [showRemindersPanel, setShowRemindersPanel] = useState(false);
+  const [showCompleteReminderModal, setShowCompleteReminderModal] = useState(false);
+  const [completingReminder, setCompletingReminder] = useState(null);
+  const [completeServiceForm, setCompleteServiceForm] = useState({
+  logService: null,
+  serviceType: '',
+  date: '',
+  notes: '',
+  technician: '',
+});
   const [flippedCards, setFlippedCards] = useState({});
   const [hoursExpanded, setHoursExpanded] = useState(false);
   const [kmExpanded, setKmExpanded] = useState(false);
@@ -1626,24 +1635,88 @@ const createReminder = async () => {
 };
 
 // Mark reminder as completed
-const completeReminder = async (reminderId) => {
+const completeReminder = (reminderId) => {
+  const reminder = serviceReminders.find(r => r.id === reminderId);
+  if (!reminder) return;
+  const currentHours = getMachineHours(reminder.machine_name);
+  setCompletingReminder({ ...reminder, currentHours });
+  setCompleteServiceForm({
+    logService: null,
+    serviceType: reminder.reminder_name || '',
+    date: new Date().toISOString().split('T')[0],
+    notes: '',
+    technician: '',
+  });
+  setShowCompleteReminderModal(true);
+};
+
+const handleCompleteReminderSubmit = async (shouldLog) => {
+  if (!completingReminder) return;
+
   try {
-    const reminder = serviceReminders.find(r => r.id === reminderId);
-    if (!reminder) return;
+    const isKm = completingReminder.reminder_type === 'km';
 
-    const currentHours = getMachineHours(reminder.machine_name);
+    // Reset the reminder counter
+    if (isKm) {
+      await supabase.from('service_reminders').update({
+        last_service_km: completingReminder.currentKm
+      }).eq('id', completingReminder.id);
+    } else {
+      await supabase.from('service_reminders').update({
+        last_service_hours: completingReminder.currentHours
+      }).eq('id', completingReminder.id);
+    }
 
-    await supabase.from('service_reminders').update({
-      last_service_hours: currentHours
-    }).eq('id', reminderId);
+    // Optionally log a service record
+    if (shouldLog) {
+      const metric = isKm
+        ? `${completingReminder.currentKm?.toFixed(1)} km`
+        : `${completingReminder.currentHours?.toFixed(1)} hrs`;
 
-    alert('Reminder marked as completed!');
+      const newId = Date.now().toString();
+      const finalDate = completeServiceForm.date || new Date().toISOString().split('T')[0];
+      const fullNotes = completeServiceForm.notes
+        ? `${completeServiceForm.notes}\n\n[Logged via reminder — ${metric} at time of service]`
+        : `[Logged via reminder — ${metric} at time of service]`;
+
+      await supabase.from('service_records').insert([{
+        id: newId,
+        user_id: user.id,
+        machine_name: completingReminder.machine_name,
+        service_type: completeServiceForm.serviceType,
+        date: finalDate,
+        notes: fullNotes,
+        technician: completeServiceForm.technician,
+        photo_urls: JSON.stringify([])
+      }]);
+
+      setServiceHistory(prev => [{
+        id: newId,
+        machineName: completingReminder.machine_name,
+        serviceType: completeServiceForm.serviceType,
+        date: finalDate,
+        notes: fullNotes,
+        technician: completeServiceForm.technician,
+        photoUrls: []
+      }, ...prev]);
+    }
+
+    setShowCompleteReminderModal(false);
+    setCompletingReminder(null);
+    setCompleteServiceForm({
+      logService: null,
+      serviceType: '',
+      date: '',
+      notes: '',
+      technician: '',
+    });
+
   } catch (error) {
     console.error('Error completing reminder:', error);
     alert('Failed to complete reminder');
   }
 };
-
+  
 // Delete reminder
 const deleteReminder = async (reminderId) => {
   if (!confirm('Delete this reminder?')) return;
@@ -1778,18 +1851,19 @@ const createKmReminder = async () => {
   }
 };
 
-const completeKmReminder = async (reminderId) => {
-  try {
-    const reminder = serviceReminders.find(r => r.id === reminderId);
-    if (!reminder) return;
-    const currentKm = getMachineKm(reminder.machine_name);
-    await supabase.from('service_reminders').update({
-      last_service_km: currentKm
-    }).eq('id', reminderId);
-    alert('km Reminder marked as completed!');
-  } catch (error) {
-    alert('Failed to complete km reminder');
-  }
+const completeKmReminder = (reminderId) => {
+  const reminder = serviceReminders.find(r => r.id === reminderId);
+  if (!reminder) return;
+  const currentKm = getMachineKm(reminder.machine_name);
+  setCompletingReminder({ ...reminder, currentKm });
+  setCompleteServiceForm({
+    logService: null,
+    serviceType: reminder.reminder_name || '',
+    date: new Date().toISOString().split('T')[0],
+    notes: '',
+    technician: '',
+  });
+  setShowCompleteReminderModal(true);
 };
   
 const quickUpdateQuantity = async (id, delta) => {
@@ -7520,6 +7594,234 @@ const dueReminders = trackType === 'km'
     </div>
   </Modal>
 )}
+
+{/* Complete Reminder Modal */}
+{showCompleteReminderModal && completingReminder && (
+  <Modal
+    title={`Complete — ${completingReminder.reminder_name}`}
+    theme={theme}
+    onClose={() => {
+      setShowCompleteReminderModal(false);
+      setCompletingReminder(null);
+    }}
+  >
+    {/* Summary bar */}
+    <div style={{
+      padding: '16px',
+      background: completingReminder.reminder_type === 'km'
+        ? 'rgba(8, 145, 178, 0.15)'
+        : 'rgba(16, 185, 129, 0.15)',
+      border: `1px solid ${completingReminder.reminder_type === 'km' ? '#0891b2' : '#10b981'}`,
+      borderRadius: '10px',
+      marginBottom: '20px',
+    }}>
+      <p style={{ fontWeight: 'bold', fontSize: '1rem', marginBottom: '6px', color: theme === 'light' ? '#111827' : 'white' }}>
+        {completingReminder.machine_name}
+      </p>
+      <p style={{ color: theme === 'light' ? '#374151' : '#9ca3af', fontSize: '0.875rem' }}>
+        {completingReminder.reminder_type === 'km'
+          ? `Current: ${completingReminder.currentKm?.toFixed(1)} km`
+          : `Current: ${completingReminder.currentHours?.toFixed(1)} hrs`}
+        &nbsp;·&nbsp;
+        Interval: every {completingReminder.reminder_type === 'km'
+          ? `${completingReminder.km_interval} km`
+          : `${completingReminder.hours_interval} hrs`}
+      </p>
+    </div>
+
+    {/* Question */}
+    {completeServiceForm.logService === null && (
+      <>
+        <p style={{
+          fontSize: '1.05rem',
+          fontWeight: '600',
+          marginBottom: '20px',
+          color: theme === 'light' ? '#111827' : 'white',
+          textAlign: 'center'
+        }}>
+          Would you like to log this service in the history?
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <button
+            onClick={() => setCompleteServiceForm(prev => ({ ...prev, logService: true }))}
+            style={{
+              padding: '16px',
+              background: 'linear-gradient(to right, #10b981, #06b6d4)',
+              border: 'none',
+              borderRadius: '10px',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              transition: 'opacity 0.2s ease'
+            }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+          >
+            📋 Yes — log it in service history
+          </button>
+          <button
+            onClick={() => handleCompleteReminderSubmit(false)}
+            style={{
+              padding: '16px',
+              background: theme === 'light' ? '#f3f4f6' : '#374151',
+              border: `1px solid ${theme === 'light' ? '#d1d5db' : '#4b5563'}`,
+              borderRadius: '10px',
+              color: theme === 'light' ? '#374151' : '#d1d5db',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              transition: 'opacity 0.2s ease'
+            }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+          >
+            ✓ Just mark complete
+          </button>
+        </div>
+      </>
+    )}
+
+    {/* Service log form */}
+    {completeServiceForm.logService === true && (
+      <>
+        <p style={{
+          fontSize: '0.875rem',
+          color: theme === 'light' ? '#374151' : '#9ca3af',
+          marginBottom: '16px'
+        }}>
+          Fill in the details below. Machine name and service type are pre-filled from the reminder.
+        </p>
+
+        {/* Machine name — read only */}
+        <div style={{ marginBottom: '12px' }}>
+          <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.8rem', marginBottom: '4px' }}>
+            Machine
+          </label>
+          <div style={{
+            padding: '10px 14px',
+            background: theme === 'light' ? '#f3f4f6' : '#1a2942',
+            border: `1px solid ${theme === 'light' ? '#d1d5db' : '#374151'}`,
+            borderRadius: '8px',
+            color: theme === 'light' ? '#374151' : '#9ca3af',
+            fontSize: '0.95rem'
+          }}>
+            {completingReminder.machine_name}
+          </div>
+        </div>
+
+        <div style={{ marginBottom: '12px' }}>
+          <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.8rem', marginBottom: '4px' }}>
+            Service Type
+          </label>
+          <input
+            style={{
+              ...styles.input,
+              marginBottom: 0
+            }}
+            value={completeServiceForm.serviceType}
+            onChange={e => setCompleteServiceForm(prev => ({ ...prev, serviceType: e.target.value }))}
+            placeholder="e.g. Oil Change, Filter Replacement"
+          />
+        </div>
+
+        <div style={{ marginBottom: '12px' }}>
+          <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.8rem', marginBottom: '4px' }}>
+            Date
+          </label>
+          <input
+            type="date"
+            style={{
+              ...styles.input,
+              marginBottom: 0,
+              fontFamily: 'inherit'
+            }}
+            value={completeServiceForm.date}
+            onChange={e => setCompleteServiceForm(prev => ({ ...prev, date: e.target.value }))}
+          />
+        </div>
+
+        <div style={{ marginBottom: '12px' }}>
+          <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.8rem', marginBottom: '4px' }}>
+            Technician
+          </label>
+          <input
+            style={{
+              ...styles.input,
+              marginBottom: 0
+            }}
+            value={completeServiceForm.technician}
+            onChange={e => setCompleteServiceForm(prev => ({ ...prev, technician: e.target.value }))}
+            placeholder="Who did the work?"
+          />
+        </div>
+
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.8rem', marginBottom: '4px' }}>
+            Notes
+          </label>
+          <textarea
+            style={{
+              ...styles.input,
+              marginBottom: 0,
+              minHeight: '100px',
+              resize: 'vertical',
+              fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif',
+              fontSize: '1rem'
+            }}
+            value={completeServiceForm.notes}
+            onChange={e => setCompleteServiceForm(prev => ({ ...prev, notes: e.target.value }))}
+            placeholder="What was done? Parts used? Anything to note for next time?"
+          />
+        </div>
+
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            onClick={() => handleCompleteReminderSubmit(true)}
+            style={{
+              flex: 1,
+              padding: '14px',
+              background: 'linear-gradient(to right, #10b981, #06b6d4)',
+              border: 'none',
+              borderRadius: '10px',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              transition: 'opacity 0.2s ease'
+            }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+          >
+            ✓ Save & Complete
+          </button>
+          <button
+            onClick={() => setCompleteServiceForm(prev => ({ ...prev, logService: null }))}
+            style={{
+              padding: '14px 20px',
+              background: theme === 'light' ? '#f3f4f6' : '#374151',
+              border: `1px solid ${theme === 'light' ? '#d1d5db' : '#4b5563'}`,
+              borderRadius: '10px',
+              color: theme === 'light' ? '#374151' : '#d1d5db',
+              cursor: 'pointer',
+              fontSize: '1rem'
+            }}
+          >
+            ← Back
+          </button>
+        </div>
+      </>
+    )}
+  </Modal>
+)}      
+      
 {/* Zoomable Image Viewer Modal */}
       {viewingImage && <ZoomableImageViewer 
   imageUrl={viewingImage} 
