@@ -209,7 +209,7 @@ const CATEGORY_TRACKING_TYPE = {
   'Land Improvement Equipment': 'hours',
   'Landscape Equipment': 'hours',
   'Lifts & Cranes': 'hours',
-  'Other': 'both',
+  'Other': 'none',
   'Spreaders': 'hours',
   'Spraying': 'hours',
   'Straight Cut/Pick-Up Headers': 'hours',
