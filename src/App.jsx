@@ -731,6 +731,7 @@ else {
 }
 
 setLastSync(new Date());
+setDataReady(true);
   } catch (error) {
     console.error('❌ CRITICAL Load error:', error);
     console.error('Error details:', JSON.stringify(error, null, 2));
@@ -3035,16 +3036,18 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
       </p>
     </div>
 
-<ServiceOverview
-  serviceReminders={serviceReminders}
-  machineHours={machineHours}
-  machineKm={machineKm}
-  theme={theme}
-  onReminderClick={() => {
-    setActiveTab('machinery');
-    setShowRemindersPanel(true);
-  }}
-/>
+{dataReady && (
+  <ServiceOverview
+    serviceReminders={serviceReminders}
+    machineHours={machineHours}
+    machineKm={machineKm}
+    theme={theme}
+    onReminderClick={() => {
+      setActiveTab('machinery');
+      setShowRemindersPanel(true);
+    }}
+  />
+)}
     
   {/* General Features Flip Card - Full Width */}
 <div
