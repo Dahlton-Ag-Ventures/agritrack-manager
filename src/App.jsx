@@ -7657,9 +7657,9 @@ const dueReminders = trackType === 'km'
       onChange={(e) => setSelectedMachineForReminder(e.target.value)}
     >
      <option value="">-- Select Machine --</option>
-      {machinery.filter(m => { const t = getTrackingType(m); return t === 'km' || t === 'both'; }).map(machine => (
+     {machinery.filter(m => { const t = getTrackingType(m); return t === 'hours' || t === 'both'; }).map(machine => (
         <option key={machine.id} value={machine.name}>
-          {machine.name}
+          {machine.name} (Current: {getMachineHours(machine.name).toFixed(1)} hrs)
         </option>
       ))}
     </select>
@@ -7763,9 +7763,9 @@ const dueReminders = trackType === 'km'
       onChange={(e) => setSelectedMachineForReminder(e.target.value)}
     >
       <option value="">-- Select Machine --</option>
-      {machinery.filter(m => { const t = getTrackingType(m); return t === 'hours' || t === 'both'; }).map(machine => (
+{machinery.filter(m => { const t = getTrackingType(m); return t === 'km' || t === 'both'; }).map(machine => (
         <option key={machine.id} value={machine.name}>
-          {machine.name}
+          {machine.name} (Current: {getMachineKm(machine.name).toFixed(1)} km)
         </option>
       ))}
     </select>
