@@ -277,7 +277,8 @@ const toggleCard = (cardId) => {
   const [settingsCollapsed, setSettingsCollapsed] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [realtimeStatus, setRealtimeStatus] = useState('connecting');
-  const [lastSync, setLastSync] = useState(null);
+  const [lastSync, setLastSync] = useState(false);
+  const [dataReady, setDataReady] = useState(false);;
 
   const [showInventoryModal, setShowInventoryModal] = useState(false);
   const [showMachineryModal, setShowMachineryModal] = useState(false);
