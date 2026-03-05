@@ -4194,29 +4194,8 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
         </button>
       </div>
       {userRole !== 'employee' && (
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-  {getFilteredAndSortedMachinery().some(m => { const t = getTrackingType(m); return t === 'hours' || t === 'both'; }) && (
-    <>
-      <button
-        onClick={() => setShowHoursModal(true)}
-        style={{
-          padding: '10px 20px',
-          background: theme === 'light' ? '#eff6ff' : '#8b5cf6',
-          border: theme === 'light' ? '1px solid #bfdbfe' : 'none',
-          borderRadius: '8px',
-          color: theme === 'light' ? '#1e3a5f' : 'white',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          fontSize: '0.875rem',
-          transition: 'all 0.2s ease'
-        }}
-        onMouseEnter={(e) => e.target.style.background = theme === 'light' ? '#dbeafe' : '#7c3aed'}
-        onMouseLeave={(e) => e.target.style.background = theme === 'light' ? '#eff6ff' : '#8b5cf6'}
-      >
-        <Plus size={16} /> Add Hours
-      </button>
+  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+    {getFilteredAndSortedMachinery().some(m => { const t = getTrackingType(m); return t === 'hours' || t === 'both'; }) && (
       <button
         onClick={() => setShowReminderModal(true)}
         style={{
@@ -4237,30 +4216,8 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
       >
         <Plus size={16} /> Create Hour Reminder
       </button>
-    </>
-  )}
-  {getFilteredAndSortedMachinery().some(m => { const t = getTrackingType(m); return t === 'km' || t === 'both'; }) && (
-    <>
-      <button
-        onClick={() => setShowKmModal(true)}
-        style={{
-          padding: '10px 20px',
-          background: theme === 'light' ? '#ecfeff' : '#0891b2',
-          border: theme === 'light' ? '1px solid #a5f3fc' : 'none',
-          borderRadius: '8px',
-          color: theme === 'light' ? '#164e63' : 'white',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          fontSize: '0.875rem',
-          transition: 'all 0.2s ease'
-        }}
-        onMouseEnter={(e) => e.target.style.background = theme === 'light' ? '#cffafe' : '#0e7490'}
-        onMouseLeave={(e) => e.target.style.background = theme === 'light' ? '#ecfeff' : '#0891b2'}
-      >
-        <Plus size={16} /> Add Kilometres
-      </button>
+    )}
+    {getFilteredAndSortedMachinery().some(m => { const t = getTrackingType(m); return t === 'km' || t === 'both'; }) && (
       <button
         onClick={() => setShowKmReminderModal(true)}
         style={{
@@ -4281,10 +4238,9 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
       >
         <Plus size={16} /> Create km Reminder
       </button>
-    </>
-  )}
-</div>
-      )}
+    )}
+  </div>
+)}
     </div>
 
 {/* === HOURS BANNER CARD === */}
@@ -7488,80 +7444,6 @@ const dueReminders = trackType === 'km'
             </button>
           </Modal>
         )}
-      {/* Add Hours Modal */}
-{showHoursModal && (
-  <Modal title="Add Machine Hours" theme={theme} onClose={() => {
-    setShowHoursModal(false);
-    setHoursForm({ machineName: '', hoursToAdd: '' });
-  }}>
-    <select
-      style={styles.input}
-      value={hoursForm.machineName}
-      onChange={(e) => setHoursForm({ ...hoursForm, machineName: e.target.value })}
-    >
-      <option value="">-- Select Machine --</option>
-     {machinery.filter(m => {
-  const t = CATEGORY_TRACKING_TYPE[m.category] || 'hours';
-  return t === 'hours' || t === 'both';
-}).map(machine => (
-  <option key={machine.id} value={machine.name}>
-    {machine.name} (Current: {getMachineHours(machine.name).toFixed(1)} hrs)
-  </option>
-))}
-    </select>
-    <input
-      style={styles.input}
-      type="number"
-      step="0.1"
-      placeholder="Hours to add"
-      value={hoursForm.hoursToAdd}
-      onChange={(e) => setHoursForm({ ...hoursForm, hoursToAdd: e.target.value })}
-    />
-    <div style={{ display: 'flex', gap: '12px' }}>
-      <button onClick={addMachineHours} style={styles.primaryButton}>
-        Add Hours
-      </button>
-      <button onClick={() => setShowHoursModal(false)} style={styles.secondaryButton}>
-        Cancel
-      </button>
-    </div>
-  </Modal>
-)}
-
-{showKmModal && (
-  <Modal title="Add Machine Kilometres" theme={theme} onClose={() => {
-    setShowKmModal(false);
-    setKmForm({ machineName: '', kmToAdd: '' });
-  }}>
-    <select
-      style={styles.input}
-      value={kmForm.machineName}
-      onChange={(e) => setKmForm({ ...kmForm, machineName: e.target.value })}
-    >
-      <option value="">-- Select Machine --</option>
-{machinery.filter(m => {
-  const t = CATEGORY_TRACKING_TYPE[m.category] || 'hours';
-  return t === 'km' || t === 'both';
-}).map(machine => (
-  <option key={machine.id} value={machine.name}>
-    {machine.name} (Current: {getMachineKm(machine.name).toFixed(1)} km)
-  </option>
-))}
-    </select>
-    <input
-      style={styles.input}
-      type="number"
-      step="0.1"
-      placeholder="Kilometres to add"
-      value={kmForm.kmToAdd}
-      onChange={(e) => setKmForm({ ...kmForm, kmToAdd: e.target.value })}
-    />
-    <div style={{ display: 'flex', gap: '12px' }}>
-      <button onClick={addMachineKm} style={styles.primaryButton}>Add km</button>
-      <button onClick={() => setShowKmModal(false)} style={styles.secondaryButton}>Cancel</button>
-    </div>
-  </Modal>
-)}
 
 {showKmDetailModal && selectedKmRecord && (
   <Modal title={selectedKmRecord.machine.name} theme={theme} onClose={() => setShowKmDetailModal(false)}>
