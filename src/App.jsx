@@ -7822,26 +7822,57 @@ const dueReminders = trackType === 'km'
                   </div>
                 </div>
               </div>
-              <button
-                onClick={() => restoreReminder(reminder.id)}
-                disabled={restoringReminder === reminder.id}
-                style={{
-                  padding: '10px 16px',
-                  background: restoringReminder === reminder.id ? '#6b7280' : 'linear-gradient(to right, #10b981, #06b6d4)',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: 'white',
-                  cursor: restoringReminder === reminder.id ? 'not-allowed' : 'pointer',
-                  fontSize: '0.875rem',
-                  fontWeight: 'bold',
-                  whiteSpace: 'nowrap',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                {restoringReminder === reminder.id ? '...' : '↺ Restore'}
-              </button>
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+  <button
+    onClick={() => restoreReminder(reminder.id)}
+    disabled={restoringReminder === reminder.id}
+    style={{
+      padding: '10px 16px',
+      background: restoringReminder === reminder.id ? '#6b7280' : 'linear-gradient(to right, #10b981, #06b6d4)',
+      border: 'none',
+      borderRadius: '8px',
+      color: 'white',
+      cursor: restoringReminder === reminder.id ? 'not-allowed' : 'pointer',
+      fontSize: '0.875rem',
+      fontWeight: 'bold',
+      whiteSpace: 'nowrap',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px'
+    }}
+  >
+    {restoringReminder === reminder.id ? '...' : '↺ Restore'}
+  </button>
+  <button
+    onClick={async () => {
+      if (!confirm(`Permanently delete "${reminder.reminder_name}" for ${reminder.machine_name}? This cannot be undone.`)) return;
+      try {
+        const { error } = await supabase.from('service_reminders').delete().eq('id', reminder.id);
+        if (error) { alert('Failed to delete: ' + error.message); return; }
+        setDeletedReminders(prev => prev.filter(r => r.id !== reminder.id));
+      } catch (error) {
+        alert('Failed to delete reminder');
+      }
+    }}
+    disabled={restoringReminder === reminder.id}
+    style={{
+      padding: '10px 16px',
+      background: restoringReminder === reminder.id ? '#6b7280' : '#7f1d1d',
+      border: 'none',
+      borderRadius: '8px',
+      color: 'white',
+      cursor: restoringReminder === reminder.id ? 'not-allowed' : 'pointer',
+      fontSize: '0.875rem',
+      fontWeight: 'bold',
+      whiteSpace: 'nowrap',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px'
+    }}
+  >
+    🗑️ Delete
+  </button>
+</div>
             </div>
           </div>
         ))}
