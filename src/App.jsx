@@ -2920,7 +2920,7 @@ return (
 )}
 
         <div style={styles.tabs}>
-  {['home', 'inventory', 'machinery', 'service'].map(tab => (
+{['dashboard', 'inventory', 'machinery', 'service'].map(tab => (
     <button
       key={tab}
       onClick={() => {
@@ -2934,7 +2934,7 @@ return (
         background: activeTab === tab ? 'linear-gradient(to right, #10b981, #06b6d4)' : currentTheme.tabInactive
       }}
     >
-      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+      {tab === 'dashboard' ? 'Dashboard' : tab.charAt(0).toUpperCase() + tab.slice(1)}
       {!loading && tab === 'inventory' && ` (${inventory.length})`}
       {!loading && tab === 'machinery' && ` (${machinery.length})`}
       {!loading && tab === 'service' && ` (${serviceHistory.length})`}
@@ -3001,7 +3001,7 @@ return (
           )}
         </div>
 
-{activeTab === 'home' && (
+{activeTab === 'dashboard' && (
   <div style={styles.homeContainer}>
     {/* Welcome Header */}
     <div style={{ 
@@ -3035,7 +3035,17 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
       </p>
     </div>
 
-
+<ServiceOverview
+  serviceReminders={serviceReminders}
+  machineHours={machineHours}
+  machineKm={machineKm}
+  theme={theme}
+  onReminderClick={() => {
+    setActiveTab('machinery');
+    setShowRemindersPanel(true);
+  }}
+/>
+    
   {/* General Features Flip Card - Full Width */}
 <div
 className="flip-card"
@@ -8143,6 +8153,260 @@ const dueReminders = trackType === 'km'
       </div>
     </div>
   </>
+  );
+}
+
+function ServiceOverview({ serviceReminders, machineHours, machineKm, theme, onReminderClick }) {
+  const getHours = (name) => {
+    const r = machineHours.find(h => h.machine_name === name);
+    return r ? parseFloat(r.current_hours || 0) : 0;
+  };
+  const getKm = (name) => {
+    const r = machineKm.find(h => h.machine_name === name);
+    return r ? parseFloat(r.current_km || 0) : 0;
+  };
+
+  const active = serviceReminders.filter(r => !r.deleted_at);
+
+  const withStatus = active.map(r => {
+    const isKm = r.reminder_type === 'km';
+    const current = isKm ? getKm(r.machine_name) : getHours(r.machine_name);
+    const last = isKm ? parseFloat(r.last_service_km || 0) : parseFloat(r.last_service_hours || 0);
+    const interval = isKm ? parseFloat(r.km_interval || 0) : parseFloat(r.hours_interval || 0);
+    const used = current - last;
+    const progress = interval > 0 ? Math.min(100, Math.round((used / interval) * 100)) : 0;
+    const remaining = interval - used;
+    const isOverdue = used >= interval;
+    const isDueSoon = !isOverdue && remaining <= interval * 0.15;
+    const priority = isOverdue ? 'overdue' : isDueSoon ? 'due-soon' : 'upcoming';
+    const overageLabel = isOverdue
+      ? `${Math.abs(remaining).toFixed(0)} ${isKm ? 'km' : 'hrs'} over`
+      : `${remaining.toFixed(0)} ${isKm ? 'km' : 'hrs'} remaining`;
+
+    return { ...r, current, progress, remaining, isOverdue, isDueSoon, priority, overageLabel, isKm };
+  });
+
+  const sorted = [
+    ...withStatus.filter(r => r.priority === 'overdue'),
+    ...withStatus.filter(r => r.priority === 'due-soon'),
+    ...withStatus.filter(r => r.priority === 'upcoming'),
+  ];
+
+  const overdueCount = sorted.filter(r => r.priority === 'overdue').length;
+  const dueSoonCount = sorted.filter(r => r.priority === 'due-soon').length;
+  const upcomingCount = sorted.filter(r => r.priority === 'upcoming').length;
+  const allClear = overdueCount === 0 && dueSoonCount === 0;
+
+  const priorityConfig = {
+    overdue:  { label: 'OVERDUE',  color: '#ef4444', bg: theme === 'light' ? 'rgba(239,68,68,0.08)'   : 'rgba(239,68,68,0.12)',   border: theme === 'light' ? '#fca5a5' : 'rgba(239,68,68,0.4)'   },
+    'due-soon':{ label: 'DUE SOON', color: '#f59e0b', bg: theme === 'light' ? 'rgba(245,158,11,0.08)'  : 'rgba(245,158,11,0.12)',  border: theme === 'light' ? '#fcd34d' : 'rgba(245,158,11,0.4)'  },
+    upcoming:  { label: 'UPCOMING', color: '#10b981', bg: theme === 'light' ? 'rgba(16,185,129,0.06)'  : 'rgba(16,185,129,0.10)',  border: theme === 'light' ? '#6ee7b7' : 'rgba(16,185,129,0.3)'  },
+  };
+
+  const cardBg   = theme === 'light' ? '#ffffff' : '#1e3a5f';
+  const cardBdr  = theme === 'light' ? '#e5e7eb' : '#2563eb';
+  const textMain = theme === 'light' ? '#111827' : '#f0fdf4';
+  const textSub  = theme === 'light' ? '#6b7280' : '#9ca3af';
+
+  return (
+    <div style={{ marginBottom: 28 }}>
+      {/* Section header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: textMain, margin: 0 }}>
+          🔧 Service Overview
+        </h2>
+        {!allClear && (
+          <span style={{
+            padding: '2px 10px',
+            background: overdueCount > 0 ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)',
+            border: `1px solid ${overdueCount > 0 ? '#ef4444' : '#f59e0b'}`,
+            borderRadius: 99,
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            color: overdueCount > 0 ? '#ef4444' : '#f59e0b',
+            letterSpacing: '0.08em',
+          }}>
+            {overdueCount > 0 ? `${overdueCount} OVERDUE` : `${dueSoonCount} DUE SOON`}
+          </span>
+        )}
+      </div>
+
+      {/* All Clear state */}
+      {allClear && active.length > 0 && (
+        <div style={{
+          padding: '18px 20px',
+          background: theme === 'light' ? '#f0fdf4' : 'rgba(16,185,129,0.10)',
+          border: `1px solid ${theme === 'light' ? '#6ee7b7' : 'rgba(16,185,129,0.35)'}`,
+          borderRadius: 12,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 14,
+        }}>
+          <span style={{ fontSize: '1.6rem' }}>✅</span>
+          <div>
+            <p style={{ fontWeight: 700, color: '#10b981', margin: 0, fontSize: '0.95rem' }}>All Clear</p>
+            <p style={{ color: textSub, margin: 0, fontSize: '0.8rem', marginTop: 2 }}>
+              {upcomingCount > 0
+                ? `${upcomingCount} reminder${upcomingCount !== 1 ? 's' : ''} active — nothing due yet.`
+                : 'No service reminders are due. You\'re all caught up.'}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* No reminders at all */}
+      {active.length === 0 && (
+        <div style={{
+          padding: '18px 20px',
+          background: cardBg,
+          border: `1px solid ${cardBdr}`,
+          borderRadius: 12,
+          color: textSub,
+          fontSize: '0.875rem',
+        }}>
+          No service reminders set yet. Add reminders in the Machinery tab.
+        </div>
+      )}
+
+      {/* Summary tiles — only show when there's something to report */}
+      {!allClear && (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: 10,
+          marginBottom: 14,
+        }}>
+          {[
+            { key: 'overdue',   label: 'Overdue',  count: overdueCount  },
+            { key: 'due-soon',  label: 'Due Soon', count: dueSoonCount  },
+            { key: 'upcoming',  label: 'Upcoming', count: upcomingCount },
+          ].map(({ key, label, count }) => {
+            const p = priorityConfig[key];
+            return (
+              <div key={key} style={{
+                background: count > 0 ? p.bg : (theme === 'light' ? '#f9fafb' : 'rgba(255,255,255,0.02)'),
+                border: `1px solid ${count > 0 ? p.border : cardBdr}`,
+                borderRadius: 10,
+                padding: '14px 16px',
+              }}>
+                <div style={{
+                  fontSize: '1.8rem', fontWeight: 800,
+                  color: count > 0 ? p.color : textSub,
+                  lineHeight: 1, marginBottom: 4,
+                }}>
+                  {String(count).padStart(2, '0')}
+                </div>
+                <div style={{
+                  fontSize: '0.7rem', letterSpacing: '0.1em',
+                  color: count > 0 ? p.color : textSub,
+                  fontWeight: 600, textTransform: 'uppercase',
+                }}>
+                  {label}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Work queue rows — only overdue + due-soon */}
+      {!allClear && sorted.filter(r => r.priority !== 'upcoming').map((r, i) => {
+        const p = priorityConfig[r.priority];
+        return (
+          <div
+            key={r.id}
+            onClick={() => onReminderClick()}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 14,
+              padding: '13px 16px',
+              background: p.bg,
+              border: `1px solid ${p.border}`,
+              borderRadius: 10,
+              marginBottom: 8,
+              cursor: 'pointer',
+              transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = `0 6px 20px ${p.bg}`;
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            {/* Priority dot */}
+            <div style={{
+              width: 8, height: 8, borderRadius: '50%',
+              background: p.color, flexShrink: 0,
+            }} />
+
+            {/* Main info */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                flexWrap: 'wrap', marginBottom: 4,
+              }}>
+                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: textMain }}>
+                  {r.machine_name}
+                </span>
+                <span style={{
+                  fontSize: '0.75rem', color: textSub,
+                }}>
+                  — {r.reminder_name}
+                </span>
+              </div>
+              {/* Progress bar */}
+              <div style={{
+                height: 4, borderRadius: 99,
+                background: theme === 'light' ? '#e5e7eb' : 'rgba(255,255,255,0.08)',
+                overflow: 'hidden',
+              }}>
+                <div style={{
+                  height: '100%',
+                  width: `${r.progress}%`,
+                  background: p.color,
+                  borderRadius: 99,
+                  transition: 'width 0.5s ease',
+                }} />
+              </div>
+            </div>
+
+            {/* Right: status + metric */}
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <div style={{
+                fontSize: '0.68rem', fontWeight: 700,
+                color: p.color, letterSpacing: '0.08em',
+                marginBottom: 1,
+              }}>
+                {p.label}
+              </div>
+              <div style={{ fontSize: '0.8rem', color: textMain, fontWeight: 600 }}>
+                {r.overageLabel}
+              </div>
+              <div style={{ fontSize: '0.68rem', color: textSub }}>
+                {r.current.toFixed(1)} {r.isKm ? 'km' : 'hrs'} current
+              </div>
+            </div>
+
+            {/* Arrow */}
+            <div style={{ color: p.color, fontSize: '0.9rem', flexShrink: 0 }}>→</div>
+          </div>
+        );
+      })}
+
+      {/* Upcoming count hint when all clear */}
+      {!allClear && upcomingCount > 0 && (
+        <p style={{
+          color: textSub, fontSize: '0.78rem',
+          marginTop: 4, paddingLeft: 4,
+        }}>
+          + {upcomingCount} upcoming reminder{upcomingCount !== 1 ? 's' : ''} not yet due
+        </p>
+      )}
+    </div>
   );
 }
 
