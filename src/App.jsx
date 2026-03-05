@@ -5206,16 +5206,35 @@ const dueReminders = trackType === 'km'
   })()}
 </div>
                 <div style={styles.itemDetails}>
-                  <div>
-                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>VIN/Serial</p>
-                    <p>{item.vinSerial || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Category</p>
-                    <p>{item.category || 'N/A'}</p>
-                  </div>
-                </div>
-
+  <div>
+    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>VIN/Serial</p>
+    <p>{item.vinSerial || 'N/A'}</p>
+  </div>
+  <div>
+    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Category</p>
+    <p>{item.category || 'N/A'}</p>
+  </div>
+  {(() => {
+    const t = CATEGORY_TRACKING_TYPE[item.category] || 'hours';
+    if (t === 'hours' || t === 'both') {
+      return (
+        <div>
+          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Hours</p>
+          <p style={{ fontWeight: 'bold', color: '#10b981' }}>{getMachineHours(item.name).toFixed(1)} hrs</p>
+        </div>
+      );
+    }
+    if (t === 'km' || t === 'both') {
+      return (
+        <div>
+          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Kilometres</p>
+          <p style={{ fontWeight: 'bold', color: '#0891b2' }}>{getMachineKm(item.name).toFixed(1)} km</p>
+        </div>
+      );
+    }
+    return null;
+  })()}
+</div>
               {item.requirements ? (
                 <div style={{
                   marginTop: '12px',
