@@ -3035,6 +3035,9 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
       </p>
     </div>
 
+<div style={{color: 'red', fontSize: '12px', marginBottom: '8px'}}>
+  DEBUG: reminders={serviceReminders.length} | hours={machineHours.length} | km={machineKm.length}
+</div>
 <ServiceOverview
   serviceReminders={serviceReminders}
   machineHours={machineHours}
