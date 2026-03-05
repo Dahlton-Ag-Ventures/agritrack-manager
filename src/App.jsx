@@ -1584,21 +1584,25 @@ const addMachineHours = async () => {
     const existingRecord = machineHours.find(h => h.machine_name === hoursForm.machineName);
     
     if (existingRecord) {
-      // Update existing
-      const newTotal = parseFloat(existingRecord.current_hours) + hoursToAdd;
-      await supabase.from('machine_hours').update({
-        current_hours: newTotal,
-        updated_at: new Date().toISOString()
-      }).eq('id', existingRecord.id);
-    } else {
-      // Create new
-      await supabase.from('machine_hours').insert([{
-        id: Date.now().toString(),
-        machine_name: hoursForm.machineName,
-        current_hours: hoursToAdd,
-        user_id: user.id
-      }]);
-    }
+  const newTotal = parseFloat(existingRecord.current_hours) + hoursToAdd;
+  await supabase.from('machine_hours').update({
+    current_hours: newTotal,
+    updated_at: new Date().toISOString()
+  }).eq('id', existingRecord.id);
+  setMachineHours(prev => prev.map(item =>
+    item.id === existingRecord.id ? { ...item, current_hours: newTotal } : item
+  ));
+} else {
+  const { data, error: insertError } = await supabase.from('machine_hours').insert([{
+    id: Date.now().toString(),
+    machine_name: hoursForm.machineName,
+    current_hours: hoursToAdd,
+    user_id: user.id
+  }]).select();
+  if (!insertError && data?.[0]) {
+    setMachineHours(prev => [...prev, data[0]]);
+  }
+}
 
     setHoursForm({ machineName: '', hoursToAdd: '' });
     setShowHoursModal(false);
