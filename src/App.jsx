@@ -278,7 +278,6 @@ const toggleCard = (cardId) => {
   const [syncing, setSyncing] = useState(false);
   const [realtimeStatus, setRealtimeStatus] = useState('connecting');
   const [lastSync, setLastSync] = useState(false);
-  const [dataReady, setDataReady] = useState(false);;
 
   const [showInventoryModal, setShowInventoryModal] = useState(false);
   const [showMachineryModal, setShowMachineryModal] = useState(false);
@@ -732,7 +731,6 @@ else {
 }
 
 setLastSync(new Date());
-setDataReady(true);
   } catch (error) {
     console.error('❌ CRITICAL Load error:', error);
     console.error('Error details:', JSON.stringify(error, null, 2));
@@ -3037,18 +3035,16 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
       </p>
     </div>
 
-{dataReady && (
-  <ServiceOverview
-    serviceReminders={serviceReminders}
-    machineHours={machineHours}
-    machineKm={machineKm}
-    theme={theme}
-    onReminderClick={() => {
-      setActiveTab('machinery');
-      setShowRemindersPanel(true);
-    }}
-  />
-)}
+<ServiceOverview
+  serviceReminders={serviceReminders}
+  machineHours={machineHours}
+  machineKm={machineKm}
+  theme={theme}
+  onReminderClick={() => {
+    setActiveTab('machinery');
+    setShowRemindersPanel(true);
+  }}
+/>
     
   {/* General Features Flip Card - Full Width */}
 <div
