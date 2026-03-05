@@ -7658,7 +7658,7 @@ const dueReminders = trackType === 'km'
     >
      <option value="">-- Select Machine --</option>
 {machinery.filter(m => {
-  const t = m.tracking_type || CATEGORY_TRACKING_TYPE[m.category] || 'hours';
+  const t = CATEGORY_TRACKING_TYPE[m.category] || 'hours';
   return t === 'hours' || t === 'both';
 }).map(machine => (
   <option key={machine.id} value={machine.name}>
@@ -7767,7 +7767,7 @@ const dueReminders = trackType === 'km'
     >
       <option value="">-- Select Machine --</option>
 {machinery.filter(m => {
-  const t = m.tracking_type || CATEGORY_TRACKING_TYPE[m.category] || 'hours';
+  const t = CATEGORY_TRACKING_TYPE[m.category] || 'hours';
   return t === 'km' || t === 'both';
 }).map(machine => (
   <option key={machine.id} value={machine.name}>
