@@ -1604,9 +1604,17 @@ const addMachineHours = async () => {
   }
 }
 
-    setHoursForm({ machineName: '', hoursToAdd: '' });
-    setShowHoursModal(false);
-    alert(`Added ${hoursToAdd} hours to ${hoursForm.machineName}`);
+setHoursForm({ machineName: '', hoursToAdd: '' });
+setShowHoursModal(false);
+
+// Refresh hours from DB to ensure dropdown stays current
+const { data: freshHours } = await supabase
+  .from('machine_hours')
+  .select('*')
+  .order('machine_name', { ascending: true });
+if (freshHours) setMachineHours(freshHours);
+
+alert(`Added ${hoursToAdd} hours to ${hoursForm.machineName}`);
   } catch (error) {
     console.error('Error adding hours:', error);
     alert('Failed to add hours');
@@ -1880,9 +1888,16 @@ const addMachineKm = async () => {
         user_id: user.id
       }]);
     }
-    setKmForm({ machineName: '', kmToAdd: '' });
-    setShowKmModal(false);
-    alert(`Added ${kmToAdd} km to ${kmForm.machineName}`);
+setKmForm({ machineName: '', kmToAdd: '' });
+setShowKmModal(false);
+
+const { data: freshKm } = await supabase
+  .from('machine_km')
+  .select('*')
+  .order('machine_name', { ascending: true });
+if (freshKm) setMachineKm(freshKm);
+
+alert(`Added ${kmToAdd} km to ${kmForm.machineName}`);
   } catch (error) {
     alert('Failed to add km');
   }
