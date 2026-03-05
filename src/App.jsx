@@ -270,7 +270,7 @@ const toggleCard = (cardId) => {
   setFlippedCards(prev => ({ ...prev, [cardId]: !prev[cardId] }));
 };
   
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [inventory, setInventory] = useState([]);
   const [machinery, setMachinery] = useState([]);
   const [serviceHistory, setServiceHistory] = useState([]);
