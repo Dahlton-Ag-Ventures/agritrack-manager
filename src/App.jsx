@@ -1625,16 +1625,33 @@ const createReminder = async () => {
 
     const currentHours = getMachineHours(selectedMachineForReminder);
 
-    await supabase.from('service_reminders').insert([{
-      id: Date.now().toString(),
-      machine_name: selectedMachineForReminder,
-      reminder_name: reminderForm.reminderName,
-      reminder_type: 'hours',
-      hours_interval: interval,
-      last_service_hours: currentHours,
-      user_id: user.id
-    }]);
+    const existing = serviceReminders.find(r =>
+  r.machine_name === selectedMachineForReminder &&
+  r.reminder_name === reminderForm.reminderName &&
+  r.reminder_type === 'hours' &&
+  !r.deleted_at
+);
 
+if (existing) {
+  alert(`A reminder called "${reminderForm.reminderName}" already exists for ${selectedMachineForReminder}.`);
+  return;
+}
+
+const { error: insertError } = await supabase.from('service_reminders').insert([{
+  machine_name: selectedMachineForReminder,
+  reminder_name: reminderForm.reminderName,
+  reminder_type: 'hours',
+  hours_interval: interval,
+  last_service_hours: currentHours,
+  is_active: true,
+  user_id: user.id
+}]);
+
+if (insertError) {
+  console.error('❌ createReminder error:', insertError);
+  alert('Failed to create reminder: ' + insertError.message);
+  return;
+}
     setReminderForm({ reminderName: '', hoursInterval: '' });
     setSelectedMachineForReminder('');
     setShowReminderModal(false);
