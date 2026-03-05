@@ -2076,7 +2076,7 @@ loginCard: {
       background: 'rgba(239, 68, 68, 0.2)',
       border: '1px solid #ef4444',
       borderRadius: '8px',
-      color: '#ef4444',
+      color: '#111827',
       fontSize: '0.875rem',
     },
 container: {
@@ -7888,7 +7888,7 @@ const dueReminders = trackType === 'km'
         border: '1px solid #fbbf24',
         borderRadius: '8px',
         fontSize: '0.85rem',
-        color: '#fbbf24',
+        color: '#111827',
         display: 'flex',
         alignItems: 'flex-start',
         gap: '8px'
