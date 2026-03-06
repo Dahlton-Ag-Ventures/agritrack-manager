@@ -255,6 +255,9 @@ export default function App() {
   const [showDeletedRemindersModal, setShowDeletedRemindersModal] = useState(false);
   const [deletedReminders, setDeletedReminders] = useState([]);
   const [restoringReminder, setRestoringReminder] = useState(null);
+  const [restoreChoice, setRestoreChoice] = useState(null); // 'fresh' | 'original'
+  const [showRestoreChoiceModal, setShowRestoreChoiceModal] = useState(false);
+  const [pendingRestoreReminder, setPendingRestoreReminder] = useState(null);
   const [completeServiceForm, setCompleteServiceForm] = useState({
   logService: null,
   serviceType: '',
@@ -1781,16 +1784,25 @@ const loadDeletedReminders = async () => {
   }
 };
 
-const restoreReminder = async (reminderId) => {
-  try {
-    setRestoringReminder(reminderId);
-    const reminder = deletedReminders.find(r => r.id === reminderId);
-    if (!reminder) return;
+const restoreReminder = (reminderId) => {
+  const reminder = deletedReminders.find(r => r.id === reminderId);
+  if (!reminder) return;
+  setPendingRestoreReminder(reminder);
+  setRestoreChoice(null);
+  setShowRestoreChoiceModal(true);
+};
 
+const confirmRestoreReminder = async () => {
+  if (!pendingRestoreReminder || !restoreChoice) return;
+  const reminder = pendingRestoreReminder;
+  try {
+    setRestoringReminder(reminder.id);
     const isKm = reminder.reminder_type === 'km';
-    const currentMetric = isKm
-      ? getMachineKm(reminder.machine_name)
-      : getMachineHours(reminder.machine_name);
+    const currentMetric = isKm ? getMachineKm(reminder.machine_name) : getMachineHours(reminder.machine_name);
+
+    const lastMetric = restoreChoice === 'fresh'
+      ? currentMetric
+      : (isKm ? parseFloat(reminder.last_service_km || 0) : parseFloat(reminder.last_service_hours || 0));
 
     const updates = {
       deleted_at: null,
@@ -1798,28 +1810,31 @@ const restoreReminder = async (reminderId) => {
       completed_at: null,
       completed_at_metric: null,
       ...(isKm
-        ? { last_service_km: currentMetric }
-        : { last_service_hours: currentMetric }
+        ? { last_service_km: lastMetric }
+        : { last_service_hours: lastMetric }
       )
     };
 
     const { error } = await supabase
       .from('service_reminders')
       .update(updates)
-      .eq('id', reminderId);
+      .eq('id', reminder.id);
 
     if (error) { alert('Failed to restore reminder: ' + error.message); return; }
 
     setServiceReminders(prev => {
-      const exists = prev.find(r => r.id === reminderId);
+      const exists = prev.find(r => r.id === reminder.id);
       if (exists) {
-        return prev.map(r => r.id === reminderId ? { ...r, ...updates } : r);
+        return prev.map(r => r.id === reminder.id ? { ...r, ...updates } : r);
       } else {
         return [...prev, { ...reminder, ...updates }];
       }
     });
 
-    setDeletedReminders(prev => prev.filter(r => r.id !== reminderId));
+    setDeletedReminders(prev => prev.filter(r => r.id !== reminder.id));
+    setShowRestoreChoiceModal(false);
+    setPendingRestoreReminder(null);
+    setRestoreChoice(null);
     setRestoringReminder(null);
 
   } catch (error) {
@@ -7784,9 +7799,9 @@ const dueReminders = trackType === 'km'
                 </div>
               </div>
              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-  <button
-    onClick={() => restoreReminder(reminder.id)}
-    disabled={restoringReminder === reminder.id}
+<button
+  onClick={() => restoreReminder(reminder.id)}
+  disabled={restoringReminder === reminder.id}
     style={{
       padding: '10px 16px',
       background: restoringReminder === reminder.id ? '#6b7280' : 'linear-gradient(to right, #10b981, #06b6d4)',
@@ -7840,24 +7855,6 @@ const dueReminders = trackType === 'km'
       </div>
     )}
 
-    {/* Warning message shown after restore */}
-    {deletedReminders.length < (deletedReminders.length + 1) && restoringReminder === null && (
-      <div style={{
-        marginTop: '16px',
-        padding: '12px 16px',
-        background: 'rgba(251, 191, 36, 0.15)',
-        border: '1px solid #fbbf24',
-        borderRadius: '8px',
-        fontSize: '0.85rem',
-        color: '#111827',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '8px'
-      }}>
-        <span style={{ fontSize: '1rem', flexShrink: 0 }}>⚠️</span>
-        <span>Restored reminders are reset to current hours/km. Make sure the service interval is still correct before relying on it.</span>
-      </div>
-    )}
   </Modal>
 )}
       
@@ -8087,6 +8084,150 @@ const dueReminders = trackType === 'km'
     )}
   </Modal>
 )}      
+
+{showRestoreChoiceModal && pendingRestoreReminder && (() => {
+  const reminder = pendingRestoreReminder;
+  const isKm = reminder.reminder_type === 'km';
+  const currentMetric = isKm ? getMachineKm(reminder.machine_name) : getMachineHours(reminder.machine_name);
+  const lastMetric = isKm ? parseFloat(reminder.last_service_km || 0) : parseFloat(reminder.last_service_hours || 0);
+  const interval = isKm ? parseFloat(reminder.km_interval || 0) : parseFloat(reminder.hours_interval || 0);
+  const unit = isKm ? 'km' : 'hrs';
+  const freshNextDue = currentMetric + interval;
+  const originalUsed = currentMetric - lastMetric;
+  const originalOverdue = originalUsed >= interval;
+  const originalOverageAmt = Math.abs(interval - originalUsed).toFixed(0);
+  const originalNextDue = lastMetric + interval;
+
+  const cardStyle = (active) => ({
+    padding: '16px 20px',
+    background: active ? 'rgba(16, 185, 129, 0.08)' : (theme === 'light' ? '#ffffff' : 'rgba(255,255,255,0.05)'),
+    border: active ? '2px solid #10b981' : `2px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+    borderRadius: 12,
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: 14,
+  });
+
+  return (
+    <Modal
+      title="↺ Restore Reminder"
+      theme={theme}
+      onClose={() => {
+        setShowRestoreChoiceModal(false);
+        setPendingRestoreReminder(null);
+        setRestoreChoice(null);
+      }}
+    >
+      {/* Machine info bar */}
+      <div style={{
+        padding: '12px 16px',
+        background: isKm ? 'rgba(8,145,178,0.1)' : 'rgba(16,185,129,0.1)',
+        border: `1px solid ${isKm ? '#0891b2' : '#10b981'}`,
+        borderRadius: 10,
+        marginBottom: 20,
+        display: 'flex',
+        gap: 24,
+        flexWrap: 'wrap',
+      }}>
+        <div>
+          <p style={{ color: '#9ca3af', fontSize: '0.75rem', margin: 0 }}>Machine</p>
+          <p style={{ fontWeight: 700, color: currentTheme.text, fontSize: '0.95rem', margin: 0 }}>{reminder.machine_name}</p>
+        </div>
+        <div>
+          <p style={{ color: '#9ca3af', fontSize: '0.75rem', margin: 0 }}>Reminder</p>
+          <p style={{ fontWeight: 700, color: currentTheme.text, fontSize: '0.95rem', margin: 0 }}>{reminder.reminder_name}</p>
+        </div>
+        <div>
+          <p style={{ color: '#9ca3af', fontSize: '0.75rem', margin: 0 }}>Current {isKm ? 'km' : 'Hours'}</p>
+          <p style={{ fontWeight: 700, color: currentTheme.text, fontSize: '0.95rem', margin: 0 }}>{currentMetric.toFixed(1)} {unit}</p>
+        </div>
+        <div>
+          <p style={{ color: '#9ca3af', fontSize: '0.75rem', margin: 0 }}>Last Serviced At</p>
+          <p style={{ fontWeight: 700, color: currentTheme.text, fontSize: '0.95rem', margin: 0 }}>{lastMetric.toFixed(1)} {unit}</p>
+        </div>
+        <div>
+          <p style={{ color: '#9ca3af', fontSize: '0.75rem', margin: 0 }}>Interval</p>
+          <p style={{ fontWeight: 700, color: currentTheme.text, fontSize: '0.95rem', margin: 0 }}>Every {interval} {unit}</p>
+        </div>
+      </div>
+
+      <p style={{ fontWeight: 600, fontSize: '1rem', color: currentTheme.text, marginBottom: 14 }}>
+        How would you like to restore this reminder?
+      </p>
+
+      {/* Option 1 - Fresh Start */}
+      <div style={cardStyle(restoreChoice === 'fresh')} onClick={() => setRestoreChoice('fresh')}>
+        <div style={{
+          width: 36, height: 36, borderRadius: '50%',
+          background: restoreChoice === 'fresh' ? '#10b981' : (theme === 'light' ? '#e5e7eb' : '#374151'),
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '1rem', flexShrink: 0, transition: 'background 0.2s ease',
+        }}>🔄</div>
+        <div>
+          <p style={{ fontWeight: 700, color: currentTheme.text, margin: 0, marginBottom: 4, fontSize: '0.95rem' }}>
+            Fresh Start
+          </p>
+          <p style={{ color: '#9ca3af', fontSize: '0.8rem', margin: 0, lineHeight: 1.5 }}>
+            Reset from <strong style={{ color: currentTheme.text }}>current {isKm ? 'km' : 'hours'} ({currentMetric.toFixed(1)} {unit})</strong>. Next service due at {freshNextDue.toFixed(0)} {unit}.
+          </p>
+        </div>
+      </div>
+
+      <div style={{ height: 10 }} />
+
+      {/* Option 2 - Keep Original */}
+      <div style={cardStyle(restoreChoice === 'original')} onClick={() => setRestoreChoice('original')}>
+        <div style={{
+          width: 36, height: 36, borderRadius: '50%',
+          background: restoreChoice === 'original' ? '#10b981' : (theme === 'light' ? '#e5e7eb' : '#374151'),
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '1rem', flexShrink: 0, transition: 'background 0.2s ease',
+        }}>📋</div>
+        <div>
+          <p style={{ fontWeight: 700, color: currentTheme.text, margin: 0, marginBottom: 4, fontSize: '0.95rem' }}>
+            Keep Original History
+          </p>
+          <p style={{ color: '#9ca3af', fontSize: '0.8rem', margin: 0, lineHeight: 1.5 }}>
+            Restore from <strong style={{ color: currentTheme.text }}>last service ({lastMetric.toFixed(1)} {unit})</strong>.{' '}
+            {originalOverdue
+              ? <span>Currently <strong style={{ color: '#ef4444' }}>{originalOverageAmt} {unit} overdue</strong> — was due at {originalNextDue.toFixed(0)} {unit}.</span>
+              : <span>Next service due at {originalNextDue.toFixed(0)} {unit}.</span>
+            }
+          </p>
+        </div>
+      </div>
+
+      {/* Confirm button */}
+      <button
+        onClick={confirmRestoreReminder}
+        disabled={!restoreChoice || restoringReminder === reminder.id}
+        style={{
+          width: '100%',
+          marginTop: 20,
+          padding: '14px',
+          background: restoreChoice ? 'linear-gradient(to right, #10b981, #06b6d4)' : '#6b7280',
+          border: 'none',
+          borderRadius: 10,
+          color: 'white',
+          cursor: restoreChoice ? 'pointer' : 'not-allowed',
+          fontSize: '1rem',
+          fontWeight: 700,
+          opacity: restoringReminder === reminder.id ? 0.7 : 1,
+        }}
+      >
+        {restoringReminder === reminder.id
+          ? 'Restoring...'
+          : restoreChoice === 'fresh'
+            ? '🔄 Restore with Fresh Start'
+            : restoreChoice === 'original'
+              ? '📋 Restore with Original History'
+              : 'Select an option above'}
+      </button>
+    </Modal>
+  );
+})()}
       
 {/* Zoomable Image Viewer Modal */}
       {viewingImage && <ZoomableImageViewer 
