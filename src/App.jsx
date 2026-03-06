@@ -4548,8 +4548,9 @@ return (
               return (
 <div key={reminder.id} style={{
           ...styles.itemCard,
-          background: reminder.completed_at ? (theme === 'light' ? '#f0fdf4' : 'rgba(16, 185, 129, 0.08)') : isDue ? 'rgba(239, 68, 68, 0.1)' : (theme === 'light' ? '#eff6ff' : currentTheme.cardBackground),
-          border: reminder.completed_at ? '2px solid #10b981' : isDue ? '2px solid #ef4444' : (theme === 'light' ? '1px solid #bfdbfe' : `1px solid ${currentTheme.cardBorder}`),
+          background: reminder.completed_at ? (theme === 'light' ? '#f0fdf4' : 'rgba(16, 185, 129, 0.08)') : isDue ? (theme === 'light' ? '#ffffff' : 'rgba(239, 68, 68, 0.1)') : (theme === 'light' ? '#eff6ff' : currentTheme.cardBackground),
+          border: reminder.completed_at ? '2px solid #10b981' : isDue ? '1px solid #fca5a5' : (theme === 'light' ? '1px solid #bfdbfe' : `1px solid ${currentTheme.cardBorder}`),
+          borderLeft: isDue && !reminder.completed_at ? '5px solid #ef4444' : undefined,
           position: 'relative',
           overflow: 'hidden'
         }}>
@@ -4684,8 +4685,9 @@ const allKmFiltered = serviceReminders.filter(r =>
           return (
 <div key={reminder.id} style={{
               ...styles.itemCard,
-              background: reminder.completed_at ? (theme === 'light' ? '#ecfeff' : 'rgba(8, 145, 178, 0.08)') : isDue ? 'rgba(239, 68, 68, 0.1)' : (theme === 'light' ? '#ecfeff' : currentTheme.cardBackground),
-              border: reminder.completed_at ? '2px solid #0891b2' : isDue ? '2px solid #ef4444' : (theme === 'light' ? '1px solid #a5f3fc' : '1px solid #0891b2'),
+              background: reminder.completed_at ? (theme === 'light' ? '#ecfeff' : 'rgba(8, 145, 178, 0.08)') : isDue ? (theme === 'light' ? '#ffffff' : 'rgba(239, 68, 68, 0.1)') : (theme === 'light' ? '#ecfeff' : currentTheme.cardBackground),
+              border: reminder.completed_at ? '2px solid #0891b2' : isDue ? '1px solid #fca5a5' : (theme === 'light' ? '1px solid #a5f3fc' : '1px solid #0891b2'),
+              borderLeft: isDue && !reminder.completed_at ? '5px solid #ef4444' : undefined,
               position: 'relative',
               overflow: 'hidden'
             }}>
@@ -8146,11 +8148,11 @@ function ServiceOverview({ serviceReminders, machineHours, machineKm, theme, onR
   const upcomingCount = sorted.filter(r => r.priority === 'upcoming').length;
   const allClear = overdueCount === 0 && dueSoonCount === 0;
 
-  const priorityConfig = {
-    overdue:  { label: 'OVERDUE',  color: '#ef4444', bg: theme === 'light' ? 'rgba(239,68,68,0.08)'   : 'rgba(239,68,68,0.12)',   border: theme === 'light' ? '#fca5a5' : 'rgba(239,68,68,0.4)'   },
-    'due-soon':{ label: 'DUE SOON', color: '#f59e0b', bg: theme === 'light' ? 'rgba(245,158,11,0.08)'  : 'rgba(245,158,11,0.12)',  border: theme === 'light' ? '#fcd34d' : 'rgba(245,158,11,0.4)'  },
-    upcoming:  { label: 'UPCOMING', color: '#10b981', bg: theme === 'light' ? 'rgba(16,185,129,0.06)'  : 'rgba(16,185,129,0.10)',  border: theme === 'light' ? '#6ee7b7' : 'rgba(16,185,129,0.3)'  },
-  };
+const priorityConfig = {
+  overdue:  { label: 'OVERDUE',  color: '#ef4444', bg: theme === 'light' ? 'rgba(239,68,68,0.08)'   : 'rgba(239,68,68,0.12)',   border: theme === 'light' ? '#fca5a5' : 'rgba(239,68,68,0.4)'   },
+  'due-soon':{ label: 'DUE SOON', color: '#f59e0b', bg: theme === 'light' ? 'rgba(245,158,11,0.08)'  : 'rgba(245,158,11,0.12)',  border: theme === 'light' ? '#fcd34d' : 'rgba(245,158,11,0.4)'  },
+  upcoming:  { label: 'UPCOMING', color: '#10b981', bg: theme === 'light' ? 'rgba(16,185,129,0.06)'  : 'rgba(16,185,129,0.10)',  border: theme === 'light' ? '#6ee7b7' : 'rgba(16,185,129,0.3)'  },
+};
 
   const cardBg   = theme === 'light' ? '#ffffff' : '#1e3a5f';
   const cardBdr  = theme === 'light' ? '#e5e7eb' : '#2563eb';
@@ -8272,6 +8274,7 @@ function ServiceOverview({ serviceReminders, machineHours, machineKm, theme, onR
               padding: '13px 16px',
               background: p.bg,
               border: `1px solid ${p.border}`,
+              borderLeft: p.accentBorder || `1px solid ${p.border}`,
               borderRadius: 10,
               marginBottom: 8,
               cursor: 'pointer',
