@@ -8149,11 +8149,10 @@ function ServiceOverview({ serviceReminders, machineHours, machineKm, theme, onR
   const allClear = overdueCount === 0 && dueSoonCount === 0;
 
 const priorityConfig = {
-  overdue:  { label: 'OVERDUE',  color: '#ef4444', bg: theme === 'light' ? 'rgba(239,68,68,0.08)'   : 'rgba(239,68,68,0.12)',   border: theme === 'light' ? '#fca5a5' : 'rgba(239,68,68,0.4)'   },
-  'due-soon':{ label: 'DUE SOON', color: '#f59e0b', bg: theme === 'light' ? 'rgba(245,158,11,0.08)'  : 'rgba(245,158,11,0.12)',  border: theme === 'light' ? '#fcd34d' : 'rgba(245,158,11,0.4)'  },
-  upcoming:  { label: 'UPCOMING', color: '#10b981', bg: theme === 'light' ? 'rgba(16,185,129,0.06)'  : 'rgba(16,185,129,0.10)',  border: theme === 'light' ? '#6ee7b7' : 'rgba(16,185,129,0.3)'  },
+  overdue:   { label: 'OVERDUE',  color: '#ef4444', bg: theme === 'light' ? '#ffffff' : 'rgba(239,68,68,0.12)',  border: theme === 'light' ? '#fca5a5' : 'rgba(239,68,68,0.4)',  accentBorder: theme === 'light' ? '5px solid #ef4444' : null },
+  'due-soon':{ label: 'DUE SOON', color: theme === 'light' ? '#d97706' : '#f59e0b', bg: theme === 'light' ? '#ffffff' : 'rgba(245,158,11,0.12)', border: theme === 'light' ? '#fcd34d' : 'rgba(245,158,11,0.4)', accentBorder: theme === 'light' ? '5px solid #f59e0b' : null },
+  upcoming:  { label: 'UPCOMING', color: theme === 'light' ? '#059669' : '#10b981', bg: theme === 'light' ? '#ffffff' : 'rgba(16,185,129,0.10)', border: theme === 'light' ? '#6ee7b7' : 'rgba(16,185,129,0.3)', accentBorder: theme === 'light' ? '5px solid #10b981' : null },
 };
-
   const cardBg   = theme === 'light' ? '#ffffff' : '#1e3a5f';
   const cardBdr  = theme === 'light' ? '#e5e7eb' : '#2563eb';
   const textMain = theme === 'light' ? '#111827' : '#f0fdf4';
