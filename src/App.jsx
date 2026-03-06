@@ -8159,26 +8159,22 @@ const priorityConfig = {
   const textSub  = theme === 'light' ? '#6b7280' : '#9ca3af';
 
   return (
-    <div style={{ marginBottom: 28 }}>
+    <div style={{
+      marginBottom: 28,
+      background: theme === 'light' ? 'rgba(255,248,240,0.9)' : 'transparent',
+      border: theme === 'light' ? '2px solid #fde047' : 'none',
+      borderRadius: theme === 'light' ? 16 : 0,
+      padding: theme === 'light' ? 20 : 0,
+    }}>
       {/* Section header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: textMain, margin: 0 }}>
+        <h2 style={{
+          fontSize: '1.6rem', fontWeight: 800, margin: 0,
+          background: 'linear-gradient(to right, #10b981, #06b6d4)',
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+        }}>
           🔧 Service Overview
         </h2>
-        {!allClear && (
-          <span style={{
-            padding: '2px 10px',
-            background: overdueCount > 0 ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)',
-            border: `1px solid ${overdueCount > 0 ? '#ef4444' : '#f59e0b'}`,
-            borderRadius: 99,
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            color: overdueCount > 0 ? '#ef4444' : '#f59e0b',
-            letterSpacing: '0.08em',
-          }}>
-            {overdueCount > 0 ? `${overdueCount} OVERDUE` : `${dueSoonCount} DUE SOON`}
-          </span>
-        )}
       </div>
 
       {/* All Clear state */}
