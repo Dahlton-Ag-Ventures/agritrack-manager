@@ -298,7 +298,7 @@ const [inventoryForm, setInventoryForm] = useState({
 });
 const [machineryForm, setMachineryForm] = useState({ 
   name: '', vinSerial: '', category: '', status: 'Active', 
-  photoUrl: '', requirements: '', tracking_type: ''
+  photoUrl: '', requirements: '', tracking_type: '', licensePlate: ''
 });
 const [serviceForm, setServiceForm] = useState({
   machineName: '', 
@@ -622,7 +622,8 @@ setMachinery(allMachinery.map(item => ({
   status: item.status || 'Active',
   photoUrl: item.photo_url || '',
   requirements: item.requirements || '',
-  tracking_type: item.tracking_type || ''
+  tracking_type: item.tracking_type || '',
+  licensePlate: item.license_plate || ''
 })));
     
     let allServiceRecords = [];
@@ -788,27 +789,29 @@ supabase
     .on('postgres_changes', { event: '*', schema: 'public', table: 'machinery_items' }, (payload) => {
       console.log('🔔 Machinery change');
 if (payload.eventType === 'INSERT') {
-  setMachinery(prev => [...prev, {
-    id: payload.new.id,
-    name: payload.new.name,
-    vinSerial: payload.new.vin_serial,
-    category: payload.new.category,
-    status: payload.new.status,
-    photoUrl: payload.new.photo_url,
-    requirements: payload.new.requirements || '',
-    tracking_type: payload.new.tracking_type || ''
-  }]);
+setMachinery(prev => [...prev, {
+  id: payload.new.id,
+  name: payload.new.name,
+  vinSerial: payload.new.vin_serial,
+  category: payload.new.category,
+  status: payload.new.status,
+  photoUrl: payload.new.photo_url,
+  requirements: payload.new.requirements || '',
+  tracking_type: payload.new.tracking_type || '',
+  licensePlate: payload.new.license_plate || ''
+}]);
 } else if (payload.eventType === 'UPDATE') {
-  setMachinery(prev => prev.map(item => item.id === payload.new.id ? {
-    id: payload.new.id,
-    name: payload.new.name,
-    vinSerial: payload.new.vin_serial,
-    category: payload.new.category,
-    status: payload.new.status,
-    photoUrl: payload.new.photo_url,
-    requirements: payload.new.requirements || '',
-    tracking_type: payload.new.tracking_type || ''
-  } : item));
+setMachinery(prev => prev.map(item => item.id === payload.new.id ? {
+  id: payload.new.id,
+  name: payload.new.name,
+  vinSerial: payload.new.vin_serial,
+  category: payload.new.category,
+  status: payload.new.status,
+  photoUrl: payload.new.photo_url,
+  requirements: payload.new.requirements || '',
+  tracking_type: payload.new.tracking_type || '',
+  licensePlate: payload.new.license_plate || ''
+} : item));
       } else if (payload.eventType === 'DELETE') {
         setMachinery(prev => prev.filter(item => item.id !== payload.old.id));
       }
@@ -1244,8 +1247,9 @@ const newItem = {
   category: machineryForm.category,
   status: machineryForm.status || 'Active',
   photo_url: machineryForm.photoUrl || '',
-  tracking_type: machineryForm.tracking_type || null
-};;
+  tracking_type: machineryForm.tracking_type || null,
+  license_plate: machineryForm.licensePlate || ''
+};
     
     await supabase.from('machinery_items').insert([newItem]);
     
@@ -1257,7 +1261,9 @@ setMachinery(prev => [...prev, {
   category: newItem.category,
   status: newItem.status,
   photoUrl: newItem.photo_url,
-  tracking_type: newItem.tracking_type || ''
+  requirements: newItem.requirements || '',
+  tracking_type: newItem.tracking_type || '',
+  licensePlate: newItem.license_plate || ''
 }]);
     
     console.log('✅ Machinery saved - FAST!');
@@ -1320,7 +1326,8 @@ setMachineryForm({
   status: item.status || 'Active',
   photoUrl: item.photoUrl || '',
   requirements: item.requirements || '',
-  tracking_type: item.tracking_type || ''
+  tracking_type: item.tracking_type || '',
+  licensePlate: item.licensePlate || ''
 });
 };
 const saveMachineryEdit = async (id) => {
@@ -1333,7 +1340,8 @@ const updates = {
   status: machineryForm.status,
   photo_url: machineryForm.photoUrl || '',
   requirements: machineryForm.requirements || '',
-  tracking_type: machineryForm.tracking_type || null
+  tracking_type: machineryForm.tracking_type || null,
+  license_plate: machineryForm.licensePlate || ''
 };
     
     await supabase.from('machinery_items').update(updates).eq('id', id);
@@ -1347,7 +1355,8 @@ setMachinery(prev => prev.map(item =>
     status: updates.status,
     photoUrl: updates.photo_url,
     requirements: updates.requirements,
-    tracking_type: updates.tracking_type || ''
+    tracking_type: updates.tracking_type || '',
+    licensePlate: updates.license_plate || ''
   } : item
 ));
 
@@ -1365,7 +1374,7 @@ setMachinery(prev => prev.map(item =>
 const cancelMachineryEdit = () => {
   setEditingMachineryId(null);
   isEditingRef.current = false;
-  setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '', requirements: '', tracking_type: '' });
+  setMachineryForm({ name: '', vinSerial: '', category: '', status: 'Active', photoUrl: '', requirements: '', tracking_type: '', licensePlate: '' });
 };
   
 const viewMachineServiceHistory = (machineName) => {
@@ -4914,17 +4923,25 @@ whiteSpace: 'nowrap'
           {editingMachineryId === item.id ? (
             <div style={{ flex: 1 }}>
               <input
-                style={styles.input}
-                placeholder="Machine Name"
-                value={machineryForm.name}
-                onChange={(e) => setMachineryForm({ ...machineryForm, name: e.target.value })}
-              />
-              <input
-                style={styles.input}
-                placeholder="VIN / Serial Number"
-                value={machineryForm.vinSerial}
-                onChange={(e) => setMachineryForm({ ...machineryForm, vinSerial: e.target.value })}
-              />
+  style={styles.input}
+  placeholder="Machine Name"
+  value={machineryForm.name}
+  onChange={(e) => setMachineryForm({ ...machineryForm, name: e.target.value })}
+/>
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+  <input
+    style={styles.input}
+    placeholder="VIN / Serial Number"
+    value={machineryForm.vinSerial}
+    onChange={(e) => setMachineryForm({ ...machineryForm, vinSerial: e.target.value })}
+  />
+  <input
+    style={styles.input}
+    placeholder="License Plate"
+    value={machineryForm.licensePlate}
+    onChange={(e) => setMachineryForm({ ...machineryForm, licensePlate: e.target.value })}
+  />
+</div>
 <select
   style={{...styles.input, position: 'relative', zIndex: 9999}}
   value={machineryForm.category}
@@ -5194,10 +5211,16 @@ const dueReminders = trackType === 'km'
   })()}
 </div>
                 <div style={styles.itemDetails}>
+<div>
+  <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>VIN/Serial</p>
+  <p>{item.vinSerial || 'N/A'}</p>
+</div>
+{item.licensePlate && (
   <div>
-    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>VIN/Serial</p>
-    <p>{item.vinSerial || 'N/A'}</p>
+    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>License Plate</p>
+    <p>{item.licensePlate}</p>
   </div>
+)}
   <div>
     <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Category</p>
     <p>{item.category || 'N/A'}</p>
