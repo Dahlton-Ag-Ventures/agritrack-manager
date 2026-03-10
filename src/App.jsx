@@ -1135,21 +1135,36 @@ const addInventoryItem = async () => {
   if (uploadingPhoto) return;
   
   try {
-    await supabase.from('inventory_items').insert([{
-      id: Date.now().toString(),
-      user_id: user.id,
-      name: inventoryForm.name,
-      part_number: inventoryForm.partNumber,
-      quantity: inventoryForm.quantity,
-      location: inventoryForm.location,
-      min_quantity: inventoryForm.minQuantity,
-      max_quantity: inventoryForm.maxQuantity,
-      photo_url: inventoryForm.photoUrl || ''
-    }]);
-    
-    console.log('✅ Inventory saved - FAST!');
-    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
-    setShowInventoryModal(false);
+const newId = Date.now().toString();
+const newItem = {
+  id: newId,
+  user_id: user.id,
+  name: inventoryForm.name,
+  part_number: inventoryForm.partNumber,
+  quantity: inventoryForm.quantity,
+  location: inventoryForm.location,
+  min_quantity: inventoryForm.minQuantity,
+  max_quantity: inventoryForm.maxQuantity,
+  photo_url: inventoryForm.photoUrl || ''
+};
+
+await supabase.from('inventory_items').insert([newItem]);
+
+// ✅ UPDATE LOCAL STATE IMMEDIATELY
+setInventory(prev => [...prev, {
+  id: newId,
+  name: newItem.name,
+  partNumber: newItem.part_number,
+  quantity: newItem.quantity,
+  location: newItem.location,
+  minQuantity: newItem.min_quantity,
+  maxQuantity: newItem.max_quantity,
+  photoUrl: newItem.photo_url
+}]);
+
+console.log('✅ Inventory saved - FAST!');
+setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
+setShowInventoryModal(false);
   } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
