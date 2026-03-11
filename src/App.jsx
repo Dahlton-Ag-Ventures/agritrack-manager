@@ -1012,7 +1012,9 @@ const quality = 0.85;
       case 'quantity-desc':
         return (parseInt(b.quantity) || 0) - (parseInt(a.quantity) || 0);
       case 'recently-added':
-        return (b.id || '').localeCompare(a.id || '');
+        const idA = Number(a.id) || 0;
+        const idB = Number(b.id) || 0;
+        return idB - idA;
       case 'location':
         return (a.location || '').localeCompare(b.location || '');
       default:
