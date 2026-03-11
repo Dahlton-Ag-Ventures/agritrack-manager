@@ -7908,16 +7908,32 @@ const dueReminders = trackType === 'km'
                         ))}
                       </tr>
                     </thead>
-                    <tbody>
+<tbody>
                       {importServiceRows.slice(0, 5).map((row, i) => {
                         const isDupe = importServiceDuplicates.some(d =>
                           d.machineName.toLowerCase() === row.machineName.toLowerCase() &&
-                          d.serviceType.toLowerCase() === row.service
-                    </div>
-                  </div>
+                          d.serviceType.toLowerCase() === row.serviceType.toLowerCase()
+                        );
+                        return (
+                          <tr key={i} style={{ background: isDupe ? 'rgba(245,158,11,0.1)' : 'transparent' }}>
+                            <td style={{ padding: '6px 10px', color: currentTheme.text }}>{row.machineName}</td>
+                            <td style={{ padding: '6px 10px', color: currentTheme.textSecondary }}>{row.serviceType}</td>
+                            <td style={{ padding: '6px 10px', color: currentTheme.textSecondary }}>{row.date}</td>
+                            <td style={{ padding: '6px 10px', color: currentTheme.textSecondary }}>{row.technician}</td>
+                            <td style={{ padding: '6px 10px', color: currentTheme.textSecondary }}>{row.notes}</td>
+                            <td style={{ padding: '6px 10px' }}>
+                              {isDupe
+                                ? <span style={{ color: '#f59e0b', fontWeight: '600', fontSize: '0.75rem' }}>⚠ Duplicate</span>
+                                : <span style={{ color: '#10b981', fontSize: '0.75rem' }}>✓ New</span>}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               )}
-             <div                    
+             <div               
 
   style={{
     marginTop: '24px',
