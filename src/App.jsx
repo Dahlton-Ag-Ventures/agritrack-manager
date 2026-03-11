@@ -7932,8 +7932,133 @@ const dueReminders = trackType === 'km'
                     </tbody>
                   </table>
                 </div>
-              )}
-             <div               
+)}
+
+                {importServiceDuplicates.length > 0 && (
+                  <div style={{ padding: '12px 14px', marginBottom: '12px', background: 'rgba(245,158,11,0.1)', border: '1px solid #f59e0b', borderRadius: '8px', fontSize: '0.875rem' }}>
+                    <p style={{ color: '#f59e0b', fontWeight: '600', marginBottom: '6px' }}>⚠ {importServiceDuplicates.length} duplicate record{importServiceDuplicates.length !== 1 ? 's' : ''} detected:</p>
+                    <p style={{ color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '10px' }}>{importServiceDuplicates.map(d => `${d.machineName} – ${d.serviceType} (${d.date})`).join(', ')}</p>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <button
+                        onClick={async () => {
+                          const toImport = importServiceRows.filter(r =>
+                            !importServiceDuplicates.some(d =>
+                              d.machineName.toLowerCase() === r.machineName.toLowerCase() &&
+                              d.serviceType.toLowerCase() === r.serviceType.toLowerCase() &&
+                              d.date === r.date
+                            )
+                          );
+                          const rows = toImport.map(r => ({
+                            id: Date.now().toString() + Math.random().toString(36).slice(2),
+                            machine_name: r.machineName, service_type: r.serviceType,
+                            date: r.date, technician: r.technician, notes: r.notes
+                          }));
+                          const { error } = await supabase.from('service_records').insert(rows);
+                          if (error) { setImportServiceStatus({ type: 'error', message: error.message }); }
+                          else { setImportServiceStatus({ type: 'success', message: `Successfully imported ${rows.length} records (${importServiceDuplicates.length} duplicates skipped).` }); setImportServiceRows([]); setImportServiceDuplicates([]); loadData(); }
+                        }}
+                        style={{ padding: '8px 16px', background: '#10b981', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' }}
+                      >
+                        Skip Duplicates & Import
+                      </button>
+                      <button
+                        onClick={async () => {
+                          const rows = importServiceRows.map(r => ({
+                            id: Date.now().toString() + Math.random().toString(36).slice(2),
+                            machine_name: r.machineName, service_type: r.serviceType,
+                            date: r.date, technician: r.technician, notes: r.notes
+                          }));
+                          const { error } = await supabase.from('service_records').insert(rows);
+                          if (error) { setImportServiceStatus({ type: 'error', message: error.message }); }
+                          else { setImportServiceStatus({ type: 'success', message: `Successfully imported all ${rows.length} records including duplicates.` }); setImportServiceRows([]); setImportServiceDuplicates([]); loadData(); }
+                        }}
+                        style={{ padding: '8px 16px', background: '#f59e0b', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' }}
+                      >
+                        Import All Including Duplicates
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {importServiceDuplicates.length === 0 && (
+                  <button
+                    onClick={async () => {
+                      const rows = importServiceRows.map(r => ({
+                        id: Date.now().toString() + Math.random().toString(36).slice(2),
+                        machine_name: r.machineName, service_type: r.serviceType,
+                        date: r.date, technician: r.technician, notes: r.notes
+                      }));
+                      const { error } = await supabase.from('service_records').insert(rows);
+                      if (error) { setImportServiceStatus({ type: 'error', message: error.message }); }
+                      else { setImportServiceStatus({ type: 'success', message: `Successfully imported ${rows.length} service records!` }); setImportServiceRows([]); loadData(); }
+                    }}
+                    style={{ padding: '10px 20px', background: '#10b981', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600', marginBottom: '12px' }}
+                  >
+                    ✓ Confirm Import
+                  </button>
+                )}
+
+                {importServiceStatus && (
+                  <div style={{
+                    padding: '10px 14px', borderRadius: '8px', fontSize: '0.875rem', marginTop: '8px',
+                    background: importServiceStatus.type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+                    border: `1px solid ${importServiceStatus.type === 'success' ? '#10b981' : '#ef4444'}`,
+                    color: importServiceStatus.type === 'success' ? '#10b981' : '#ef4444'
+                  }}>
+                    {importServiceStatus.type === 'success' ? '✅' : '❌'} {importServiceStatus.message}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {importServiceTab === 'format' && (
+          <div>
+            <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '12px' }}>
+              Your CSV must have these columns in this exact order:
+            </p>
+            <div style={{ overflowX: 'auto', marginBottom: '16px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                <thead>
+                  <tr>
+                    {['Machine Name','Service Type','Date','Technician','Notes'].map(h => (
+                      <th key={h} style={{ padding: '6px 10px', background: theme === 'light' ? '#f3f4f6' : '#374151', color: currentTheme.text, textAlign: 'left' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    {['John Deere 8R 410','Oil Change','2024-03-15','J. Smith','Replaced filter and 15L oil'].map((v,i) => (
+                      <td key={i} style={{ padding: '6px 10px', color: currentTheme.textSecondary, borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` }}>{v}</td>
+                    ))}
+                  </tr>
+                  <tr>
+                    {['Spray Coupe 4640','Nozzle Inspection','2024-04-02','B. Jones','Replaced 3 nozzles on boom 2'].map((v,i) => (
+                      <td key={i} style={{ padding: '6px 10px', color: currentTheme.textSecondary, borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` }}>{v}</td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <button
+              onClick={() => {
+                const csv = 'Machine Name,Service Type,Date,Technician,Notes\nJohn Deere 8R 410,Oil Change,2024-03-15,J. Smith,Replaced filter and 15L oil\nSpray Coupe 4640,Nozzle Inspection,2024-04-02,B. Jones,Replaced 3 nozzles on boom 2\n';
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = 'service-records-template.csv'; a.click();
+                window.URL.revokeObjectURL(url);
+              }}
+              style={{ padding: '10px 20px', background: '#0891b2', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600' }}
+            >
+              ⬇ Download Blank Template
+            </button>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
 
   style={{
     marginTop: '24px',
