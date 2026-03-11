@@ -354,6 +354,24 @@ const [editingKm, setEditingKm] = useState(false);
 const [newTotalKm, setNewTotalKm] = useState('');
 const [kmForm, setKmForm] = useState({ machineName: '', kmToAdd: '' });
 const [showKmReminderModal, setShowKmReminderModal] = useState(false);
+
+  // Export state
+const [exportInventoryOpen, setExportInventoryOpen] = useState(false);
+const [exportMachineryOpen, setExportMachineryOpen] = useState(false);
+const [exportServiceOpen, setExportServiceOpen] = useState(false);
+const [exportInventoryTab, setExportInventoryTab] = useState('all');
+const [exportMachineryTab, setExportMachineryTab] = useState('all');
+const [exportServiceTab, setExportServiceTab] = useState('all');
+const [exportInventoryDateStart, setExportInventoryDateStart] = useState('');
+const [exportInventoryDateEnd, setExportInventoryDateEnd] = useState('');
+const [exportMachineryDateStart, setExportMachineryDateStart] = useState('');
+const [exportMachineryDateEnd, setExportMachineryDateEnd] = useState('');
+const [exportServiceDateStart, setExportServiceDateStart] = useState('');
+const [exportServiceDateEnd, setExportServiceDateEnd] = useState('');
+const [exportInventorySelected, setExportInventorySelected] = useState(new Set());
+const [exportMachinerySelected, setExportMachinerySelected] = useState(new Set());
+const [exportServiceSelected, setExportServiceSelected] = useState(new Set());
+const [exportMode, setExportMode] = useState(null); // 'inventory' | 'machinery' | 'service' | null
   
   // Get current theme object
   const currentTheme = themes[theme];
@@ -980,6 +998,47 @@ const quality = 0.85;
     return null;
   }
 };
+
+const exportToCSV = (rows, headers, filename) => {
+  const escape = (val) => {
+    const str = (val === null || val === undefined) ? '' : String(val);
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+  const csv = [
+    headers.join(','),
+    ...rows.map(row => row.map(escape).join(','))
+  ].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  window.URL.revokeObjectURL(url);
+};
+
+const isTimestampId = (id) => /^\d{13}$/.test(String(id));
+
+const idToDate = (id) => {
+  if (!isTimestampId(id)) return null;
+  return new Date(Number(id));
+};
+
+const getInventoryRows = (items) => items.map(item => [
+  item.name, item.partNumber, item.quantity,
+  item.location, item.minQuantity, item.maxQuantity
+]);
+
+const getMachineryRows = (items) => items.map(item => [
+  item.name, item.vinSerial, item.category, item.status, item.licensePlate
+]);
+
+const getServiceRows = (items) => items.map(item => [
+  item.machineName, item.serviceType, item.date, item.technician, item.notes
+]);
   
   const getStockStatus = (item) => {
     const qty = parseInt(item.quantity) || 0;
@@ -3391,6 +3450,45 @@ className="flip-card"
   
   {activeTab === 'inventory' && (
   <div>
+{exportMode === 'inventory' && (
+      <div style={{
+        padding: '14px 18px', marginBottom: '16px',
+        background: 'rgba(16,185,129,0.12)', border: '2px solid #10b981',
+        borderRadius: '10px', display: 'flex', justifyContent: 'space-between',
+        alignItems: 'center', flexWrap: 'wrap', gap: '12px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '1.1rem' }}>☑</span>
+          <span style={{ fontWeight: '700', color: '#10b981' }}>Export Mode</span>
+          <span style={{ color: currentTheme.textSecondary, fontSize: '0.875rem' }}>
+            {exportInventorySelected.size} item{exportInventorySelected.size !== 1 ? 's' : ''} selected
+          </span>
+        </div>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button onClick={() => {
+            const visibleIds = new Set(getFilteredAndSortedInventory().map(i => i.id));
+            setExportInventorySelected(prev => new Set([...prev, ...visibleIds]));
+          }} style={{
+            padding: '8px 14px', background: '#10b981', border: 'none',
+            borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600'
+          }}>
+            Select All Visible
+          </button>
+          <button onClick={() => setExportInventorySelected(new Set())} style={{
+            padding: '8px 14px', background: '#ef4444', border: 'none',
+            borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.8rem'
+          }}>
+            Clear All
+          </button>
+          <button onClick={() => { setActiveTab('settings'); setActiveSettingsSection('importexport'); }} style={{
+            padding: '8px 14px', background: '#2563eb', border: 'none',
+            borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600'
+          }}>
+            Done — Back to Settings
+          </button>
+        </div>
+      </div>
+    )}
     <div style={styles.tabHeader}>
       <h2 style={{ fontSize: '1.5rem' }}>Inventory Items</h2>
       {userRole !== 'employee' && (
@@ -3595,7 +3693,25 @@ className="flip-card"
         {/* INVENTORY ITEMS LIST */}
         <div style={styles.itemsList}>
           {getPaginatedInventory().items.map(item => (
-              <div key={item.id} className="item-card" style={styles.itemCard}>
+<div key={item.id} className="item-card" style={{
+                ...styles.itemCard,
+                outline: exportMode === 'inventory' && exportInventorySelected.has(item.id)
+                  ? '2px solid #10b981' : 'none'
+              }}>
+              {exportMode === 'inventory' && (
+                <input
+                  type="checkbox"
+                  checked={exportInventorySelected.has(item.id)}
+                  onChange={(e) => {
+                    setExportInventorySelected(prev => {
+                      const next = new Set(prev);
+                      e.target.checked ? next.add(item.id) : next.delete(item.id);
+                      return next;
+                    });
+                  }}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer', flexShrink: 0, accentColor: '#10b981' }}
+                />
+              )}
               {editingInventoryId === item.id ? (
                 <div style={{ flex: 1 }}>
                   <input
@@ -3999,6 +4115,45 @@ className="flip-card"
 
         {activeTab === 'machinery' && (
           <div>
+{exportMode === 'machinery' && (
+  <div style={{
+    padding: '14px 18px', marginBottom: '16px',
+    background: 'rgba(16,185,129,0.12)', border: '2px solid #10b981',
+    borderRadius: '10px', display: 'flex', justifyContent: 'space-between',
+    alignItems: 'center', flexWrap: 'wrap', gap: '12px'
+  }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+      <span style={{ fontSize: '1.1rem' }}>☑</span>
+      <span style={{ fontWeight: '700', color: '#10b981' }}>Export Mode</span>
+      <span style={{ color: currentTheme.textSecondary, fontSize: '0.875rem' }}>
+        {exportMachinerySelected.size} item{exportMachinerySelected.size !== 1 ? 's' : ''} selected
+      </span>
+    </div>
+    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      <button onClick={() => {
+        const visibleIds = new Set(getFilteredAndSortedMachinery().map(i => i.id));
+        setExportMachinerySelected(prev => new Set([...prev, ...visibleIds]));
+      }} style={{
+        padding: '8px 14px', background: '#10b981', border: 'none',
+        borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600'
+      }}>
+        Select All Visible
+      </button>
+      <button onClick={() => setExportMachinerySelected(new Set())} style={{
+        padding: '8px 14px', background: '#ef4444', border: 'none',
+        borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.8rem'
+      }}>
+        Clear All
+      </button>
+      <button onClick={() => { setActiveTab('settings'); setActiveSettingsSection('importexport'); }} style={{
+        padding: '8px 14px', background: '#2563eb', border: 'none',
+        borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600'
+      }}>
+        Done — Back to Settings
+      </button>
+    </div>
+  </div>
+)}
 <div style={{
   display: 'flex',
   justifyContent: 'space-between',
@@ -4959,7 +5114,25 @@ whiteSpace: 'nowrap'
     {/* MACHINERY ITEMS LIST */}
     <div style={styles.itemsList}>
       {getPaginatedMachinery().items.map(item => (
-        <div key={item.id} className="item-card" style={styles.itemCard}>
+<div key={item.id} className="item-card" style={{
+          ...styles.itemCard,
+          outline: exportMode === 'machinery' && exportMachinerySelected.has(item.id)
+            ? '2px solid #10b981' : 'none'
+        }}>
+        {exportMode === 'machinery' && (
+          <input
+            type="checkbox"
+            checked={exportMachinerySelected.has(item.id)}
+            onChange={(e) => {
+              setExportMachinerySelected(prev => {
+                const next = new Set(prev);
+                e.target.checked ? next.add(item.id) : next.delete(item.id);
+                return next;
+              });
+            }}
+            style={{ width: '18px', height: '18px', cursor: 'pointer', flexShrink: 0, accentColor: '#10b981' }}
+          />
+        )}
           {editingMachineryId === item.id ? (
             <div style={{ flex: 1 }}>
               <input
@@ -5433,6 +5606,45 @@ const dueReminders = trackType === 'km'
 )}
 {activeTab === 'service' && (
           <div>
+{exportMode === 'service' && (
+  <div style={{
+    padding: '14px 18px', marginBottom: '16px',
+    background: 'rgba(16,185,129,0.12)', border: '2px solid #10b981',
+    borderRadius: '10px', display: 'flex', justifyContent: 'space-between',
+    alignItems: 'center', flexWrap: 'wrap', gap: '12px'
+  }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+      <span style={{ fontSize: '1.1rem' }}>☑</span>
+      <span style={{ fontWeight: '700', color: '#10b981' }}>Export Mode</span>
+      <span style={{ color: currentTheme.textSecondary, fontSize: '0.875rem' }}>
+        {exportServiceSelected.size} record{exportServiceSelected.size !== 1 ? 's' : ''} selected
+      </span>
+    </div>
+    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      <button onClick={() => {
+        const visibleIds = new Set(getFilteredAndSortedService().map(i => i.id));
+        setExportServiceSelected(prev => new Set([...prev, ...visibleIds]));
+      }} style={{
+        padding: '8px 14px', background: '#10b981', border: 'none',
+        borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600'
+      }}>
+        Select All Visible
+      </button>
+      <button onClick={() => setExportServiceSelected(new Set())} style={{
+        padding: '8px 14px', background: '#ef4444', border: 'none',
+        borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.8rem'
+      }}>
+        Clear All
+      </button>
+      <button onClick={() => { setActiveTab('settings'); setActiveSettingsSection('importexport'); }} style={{
+        padding: '8px 14px', background: '#2563eb', border: 'none',
+        borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600'
+      }}>
+        Done — Back to Settings
+      </button>
+    </div>
+  </div>
+)}
             <div style={styles.tabHeader}>
   <div>
     <h2 style={{ fontSize: '1.5rem' }}>Service Records</h2>
@@ -5752,7 +5964,25 @@ const dueReminders = trackType === 'km'
     {/* SERVICE RECORDS LIST */}
     <div style={styles.itemsList}>
 {getPaginatedService().items.map(record => (
-   <div key={record.id} className="item-card" style={styles.itemCard}>
+<div key={record.id} className="item-card" style={{
+    ...styles.itemCard,
+    outline: exportMode === 'service' && exportServiceSelected.has(record.id)
+      ? '2px solid #10b981' : 'none'
+  }}>
+  {exportMode === 'service' && (
+    <input
+      type="checkbox"
+      checked={exportServiceSelected.has(record.id)}
+      onChange={(e) => {
+        setExportServiceSelected(prev => {
+          const next = new Set(prev);
+          e.target.checked ? next.add(record.id) : next.delete(record.id);
+          return next;
+        });
+      }}
+      style={{ width: '18px', height: '18px', cursor: 'pointer', flexShrink: 0, accentColor: '#10b981' }}
+    />
+  )}
   {editingServiceId === record.id ? (
     <div style={{ flex: 1 }}>
 
@@ -6552,211 +6782,540 @@ const dueReminders = trackType === 'km'
                     <p style={{ color: '#9ca3af', marginBottom: '24px' }}>
                       Export and import your data to CSV format
                     </p>
-                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                      <button 
-                        onClick={() => {
-                          const csv = [
-                            ['Name', 'Part Number', 'Quantity', 'Location', 'Category', 'Min Qty', 'Max Qty'].join(','),
-                            ...inventory.map(item => [
-                              item.name,
-                              item.partNumber,
-                              item.quantity,
-                              item.location,
-                              item.category,
-                              item.minQuantity,
-                              item.maxQuantity
-                            ].join(','))
-                          ].join('\n');
-                          
-                          const blob = new Blob([csv], { type: 'text/csv' });
-                          const url = window.URL.createObjectURL(blob);
-                          const a = document.createElement('a');
-                          a.href = url;
-                          a.download = 'inventory.csv';
-                          a.click();
-                        }}
-                        style={styles.primaryButton}
-                      >
-                        Export Inventory to CSV
-                      </button>
-                      <button 
-                        onClick={() => {
-                          const csv = [
-                            ['Name', 'VIN/Serial', 'Category', 'Status'].join(','),
-                            ...machinery.map(item => [
-                              item.name,
-                              item.vinSerial,
-                              item.category,
-                              item.status
-                            ].join(','))
-                          ].join('\n');
-                          
-                          const blob = new Blob([csv], { type: 'text/csv' });
-                          const url = window.URL.createObjectURL(blob);
-                          const a = document.createElement('a');
-                          a.href = url;
-                          a.download = 'machinery.csv';
-                          a.click();
-                        }}
-                        style={styles.primaryButton}
-                      >
-                        Export Machinery to CSV
-                      </button>
-                     <button 
-  onClick={() => {
-    const csv = [
-      ['Machine', 'Service Type', 'Date', 'Technician', 'Notes'].join(','),  // removed Cost
-      ...serviceHistory.map(record => [
-        record.machineName,
-        record.serviceType,
-        record.date,
-        record.technician,
-        record.notes
-      ].join(','))
-    ].join('\n');
-    
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'service-records.csv';
-    a.click();
-  }}
-  style={styles.primaryButton}
->
-  Export Service Records to CSV
-</button>
-                      <button 
-                        onClick={async () => {
-                          const input = document.createElement('input');
-                          input.type = 'file';
-                          input.accept = '.csv';
-                          input.onchange = async (e) => {
-                            const file = e.target.files[0];
-                            if (!file) return;
-                            
-                            const text = await file.text();
-                            const rows = text.split('\n').slice(1);
-                            const newInventory = rows
-                              .filter(row => row.trim())
-                              .map((row, index) => {
-                                const [name, partNumber, quantity, location, category, minQuantity, maxQuantity] = row.split(',');
-                                return {
-                                  id: Date.now() + index,
-                                  name: name?.trim() || '',
-                                  partNumber: partNumber?.trim() || '',
-                                  quantity: quantity?.trim() || '',
-                                  location: location?.trim() || '',
-                                  category: category?.trim() || '',
-                                  minQuantity: minQuantity?.trim() || '',
-                                  maxQuantity: maxQuantity?.trim() || '',
-                                };
-                              });
-                            
-                            const { error } = await supabase
-                              .from('agritrack_data')
-                              .update({ inventory: [...inventory, ...newInventory] })
-                              .eq('id', 1);
-                            
-                            if (error) {
-                              alert('Error importing: ' + error.message);
-                            } else {
-                              alert(`Successfully imported ${newInventory.length} items!`);
-                              loadData();
-                            }
-                          };
-                          input.click();
-                        }}
-                        style={{...styles.secondaryButton, background: '#0891b2'}}
-                      >
-                        Import Inventory from CSV
-                      </button>
-                      <button 
-                        onClick={async () => {
-                          const input = document.createElement('input');
-                          input.type = 'file';
-                          input.accept = '.csv';
-                          input.onchange = async (e) => {
-                            const file = e.target.files[0];
-                            if (!file) return;
-                            
-                            const text = await file.text();
-                            const rows = text.split('\n').slice(1);
-                            const newMachinery = rows
-                              .filter(row => row.trim())
-                              .map((row, index) => {
-                                const [name, vinSerial, category, status] = row.split(',');
-                                return {
-                                  id: Date.now() + index,
-                                  name: name?.trim() || '',
-                                  vinSerial: vinSerial?.trim() || '',
-                                  category: category?.trim() || '',
-                                  status: status?.trim() || 'Active',
-                                };
-                              });
-                            
-                            const { error } = await supabase
-                              .from('agritrack_data')
-                              .update({ machinery: [...machinery, ...newMachinery] })
-                              .eq('id', 1);
-                            
-                            if (error) {
-                              alert('Error importing: ' + error.message);
-                            } else {
-                              alert(`Successfully imported ${newMachinery.length} machines!`);
-                              loadData();
-                            }
-                          };
-                          input.click();
-                        }}
-                        style={{...styles.secondaryButton, background: '#0891b2'}}
-                      >
-                        Import Machinery from CSV
-                      </button>
-  <button 
-  onClick={async () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.csv';
-    input.onchange = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      
-      const text = await file.text();
-      const rows = text.split('\n').slice(1);
-      const newRecords = rows
-        .filter(row => row.trim())
-        .map((row, index) => {
-          const [machineName, serviceType, date, technician, notes] = row.split(',');  // removed cost
-          return {
-            id: Date.now() + index,
-            machineName: machineName?.trim() || '',
-            serviceType: serviceType?.trim() || '',
-            date: date?.trim() || '',
-            technician: technician?.trim() || '',
-            notes: notes?.trim() || '',
-          };
-        });
-      
-      const { error } = await supabase
-        .from('agritrack_data')
-        .update({ service_history: [...serviceHistory, ...newRecords] })
-        .eq('id', 1);
-      
-      if (error) {
-        alert('Error importing: ' + error.message);
-      } else {
-        alert(`Successfully imported ${newRecords.length} service records!`);
-        loadData();
-      }
-    };
-    input.click();
-  }}
-  style={{...styles.secondaryButton, background: '#0891b2'}}
->
-                        Import Service Records from CSV
-                      </button>
-                    </div>
+                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+
+  {/* ── EXPORT INVENTORY ── */}
+  <div style={{
+    border: `1px solid ${theme === 'light' ? '#d1d5db' : '#374151'}`,
+    borderRadius: '10px',
+    overflow: 'hidden'
+  }}>
+    <button
+      onClick={() => setExportInventoryOpen(o => !o)}
+      style={{
+        width: '100%', padding: '14px 18px',
+        background: exportInventoryOpen
+          ? (theme === 'light' ? '#f0fdf4' : 'rgba(16,185,129,0.15)')
+          : (theme === 'light' ? '#f9fafb' : 'rgba(255,255,255,0.04)'),
+        border: 'none', cursor: 'pointer',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        color: currentTheme.text, fontSize: '1rem', fontWeight: '600',
+      }}
+    >
+      <span>📦 Export Inventory</span>
+      <span style={{
+        transition: 'transform 0.2s ease',
+        transform: exportInventoryOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+        display: 'inline-block'
+      }}>▼</span>
+    </button>
+
+    {exportInventoryOpen && (
+      <div style={{ padding: '16px', borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` }}>
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+          {['all', 'daterange', 'manual'].map(tab => (
+            <button key={tab} onClick={() => setExportInventoryTab(tab)} style={{
+              padding: '8px 16px', border: 'none', borderRadius: '8px', cursor: 'pointer',
+              fontSize: '0.875rem', fontWeight: exportInventoryTab === tab ? '700' : '400',
+              background: exportInventoryTab === tab
+                ? 'linear-gradient(to right, #10b981, #06b6d4)'
+                : (theme === 'light' ? '#e5e7eb' : '#374151'),
+              color: exportInventoryTab === tab ? 'white' : currentTheme.text,
+            }}>
+              {tab === 'all' ? 'Export All' : tab === 'daterange' ? 'Date Range' : 'Manual Select'}
+            </button>
+          ))}
+        </div>
+
+        {/* Export All */}
+        {exportInventoryTab === 'all' && (
+          <div>
+            <p style={{ color: currentTheme.textSecondary, marginBottom: '12px', fontSize: '0.875rem' }}>
+              This will export all <strong style={{ color: currentTheme.text }}>{inventory.length}</strong> inventory items.
+            </p>
+            <button onClick={() => exportToCSV(
+              getInventoryRows(inventory),
+              ['Name', 'Part Number', 'Quantity', 'Location', 'Min Qty', 'Max Qty'],
+              'inventory-all.csv'
+            )} style={{
+              padding: '10px 20px', background: '#10b981', border: 'none',
+              borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600'
+            }}>
+              ⬇ Download CSV
+            </button>
+          </div>
+        )}
+
+        {/* Date Range */}
+        {exportInventoryTab === 'daterange' && (() => {
+          const hasNonTimestamp = inventory.some(i => !isTimestampId(i.id));
+          const filtered = inventory.filter(i => {
+            const d = idToDate(i.id);
+            if (!d) return false;
+            const start = exportInventoryDateStart ? new Date(exportInventoryDateStart) : null;
+            const end = exportInventoryDateEnd ? new Date(exportInventoryDateEnd + 'T23:59:59') : null;
+            if (start && d < start) return false;
+            if (end && d > end) return false;
+            return true;
+          });
+          return (
+            <div>
+              {hasNonTimestamp && (
+                <div style={{
+                  padding: '10px 14px', marginBottom: '12px',
+                  background: 'rgba(245,158,11,0.1)', border: '1px solid #f59e0b',
+                  borderRadius: '8px', fontSize: '0.8rem', color: '#f59e0b'
+                }}>
+                  ⚠️ Some items were added before timestamp IDs were used and won't appear in date range results.
+                </div>
+              )}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '4px' }}>Start Date</label>
+                  <input type="date" value={exportInventoryDateStart}
+                    onChange={e => setExportInventoryDateStart(e.target.value)}
+                    style={{ ...styles.input, marginBottom: 0, fontFamily: 'inherit' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '4px' }}>End Date</label>
+                  <input type="date" value={exportInventoryDateEnd}
+                    onChange={e => setExportInventoryDateEnd(e.target.value)}
+                    style={{ ...styles.input, marginBottom: 0, fontFamily: 'inherit' }} />
+                </div>
+              </div>
+              <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '12px' }}>
+                <strong style={{ color: currentTheme.text }}>{filtered.length}</strong> items match this date range.
+              </p>
+              <button
+                onClick={() => exportToCSV(
+                  getInventoryRows(filtered),
+                  ['Name', 'Part Number', 'Quantity', 'Location', 'Min Qty', 'Max Qty'],
+                  'inventory-daterange.csv'
+                )}
+                disabled={filtered.length === 0}
+                style={{
+                  padding: '10px 20px', border: 'none', borderRadius: '8px',
+                  color: 'white', cursor: filtered.length === 0 ? 'not-allowed' : 'pointer',
+                  fontSize: '0.875rem', fontWeight: '600',
+                  background: filtered.length === 0 ? '#6b7280' : '#10b981',
+                  opacity: filtered.length === 0 ? 0.6 : 1
+                }}>
+                ⬇ Download CSV
+              </button>
+            </div>
+          );
+        })()}
+
+        {/* Manual Select */}
+        {exportInventoryTab === 'manual' && (
+          <div>
+            {exportMode === 'inventory' ? (
+              <div style={{
+                padding: '12px 14px',
+                background: 'rgba(16,185,129,0.1)', border: '1px solid #10b981',
+                borderRadius: '8px', marginBottom: '12px', fontSize: '0.875rem', color: '#10b981'
+              }}>
+                ✅ Export mode active — go to the Inventory tab to select items.
+              </div>
+            ) : (
+              <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '12px' }}>
+                Click below to go to the Inventory tab and select items to export.
+              </p>
+            )}
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+              <button onClick={() => { setExportMode('inventory'); setActiveTab('inventory'); }} style={{
+                padding: '10px 20px', background: '#10b981', border: 'none',
+                borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600'
+              }}>
+                {exportMode === 'inventory' ? '↩ Back to Inventory' : '☑ Select Items'}
+              </button>
+              {exportInventorySelected.size > 0 && (
+                <button onClick={() => setExportInventorySelected(new Set())} style={{
+                  padding: '10px 20px', background: '#ef4444', border: 'none',
+                  borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem'
+                }}>
+                  Clear Selection
+                </button>
+              )}
+            </div>
+            <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '12px' }}>
+              <strong style={{ color: currentTheme.text }}>{exportInventorySelected.size}</strong> items selected.
+            </p>
+            <button
+              onClick={() => {
+                const selected = inventory.filter(i => exportInventorySelected.has(i.id));
+                exportToCSV(
+                  getInventoryRows(selected),
+                  ['Name', 'Part Number', 'Quantity', 'Location', 'Min Qty', 'Max Qty'],
+                  'inventory-selected.csv'
+                );
+              }}
+              disabled={exportInventorySelected.size === 0}
+              style={{
+                padding: '10px 20px', border: 'none', borderRadius: '8px',
+                color: 'white', cursor: exportInventorySelected.size === 0 ? 'not-allowed' : 'pointer',
+                fontSize: '0.875rem', fontWeight: '600',
+                background: exportInventorySelected.size === 0 ? '#6b7280' : '#10b981',
+                opacity: exportInventorySelected.size === 0 ? 0.6 : 1
+              }}>
+              ⬇ Download CSV
+            </button>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+
+  {/* ── EXPORT MACHINERY ── */}
+  <div style={{
+    border: `1px solid ${theme === 'light' ? '#d1d5db' : '#374151'}`,
+    borderRadius: '10px',
+    overflow: 'hidden'
+  }}>
+    <button
+      onClick={() => setExportMachineryOpen(o => !o)}
+      style={{
+        width: '100%', padding: '14px 18px',
+        background: exportMachineryOpen
+          ? (theme === 'light' ? '#f0fdf4' : 'rgba(16,185,129,0.15)')
+          : (theme === 'light' ? '#f9fafb' : 'rgba(255,255,255,0.04)'),
+        border: 'none', cursor: 'pointer',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        color: currentTheme.text, fontSize: '1rem', fontWeight: '600',
+      }}
+    >
+      <span>🚜 Export Machinery</span>
+      <span style={{
+        transition: 'transform 0.2s ease',
+        transform: exportMachineryOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+        display: 'inline-block'
+      }}>▼</span>
+    </button>
+
+    {exportMachineryOpen && (
+      <div style={{ padding: '16px', borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` }}>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+          {['all', 'daterange', 'manual'].map(tab => (
+            <button key={tab} onClick={() => setExportMachineryTab(tab)} style={{
+              padding: '8px 16px', border: 'none', borderRadius: '8px', cursor: 'pointer',
+              fontSize: '0.875rem', fontWeight: exportMachineryTab === tab ? '700' : '400',
+              background: exportMachineryTab === tab
+                ? 'linear-gradient(to right, #10b981, #06b6d4)'
+                : (theme === 'light' ? '#e5e7eb' : '#374151'),
+              color: exportMachineryTab === tab ? 'white' : currentTheme.text,
+            }}>
+              {tab === 'all' ? 'Export All' : tab === 'daterange' ? 'Date Range' : 'Manual Select'}
+            </button>
+          ))}
+        </div>
+
+        {exportMachineryTab === 'all' && (
+          <div>
+            <p style={{ color: currentTheme.textSecondary, marginBottom: '12px', fontSize: '0.875rem' }}>
+              This will export all <strong style={{ color: currentTheme.text }}>{machinery.length}</strong> machinery items.
+            </p>
+            <button onClick={() => exportToCSV(
+              getMachineryRows(machinery),
+              ['Name', 'VIN/Serial', 'Category', 'Status', 'License Plate'],
+              'machinery-all.csv'
+            )} style={{
+              padding: '10px 20px', background: '#10b981', border: 'none',
+              borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600'
+            }}>
+              ⬇ Download CSV
+            </button>
+          </div>
+        )}
+
+        {exportMachineryTab === 'daterange' && (() => {
+          const hasNonTimestamp = machinery.some(i => !isTimestampId(i.id));
+          const filtered = machinery.filter(i => {
+            const d = idToDate(i.id);
+            if (!d) return false;
+            const start = exportMachineryDateStart ? new Date(exportMachineryDateStart) : null;
+            const end = exportMachineryDateEnd ? new Date(exportMachineryDateEnd + 'T23:59:59') : null;
+            if (start && d < start) return false;
+            if (end && d > end) return false;
+            return true;
+          });
+          return (
+            <div>
+              {hasNonTimestamp && (
+                <div style={{
+                  padding: '10px 14px', marginBottom: '12px',
+                  background: 'rgba(245,158,11,0.1)', border: '1px solid #f59e0b',
+                  borderRadius: '8px', fontSize: '0.8rem', color: '#f59e0b'
+                }}>
+                  ⚠️ Some machines were added before timestamp IDs were used and won't appear in date range results.
+                </div>
+              )}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '4px' }}>Start Date</label>
+                  <input type="date" value={exportMachineryDateStart}
+                    onChange={e => setExportMachineryDateStart(e.target.value)}
+                    style={{ ...styles.input, marginBottom: 0, fontFamily: 'inherit' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '4px' }}>End Date</label>
+                  <input type="date" value={exportMachineryDateEnd}
+                    onChange={e => setExportMachineryDateEnd(e.target.value)}
+                    style={{ ...styles.input, marginBottom: 0, fontFamily: 'inherit' }} />
+                </div>
+              </div>
+              <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '12px' }}>
+                <strong style={{ color: currentTheme.text }}>{filtered.length}</strong> machines match this date range.
+              </p>
+              <button
+                onClick={() => exportToCSV(
+                  getMachineryRows(filtered),
+                  ['Name', 'VIN/Serial', 'Category', 'Status', 'License Plate'],
+                  'machinery-daterange.csv'
+                )}
+                disabled={filtered.length === 0}
+                style={{
+                  padding: '10px 20px', border: 'none', borderRadius: '8px',
+                  color: 'white', cursor: filtered.length === 0 ? 'not-allowed' : 'pointer',
+                  fontSize: '0.875rem', fontWeight: '600',
+                  background: filtered.length === 0 ? '#6b7280' : '#10b981',
+                  opacity: filtered.length === 0 ? 0.6 : 1
+                }}>
+                ⬇ Download CSV
+              </button>
+            </div>
+          );
+        })()}
+
+        {exportMachineryTab === 'manual' && (
+          <div>
+            {exportMode === 'machinery' ? (
+              <div style={{
+                padding: '12px 14px',
+                background: 'rgba(16,185,129,0.1)', border: '1px solid #10b981',
+                borderRadius: '8px', marginBottom: '12px', fontSize: '0.875rem', color: '#10b981'
+              }}>
+                ✅ Export mode active — go to the Machinery tab to select items.
+              </div>
+            ) : (
+              <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '12px' }}>
+                Click below to go to the Machinery tab and select items to export.
+              </p>
+            )}
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+              <button onClick={() => { setExportMode('machinery'); setActiveTab('machinery'); }} style={{
+                padding: '10px 20px', background: '#10b981', border: 'none',
+                borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600'
+              }}>
+                {exportMode === 'machinery' ? '↩ Back to Machinery' : '☑ Select Items'}
+              </button>
+              {exportMachinerySelected.size > 0 && (
+                <button onClick={() => setExportMachinerySelected(new Set())} style={{
+                  padding: '10px 20px', background: '#ef4444', border: 'none',
+                  borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem'
+                }}>
+                  Clear Selection
+                </button>
+              )}
+            </div>
+            <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '12px' }}>
+              <strong style={{ color: currentTheme.text }}>{exportMachinerySelected.size}</strong> items selected.
+            </p>
+            <button
+              onClick={() => {
+                const selected = machinery.filter(i => exportMachinerySelected.has(i.id));
+                exportToCSV(
+                  getMachineryRows(selected),
+                  ['Name', 'VIN/Serial', 'Category', 'Status', 'License Plate'],
+                  'machinery-selected.csv'
+                );
+              }}
+              disabled={exportMachinerySelected.size === 0}
+              style={{
+                padding: '10px 20px', border: 'none', borderRadius: '8px',
+                color: 'white', cursor: exportMachinerySelected.size === 0 ? 'not-allowed' : 'pointer',
+                fontSize: '0.875rem', fontWeight: '600',
+                background: exportMachinerySelected.size === 0 ? '#6b7280' : '#10b981',
+                opacity: exportMachinerySelected.size === 0 ? 0.6 : 1
+              }}>
+              ⬇ Download CSV
+            </button>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+
+  {/* ── EXPORT SERVICE RECORDS ── */}
+  <div style={{
+    border: `1px solid ${theme === 'light' ? '#d1d5db' : '#374151'}`,
+    borderRadius: '10px',
+    overflow: 'hidden'
+  }}>
+    <button
+      onClick={() => setExportServiceOpen(o => !o)}
+      style={{
+        width: '100%', padding: '14px 18px',
+        background: exportServiceOpen
+          ? (theme === 'light' ? '#f0fdf4' : 'rgba(16,185,129,0.15)')
+          : (theme === 'light' ? '#f9fafb' : 'rgba(255,255,255,0.04)'),
+        border: 'none', cursor: 'pointer',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        color: currentTheme.text, fontSize: '1rem', fontWeight: '600',
+      }}
+    >
+      <span>🔧 Export Service Records</span>
+      <span style={{
+        transition: 'transform 0.2s ease',
+        transform: exportServiceOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+        display: 'inline-block'
+      }}>▼</span>
+    </button>
+
+    {exportServiceOpen && (
+      <div style={{ padding: '16px', borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` }}>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+          {['all', 'daterange', 'manual'].map(tab => (
+            <button key={tab} onClick={() => setExportServiceTab(tab)} style={{
+              padding: '8px 16px', border: 'none', borderRadius: '8px', cursor: 'pointer',
+              fontSize: '0.875rem', fontWeight: exportServiceTab === tab ? '700' : '400',
+              background: exportServiceTab === tab
+                ? 'linear-gradient(to right, #10b981, #06b6d4)'
+                : (theme === 'light' ? '#e5e7eb' : '#374151'),
+              color: exportServiceTab === tab ? 'white' : currentTheme.text,
+            }}>
+              {tab === 'all' ? 'Export All' : tab === 'daterange' ? 'Date Range' : 'Manual Select'}
+            </button>
+          ))}
+        </div>
+
+        {exportServiceTab === 'all' && (
+          <div>
+            <p style={{ color: currentTheme.textSecondary, marginBottom: '12px', fontSize: '0.875rem' }}>
+              This will export all <strong style={{ color: currentTheme.text }}>{serviceHistory.length}</strong> service records.
+            </p>
+            <button onClick={() => exportToCSV(
+              getServiceRows(serviceHistory),
+              ['Machine', 'Service Type', 'Date', 'Technician', 'Notes'],
+              'service-records-all.csv'
+            )} style={{
+              padding: '10px 20px', background: '#10b981', border: 'none',
+              borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600'
+            }}>
+              ⬇ Download CSV
+            </button>
+          </div>
+        )}
+
+        {exportServiceTab === 'daterange' && (() => {
+          const filtered = serviceHistory.filter(r => {
+            if (!r.date) return false;
+            const start = exportServiceDateStart ? new Date(exportServiceDateStart) : null;
+            const end = exportServiceDateEnd ? new Date(exportServiceDateEnd + 'T23:59:59') : null;
+            const d = new Date(r.date);
+            if (start && d < start) return false;
+            if (end && d > end) return false;
+            return true;
+          });
+          return (
+            <div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '4px' }}>Start Date</label>
+                  <input type="date" value={exportServiceDateStart}
+                    onChange={e => setExportServiceDateStart(e.target.value)}
+                    style={{ ...styles.input, marginBottom: 0, fontFamily: 'inherit' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '4px' }}>End Date</label>
+                  <input type="date" value={exportServiceDateEnd}
+                    onChange={e => setExportServiceDateEnd(e.target.value)}
+                    style={{ ...styles.input, marginBottom: 0, fontFamily: 'inherit' }} />
+                </div>
+              </div>
+              <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '12px' }}>
+                <strong style={{ color: currentTheme.text }}>{filtered.length}</strong> records match this date range.
+              </p>
+              <button
+                onClick={() => exportToCSV(
+                  getServiceRows(filtered),
+                  ['Machine', 'Service Type', 'Date', 'Technician', 'Notes'],
+                  'service-records-daterange.csv'
+                )}
+                disabled={filtered.length === 0}
+                style={{
+                  padding: '10px 20px', border: 'none', borderRadius: '8px',
+                  color: 'white', cursor: filtered.length === 0 ? 'not-allowed' : 'pointer',
+                  fontSize: '0.875rem', fontWeight: '600',
+                  background: filtered.length === 0 ? '#6b7280' : '#10b981',
+                  opacity: filtered.length === 0 ? 0.6 : 1
+                }}>
+                ⬇ Download CSV
+              </button>
+            </div>
+          );
+        })()}
+
+        {exportServiceTab === 'manual' && (
+          <div>
+            {exportMode === 'service' ? (
+              <div style={{
+                padding: '12px 14px',
+                background: 'rgba(16,185,129,0.1)', border: '1px solid #10b981',
+                borderRadius: '8px', marginBottom: '12px', fontSize: '0.875rem', color: '#10b981'
+              }}>
+                ✅ Export mode active — go to the Service tab to select records.
+              </div>
+            ) : (
+              <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '12px' }}>
+                Click below to go to the Service tab and select records to export.
+              </p>
+            )}
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+              <button onClick={() => { setExportMode('service'); setActiveTab('service'); }} style={{
+                padding: '10px 20px', background: '#10b981', border: 'none',
+                borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600'
+              }}>
+                {exportMode === 'service' ? '↩ Back to Service' : '☑ Select Records'}
+              </button>
+              {exportServiceSelected.size > 0 && (
+                <button onClick={() => setExportServiceSelected(new Set())} style={{
+                  padding: '10px 20px', background: '#ef4444', border: 'none',
+                  borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem'
+                }}>
+                  Clear Selection
+                </button>
+              )}
+            </div>
+            <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '12px' }}>
+              <strong style={{ color: currentTheme.text }}>{exportServiceSelected.size}</strong> records selected.
+            </p>
+            <button
+              onClick={() => {
+                const selected = serviceHistory.filter(i => exportServiceSelected.has(i.id));
+                exportToCSV(
+                  getServiceRows(selected),
+                  ['Machine', 'Service Type', 'Date', 'Technician', 'Notes'],
+                  'service-records-selected.csv'
+                );
+              }}
+              disabled={exportServiceSelected.size === 0}
+              style={{
+                padding: '10px 20px', border: 'none', borderRadius: '8px',
+                color: 'white', cursor: exportServiceSelected.size === 0 ? 'not-allowed' : 'pointer',
+                fontSize: '0.875rem', fontWeight: '600',
+                background: exportServiceSelected.size === 0 ? '#6b7280' : '#10b981',
+                opacity: exportServiceSelected.size === 0 ? 0.6 : 1
+              }}>
+              ⬇ Download CSV
+            </button>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+
+</div>
                   </div>
                 </div>
               )}
