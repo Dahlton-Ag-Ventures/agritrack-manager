@@ -355,23 +355,6 @@ const [newTotalKm, setNewTotalKm] = useState('');
 const [kmForm, setKmForm] = useState({ machineName: '', kmToAdd: '' });
 const [showKmReminderModal, setShowKmReminderModal] = useState(false);
 
-// Import state
-const [importInventoryOpen, setImportInventoryOpen] = useState(false);
-const [importMachineryOpen, setImportMachineryOpen] = useState(false);
-const [importServiceOpen, setImportServiceOpen] = useState(false);
-const [importInventoryTab, setImportInventoryTab] = useState('upload');
-const [importMachineryTab, setImportMachineryTab] = useState('upload');
-const [importServiceTab, setImportServiceTab] = useState('upload');
-const [importInventoryRows, setImportInventoryRows] = useState([]);
-const [importMachineryRows, setImportMachineryRows] = useState([]);
-const [importServiceRows, setImportServiceRows] = useState([]);
-const [importInventoryDuplicates, setImportInventoryDuplicates] = useState([]);
-const [importMachineryDuplicates, setImportMachineryDuplicates] = useState([]);
-const [importServiceDuplicates, setImportServiceDuplicates] = useState([]);
-const [importInventoryStatus, setImportInventoryStatus] = useState(null);
-const [importMachineryStatus, setImportMachineryStatus] = useState(null);
-const [importServiceStatus, setImportServiceStatus] = useState(null);
-  
   // Export state
 const [exportInventoryOpen, setExportInventoryOpen] = useState(false);
 const [exportMachineryOpen, setExportMachineryOpen] = useState(false);
@@ -1015,27 +998,7 @@ const quality = 0.85;
     return null;
   }
 };
-const parseCSVText = (text) => {
-  const lines = text.split('\n').filter(l => l.trim());
-  if (lines.length < 2) return [];
-  return lines.slice(1).map(line => {
-    const cols = [];
-    let current = '';
-    let inQuotes = false;
-    for (let i = 0; i < line.length; i++) {
-      if (line[i] === '"') {
-        inQuotes = !inQuotes;
-      } else if (line[i] === ',' && !inQuotes) {
-        cols.push(current.trim());
-        current = '';
-      } else {
-        current += line[i];
-      }
-    }
-    cols.push(current.trim());
-    return cols;
-  });
-};
+
 const exportToCSV = (rows, headers, filename) => {
   const escape = (val) => {
     const str = (val === null || val === undefined) ? '' : String(val);
@@ -7352,713 +7315,133 @@ const dueReminders = trackType === 'km'
     )}
   </div>
 
-   {/* ── IMPORT INVENTORY ── */}
-  <div style={{
-    border: `1px solid ${theme === 'light' ? '#d1d5db' : '#374151'}`,
-    borderRadius: '10px', overflow: 'hidden'
-  }}>
-    <button
-      onClick={() => { setImportInventoryOpen(o => !o); setImportInventoryRows([]); setImportInventoryDuplicates([]); setImportInventoryStatus(null); }}
-      style={{
-        width: '100%', padding: '14px 18px',
-        background: importInventoryOpen
-          ? (theme === 'light' ? '#eff6ff' : 'rgba(8,145,178,0.15)')
-          : (theme === 'light' ? '#f9fafb' : 'rgba(255,255,255,0.04)'),
-        border: 'none', cursor: 'pointer',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        color: currentTheme.text, fontSize: '1rem', fontWeight: '600',
-      }}
-    >
-      <span>📥 Import Inventory</span>
-      <span style={{ transition: 'transform 0.2s ease', transform: importInventoryOpen ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block' }}>▼</span>
-    </button>
+   <button 
+    onClick={async () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.csv';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const text = await file.text();
+        const rows = text.split('\n').slice(1);
+        const newInventory = rows
+          .filter(row => row.trim())
+          .map((row, index) => {
+            const [name, partNumber, quantity, location, category, minQuantity, maxQuantity] = row.split(',');
+            return {
+              id: Date.now() + index,
+              name: name?.trim() || '',
+              partNumber: partNumber?.trim() || '',
+              quantity: quantity?.trim() || '',
+              location: location?.trim() || '',
+              category: category?.trim() || '',
+              minQuantity: minQuantity?.trim() || '',
+              maxQuantity: maxQuantity?.trim() || '',
+            };
+          });
+        const { error } = await supabase
+          .from('agritrack_data')
+          .update({ inventory: [...inventory, ...newInventory] })
+          .eq('id', 1);
+        if (error) {
+          alert('Error importing: ' + error.message);
+        } else {
+          alert(`Successfully imported ${newInventory.length} items!`);
+          loadData();
+        }
+      };
+      input.click();
+    }}
+    style={{...styles.secondaryButton, background: '#0891b2'}}
+  >
+    Import Inventory from CSV
+  </button>
+  <button 
+    onClick={async () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.csv';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const text = await file.text();
+        const rows = text.split('\n').slice(1);
+        const newMachinery = rows
+          .filter(row => row.trim())
+          .map((row, index) => {
+            const [name, vinSerial, category, status] = row.split(',');
+            return {
+              id: Date.now() + index,
+              name: name?.trim() || '',
+              vinSerial: vinSerial?.trim() || '',
+              category: category?.trim() || '',
+              status: status?.trim() || 'Active',
+            };
+          });
+        const { error } = await supabase
+          .from('agritrack_data')
+          .update({ machinery: [...machinery, ...newMachinery] })
+          .eq('id', 1);
+        if (error) {
+          alert('Error importing: ' + error.message);
+        } else {
+          alert(`Successfully imported ${newMachinery.length} machines!`);
+          loadData();
+        }
+      };
+      input.click();
+    }}
+    style={{...styles.secondaryButton, background: '#0891b2'}}
+  >
+    Import Machinery from CSV
+  </button>
+  <button 
+    onClick={async () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.csv';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const text = await file.text();
+        const rows = text.split('\n').slice(1);
+        const newRecords = rows
+          .filter(row => row.trim())
+          .map((row, index) => {
+            const [machineName, serviceType, date, technician, notes] = row.split(',');
+            return {
+              id: Date.now() + index,
+              machineName: machineName?.trim() || '',
+              serviceType: serviceType?.trim() || '',
+              date: date?.trim() || '',
+              technician: technician?.trim() || '',
+              notes: notes?.trim() || '',
+            };
+          });
+        const { error } = await supabase
+          .from('agritrack_data')
+          .update({ service_history: [...serviceHistory, ...newRecords] })
+          .eq('id', 1);
+        if (error) {
+          alert('Error importing: ' + error.message);
+        } else {
+          alert(`Successfully imported ${newRecords.length} service records!`);
+          loadData();
+        }
+      };
+      input.click();
+    }}
+    style={{...styles.secondaryButton, background: '#0891b2'}}
+  >
+    Import Service Records from CSV
+  </button>
 
-    {importInventoryOpen && (
-      <div style={{ padding: '16px', borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` }}>
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-          {['upload', 'format'].map(tab => (
-            <button key={tab} onClick={() => setImportInventoryTab(tab)} style={{
-              padding: '8px 16px', border: 'none', borderRadius: '8px', cursor: 'pointer',
-              fontSize: '0.875rem', fontWeight: importInventoryTab === tab ? '700' : '400',
-              background: importInventoryTab === tab
-                ? 'linear-gradient(to right, #0891b2, #0284c7)'
-                : (theme === 'light' ? '#e5e7eb' : '#374151'),
-              color: importInventoryTab === tab ? 'white' : currentTheme.text,
-            }}>
-              {tab === 'upload' ? 'Upload & Preview' : 'Format Guide'}
-            </button>
-          ))}
-        </div>
-
-        {importInventoryTab === 'upload' && (
-          <div>
-            <button
-              onClick={() => {
-                const input = document.createElement('input');
-                input.type = 'file'; input.accept = '.csv';
-                input.onchange = async (e) => {
-                  const file = e.target.files[0];
-                  if (!file) return;
-                  const text = await file.text();
-                  const parsed = parseCSVText(text).map(cols => ({
-                    name: cols[0] || '',
-                    partNumber: cols[1] || '',
-                    quantity: cols[2] || '',
-                    location: cols[3] || '',
-                    minQuantity: cols[4] || '',
-                    maxQuantity: cols[5] || '',
-                  })).filter(r => r.name);
-                  const dupes = parsed.filter(r =>
-                    inventory.some(existing => existing.name.toLowerCase() === r.name.toLowerCase())
-                  );
-                  setImportInventoryRows(parsed);
-                  setImportInventoryDuplicates(dupes);
-                  setImportInventoryStatus(null);
-                };
-                input.click();
-              }}
-              style={{ padding: '10px 20px', background: '#0891b2', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600', marginBottom: '16px' }}
-            >
-              📂 Choose CSV File
-            </button>
-
-            {importInventoryRows.length > 0 && (
-              <div>
-                <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '8px' }}>
-                  <strong style={{ color: currentTheme.text }}>{importInventoryRows.length}</strong> rows detected. Preview (first 5):
-                </p>
-                <div style={{ overflowX: 'auto', marginBottom: '12px' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
-                    <thead>
-                      <tr>
-                        {['Name','Part #','Qty','Location','Min','Max'].map(h => (
-                          <th key={h} style={{ padding: '6px 10px', background: theme === 'light' ? '#f3f4f6' : '#374151', color: currentTheme.text, textAlign: 'left', borderRadius: '4px' }}>{h}</th>
-                        ))}
-                        <th style={{ padding: '6px 10px', background: theme === 'light' ? '#f3f4f6' : '#374151', color: currentTheme.text, textAlign: 'left', borderRadius: '4px' }}>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {importInventoryRows.slice(0, 5).map((row, i) => {
-                        const isDupe = importInventoryDuplicates.some(d => d.name.toLowerCase() === row.name.toLowerCase());
-                        return (
-                          <tr key={i} style={{ background: isDupe ? 'rgba(245,158,11,0.1)' : 'transparent' }}>
-                            <td style={{ padding: '6px 10px', color: currentTheme.text }}>{row.name}</td>
-                            <td style={{ padding: '6px 10px', color: currentTheme.textSecondary }}>{row.partNumber}</td>
-                            <td style={{ padding: '6px 10px', color: currentTheme.textSecondary }}>{row.quantity}</td>
-                            <td style={{ padding: '6px 10px', color: currentTheme.textSecondary }}>{row.location}</td>
-                            <td style={{ padding: '6px 10px', color: currentTheme.textSecondary }}>{row.minQuantity}</td>
-                            <td style={{ padding: '6px 10px', color: currentTheme.textSecondary }}>{row.maxQuantity}</td>
-                            <td style={{ padding: '6px 10px' }}>
-                              {isDupe
-                                ? <span style={{ color: '#f59e0b', fontWeight: '600', fontSize: '0.75rem' }}>⚠ Duplicate</span>
-                                : <span style={{ color: '#10b981', fontSize: '0.75rem' }}>✓ New</span>}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+</div>
+                  </div>
                 </div>
-
-                {importInventoryDuplicates.length > 0 && (
-                  <div style={{ padding: '12px 14px', marginBottom: '12px', background: 'rgba(245,158,11,0.1)', border: '1px solid #f59e0b', borderRadius: '8px', fontSize: '0.875rem' }}>
-                    <p style={{ color: '#f59e0b', fontWeight: '600', marginBottom: '6px' }}>⚠ {importInventoryDuplicates.length} duplicate name{importInventoryDuplicates.length !== 1 ? 's' : ''} detected:</p>
-                    <p style={{ color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '10px' }}>{importInventoryDuplicates.map(d => d.name).join(', ')}</p>
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      <button
-                        onClick={async () => {
-                          const toImport = importInventoryRows.filter(r =>
-                            !importInventoryDuplicates.some(d => d.name.toLowerCase() === r.name.toLowerCase())
-                          );
-                          const rows = toImport.map(r => ({
-                            id: Date.now().toString() + Math.random().toString(36).slice(2),
-                            name: r.name, part_number: r.partNumber,
-                            quantity: parseInt(r.quantity) || 0, location: r.location,
-                            min_quantity: parseInt(r.minQuantity) || 0,
-                            max_quantity: parseInt(r.maxQuantity) || 0,
-                            photo_url: null
-                          }));
-                          const { error } = await supabase.from('inventory_items').insert(rows);
-                          if (error) { setImportInventoryStatus({ type: 'error', message: error.message }); }
-                          else { setImportInventoryStatus({ type: 'success', message: `Successfully imported ${rows.length} items (${importInventoryDuplicates.length} duplicates skipped).` }); setImportInventoryRows([]); setImportInventoryDuplicates([]); loadData(); }
-                        }}
-                        style={{ padding: '8px 16px', background: '#10b981', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' }}
-                      >
-                        Skip Duplicates & Import
-                      </button>
-                      <button
-                        onClick={async () => {
-                          const rows = importInventoryRows.map(r => ({
-                            id: Date.now().toString() + Math.random().toString(36).slice(2),
-                            name: r.name, part_number: r.partNumber,
-                            quantity: parseInt(r.quantity) || 0, location: r.location,
-                            min_quantity: parseInt(r.minQuantity) || 0,
-                            max_quantity: parseInt(r.maxQuantity) || 0,
-                            photo_url: null
-                          }));
-                          const { error } = await supabase.from('inventory_items').insert(rows);
-                          if (error) { setImportInventoryStatus({ type: 'error', message: error.message }); }
-                          else { setImportInventoryStatus({ type: 'success', message: `Successfully imported all ${rows.length} items including duplicates.` }); setImportInventoryRows([]); setImportInventoryDuplicates([]); loadData(); }
-                        }}
-                        style={{ padding: '8px 16px', background: '#f59e0b', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' }}
-                      >
-                        Import All Including Duplicates
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {importInventoryDuplicates.length === 0 && (
-                  <button
-                    onClick={async () => {
-                      const rows = importInventoryRows.map(r => ({
-                        id: Date.now().toString() + Math.random().toString(36).slice(2),
-                        name: r.name, part_number: r.partNumber,
-                        quantity: parseInt(r.quantity) || 0, location: r.location,
-                        min_quantity: parseInt(r.minQuantity) || 0,
-                        max_quantity: parseInt(r.maxQuantity) || 0,
-                        photo_url: null
-                      }));
-                      const { error } = await supabase.from('inventory_items').insert(rows);
-                      if (error) { setImportInventoryStatus({ type: 'error', message: error.message }); }
-                      else { setImportInventoryStatus({ type: 'success', message: `Successfully imported ${rows.length} items!` }); setImportInventoryRows([]); loadData(); }
-                    }}
-                    style={{ padding: '10px 20px', background: '#10b981', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600', marginBottom: '12px' }}
-                  >
-                    ✓ Confirm Import
-                  </button>
-                )}
-
-                {importInventoryStatus && (
-                  <div style={{
-                    padding: '10px 14px', borderRadius: '8px', fontSize: '0.875rem', marginTop: '8px',
-                    background: importInventoryStatus.type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-                    border: `1px solid ${importInventoryStatus.type === 'success' ? '#10b981' : '#ef4444'}`,
-                    color: importInventoryStatus.type === 'success' ? '#10b981' : '#ef4444'
-                  }}>
-                    {importInventoryStatus.type === 'success' ? '✅' : '❌'} {importInventoryStatus.message}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {importInventoryTab === 'format' && (
-          <div>
-            <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '12px' }}>
-              Your CSV must have these columns in this exact order:
-            </p>
-            <div style={{ overflowX: 'auto', marginBottom: '16px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
-                <thead>
-                  <tr>
-                    {['Name','Part Number','Quantity','Location','Min Qty','Max Qty'].map(h => (
-                      <th key={h} style={{ padding: '6px 10px', background: theme === 'light' ? '#f3f4f6' : '#374151', color: currentTheme.text, textAlign: 'left' }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    {['Oil Filter','OF-1234','5','Shop Shelf A','2','10'].map((v,i) => (
-                      <td key={i} style={{ padding: '6px 10px', color: currentTheme.textSecondary, borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` }}>{v}</td>
-                    ))}
-                  </tr>
-                  <tr>
-                    {['Hydraulic Hose','HH-5678','3','Bin 4','1','8'].map((v,i) => (
-                      <td key={i} style={{ padding: '6px 10px', color: currentTheme.textSecondary, borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` }}>{v}</td>
-                    ))}
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <button
-              onClick={() => {
-                const csv = 'Name,Part Number,Quantity,Location,Min Qty,Max Qty\nOil Filter,OF-1234,5,Shop Shelf A,2,10\nHydraulic Hose,HH-5678,3,Bin 4,1,8\n';
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url; a.download = 'inventory-template.csv'; a.click();
-                window.URL.revokeObjectURL(url);
-              }}
-              style={{ padding: '10px 20px', background: '#0891b2', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600' }}
-            >
-              ⬇ Download Blank Template
-            </button>
-          </div>
-        )}
-      </div>
-    )}
-  </div>
-
-  {/* ── IMPORT MACHINERY ── */}
-  <div style={{
-    border: `1px solid ${theme === 'light' ? '#d1d5db' : '#374151'}`,
-    borderRadius: '10px', overflow: 'hidden'
-  }}>
-    <button
-      onClick={() => { setImportMachineryOpen(o => !o); setImportMachineryRows([]); setImportMachineryDuplicates([]); setImportMachineryStatus(null); }}
-      style={{
-        width: '100%', padding: '14px 18px',
-        background: importMachineryOpen
-          ? (theme === 'light' ? '#eff6ff' : 'rgba(8,145,178,0.15)')
-          : (theme === 'light' ? '#f9fafb' : 'rgba(255,255,255,0.04)'),
-        border: 'none', cursor: 'pointer',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        color: currentTheme.text, fontSize: '1rem', fontWeight: '600',
-      }}
-    >
-      <span>📥 Import Machinery</span>
-      <span style={{ transition: 'transform 0.2s ease', transform: importMachineryOpen ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block' }}>▼</span>
-    </button>
-
-    {importMachineryOpen && (
-      <div style={{ padding: '16px', borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` }}>
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-          {['upload', 'format'].map(tab => (
-            <button key={tab} onClick={() => setImportMachineryTab(tab)} style={{
-              padding: '8px 16px', border: 'none', borderRadius: '8px', cursor: 'pointer',
-              fontSize: '0.875rem', fontWeight: importMachineryTab === tab ? '700' : '400',
-              background: importMachineryTab === tab
-                ? 'linear-gradient(to right, #0891b2, #0284c7)'
-                : (theme === 'light' ? '#e5e7eb' : '#374151'),
-              color: importMachineryTab === tab ? 'white' : currentTheme.text,
-            }}>
-              {tab === 'upload' ? 'Upload & Preview' : 'Format Guide'}
-            </button>
-          ))}
-        </div>
-
-        {importMachineryTab === 'upload' && (
-          <div>
-            <button
-              onClick={() => {
-                const input = document.createElement('input');
-                input.type = 'file'; input.accept = '.csv';
-                input.onchange = async (e) => {
-                  const file = e.target.files[0];
-                  if (!file) return;
-                  const text = await file.text();
-                  const parsed = parseCSVText(text).map(cols => ({
-                    name: cols[0] || '',
-                    vinSerial: cols[1] || '',
-                    category: cols[2] || '',
-                    status: cols[3] || 'Active',
-                    licensePlate: cols[4] || '',
-                  })).filter(r => r.name);
-                  const dupes = parsed.filter(r =>
-                    machinery.some(existing => existing.name.toLowerCase() === r.name.toLowerCase())
-                  );
-                  setImportMachineryRows(parsed);
-                  setImportMachineryDuplicates(dupes);
-                  setImportMachineryStatus(null);
-                };
-                input.click();
-              }}
-              style={{ padding: '10px 20px', background: '#0891b2', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600', marginBottom: '16px' }}
-            >
-              📂 Choose CSV File
-            </button>
-
-            {importMachineryRows.length > 0 && (
-              <div>
-                <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '8px' }}>
-                  <strong style={{ color: currentTheme.text }}>{importMachineryRows.length}</strong> rows detected. Preview (first 5):
-                </p>
-                <div style={{ overflowX: 'auto', marginBottom: '12px' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
-                    <thead>
-                      <tr>
-                        {['Name','VIN/Serial','Category','Status','License Plate',''].map(h => (
-                          <th key={h} style={{ padding: '6px 10px', background: theme === 'light' ? '#f3f4f6' : '#374151', color: currentTheme.text, textAlign: 'left', borderRadius: '4px' }}>{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {importMachineryRows.slice(0, 5).map((row, i) => {
-                        const isDupe = importMachineryDuplicates.some(d => d.name.toLowerCase() === row.name.toLowerCase());
-                        return (
-                          <tr key={i} style={{ background: isDupe ? 'rgba(245,158,11,0.1)' : 'transparent' }}>
-                            <td style={{ padding: '6px 10px', color: currentTheme.text }}>{row.name}</td>
-                            <td style={{ padding: '6px 10px', color: currentTheme.textSecondary }}>{row.vinSerial}</td>
-                            <td style={{ padding: '6px 10px', color: currentTheme.textSecondary }}>{row.category}</td>
-                            <td style={{ padding: '6px 10px', color: currentTheme.textSecondary }}>{row.status}</td>
-                            <td style={{ padding: '6px 10px', color: currentTheme.textSecondary }}>{row.licensePlate}</td>
-                            <td style={{ padding: '6px 10px' }}>
-                              {isDupe
-                                ? <span style={{ color: '#f59e0b', fontWeight: '600', fontSize: '0.75rem' }}>⚠ Duplicate</span>
-                                : <span style={{ color: '#10b981', fontSize: '0.75rem' }}>✓ New</span>}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-
-                {importMachineryDuplicates.length > 0 && (
-                  <div style={{ padding: '12px 14px', marginBottom: '12px', background: 'rgba(245,158,11,0.1)', border: '1px solid #f59e0b', borderRadius: '8px', fontSize: '0.875rem' }}>
-                    <p style={{ color: '#f59e0b', fontWeight: '600', marginBottom: '6px' }}>⚠ {importMachineryDuplicates.length} duplicate name{importMachineryDuplicates.length !== 1 ? 's' : ''} detected:</p>
-                    <p style={{ color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '10px' }}>{importMachineryDuplicates.map(d => d.name).join(', ')}</p>
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      <button
-                        onClick={async () => {
-                          const toImport = importMachineryRows.filter(r =>
-                            !importMachineryDuplicates.some(d => d.name.toLowerCase() === r.name.toLowerCase())
-                          );
-                          const rows = toImport.map(r => ({
-                            id: Date.now().toString() + Math.random().toString(36).slice(2),
-                            name: r.name, vin_serial: r.vinSerial,
-                            category: r.category, status: r.status || 'Active',
-                            license_plate: r.licensePlate
-                          }));
-                          const { error } = await supabase.from('machinery_items').insert(rows);
-                          if (error) { setImportMachineryStatus({ type: 'error', message: error.message }); }
-                          else { setImportMachineryStatus({ type: 'success', message: `Successfully imported ${rows.length} machines (${importMachineryDuplicates.length} duplicates skipped).` }); setImportMachineryRows([]); setImportMachineryDuplicates([]); loadData(); }
-                        }}
-                        style={{ padding: '8px 16px', background: '#10b981', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' }}
-                      >
-                        Skip Duplicates & Import
-                      </button>
-                      <button
-                        onClick={async () => {
-                          const rows = importMachineryRows.map(r => ({
-                            id: Date.now().toString() + Math.random().toString(36).slice(2),
-                            name: r.name, vin_serial: r.vinSerial,
-                            category: r.category, status: r.status || 'Active',
-                            license_plate: r.licensePlate
-                          }));
-                          const { error } = await supabase.from('machinery_items').insert(rows);
-                          if (error) { setImportMachineryStatus({ type: 'error', message: error.message }); }
-                          else { setImportMachineryStatus({ type: 'success', message: `Successfully imported all ${rows.length} machines including duplicates.` }); setImportMachineryRows([]); setImportMachineryDuplicates([]); loadData(); }
-                        }}
-                        style={{ padding: '8px 16px', background: '#f59e0b', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' }}
-                      >
-                        Import All Including Duplicates
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {importMachineryDuplicates.length === 0 && (
-                  <button
-                    onClick={async () => {
-                      const rows = importMachineryRows.map(r => ({
-                        id: Date.now().toString() + Math.random().toString(36).slice(2),
-                        name: r.name, vin_serial: r.vinSerial,
-                        category: r.category, status: r.status || 'Active',
-                        license_plate: r.licensePlate
-                      }));
-                      const { error } = await supabase.from('machinery_items').insert(rows);
-                      if (error) { setImportMachineryStatus({ type: 'error', message: error.message }); }
-                      else { setImportMachineryStatus({ type: 'success', message: `Successfully imported ${rows.length} machines!` }); setImportMachineryRows([]); loadData(); }
-                    }}
-                    style={{ padding: '10px 20px', background: '#10b981', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600', marginBottom: '12px' }}
-                  >
-                    ✓ Confirm Import
-                  </button>
-                )}
-
-                {importMachineryStatus && (
-                  <div style={{
-                    padding: '10px 14px', borderRadius: '8px', fontSize: '0.875rem', marginTop: '8px',
-                    background: importMachineryStatus.type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-                    border: `1px solid ${importMachineryStatus.type === 'success' ? '#10b981' : '#ef4444'}`,
-                    color: importMachineryStatus.type === 'success' ? '#10b981' : '#ef4444'
-                  }}>
-                    {importMachineryStatus.type === 'success' ? '✅' : '❌'} {importMachineryStatus.message}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {importMachineryTab === 'format' && (
-          <div>
-            <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '12px' }}>
-              Your CSV must have these columns in this exact order:
-            </p>
-            <div style={{ overflowX: 'auto', marginBottom: '16px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
-                <thead>
-                  <tr>
-                    {['Name','VIN/Serial','Category','Status','License Plate'].map(h => (
-                      <th key={h} style={{ padding: '6px 10px', background: theme === 'light' ? '#f3f4f6' : '#374151', color: currentTheme.text, textAlign: 'left' }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    {['John Deere 8R 410','1RW8410RPKM123456','Tractor','Active','DAV-001'].map((v,i) => (
-                      <td key={i} style={{ padding: '6px 10px', color: currentTheme.textSecondary, borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` }}>{v}</td>
-                    ))}
-                  </tr>
-                  <tr>
-                    {['Spray Coupe 4640','SC4640-789012','Sprayer','Active','DAV-002'].map((v,i) => (
-                      <td key={i} style={{ padding: '6px 10px', color: currentTheme.textSecondary, borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` }}>{v}</td>
-                    ))}
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <button
-              onClick={() => {
-                const csv = 'Name,VIN/Serial,Category,Status,License Plate\nJohn Deere 8R 410,1RW8410RPKM123456,Tractor,Active,DAV-001\nSpray Coupe 4640,SC4640-789012,Sprayer,Active,DAV-002\n';
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url; a.download = 'machinery-template.csv'; a.click();
-                window.URL.revokeObjectURL(url);
-              }}
-              style={{ padding: '10px 20px', background: '#0891b2', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600' }}
-            >
-              ⬇ Download Blank Template
-            </button>
-          </div>
-        )}
-      </div>
-    )}
-  </div>
-
-  {/* ── IMPORT SERVICE RECORDS ── */}
-  <div style={{
-    border: `1px solid ${theme === 'light' ? '#d1d5db' : '#374151'}`,
-    borderRadius: '10px', overflow: 'hidden'
-  }}>
-    <button
-      onClick={() => { setImportServiceOpen(o => !o); setImportServiceRows([]); setImportServiceDuplicates([]); setImportServiceStatus(null); }}
-      style={{
-        width: '100%', padding: '14px 18px',
-        background: importServiceOpen
-          ? (theme === 'light' ? '#eff6ff' : 'rgba(8,145,178,0.15)')
-          : (theme === 'light' ? '#f9fafb' : 'rgba(255,255,255,0.04)'),
-        border: 'none', cursor: 'pointer',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        color: currentTheme.text, fontSize: '1rem', fontWeight: '600',
-      }}
-    >
-      <span>📥 Import Service Records</span>
-      <span style={{ transition: 'transform 0.2s ease', transform: importServiceOpen ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block' }}>▼</span>
-    </button>
-
-    {importServiceOpen && (
-      <div style={{ padding: '16px', borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` }}>
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-          {['upload', 'format'].map(tab => (
-            <button key={tab} onClick={() => setImportServiceTab(tab)} style={{
-              padding: '8px 16px', border: 'none', borderRadius: '8px', cursor: 'pointer',
-              fontSize: '0.875rem', fontWeight: importServiceTab === tab ? '700' : '400',
-              background: importServiceTab === tab
-                ? 'linear-gradient(to right, #0891b2, #0284c7)'
-                : (theme === 'light' ? '#e5e7eb' : '#374151'),
-              color: importServiceTab === tab ? 'white' : currentTheme.text,
-            }}>
-              {tab === 'upload' ? 'Upload & Preview' : 'Format Guide'}
-            </button>
-          ))}
-        </div>
-
-        {importServiceTab === 'upload' && (
-          <div>
-            <button
-              onClick={() => {
-                const input = document.createElement('input');
-                input.type = 'file'; input.accept = '.csv';
-                input.onchange = async (e) => {
-                  const file = e.target.files[0];
-                  if (!file) return;
-                  const text = await file.text();
-                  const parsed = parseCSVText(text).map(cols => ({
-                    machineName: cols[0] || '',
-                    serviceType: cols[1] || '',
-                    date: cols[2] || '',
-                    technician: cols[3] || '',
-                    notes: cols[4] || '',
-                  })).filter(r => r.machineName);
-                  const dupes = parsed.filter(r =>
-                    serviceHistory.some(existing =>
-                      existing.machineName?.toLowerCase() === r.machineName.toLowerCase() &&
-                      existing.serviceType?.toLowerCase() === r.serviceType.toLowerCase() &&
-                      existing.date === r.date
-                    )
-                  );
-                  setImportServiceRows(parsed);
-                  setImportServiceDuplicates(dupes);
-                  setImportServiceStatus(null);
-                };
-                input.click();
-              }}
-              style={{ padding: '10px 20px', background: '#0891b2', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600', marginBottom: '16px' }}
-            >
-              📂 Choose CSV File
-            </button>
-
-            {importServiceRows.length > 0 && (
-              <div>
-                <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '8px' }}>
-                  <strong style={{ color: currentTheme.text }}>{importServiceRows.length}</strong> rows detected. Preview (first 5):
-                </p>
-                <div style={{ overflowX: 'auto', marginBottom: '12px' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
-                    <thead>
-                      <tr>
-                        {['Machine','Service Type','Date','Technician','Notes',''].map(h => (
-                          <th key={h} style={{ padding: '6px 10px', background: theme === 'light' ? '#f3f4f6' : '#374151', color: currentTheme.text, textAlign: 'left', borderRadius: '4px' }}>{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-<tbody>
-                      {importServiceRows.slice(0, 5).map((row, i) => {
-                        const isDupe = importServiceDuplicates.some(d =>
-                          d.machineName.toLowerCase() === row.machineName.toLowerCase() &&
-                          d.serviceType.toLowerCase() === row.serviceType.toLowerCase()
-                        );
-                        return (
-                          <tr key={i} style={{ background: isDupe ? 'rgba(245,158,11,0.1)' : 'transparent' }}>
-                            <td style={{ padding: '6px 10px', color: currentTheme.text }}>{row.machineName}</td>
-                            <td style={{ padding: '6px 10px', color: currentTheme.textSecondary }}>{row.serviceType}</td>
-                            <td style={{ padding: '6px 10px', color: currentTheme.textSecondary }}>{row.date}</td>
-                            <td style={{ padding: '6px 10px', color: currentTheme.textSecondary }}>{row.technician}</td>
-                            <td style={{ padding: '6px 10px', color: currentTheme.textSecondary }}>{row.notes}</td>
-                            <td style={{ padding: '6px 10px' }}>
-                              {isDupe
-                                ? <span style={{ color: '#f59e0b', fontWeight: '600', fontSize: '0.75rem' }}>⚠ Duplicate</span>
-                                : <span style={{ color: '#10b981', fontSize: '0.75rem' }}>✓ New</span>}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-)}
-
-                {importServiceDuplicates.length > 0 && (
-                  <div style={{ padding: '12px 14px', marginBottom: '12px', background: 'rgba(245,158,11,0.1)', border: '1px solid #f59e0b', borderRadius: '8px', fontSize: '0.875rem' }}>
-                    <p style={{ color: '#f59e0b', fontWeight: '600', marginBottom: '6px' }}>⚠ {importServiceDuplicates.length} duplicate record{importServiceDuplicates.length !== 1 ? 's' : ''} detected:</p>
-                    <p style={{ color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '10px' }}>{importServiceDuplicates.map(d => `${d.machineName} – ${d.serviceType} (${d.date})`).join(', ')}</p>
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      <button
-                        onClick={async () => {
-                          const toImport = importServiceRows.filter(r =>
-                            !importServiceDuplicates.some(d =>
-                              d.machineName.toLowerCase() === r.machineName.toLowerCase() &&
-                              d.serviceType.toLowerCase() === r.serviceType.toLowerCase() &&
-                              d.date === r.date
-                            )
-                          );
-                          const rows = toImport.map(r => ({
-                            id: Date.now().toString() + Math.random().toString(36).slice(2),
-                            machine_name: r.machineName, service_type: r.serviceType,
-                            date: r.date, technician: r.technician, notes: r.notes
-                          }));
-                          const { error } = await supabase.from('service_records').insert(rows);
-                          if (error) { setImportServiceStatus({ type: 'error', message: error.message }); }
-                          else { setImportServiceStatus({ type: 'success', message: `Successfully imported ${rows.length} records (${importServiceDuplicates.length} duplicates skipped).` }); setImportServiceRows([]); setImportServiceDuplicates([]); loadData(); }
-                        }}
-                        style={{ padding: '8px 16px', background: '#10b981', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' }}
-                      >
-                        Skip Duplicates & Import
-                      </button>
-                      <button
-                        onClick={async () => {
-                          const rows = importServiceRows.map(r => ({
-                            id: Date.now().toString() + Math.random().toString(36).slice(2),
-                            machine_name: r.machineName, service_type: r.serviceType,
-                            date: r.date, technician: r.technician, notes: r.notes
-                          }));
-                          const { error } = await supabase.from('service_records').insert(rows);
-                          if (error) { setImportServiceStatus({ type: 'error', message: error.message }); }
-                          else { setImportServiceStatus({ type: 'success', message: `Successfully imported all ${rows.length} records including duplicates.` }); setImportServiceRows([]); setImportServiceDuplicates([]); loadData(); }
-                        }}
-                        style={{ padding: '8px 16px', background: '#f59e0b', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' }}
-                      >
-                        Import All Including Duplicates
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {importServiceDuplicates.length === 0 && (
-                  <button
-                    onClick={async () => {
-                      const rows = importServiceRows.map(r => ({
-                        id: Date.now().toString() + Math.random().toString(36).slice(2),
-                        machine_name: r.machineName, service_type: r.serviceType,
-                        date: r.date, technician: r.technician, notes: r.notes
-                      }));
-                      const { error } = await supabase.from('service_records').insert(rows);
-                      if (error) { setImportServiceStatus({ type: 'error', message: error.message }); }
-                      else { setImportServiceStatus({ type: 'success', message: `Successfully imported ${rows.length} service records!` }); setImportServiceRows([]); loadData(); }
-                    }}
-                    style={{ padding: '10px 20px', background: '#10b981', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600', marginBottom: '12px' }}
-                  >
-                    ✓ Confirm Import
-                  </button>
-                )}
-
-                {importServiceStatus && (
-                  <div style={{
-                    padding: '10px 14px', borderRadius: '8px', fontSize: '0.875rem', marginTop: '8px',
-                    background: importServiceStatus.type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-                    border: `1px solid ${importServiceStatus.type === 'success' ? '#10b981' : '#ef4444'}`,
-                    color: importServiceStatus.type === 'success' ? '#10b981' : '#ef4444'
-                  }}>
-                    {importServiceStatus.type === 'success' ? '✅' : '❌'} {importServiceStatus.message}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {importServiceTab === 'format' && (
-          <div>
-            <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '12px' }}>
-              Your CSV must have these columns in this exact order:
-            </p>
-            <div style={{ overflowX: 'auto', marginBottom: '16px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
-                <thead>
-                  <tr>
-                    {['Machine Name','Service Type','Date','Technician','Notes'].map(h => (
-                      <th key={h} style={{ padding: '6px 10px', background: theme === 'light' ? '#f3f4f6' : '#374151', color: currentTheme.text, textAlign: 'left' }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    {['John Deere 8R 410','Oil Change','2024-03-15','J. Smith','Replaced filter and 15L oil'].map((v,i) => (
-                      <td key={i} style={{ padding: '6px 10px', color: currentTheme.textSecondary, borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` }}>{v}</td>
-                    ))}
-                  </tr>
-                  <tr>
-                    {['Spray Coupe 4640','Nozzle Inspection','2024-04-02','B. Jones','Replaced 3 nozzles on boom 2'].map((v,i) => (
-                      <td key={i} style={{ padding: '6px 10px', color: currentTheme.textSecondary, borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` }}>{v}</td>
-                    ))}
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <button
-              onClick={() => {
-                const csv = 'Machine Name,Service Type,Date,Technician,Notes\nJohn Deere 8R 410,Oil Change,2024-03-15,J. Smith,Replaced filter and 15L oil\nSpray Coupe 4640,Nozzle Inspection,2024-04-02,B. Jones,Replaced 3 nozzles on boom 2\n';
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url; a.download = 'service-records-template.csv'; a.click();
-                window.URL.revokeObjectURL(url);
-              }}
-              style={{ padding: '10px 20px', background: '#0891b2', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600' }}
-            >
-              ⬇ Download Blank Template
-            </button>
-          </div>
-        )}
-      </div>
-    )}
-  </div>
+              )}
+             <div                    
 
   style={{
     marginTop: '24px',
@@ -9587,6 +8970,8 @@ const dueReminders = trackType === 'km'
               : 'Select an option above'}
       </button>
     </Modal>
+  );
+})()}
       
 {/* Zoomable Image Viewer Modal */}
       {viewingImage && <ZoomableImageViewer 
