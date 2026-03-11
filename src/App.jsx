@@ -4008,24 +4008,33 @@ className="flip-card"
 }}>
   <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Machinery</h2>
   <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-    <button
+<button
   onClick={() => setShowRemindersPanel(!showRemindersPanel)}
   style={{
     padding: '10px 16px',
-    background: showRemindersPanel 
-  ? (theme === 'light' ? '#bae6fd' : 'linear-gradient(to right, #8b5cf6, #7c3aed)') 
-  : (theme === 'light' ? '#bae6fd' : '#8b5cf6'),
-    border: `1px solid ${showRemindersPanel ? '#06b6d4' : '#10b981'}`,
+    background: theme === 'light' ? '#86efac' : '#10b981',
+    border: 'none',
     borderRadius: '8px',
     fontSize: '0.875rem',
     fontWeight: 'bold',
-    color: theme === 'light' ? '#0c4a6e' : 'white',
+    color: theme === 'light' ? '#14532d' : 'white',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
     whiteSpace: 'nowrap',
     display: 'flex',
     alignItems: 'center',
-    gap: '6px'
+    gap: '6px',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.transform = 'translateY(-2px)';
+    e.currentTarget.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.4)';
+    e.currentTarget.style.background = theme === 'light' ? '#4ade80' : '#059669';
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.transform = 'translateY(0)';
+    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+    e.currentTarget.style.background = theme === 'light' ? '#86efac' : '#10b981';
   }}
 >
   <Wrench size={16} /> {showRemindersPanel ? 'Hide' : (window.innerWidth >= 768 ? 'Show Service Reminders' : 'Show')}
@@ -4047,7 +4056,18 @@ className="flip-card"
     gap: '6px',
     fontSize: '0.875rem',
     transition: 'all 0.2s ease',
-    whiteSpace: 'nowrap'
+    whiteSpace: 'nowrap',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.transform = 'translateY(-2px)';
+    e.currentTarget.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.4)';
+    e.currentTarget.style.background = theme === 'light' ? '#4ade80' : '#059669';
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.transform = 'translateY(0)';
+    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+    e.currentTarget.style.background = theme === 'light' ? '#86efac' : '#10b981';
   }}
 >
   <Plus size={16} /> {window.innerWidth >= 768 ? 'Add Machinery' : 'Add'}
