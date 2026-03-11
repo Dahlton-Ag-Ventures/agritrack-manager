@@ -1011,6 +1011,8 @@ const quality = 0.85;
         return (parseInt(a.quantity) || 0) - (parseInt(b.quantity) || 0);
       case 'quantity-desc':
         return (parseInt(b.quantity) || 0) - (parseInt(a.quantity) || 0);
+      case 'recently-added':
+        return (b.id || '').localeCompare(a.id || '');
       case 'location':
         return (a.location || '').localeCompare(b.location || '');
       default:
@@ -3449,6 +3451,7 @@ className="flip-card"
   >
     <option value="name-asc">Name (A → Z)</option>
     <option value="name-desc">Name (Z → A)</option>
+    <option value="recently-added">Recently Added</option>
     <option value="quantity-asc">Stock (Low → High)</option>
     <option value="quantity-desc">Stock (High → Low)</option>
     <option value="location">Location</option>
