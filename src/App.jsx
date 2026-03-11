@@ -9587,8 +9587,6 @@ const dueReminders = trackType === 'km'
               : 'Select an option above'}
       </button>
     </Modal>
-  );
-})()}
       
 {/* Zoomable Image Viewer Modal */}
       {viewingImage && <ZoomableImageViewer 
