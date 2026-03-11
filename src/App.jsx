@@ -7315,12 +7315,134 @@ const dueReminders = trackType === 'km'
     )}
   </div>
 
+   <button 
+    onClick={async () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.csv';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const text = await file.text();
+        const rows = text.split('\n').slice(1);
+        const newInventory = rows
+          .filter(row => row.trim())
+          .map((row, index) => {
+            const [name, partNumber, quantity, location, category, minQuantity, maxQuantity] = row.split(',');
+            return {
+              id: Date.now() + index,
+              name: name?.trim() || '',
+              partNumber: partNumber?.trim() || '',
+              quantity: quantity?.trim() || '',
+              location: location?.trim() || '',
+              category: category?.trim() || '',
+              minQuantity: minQuantity?.trim() || '',
+              maxQuantity: maxQuantity?.trim() || '',
+            };
+          });
+        const { error } = await supabase
+          .from('agritrack_data')
+          .update({ inventory: [...inventory, ...newInventory] })
+          .eq('id', 1);
+        if (error) {
+          alert('Error importing: ' + error.message);
+        } else {
+          alert(`Successfully imported ${newInventory.length} items!`);
+          loadData();
+        }
+      };
+      input.click();
+    }}
+    style={{...styles.secondaryButton, background: '#0891b2'}}
+  >
+    Import Inventory from CSV
+  </button>
+  <button 
+    onClick={async () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.csv';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const text = await file.text();
+        const rows = text.split('\n').slice(1);
+        const newMachinery = rows
+          .filter(row => row.trim())
+          .map((row, index) => {
+            const [name, vinSerial, category, status] = row.split(',');
+            return {
+              id: Date.now() + index,
+              name: name?.trim() || '',
+              vinSerial: vinSerial?.trim() || '',
+              category: category?.trim() || '',
+              status: status?.trim() || 'Active',
+            };
+          });
+        const { error } = await supabase
+          .from('agritrack_data')
+          .update({ machinery: [...machinery, ...newMachinery] })
+          .eq('id', 1);
+        if (error) {
+          alert('Error importing: ' + error.message);
+        } else {
+          alert(`Successfully imported ${newMachinery.length} machines!`);
+          loadData();
+        }
+      };
+      input.click();
+    }}
+    style={{...styles.secondaryButton, background: '#0891b2'}}
+  >
+    Import Machinery from CSV
+  </button>
+  <button 
+    onClick={async () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.csv';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const text = await file.text();
+        const rows = text.split('\n').slice(1);
+        const newRecords = rows
+          .filter(row => row.trim())
+          .map((row, index) => {
+            const [machineName, serviceType, date, technician, notes] = row.split(',');
+            return {
+              id: Date.now() + index,
+              machineName: machineName?.trim() || '',
+              serviceType: serviceType?.trim() || '',
+              date: date?.trim() || '',
+              technician: technician?.trim() || '',
+              notes: notes?.trim() || '',
+            };
+          });
+        const { error } = await supabase
+          .from('agritrack_data')
+          .update({ service_history: [...serviceHistory, ...newRecords] })
+          .eq('id', 1);
+        if (error) {
+          alert('Error importing: ' + error.message);
+        } else {
+          alert(`Successfully imported ${newRecords.length} service records!`);
+          loadData();
+        }
+      };
+      input.click();
+    }}
+    style={{...styles.secondaryButton, background: '#0891b2'}}
+  >
+    Import Service Records from CSV
+  </button>
+
 </div>
                   </div>
                 </div>
               )}
+             <div                    
 
-             <div
   style={{
     marginTop: '24px',
     padding: '16px',
