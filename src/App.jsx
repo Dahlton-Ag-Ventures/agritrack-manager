@@ -8314,7 +8314,7 @@ const dueReminders = trackType === 'km'
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent'
     }}>
-      Administrative Access & Permissions
+      Administrative Access &amp; Permissions
     </h3>
     <p style={{ 
       color: theme === 'dark' ? currentTheme.textSecondary : '#111827', 
