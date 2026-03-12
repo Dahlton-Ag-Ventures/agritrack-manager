@@ -7783,18 +7783,15 @@ const dueReminders = trackType === 'km'
                   borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem'
                 }}
               >
-                              Import Another File
-                          </button>
-                        </div>
-                        )}
-                    </div>
-                    )}
-                </div>
-                )}
+            Import Another File
+              </button>
             </div>
-          </div>
+          )}
         </div>
       )}
+    </div>
+  )}
+</div>
 {/* ── IMPORT MACHINERY ── */}
 <div style={{
   border: `1px solid ${theme === 'light' ? '#d1d5db' : '#374151'}`,
@@ -8284,12 +8281,12 @@ const dueReminders = trackType === 'km'
     fontSize: '0.875rem', 
     textAlign: 'center' 
   }}>
-    AgriTrack Manager • Created by Dahlton Ag Ventures • Powered by Vercel & Supabase
-  </p>
-</div>
-            </div>
+              AgriTrack Manager • Created by Dahlton Ag Ventures • Powered by Vercel & Supabase
+            </p>
           </div>
-        )}
+        </div>
+      </div>
+    )}
       
 {activeTab === 'admin' && (
   <div>
