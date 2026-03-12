@@ -7783,16 +7783,18 @@ const dueReminders = trackType === 'km'
                   borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem'
                 }}
               >
-                Import Another File
-              </button>
+                              Import Another File
+                          </button>
+                        </div>
+                        )}
+                    </div>
+                    )}
+                </div>
+                )}
             </div>
-          )}
+          </div>
         </div>
       )}
-    </div>
-  )}
-</div>
-
 {/* ── IMPORT MACHINERY ── */}
 <div style={{
   border: `1px solid ${theme === 'light' ? '#d1d5db' : '#374151'}`,
