@@ -1019,6 +1019,234 @@ const quality = 0.85;
   }
 };
 
+// ── IMPORT HELPERS ──
+
+const downloadTemplate = (type) => {
+  const templates = {
+    inventory: {
+      headers: ['Name', 'Part Number', 'Quantity', 'Location', 'Min Qty', 'Max Qty'],
+      example: ['Example Item', 'PN-001', '10', 'Shelf A', '2', '20'],
+      filename: 'inventory-template.csv'
+    },
+    machinery: {
+      headers: ['Name', 'VIN/Serial', 'Category', 'Status', 'License Plate'],
+      example: ['Example Tractor', 'VIN123456', 'Tractors', 'Active', 'ABC-123'],
+      filename: 'machinery-template.csv'
+    },
+    service: {
+      headers: ['Machine', 'Service Type', 'Date', 'Technician', 'Notes'],
+      example: ['Example Tractor', 'Oil Change', '2025-01-15', 'John Smith', 'Changed oil and filter'],
+      filename: 'service-template.csv'
+    }
+  };
+
+  const t = templates[type];
+  const csv = [t.headers.join(','), t.example.map(v => `"${v}"`).join(',')].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = t.filename;
+  a.click();
+  window.URL.revokeObjectURL(url);
+};
+
+const parseImportCSV = (text, type) => {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  if (lines.length < 2) return { rows: [], duplicates: [], invalidCategories: [], errors: ['File appears to be empty or has no data rows.'] };
+
+  const dataLines = lines.slice(1);
+  const rows = [];
+  const duplicates = [];
+  const invalidCategories = [];
+  const errors = [];
+
+  dataLines.forEach((line, index) => {
+    // Handle quoted fields
+    const fields = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') {
+        inQuotes = !inQuotes;
+      } else if (line[i] === ',' && !inQuotes) {
+        fields.push(current.trim());
+        current = '';
+      } else {
+        current += line[i];
+      }
+    }
+    fields.push(current.trim());
+
+    if (type === 'inventory') {
+      const [name, partNumber, quantity, location, minQty, maxQty] = fields;
+      if (!name) { errors.push(`Row ${index + 2}: Missing name — skipped`); return; }
+
+      const isDuplicate = inventory.some(
+        i => i.name?.toLowerCase() === name?.toLowerCase()
+      );
+      if (isDuplicate) duplicates.push({ rowIndex: index + 2, name });
+
+      rows.push({ name, partNumber: partNumber || '', quantity: quantity || '0', location: location || '', minQty: minQty || '', maxQty: maxQty || '', isDuplicate });
+    }
+
+    if (type === 'machinery') {
+      const [name, vinSerial, category, status, licensePlate] = fields;
+      if (!name) { errors.push(`Row ${index + 2}: Missing name — skipped`); return; }
+
+      const isDuplicate = machinery.some(
+        m => m.name?.toLowerCase() === name?.toLowerCase()
+      );
+      if (isDuplicate) duplicates.push({ rowIndex: index + 2, name });
+
+      const isValidCategory = MACHINERY_CATEGORIES.includes(category);
+      if (!isValidCategory && category) invalidCategories.push(category);
+
+      rows.push({ name, vinSerial: vinSerial || '', category: category || '', status: status || 'Active', licensePlate: licensePlate || '', isDuplicate, isValidCategory: isValidCategory || !category });
+    }
+
+    if (type === 'service') {
+      const [machineName, serviceType, date, technician, notes] = fields;
+      if (!machineName) { errors.push(`Row ${index + 2}: Missing machine name — skipped`); return; }
+
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (date && !dateRegex.test(date)) {
+        errors.push(`Row ${index + 2}: Invalid date format "${date}" — expected YYYY-MM-DD`);
+        return;
+      }
+
+      const isDuplicate = serviceHistory.some(
+        r => r.machineName?.toLowerCase() === machineName?.toLowerCase() &&
+             r.serviceType?.toLowerCase() === serviceType?.toLowerCase() &&
+             r.date === date
+      );
+      if (isDuplicate) duplicates.push({ rowIndex: index + 2, name: `${machineName} / ${serviceType} / ${date}` });
+
+      rows.push({ machineName, serviceType: serviceType || '', date: date || '', technician: technician || '', notes: notes || '', isDuplicate });
+    }
+  });
+
+  const uniqueInvalidCategories = [...new Set(invalidCategories)];
+  return { rows, duplicates, invalidCategories: uniqueInvalidCategories, errors };
+};
+
+const runImport = async (type, rows, catMap = {}) => {
+  const succeeded = [];
+  const failed = [];
+
+  if (type === 'inventory') {
+    setImportingInventory(true);
+    for (const row of rows) {
+      try {
+        const newId = Date.now().toString() + Math.random().toString(36).slice(2, 6);
+        const newItem = {
+          id: newId,
+          user_id: user.id,
+          name: row.name,
+          part_number: row.partNumber,
+          quantity: row.quantity,
+          location: row.location,
+          min_quantity: row.minQty,
+          max_quantity: row.maxQty,
+          photo_url: ''
+        };
+        const { error } = await supabase.from('inventory_items').insert([newItem]);
+        if (error) throw error;
+        setInventory(prev => [...prev, {
+          id: newId,
+          name: newItem.name,
+          partNumber: newItem.part_number,
+          quantity: newItem.quantity,
+          location: newItem.location,
+          minQuantity: newItem.min_quantity,
+          maxQuantity: newItem.max_quantity,
+          photoUrl: ''
+        }]);
+        succeeded.push(row.name);
+      } catch (err) {
+        failed.push({ name: row.name, reason: err.message });
+      }
+    }
+    setImportingInventory(false);
+    setImportInventoryResult({ succeeded, failed });
+  }
+
+  if (type === 'machinery') {
+    setImportingMachinery(true);
+    for (const row of rows) {
+      try {
+        const resolvedCategory = catMap[row.category] ?? row.category;
+        const newId = Date.now().toString() + Math.random().toString(36).slice(2, 6);
+        const newItem = {
+          id: newId,
+          user_id: user.id,
+          name: row.name,
+          vin_serial: row.vinSerial,
+          category: resolvedCategory,
+          status: row.status || 'Active',
+          photo_url: '',
+          requirements: '',
+          tracking_type: null,
+          license_plate: row.licensePlate || ''
+        };
+        const { error } = await supabase.from('machinery_items').insert([newItem]);
+        if (error) throw error;
+        setMachinery(prev => [...prev, {
+          id: newId,
+          name: newItem.name,
+          vinSerial: newItem.vin_serial,
+          category: newItem.category,
+          status: newItem.status,
+          photoUrl: '',
+          requirements: '',
+          tracking_type: '',
+          licensePlate: newItem.license_plate
+        }]);
+        succeeded.push(row.name);
+      } catch (err) {
+        failed.push({ name: row.name, reason: err.message });
+      }
+    }
+    setImportingMachinery(false);
+    setImportMachineryResult({ succeeded, failed });
+  }
+
+  if (type === 'service') {
+    setImportingService(true);
+    for (const row of rows) {
+      try {
+        const newId = Date.now().toString() + Math.random().toString(36).slice(2, 6);
+        const newItem = {
+          id: newId,
+          user_id: user.id,
+          machine_name: row.machineName,
+          service_type: row.serviceType,
+          date: row.date,
+          technician: row.technician,
+          notes: row.notes,
+          photo_urls: JSON.stringify([])
+        };
+        const { error } = await supabase.from('service_records').insert([newItem]);
+        if (error) throw error;
+        setServiceHistory(prev => [{
+          id: newId,
+          machineName: newItem.machine_name,
+          serviceType: newItem.service_type,
+          date: newItem.date,
+          technician: newItem.technician,
+          notes: newItem.notes,
+          photoUrls: []
+        }, ...prev]);
+        succeeded.push(row.machineName);
+      } catch (err) {
+        failed.push({ name: row.machineName, reason: err.message });
+      }
+    }
+    setImportingService(false);
+    setImportServiceResult({ succeeded, failed });
+  }
+};
+  
 const exportToCSV = (rows, headers, filename) => {
   const escape = (val) => {
     const str = (val === null || val === undefined) ? '' : String(val);
