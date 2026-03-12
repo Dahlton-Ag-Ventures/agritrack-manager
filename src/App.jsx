@@ -218,8 +218,6 @@ const CATEGORY_TRACKING_TYPE = {
   'Trailers': 'km',
 };
 
-const MACHINERY_CATEGORIES = Object.keys(CATEGORY_TRACKING_TYPE);
-
 const getTrackingType = (machine) => {
   if (machine.tracking_type) return machine.tracking_type;
   return CATEGORY_TRACKING_TYPE[machine.category] || 'hours';
@@ -10028,7 +10026,7 @@ const dueReminders = trackType === 'km'
   theme={currentTheme}
   allPhotos={viewingImageArray}
   startIndex={viewingImageIndex}
-/>}
+/>
       </div>
     </div>
   </>
