@@ -8268,7 +8268,7 @@ const dueReminders = trackType === 'km'
     </div>
   )}
 </div>
-                                      
+<div                     
   style={{
     marginTop: '24px',
     padding: '16px',
@@ -10026,7 +10026,7 @@ const dueReminders = trackType === 'km'
   theme={currentTheme}
   allPhotos={viewingImageArray}
   startIndex={viewingImageIndex}
-/>
+/>}
       </div>
     </div>
   </>
