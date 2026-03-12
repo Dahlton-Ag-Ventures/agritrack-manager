@@ -10025,7 +10025,8 @@ const dueReminders = trackType === 'km'
   theme={currentTheme}
   allPhotos={viewingImageArray}
   startIndex={viewingImageIndex}
-/>}
+/>
+}
       </div>
     </div>
   </>
