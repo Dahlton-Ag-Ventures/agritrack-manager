@@ -8281,12 +8281,13 @@ const dueReminders = trackType === 'km'
     fontSize: '0.875rem', 
     textAlign: 'center' 
   }}>
-              AgriTrack Manager • Created by Dahlton Ag Ventures • Powered by Vercel & Supabase
-            </p>
-          </div>
-        </div>
+    AgriTrack Manager • Created by Dahlton Ag Ventures • Powered by Vercel & Supabase
+  </p>
+</div>
       </div>
-    )}
+    </div>
+  </div>
+)}
       
 {activeTab === 'admin' && (
   <div>
