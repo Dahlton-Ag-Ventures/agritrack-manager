@@ -372,6 +372,26 @@ const [exportInventorySelected, setExportInventorySelected] = useState(new Set()
 const [exportMachinerySelected, setExportMachinerySelected] = useState(new Set());
 const [exportServiceSelected, setExportServiceSelected] = useState(new Set());
 const [exportMode, setExportMode] = useState(null); // 'inventory' | 'machinery' | 'service' | null
+
+  // Import state
+const [importInventoryOpen, setImportInventoryOpen] = useState(false);
+const [importMachineryOpen, setImportMachineryOpen] = useState(false);
+const [importServiceOpen, setImportServiceOpen] = useState(false);
+const [importInventoryTab, setImportInventoryTab] = useState('upload');
+const [importMachineryTab, setImportMachineryTab] = useState('upload');
+const [importServiceTab, setImportServiceTab] = useState('upload');
+const [importInventoryPreview, setImportInventoryPreview] = useState(null);
+const [importMachineryPreview, setImportMachineryPreview] = useState(null);
+const [importServicePreview, setImportServicePreview] = useState(null);
+const [showCategoryMapModal, setShowCategoryMapModal] = useState(false);
+const [categoryMapData, setCategoryMapData] = useState(null);
+const [categoryMappings, setCategoryMappings] = useState({});
+const [importingInventory, setImportingInventory] = useState(false);
+const [importingMachinery, setImportingMachinery] = useState(false);
+const [importingService, setImportingService] = useState(false);
+const [importInventoryResult, setImportInventoryResult] = useState(null);
+const [importMachineryResult, setImportMachineryResult] = useState(null);
+const [importServiceResult, setImportServiceResult] = useState(null);
   
   // Get current theme object
   const currentTheme = themes[theme];
