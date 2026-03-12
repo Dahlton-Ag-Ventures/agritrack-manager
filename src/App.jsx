@@ -218,6 +218,8 @@ const CATEGORY_TRACKING_TYPE = {
   'Trailers': 'km',
 };
 
+const MACHINERY_CATEGORIES = Object.keys(CATEGORY_TRACKING_TYPE);
+
 const getTrackingType = (machine) => {
   if (machine.tracking_type) return machine.tracking_type;
   return CATEGORY_TRACKING_TYPE[machine.category] || 'hours';
@@ -7563,134 +7565,712 @@ const dueReminders = trackType === 'km'
     )}
   </div>
 
-   <button 
-    onClick={async () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.csv';
-      input.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const text = await file.text();
-        const rows = text.split('\n').slice(1);
-        const newInventory = rows
-          .filter(row => row.trim())
-          .map((row, index) => {
-            const [name, partNumber, quantity, location, category, minQuantity, maxQuantity] = row.split(',');
-            return {
-              id: Date.now() + index,
-              name: name?.trim() || '',
-              partNumber: partNumber?.trim() || '',
-              quantity: quantity?.trim() || '',
-              location: location?.trim() || '',
-              category: category?.trim() || '',
-              minQuantity: minQuantity?.trim() || '',
-              maxQuantity: maxQuantity?.trim() || '',
-            };
-          });
-        const { error } = await supabase
-          .from('agritrack_data')
-          .update({ inventory: [...inventory, ...newInventory] })
-          .eq('id', 1);
-        if (error) {
-          alert('Error importing: ' + error.message);
-        } else {
-          alert(`Successfully imported ${newInventory.length} items!`);
-          loadData();
-        }
-      };
-      input.click();
+   {/* ── IMPORT INVENTORY ── */}
+<div style={{
+  border: `1px solid ${theme === 'light' ? '#d1d5db' : '#374151'}`,
+  borderRadius: '10px',
+  overflow: 'hidden'
+}}>
+  <button
+    onClick={() => {
+      setImportInventoryOpen(o => !o);
+      setImportInventoryResult(null);
+      setImportInventoryPreview(null);
     }}
-    style={{...styles.secondaryButton, background: '#0891b2'}}
-  >
-    Import Inventory from CSV
-  </button>
-  <button 
-    onClick={async () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.csv';
-      input.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const text = await file.text();
-        const rows = text.split('\n').slice(1);
-        const newMachinery = rows
-          .filter(row => row.trim())
-          .map((row, index) => {
-            const [name, vinSerial, category, status] = row.split(',');
-            return {
-              id: Date.now() + index,
-              name: name?.trim() || '',
-              vinSerial: vinSerial?.trim() || '',
-              category: category?.trim() || '',
-              status: status?.trim() || 'Active',
-            };
-          });
-        const { error } = await supabase
-          .from('agritrack_data')
-          .update({ machinery: [...machinery, ...newMachinery] })
-          .eq('id', 1);
-        if (error) {
-          alert('Error importing: ' + error.message);
-        } else {
-          alert(`Successfully imported ${newMachinery.length} machines!`);
-          loadData();
-        }
-      };
-      input.click();
+    style={{
+      width: '100%', padding: '14px 18px',
+      background: importInventoryOpen
+        ? (theme === 'light' ? '#f0fdf4' : 'rgba(16,185,129,0.15)')
+        : (theme === 'light' ? '#f9fafb' : 'rgba(255,255,255,0.04)'),
+      border: 'none', cursor: 'pointer',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      color: currentTheme.text, fontSize: '1rem', fontWeight: '600',
     }}
-    style={{...styles.secondaryButton, background: '#0891b2'}}
   >
-    Import Machinery from CSV
-  </button>
-  <button 
-    onClick={async () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.csv';
-      input.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const text = await file.text();
-        const rows = text.split('\n').slice(1);
-        const newRecords = rows
-          .filter(row => row.trim())
-          .map((row, index) => {
-            const [machineName, serviceType, date, technician, notes] = row.split(',');
-            return {
-              id: Date.now() + index,
-              machineName: machineName?.trim() || '',
-              serviceType: serviceType?.trim() || '',
-              date: date?.trim() || '',
-              technician: technician?.trim() || '',
-              notes: notes?.trim() || '',
-            };
-          });
-        const { error } = await supabase
-          .from('agritrack_data')
-          .update({ service_history: [...serviceHistory, ...newRecords] })
-          .eq('id', 1);
-        if (error) {
-          alert('Error importing: ' + error.message);
-        } else {
-          alert(`Successfully imported ${newRecords.length} service records!`);
-          loadData();
-        }
-      };
-      input.click();
-    }}
-    style={{...styles.secondaryButton, background: '#0891b2'}}
-  >
-    Import Service Records from CSV
+    <span>📥 Import Inventory</span>
+    <span style={{
+      transition: 'transform 0.2s ease',
+      transform: importInventoryOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+      display: 'inline-block'
+    }}>▼</span>
   </button>
 
-</div>
-                  </div>
+  {importInventoryOpen && (
+    <div style={{ padding: '16px', borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` }}>
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+        {['upload', 'template'].map(tab => (
+          <button key={tab} onClick={() => setImportInventoryTab(tab)} style={{
+            padding: '8px 16px', border: 'none', borderRadius: '8px', cursor: 'pointer',
+            fontSize: '0.875rem', fontWeight: importInventoryTab === tab ? '700' : '400',
+            background: importInventoryTab === tab
+              ? 'linear-gradient(to right, #10b981, #06b6d4)'
+              : (theme === 'light' ? '#e5e7eb' : '#374151'),
+            color: importInventoryTab === tab ? 'white' : currentTheme.text,
+          }}>
+            {tab === 'upload' ? '⬆ Upload CSV' : '📄 Download Template'}
+          </button>
+        ))}
+      </div>
+
+      {importInventoryTab === 'template' && (
+        <div>
+          <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '8px' }}>
+            Download a blank CSV template with the correct column headers and an example row.
+          </p>
+          <p style={{ color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '16px' }}>
+            Columns: <strong style={{ color: currentTheme.text }}>Name, Part Number, Quantity, Location, Min Qty, Max Qty</strong>
+          </p>
+          <button
+            onClick={() => downloadTemplate('inventory')}
+            style={{
+              padding: '10px 20px', background: '#0891b2', border: 'none',
+              borderRadius: '8px', color: 'white', cursor: 'pointer',
+              fontSize: '0.875rem', fontWeight: '600'
+            }}
+          >
+            ⬇ Download Template
+          </button>
+        </div>
+      )}
+
+      {importInventoryTab === 'upload' && (
+        <div>
+          <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '12px' }}>
+            Upload a CSV file to import inventory items. Use the Template tab to get the correct format.
+          </p>
+
+          <input
+            type="file"
+            accept=".csv"
+            onChange={async (e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              setImportInventoryResult(null);
+              const text = await file.text();
+              const parsed = parseImportCSV(text, 'inventory');
+              setImportInventoryPreview(parsed);
+              e.target.value = '';
+            }}
+            style={{
+              ...styles.input,
+              padding: '8px',
+              marginBottom: '12px',
+              cursor: 'pointer'
+            }}
+          />
+
+          {/* Preview */}
+          {importInventoryPreview && !importInventoryResult && (
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{
+                padding: '12px 16px',
+                background: theme === 'light' ? '#f0fdf4' : 'rgba(16,185,129,0.1)',
+                border: `1px solid ${theme === 'light' ? '#6ee7b7' : 'rgba(16,185,129,0.35)'}`,
+                borderRadius: '10px',
+                marginBottom: '10px'
+              }}>
+                <p style={{ fontWeight: '700', color: '#10b981', marginBottom: '4px', fontSize: '0.9rem' }}>
+                  ✅ {importInventoryPreview.rows.length} row{importInventoryPreview.rows.length !== 1 ? 's' : ''} ready to import
+                </p>
+                <p style={{ color: currentTheme.textSecondary, fontSize: '0.8rem', margin: 0 }}>
+                  File parsed successfully.
+                </p>
+              </div>
+
+              {importInventoryPreview.duplicates.length > 0 && (
+                <div style={{
+                  padding: '12px 16px',
+                  background: theme === 'light' ? '#fff7ed' : 'rgba(249,115,22,0.1)',
+                  border: `1px solid ${theme === 'light' ? '#fdba74' : 'rgba(249,115,22,0.4)'}`,
+                  borderRadius: '10px',
+                  marginBottom: '10px'
+                }}>
+                  <p style={{ fontWeight: '700', color: theme === 'light' ? '#9a3412' : '#fb923c', marginBottom: '8px', fontSize: '0.875rem' }}>
+                    ⚠️ {importInventoryPreview.duplicates.length} possible duplicate{importInventoryPreview.duplicates.length !== 1 ? 's' : ''} detected
+                  </p>
+                  <p style={{ color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '8px' }}>
+                    These items already exist and will be imported as additional entries:
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                    {importInventoryPreview.duplicates.map((d, i) => (
+                      <li key={i} style={{ color: theme === 'light' ? '#9a3412' : '#fb923c', fontSize: '0.8rem', lineHeight: '1.8' }}>
+                        Row {d.rowIndex}: {d.name}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
-             <div                    
 
+              {importInventoryPreview.errors.length > 0 && (
+                <div style={{
+                  padding: '12px 16px',
+                  background: theme === 'light' ? '#fef2f2' : 'rgba(239,68,68,0.1)',
+                  border: `1px solid ${theme === 'light' ? '#fca5a5' : 'rgba(239,68,68,0.4)'}`,
+                  borderRadius: '10px',
+                  marginBottom: '10px'
+                }}>
+                  <p style={{ fontWeight: '700', color: '#ef4444', marginBottom: '8px', fontSize: '0.875rem' }}>
+                    ❌ {importInventoryPreview.errors.length} row{importInventoryPreview.errors.length !== 1 ? 's' : ''} will be skipped
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                    {importInventoryPreview.errors.map((err, i) => (
+                      <li key={i} style={{ color: theme === 'light' ? '#991b1b' : '#fca5a5', fontSize: '0.8rem', lineHeight: '1.8' }}>
+                        {err}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {importInventoryPreview.rows.length > 0 && (
+                <button
+                  onClick={() => runImport('inventory', importInventoryPreview.rows)}
+                  disabled={importingInventory}
+                  style={{
+                    width: '100%', padding: '12px',
+                    background: importingInventory ? '#6b7280' : 'linear-gradient(to right, #10b981, #06b6d4)',
+                    border: 'none', borderRadius: '10px', color: 'white',
+                    cursor: importingInventory ? 'not-allowed' : 'pointer',
+                    fontSize: '1rem', fontWeight: '700'
+                  }}
+                >
+                  {importingInventory ? 'Importing...' : `⬆ Import ${importInventoryPreview.rows.length} Item${importInventoryPreview.rows.length !== 1 ? 's' : ''}`}
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Result */}
+          {importInventoryResult && (
+            <div>
+              {importInventoryResult.succeeded.length > 0 && (
+                <div style={{
+                  padding: '12px 16px',
+                  background: theme === 'light' ? '#f0fdf4' : 'rgba(16,185,129,0.1)',
+                  border: `1px solid ${theme === 'light' ? '#6ee7b7' : 'rgba(16,185,129,0.35)'}`,
+                  borderRadius: '10px', marginBottom: '10px'
+                }}>
+                  <p style={{ fontWeight: '700', color: '#10b981', fontSize: '0.9rem', marginBottom: '4px' }}>
+                    ✅ {importInventoryResult.succeeded.length} item{importInventoryResult.succeeded.length !== 1 ? 's' : ''} imported successfully
+                  </p>
+                </div>
+              )}
+              {importInventoryResult.failed.length > 0 && (
+                <div style={{
+                  padding: '12px 16px',
+                  background: theme === 'light' ? '#fef2f2' : 'rgba(239,68,68,0.1)',
+                  border: `1px solid ${theme === 'light' ? '#fca5a5' : 'rgba(239,68,68,0.4)'}`,
+                  borderRadius: '10px', marginBottom: '10px'
+                }}>
+                  <p style={{ fontWeight: '700', color: '#ef4444', fontSize: '0.875rem', marginBottom: '8px' }}>
+                    ❌ {importInventoryResult.failed.length} item{importInventoryResult.failed.length !== 1 ? 's' : ''} failed
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                    {importInventoryResult.failed.map((f, i) => (
+                      <li key={i} style={{ color: theme === 'light' ? '#991b1b' : '#fca5a5', fontSize: '0.8rem', lineHeight: '1.8' }}>
+                        {f.name}: {f.reason}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <button
+                onClick={() => {
+                  setImportInventoryPreview(null);
+                  setImportInventoryResult(null);
+                }}
+                style={{
+                  padding: '10px 20px', background: '#4b5563', border: 'none',
+                  borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem'
+                }}
+              >
+                Import Another File
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )}
+</div>
+
+{/* ── IMPORT MACHINERY ── */}
+<div style={{
+  border: `1px solid ${theme === 'light' ? '#d1d5db' : '#374151'}`,
+  borderRadius: '10px',
+  overflow: 'hidden'
+}}>
+  <button
+    onClick={() => {
+      setImportMachineryOpen(o => !o);
+      setImportMachineryResult(null);
+      setImportMachineryPreview(null);
+    }}
+    style={{
+      width: '100%', padding: '14px 18px',
+      background: importMachineryOpen
+        ? (theme === 'light' ? '#f0fdf4' : 'rgba(16,185,129,0.15)')
+        : (theme === 'light' ? '#f9fafb' : 'rgba(255,255,255,0.04)'),
+      border: 'none', cursor: 'pointer',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      color: currentTheme.text, fontSize: '1rem', fontWeight: '600',
+    }}
+  >
+    <span>📥 Import Machinery</span>
+    <span style={{
+      transition: 'transform 0.2s ease',
+      transform: importMachineryOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+      display: 'inline-block'
+    }}>▼</span>
+  </button>
+
+  {importMachineryOpen && (
+    <div style={{ padding: '16px', borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` }}>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+        {['upload', 'template'].map(tab => (
+          <button key={tab} onClick={() => setImportMachineryTab(tab)} style={{
+            padding: '8px 16px', border: 'none', borderRadius: '8px', cursor: 'pointer',
+            fontSize: '0.875rem', fontWeight: importMachineryTab === tab ? '700' : '400',
+            background: importMachineryTab === tab
+              ? 'linear-gradient(to right, #10b981, #06b6d4)'
+              : (theme === 'light' ? '#e5e7eb' : '#374151'),
+            color: importMachineryTab === tab ? 'white' : currentTheme.text,
+          }}>
+            {tab === 'upload' ? '⬆ Upload CSV' : '📄 Download Template'}
+          </button>
+        ))}
+      </div>
+
+      {importMachineryTab === 'template' && (
+        <div>
+          <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '8px' }}>
+            Download a blank CSV template with the correct column headers and an example row.
+          </p>
+          <p style={{ color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '8px' }}>
+            Columns: <strong style={{ color: currentTheme.text }}>Name, VIN/Serial, Category, Status, License Plate</strong>
+          </p>
+          <p style={{ color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '16px' }}>
+            Valid categories: <strong style={{ color: currentTheme.text }}>{MACHINERY_CATEGORIES.join(', ')}</strong>
+          </p>
+          <button
+            onClick={() => downloadTemplate('machinery')}
+            style={{
+              padding: '10px 20px', background: '#0891b2', border: 'none',
+              borderRadius: '8px', color: 'white', cursor: 'pointer',
+              fontSize: '0.875rem', fontWeight: '600'
+            }}
+          >
+            ⬇ Download Template
+          </button>
+        </div>
+      )}
+
+      {importMachineryTab === 'upload' && (
+        <div>
+          <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '12px' }}>
+            Upload a CSV file to import machinery. Use the Template tab to get the correct format.
+          </p>
+
+          <input
+            type="file"
+            accept=".csv"
+            onChange={async (e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              setImportMachineryResult(null);
+              const text = await file.text();
+              const parsed = parseImportCSV(text, 'machinery');
+              setImportMachineryPreview(parsed);
+              e.target.value = '';
+            }}
+            style={{
+              ...styles.input,
+              padding: '8px',
+              marginBottom: '12px',
+              cursor: 'pointer'
+            }}
+          />
+
+          {importMachineryPreview && !importMachineryResult && (
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{
+                padding: '12px 16px',
+                background: theme === 'light' ? '#f0fdf4' : 'rgba(16,185,129,0.1)',
+                border: `1px solid ${theme === 'light' ? '#6ee7b7' : 'rgba(16,185,129,0.35)'}`,
+                borderRadius: '10px', marginBottom: '10px'
+              }}>
+                <p style={{ fontWeight: '700', color: '#10b981', marginBottom: '4px', fontSize: '0.9rem' }}>
+                  ✅ {importMachineryPreview.rows.length} row{importMachineryPreview.rows.length !== 1 ? 's' : ''} ready to import
+                </p>
+              </div>
+
+              {importMachineryPreview.duplicates.length > 0 && (
+                <div style={{
+                  padding: '12px 16px',
+                  background: theme === 'light' ? '#fff7ed' : 'rgba(249,115,22,0.1)',
+                  border: `1px solid ${theme === 'light' ? '#fdba74' : 'rgba(249,115,22,0.4)'}`,
+                  borderRadius: '10px', marginBottom: '10px'
+                }}>
+                  <p style={{ fontWeight: '700', color: theme === 'light' ? '#9a3412' : '#fb923c', marginBottom: '8px', fontSize: '0.875rem' }}>
+                    ⚠️ {importMachineryPreview.duplicates.length} possible duplicate{importMachineryPreview.duplicates.length !== 1 ? 's' : ''} detected
+                  </p>
+                  <p style={{ color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '8px' }}>
+                    These machines already exist and will be imported as additional entries:
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                    {importMachineryPreview.duplicates.map((d, i) => (
+                      <li key={i} style={{ color: theme === 'light' ? '#9a3412' : '#fb923c', fontSize: '0.8rem', lineHeight: '1.8' }}>
+                        Row {d.rowIndex}: {d.name}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {importMachineryPreview.invalidCategories.length > 0 && (
+                <div style={{
+                  padding: '12px 16px',
+                  background: theme === 'light' ? '#fef9c3' : 'rgba(245,158,11,0.1)',
+                  border: `1px solid ${theme === 'light' ? '#fcd34d' : 'rgba(245,158,11,0.4)'}`,
+                  borderRadius: '10px', marginBottom: '10px'
+                }}>
+                  <p style={{ fontWeight: '700', color: theme === 'light' ? '#92400e' : '#fbbf24', marginBottom: '8px', fontSize: '0.875rem' }}>
+                    ⚠️ {importMachineryPreview.invalidCategories.length} unrecognized categor{importMachineryPreview.invalidCategories.length !== 1 ? 'ies' : 'y'} found
+                  </p>
+                  <p style={{ color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '0' }}>
+                    You will be prompted to map these before importing.
+                  </p>
+                </div>
+              )}
+
+              {importMachineryPreview.errors.length > 0 && (
+                <div style={{
+                  padding: '12px 16px',
+                  background: theme === 'light' ? '#fef2f2' : 'rgba(239,68,68,0.1)',
+                  border: `1px solid ${theme === 'light' ? '#fca5a5' : 'rgba(239,68,68,0.4)'}`,
+                  borderRadius: '10px', marginBottom: '10px'
+                }}>
+                  <p style={{ fontWeight: '700', color: '#ef4444', marginBottom: '8px', fontSize: '0.875rem' }}>
+                    ❌ {importMachineryPreview.errors.length} row{importMachineryPreview.errors.length !== 1 ? 's' : ''} will be skipped
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                    {importMachineryPreview.errors.map((err, i) => (
+                      <li key={i} style={{ color: theme === 'light' ? '#991b1b' : '#fca5a5', fontSize: '0.8rem', lineHeight: '1.8' }}>
+                        {err}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {importMachineryPreview.rows.length > 0 && (
+                <button
+                  onClick={() => {
+                    if (importMachineryPreview.invalidCategories.length > 0) {
+                      setCategoryMapData(importMachineryPreview);
+                      setCategoryMappings({});
+                      setShowCategoryMapModal(true);
+                    } else {
+                      runImport('machinery', importMachineryPreview.rows, {});
+                    }
+                  }}
+                  disabled={importingMachinery}
+                  style={{
+                    width: '100%', padding: '12px',
+                    background: importingMachinery ? '#6b7280' : 'linear-gradient(to right, #10b981, #06b6d4)',
+                    border: 'none', borderRadius: '10px', color: 'white',
+                    cursor: importingMachinery ? 'not-allowed' : 'pointer',
+                    fontSize: '1rem', fontWeight: '700'
+                  }}
+                >
+                  {importingMachinery
+                    ? 'Importing...'
+                    : importMachineryPreview.invalidCategories.length > 0
+                      ? `⚠️ Review Categories & Import`
+                      : `⬆ Import ${importMachineryPreview.rows.length} Machine${importMachineryPreview.rows.length !== 1 ? 's' : ''}`}
+                </button>
+              )}
+            </div>
+          )}
+
+          {importMachineryResult && (
+            <div>
+              {importMachineryResult.succeeded.length > 0 && (
+                <div style={{
+                  padding: '12px 16px',
+                  background: theme === 'light' ? '#f0fdf4' : 'rgba(16,185,129,0.1)',
+                  border: `1px solid ${theme === 'light' ? '#6ee7b7' : 'rgba(16,185,129,0.35)'}`,
+                  borderRadius: '10px', marginBottom: '10px'
+                }}>
+                  <p style={{ fontWeight: '700', color: '#10b981', fontSize: '0.9rem', marginBottom: '4px' }}>
+                    ✅ {importMachineryResult.succeeded.length} machine{importMachineryResult.succeeded.length !== 1 ? 's' : ''} imported successfully
+                  </p>
+                </div>
+              )}
+              {importMachineryResult.failed.length > 0 && (
+                <div style={{
+                  padding: '12px 16px',
+                  background: theme === 'light' ? '#fef2f2' : 'rgba(239,68,68,0.1)',
+                  border: `1px solid ${theme === 'light' ? '#fca5a5' : 'rgba(239,68,68,0.4)'}`,
+                  borderRadius: '10px', marginBottom: '10px'
+                }}>
+                  <p style={{ fontWeight: '700', color: '#ef4444', fontSize: '0.875rem', marginBottom: '8px' }}>
+                    ❌ {importMachineryResult.failed.length} machine{importMachineryResult.failed.length !== 1 ? 's' : ''} failed
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                    {importMachineryResult.failed.map((f, i) => (
+                      <li key={i} style={{ color: theme === 'light' ? '#991b1b' : '#fca5a5', fontSize: '0.8rem', lineHeight: '1.8' }}>
+                        {f.name}: {f.reason}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <button
+                onClick={() => {
+                  setImportMachineryPreview(null);
+                  setImportMachineryResult(null);
+                }}
+                style={{
+                  padding: '10px 20px', background: '#4b5563', border: 'none',
+                  borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem'
+                }}
+              >
+                Import Another File
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )}
+</div>
+
+{/* ── IMPORT SERVICE RECORDS ── */}
+<div style={{
+  border: `1px solid ${theme === 'light' ? '#d1d5db' : '#374151'}`,
+  borderRadius: '10px',
+  overflow: 'hidden'
+}}>
+  <button
+    onClick={() => {
+      setImportServiceOpen(o => !o);
+      setImportServiceResult(null);
+      setImportServicePreview(null);
+    }}
+    style={{
+      width: '100%', padding: '14px 18px',
+      background: importServiceOpen
+        ? (theme === 'light' ? '#f0fdf4' : 'rgba(16,185,129,0.15)')
+        : (theme === 'light' ? '#f9fafb' : 'rgba(255,255,255,0.04)'),
+      border: 'none', cursor: 'pointer',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      color: currentTheme.text, fontSize: '1rem', fontWeight: '600',
+    }}
+  >
+    <span>📥 Import Service Records</span>
+    <span style={{
+      transition: 'transform 0.2s ease',
+      transform: importServiceOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+      display: 'inline-block'
+    }}>▼</span>
+  </button>
+
+  {importServiceOpen && (
+    <div style={{ padding: '16px', borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` }}>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+        {['upload', 'template'].map(tab => (
+          <button key={tab} onClick={() => setImportServiceTab(tab)} style={{
+            padding: '8px 16px', border: 'none', borderRadius: '8px', cursor: 'pointer',
+            fontSize: '0.875rem', fontWeight: importServiceTab === tab ? '700' : '400',
+            background: importServiceTab === tab
+              ? 'linear-gradient(to right, #10b981, #06b6d4)'
+              : (theme === 'light' ? '#e5e7eb' : '#374151'),
+            color: importServiceTab === tab ? 'white' : currentTheme.text,
+          }}>
+            {tab === 'upload' ? '⬆ Upload CSV' : '📄 Download Template'}
+          </button>
+        ))}
+      </div>
+
+      {importServiceTab === 'template' && (
+        <div>
+          <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '8px' }}>
+            Download a blank CSV template with the correct column headers and an example row.
+          </p>
+          <p style={{ color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '8px' }}>
+            Columns: <strong style={{ color: currentTheme.text }}>Machine, Service Type, Date, Technician, Notes</strong>
+          </p>
+          <p style={{ color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '16px' }}>
+            Date format: <strong style={{ color: currentTheme.text }}>YYYY-MM-DD</strong> (e.g. 2025-01-15)
+          </p>
+          <button
+            onClick={() => downloadTemplate('service')}
+            style={{
+              padding: '10px 20px', background: '#0891b2', border: 'none',
+              borderRadius: '8px', color: 'white', cursor: 'pointer',
+              fontSize: '0.875rem', fontWeight: '600'
+            }}
+          >
+            ⬇ Download Template
+          </button>
+        </div>
+      )}
+
+      {importServiceTab === 'upload' && (
+        <div>
+          <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '12px' }}>
+            Upload a CSV file to import service records. Use the Template tab to get the correct format.
+          </p>
+
+          <input
+            type="file"
+            accept=".csv"
+            onChange={async (e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              setImportServiceResult(null);
+              const text = await file.text();
+              const parsed = parseImportCSV(text, 'service');
+              setImportServicePreview(parsed);
+              e.target.value = '';
+            }}
+            style={{
+              ...styles.input,
+              padding: '8px',
+              marginBottom: '12px',
+              cursor: 'pointer'
+            }}
+          />
+
+          {importServicePreview && !importServiceResult && (
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{
+                padding: '12px 16px',
+                background: theme === 'light' ? '#f0fdf4' : 'rgba(16,185,129,0.1)',
+                border: `1px solid ${theme === 'light' ? '#6ee7b7' : 'rgba(16,185,129,0.35)'}`,
+                borderRadius: '10px', marginBottom: '10px'
+              }}>
+                <p style={{ fontWeight: '700', color: '#10b981', marginBottom: '4px', fontSize: '0.9rem' }}>
+                  ✅ {importServicePreview.rows.length} row{importServicePreview.rows.length !== 1 ? 's' : ''} ready to import
+                </p>
+              </div>
+
+              {importServicePreview.duplicates.length > 0 && (
+                <div style={{
+                  padding: '12px 16px',
+                  background: theme === 'light' ? '#fff7ed' : 'rgba(249,115,22,0.1)',
+                  border: `1px solid ${theme === 'light' ? '#fdba74' : 'rgba(249,115,22,0.4)'}`,
+                  borderRadius: '10px', marginBottom: '10px'
+                }}>
+                  <p style={{ fontWeight: '700', color: theme === 'light' ? '#9a3412' : '#fb923c', marginBottom: '8px', fontSize: '0.875rem' }}>
+                    ⚠️ {importServicePreview.duplicates.length} possible duplicate{importServicePreview.duplicates.length !== 1 ? 's' : ''} detected
+                  </p>
+                  <p style={{ color: currentTheme.textSecondary, fontSize: '0.8rem', marginBottom: '8px' }}>
+                    These records already exist and will be imported as additional entries:
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                    {importServicePreview.duplicates.map((d, i) => (
+                      <li key={i} style={{ color: theme === 'light' ? '#9a3412' : '#fb923c', fontSize: '0.8rem', lineHeight: '1.8' }}>
+                        Row {d.rowIndex}: {d.name}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {importServicePreview.errors.length > 0 && (
+                <div style={{
+                  padding: '12px 16px',
+                  background: theme === 'light' ? '#fef2f2' : 'rgba(239,68,68,0.1)',
+                  border: `1px solid ${theme === 'light' ? '#fca5a5' : 'rgba(239,68,68,0.4)'}`,
+                  borderRadius: '10px', marginBottom: '10px'
+                }}>
+                  <p style={{ fontWeight: '700', color: '#ef4444', marginBottom: '8px', fontSize: '0.875rem' }}>
+                    ❌ {importServicePreview.errors.length} row{importServicePreview.errors.length !== 1 ? 's' : ''} will be skipped
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                    {importServicePreview.errors.map((err, i) => (
+                      <li key={i} style={{ color: theme === 'light' ? '#991b1b' : '#fca5a5', fontSize: '0.8rem', lineHeight: '1.8' }}>
+                        {err}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {importServicePreview.rows.length > 0 && (
+                <button
+                  onClick={() => runImport('service', importServicePreview.rows)}
+                  disabled={importingService}
+                  style={{
+                    width: '100%', padding: '12px',
+                    background: importingService ? '#6b7280' : 'linear-gradient(to right, #10b981, #06b6d4)',
+                    border: 'none', borderRadius: '10px', color: 'white',
+                    cursor: importingService ? 'not-allowed' : 'pointer',
+                    fontSize: '1rem', fontWeight: '700'
+                  }}
+                >
+                  {importingService ? 'Importing...' : `⬆ Import ${importServicePreview.rows.length} Record${importServicePreview.rows.length !== 1 ? 's' : ''}`}
+                </button>
+              )}
+            </div>
+          )}
+
+          {importServiceResult && (
+            <div>
+              {importServiceResult.succeeded.length > 0 && (
+                <div style={{
+                  padding: '12px 16px',
+                  background: theme === 'light' ? '#f0fdf4' : 'rgba(16,185,129,0.1)',
+                  border: `1px solid ${theme === 'light' ? '#6ee7b7' : 'rgba(16,185,129,0.35)'}`,
+                  borderRadius: '10px', marginBottom: '10px'
+                }}>
+                  <p style={{ fontWeight: '700', color: '#10b981', fontSize: '0.9rem', marginBottom: '4px' }}>
+                    ✅ {importServiceResult.succeeded.length} record{importServiceResult.succeeded.length !== 1 ? 's' : ''} imported successfully
+                  </p>
+                </div>
+              )}
+              {importServiceResult.failed.length > 0 && (
+                <div style={{
+                  padding: '12px 16px',
+                  background: theme === 'light' ? '#fef2f2' : 'rgba(239,68,68,0.1)',
+                  border: `1px solid ${theme === 'light' ? '#fca5a5' : 'rgba(239,68,68,0.4)'}`,
+                  borderRadius: '10px', marginBottom: '10px'
+                }}>
+                  <p style={{ fontWeight: '700', color: '#ef4444', fontSize: '0.875rem', marginBottom: '8px' }}>
+                    ❌ {importServiceResult.failed.length} record{importServiceResult.failed.length !== 1 ? 's' : ''} failed
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                    {importServiceResult.failed.map((f, i) => (
+                      <li key={i} style={{ color: theme === 'light' ? '#991b1b' : '#fca5a5', fontSize: '0.8rem', lineHeight: '1.8' }}>
+                        {f.name}: {f.reason}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <button
+                onClick={() => {
+                  setImportServicePreview(null);
+                  setImportServiceResult(null);
+                }}
+                style={{
+                  padding: '10px 20px', background: '#4b5563', border: 'none',
+                  borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem'
+                }}
+              >
+                Import Another File
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )}
+</div>
+                                      
   style={{
     marginTop: '24px',
     padding: '16px',
