@@ -9077,6 +9077,221 @@ const dueReminders = trackType === 'km'
   </Modal>
 )}      
 
+{showCategoryMapModal && categoryMapData && (
+  <Modal
+    title="⚠️ Unrecognized Categories"
+    theme={theme}
+    onClose={() => {
+      setShowCategoryMapModal(false);
+      setCategoryMapData(null);
+      setCategoryMappings({});
+    }}
+  >
+    <p style={{
+      color: theme === 'light' ? '#374151' : '#9ca3af',
+      fontSize: '0.875rem',
+      marginBottom: '16px',
+      lineHeight: '1.6'
+    }}>
+      The following categories were not recognized. For each one, either map it to an existing category or leave it as-is to import with the original value.
+    </p>
+
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+      {categoryMapData.invalidCategories.map(unknownCat => (
+        <div key={unknownCat} style={{
+          padding: '14px 16px',
+          background: theme === 'light' ? '#fef9c3' : 'rgba(245, 158, 11, 0.1)',
+          border: `1px solid ${theme === 'light' ? '#fcd34d' : 'rgba(245, 158, 11, 0.4)'}`,
+          borderRadius: '10px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '1rem' }}>⚠️</span>
+            <span style={{
+              fontWeight: '700',
+              color: theme === 'light' ? '#92400e' : '#fbbf24',
+              fontSize: '0.95rem'
+            }}>
+              "{unknownCat}"
+            </span>
+            <span style={{
+              color: theme === 'light' ? '#6b7280' : '#9ca3af',
+              fontSize: '0.8rem'
+            }}>
+              — not in category list
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <label style={{
+              color: theme === 'light' ? '#374151' : '#9ca3af',
+              fontSize: '0.8rem',
+              whiteSpace: 'nowrap'
+            }}>
+              Map to:
+            </label>
+            <select
+              value={categoryMappings[unknownCat] || ''}
+              onChange={(e) => setCategoryMappings(prev => ({
+                ...prev,
+                [unknownCat]: e.target.value
+              }))}
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                background: theme === 'light' ? '#ffffff' : '#1a2942',
+                border: `1px solid ${theme === 'light' ? '#d1d5db' : '#2563eb'}`,
+                borderRadius: '8px',
+                color: theme === 'light' ? '#111827' : 'white',
+                fontSize: '0.875rem',
+                cursor: 'pointer',
+                outline: 'none',
+                minWidth: '180px'
+              }}
+            >
+              <option value="">— Keep original value —</option>
+              {MACHINERY_CATEGORIES.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
+
+          {categoryMappings[unknownCat] && (
+            <p style={{
+              color: '#10b981',
+              fontSize: '0.75rem',
+              marginTop: '8px',
+              marginBottom: 0
+            }}>
+              ✓ Will be imported as "{categoryMappings[unknownCat]}"
+            </p>
+          )}
+          {!categoryMappings[unknownCat] && (
+            <p style={{
+              color: theme === 'light' ? '#92400e' : '#fbbf24',
+              fontSize: '0.75rem',
+              marginTop: '8px',
+              marginBottom: 0
+            }}>
+              Will be imported as-is: "{unknownCat}"
+            </p>
+          )}
+        </div>
+      ))}
+    </div>
+
+    {/* Duplicate warning if any */}
+    {categoryMapData.duplicates.length > 0 && (
+      <div style={{
+        padding: '12px 16px',
+        background: theme === 'light' ? '#fff7ed' : 'rgba(249, 115, 22, 0.1)',
+        border: `1px solid ${theme === 'light' ? '#fdba74' : 'rgba(249, 115, 22, 0.4)'}`,
+        borderRadius: '10px',
+        marginBottom: '16px'
+      }}>
+        <p style={{
+          fontWeight: '700',
+          color: theme === 'light' ? '#9a3412' : '#fb923c',
+          fontSize: '0.875rem',
+          marginBottom: '8px'
+        }}>
+          ⚠️ {categoryMapData.duplicates.length} duplicate{categoryMapData.duplicates.length !== 1 ? 's' : ''} detected
+        </p>
+        <p style={{
+          color: theme === 'light' ? '#7c2d12' : '#9ca3af',
+          fontSize: '0.8rem',
+          marginBottom: '8px'
+        }}>
+          These machines already exist and will be imported as additional entries:
+        </p>
+        <ul style={{ margin: 0, paddingLeft: '16px' }}>
+          {categoryMapData.duplicates.map((d, i) => (
+            <li key={i} style={{
+              color: theme === 'light' ? '#7c2d12' : '#fb923c',
+              fontSize: '0.8rem',
+              lineHeight: '1.8'
+            }}>
+              Row {d.rowIndex}: {d.name}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {/* Parse errors if any */}
+    {categoryMapData.errors && categoryMapData.errors.length > 0 && (
+      <div style={{
+        padding: '12px 16px',
+        background: theme === 'light' ? '#fef2f2' : 'rgba(239, 68, 68, 0.1)',
+        border: `1px solid ${theme === 'light' ? '#fca5a5' : 'rgba(239, 68, 68, 0.4)'}`,
+        borderRadius: '10px',
+        marginBottom: '16px'
+      }}>
+        <p style={{
+          fontWeight: '700',
+          color: '#ef4444',
+          fontSize: '0.875rem',
+          marginBottom: '8px'
+        }}>
+          ❌ {categoryMapData.errors.length} row{categoryMapData.errors.length !== 1 ? 's' : ''} will be skipped
+        </p>
+        <ul style={{ margin: 0, paddingLeft: '16px' }}>
+          {categoryMapData.errors.map((e, i) => (
+            <li key={i} style={{
+              color: theme === 'light' ? '#991b1b' : '#fca5a5',
+              fontSize: '0.8rem',
+              lineHeight: '1.8'
+            }}>
+              {e}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    <div style={{ display: 'flex', gap: '12px' }}>
+      <button
+        onClick={() => {
+          setShowCategoryMapModal(false);
+          runImport('machinery', categoryMapData.rows, categoryMappings);
+          setCategoryMapData(null);
+          setCategoryMappings({});
+        }}
+        style={{
+          flex: 1,
+          padding: '14px',
+          background: 'linear-gradient(to right, #10b981, #06b6d4)',
+          border: 'none',
+          borderRadius: '10px',
+          color: 'white',
+          cursor: 'pointer',
+          fontSize: '1rem',
+          fontWeight: '700'
+        }}
+      >
+        ✓ Confirm & Import {categoryMapData.rows.length} Row{categoryMapData.rows.length !== 1 ? 's' : ''}
+      </button>
+      <button
+        onClick={() => {
+          setShowCategoryMapModal(false);
+          setCategoryMapData(null);
+          setCategoryMappings({});
+        }}
+        style={{
+          padding: '14px 20px',
+          background: theme === 'light' ? '#f3f4f6' : '#374151',
+          border: `1px solid ${theme === 'light' ? '#d1d5db' : '#4b5563'}`,
+          borderRadius: '10px',
+          color: theme === 'light' ? '#374151' : '#d1d5db',
+          cursor: 'pointer',
+          fontSize: '1rem'
+        }}
+      >
+        Cancel
+      </button>
+    </div>
+  </Modal>
+)}
+      
 {showRestoreChoiceModal && pendingRestoreReminder && (() => {
   const reminder = pendingRestoreReminder;
   const isKm = reminder.reminder_type === 'km';
