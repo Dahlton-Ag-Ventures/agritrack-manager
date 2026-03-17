@@ -432,12 +432,35 @@ useEffect(() => {
     };
   }, []);
   
-  // Load theme preference on mount (runs once when app loads)
+// Load theme preference on mount (runs once when app loads)
   useEffect(() => {
     const savedTheme = localStorage.getItem('agritrack-theme');
     if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
       setTheme(savedTheme);
     }
+  }, []);
+
+  // Handle QR code deep link — navigate to inventory item on load
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (!hash.startsWith('#inventory/')) return;
+    const itemId = hash.replace('#inventory/', '');
+    if (!itemId) return;
+
+    const tryScroll = (attemptsLeft) => {
+      const el = document.getElementById(`inventory-item-${itemId}`);
+      if (el) {
+        setActiveTab('inventory');
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.style.outline = '3px solid #10b981';
+        el.style.borderRadius = '12px';
+        setTimeout(() => { el.style.outline = ''; }, 3000);
+      } else if (attemptsLeft > 0) {
+        setTimeout(() => tryScroll(attemptsLeft - 1), 500);
+      }
+    };
+
+    setTimeout(() => tryScroll(10), 800);
   }, []);
 
   // Save theme preference whenever it changes
@@ -2355,12 +2378,12 @@ const completeKmReminder = (reminderId) => {
 };
   
 const generateQRDataUrl = (itemId) => {
-  const url = `https://agritrack.vercel.app/#inventory/${itemId}`;
+  const url = `https://agritrack-manager.vercel.app/#inventory/${itemId}`;
   return `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(url)}`;
 };
 
 const printInventoryQR = (item) => {
-  const url = `https://agritrack.vercel.app/#inventory/${item.id}`;
+  const url = `https://agritrack-manager.vercel.app/#inventory/${item.id}`;
   const w = window.open('', '_blank');
   w.document.write(`<!DOCTYPE html><html><head><title>QR - ${item.name}</title>
 <style>
@@ -3986,7 +4009,7 @@ className="flip-card"
         {/* INVENTORY ITEMS LIST */}
         <div style={styles.itemsList}>
           {getPaginatedInventory().items.map(item => (
-<div key={item.id} className="item-card" style={{
+<div key={item.id} id={`inventory-item-${item.id}`} className="item-card" style={{
                 ...styles.itemCard,
                 outline: exportMode === 'inventory' && exportInventorySelected.has(item.id)
                   ? '2px solid #10b981' : 'none'
