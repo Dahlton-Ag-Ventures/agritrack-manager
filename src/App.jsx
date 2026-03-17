@@ -2387,26 +2387,13 @@ const completeKmReminder = (reminderId) => {
 };
   
 const generateQRDataUrl = (item) => {
-  const lines = [
-    item.name,
-    item.partNumber ? `Part #: ${item.partNumber}` : null,
-    item.location ? `Location: ${item.location}` : null,
-    item.quantity !== '' && item.quantity !== undefined ? `Qty: ${item.quantity}` : null,
-    `---`,
-    `https://agritrack-manager.vercel.app/#inventory/${item.id}`,
-  ].filter(Boolean).join('\n');
-  return `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(lines)}`;
+  const url = `https://agritrack-manager.vercel.app/#inventory/${item.id}`;
+  return `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(url)}`;
 };
 
 const printInventoryQR = (item) => {
-  const appUrl = `https://agritrack-manager.vercel.app/#inventory/${item.id}`;
-  const url = [
-    item.name,
-    item.partNumber ? `Part #: ${item.partNumber}` : null,
-    item.location ? `Location: ${item.location}` : null,
-    item.quantity !== '' && item.quantity !== undefined ? `Qty: ${item.quantity}` : null,
-    appUrl,
-  ].filter(Boolean).join('\n');
+ const appUrl = `https://agritrack-manager.vercel.app/#inventory/${item.id}`;
+  const url = appUrl;
   const w = window.open('', '_blank');
   w.document.write(`<!DOCTYPE html><html><head><title>QR - ${item.name}</title>
 <style>
@@ -2430,7 +2417,7 @@ const printInventoryQR = (item) => {
 <script>
   window.onload = function() {
     new QRCode(document.getElementById('qr'), {
-      text: '${url}',
+      text: ${JSON.stringify(url)},
       width: 180,
       height: 180,
       colorDark: '#000000',
