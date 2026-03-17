@@ -440,29 +440,38 @@ useEffect(() => {
     }
   }, []);
 
-  // Handle QR code deep link — navigate to inventory item on load
+  // Handle QR code deep link — navigate to inventory item once data is loaded
   useEffect(() => {
     const hash = window.location.hash;
     if (!hash.startsWith('#inventory/')) return;
     const itemId = hash.replace('#inventory/', '');
     if (!itemId) return;
+    if (loading) return;
+    if (inventory.length === 0) return;
+
+    const targetItem = inventory.find(i => i.id === itemId);
+    if (!targetItem) return;
+
+    // Switch to inventory tab and set pagination to show all so item is visible
+    setActiveTab('inventory');
+    setInventoryItemsPerPage(99999);
+    setInventoryPage(1);
 
     const tryScroll = (attemptsLeft) => {
       const el = document.getElementById(`inventory-item-${itemId}`);
       if (el) {
-        setActiveTab('inventory');
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.style.transition = 'outline 0.3s ease';
         el.style.outline = '3px solid #10b981';
         el.style.borderRadius = '12px';
         setTimeout(() => { el.style.outline = ''; }, 3000);
       } else if (attemptsLeft > 0) {
-        setTimeout(() => tryScroll(attemptsLeft - 1), 500);
+        setTimeout(() => tryScroll(attemptsLeft - 1), 400);
       }
     };
 
-    setTimeout(() => tryScroll(10), 800);
-  }, []);
-
+    setTimeout(() => tryScroll(15), 300);
+  }, [loading, inventory]);
   // Save theme preference whenever it changes
   useEffect(() => {
     if (user) {
@@ -2377,13 +2386,26 @@ const completeKmReminder = (reminderId) => {
   setShowCompleteReminderModal(true);
 };
   
-const generateQRDataUrl = (itemId) => {
-  const url = `https://agritrack-manager.vercel.app/#inventory/${itemId}`;
-  return `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(url)}`;
+const generateQRDataUrl = (item) => {
+  const lines = [
+    item.name,
+    item.partNumber ? `Part #: ${item.partNumber}` : null,
+    item.location ? `Location: ${item.location}` : null,
+    item.quantity !== '' && item.quantity !== undefined ? `Qty: ${item.quantity}` : null,
+    `agritrack-manager.vercel.app/#inventory/${item.id}`,
+  ].filter(Boolean).join('\n');
+  return `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(lines)}`;
 };
 
 const printInventoryQR = (item) => {
-  const url = `https://agritrack-manager.vercel.app/#inventory/${item.id}`;
+  const appUrl = `https://agritrack-manager.vercel.app/#inventory/${item.id}`;
+  const url = [
+    item.name,
+    item.partNumber ? `Part #: ${item.partNumber}` : null,
+    item.location ? `Location: ${item.location}` : null,
+    item.quantity !== '' && item.quantity !== undefined ? `Qty: ${item.quantity}` : null,
+    appUrl,
+  ].filter(Boolean).join('\n');
   const w = window.open('', '_blank');
   w.document.write(`<!DOCTYPE html><html><head><title>QR - ${item.name}</title>
 <style>
@@ -2400,7 +2422,7 @@ const printInventoryQR = (item) => {
   <h2>${item.name}</h2>
   ${item.partNumber ? `<p>Part #: ${item.partNumber}</p>` : ''}
   ${item.location ? `<p>Location: ${item.location}</p>` : ''}
-  <p style="font-size:0.65rem;color:#9ca3af;margin-top:6px;word-break:break-all;">${url}</p>
+  <a href="${appUrl}" style="font-size:0.65rem;color:#0891b2;margin-top:6px;word-break:break-all;text-align:center;display:block;">Open in AgriTrack</a>
 </div>
 <button class="print-btn" onclick="window.print()">🖨 Print Label</button>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
@@ -4270,7 +4292,7 @@ className="flip-card"
                       >
                         {qrLibLoaded ? (
                           <img
-                            src={generateQRDataUrl(item.id)}
+                            src={generateQRDataUrl(item)}
                             alt="QR Code"
                             style={{
                               width: '44px',
@@ -4388,7 +4410,7 @@ className="flip-card"
                         >
                         {qrLibLoaded ? (
                           <img
-                            src={generateQRDataUrl(item.id)}
+                            src={generateQRDataUrl(item)}
                             alt="QR Code"
                             style={{
                               width: '52px',
