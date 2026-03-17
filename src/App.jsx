@@ -6746,11 +6746,12 @@ const dueReminders = trackType === 'km'
               e.target.style.transform = 'scale(1)';
             }}
           >
-            <span style={{ fontSize: '1.5rem' }}>📸</span>
-            <span>Open Photos</span>
-            <span style={{ fontSize: '0.75rem', opacity: 0.9 }}>
-              ({record.photoUrls.length} photo{record.photoUrls.length !== 1 ? 's' : ''})
-            </span>
+<span style={{ fontSize: '1.5rem' }}>📸</span>
+<span>Open Photos</span>
+<span style={{ fontSize: '0.75rem', opacity: 0.9 }}>
+  ({record.photoUrls.length} photo{record.photoUrls.length !== 1 ? 's' : ''})
+</span>
+<span style={{ fontSize: '0.7rem', opacity: 0.8 }}>↻ rotate if sideways</span>
           </button>
         )}
         
@@ -10666,6 +10667,7 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
   const [isDragging, setIsDragging] = React.useState(false);
   const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
   const [lastPinchDistance, setLastPinchDistance] = React.useState(null);
+  const [rotation, setRotation] = React.useState(0);
   
   const photos = allPhotos || [imageUrl];
   const hasMultiplePhotos = photos.length > 1;
@@ -10673,24 +10675,27 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
   
   const zoomIn = () => setScale(prev => Math.min(prev + 0.5, 3));
   const zoomOut = () => setScale(prev => Math.max(prev - 0.5, 1));
-  const resetZoom = () => {
-    setScale(1);
-    setPosition({ x: 0, y: 0 });
-  };
+const resetZoom = () => {
+  setScale(1);
+  setPosition({ x: 0, y: 0 });
+};
+const rotatePhoto = () => setRotation(prev => (prev + 90) % 360);
   
   const nextPhoto = () => {
-    if (currentIndex < photos.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-      resetZoom();
-    }
-  };
-  
-  const prevPhoto = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
-      resetZoom();
-    }
-  };
+  if (currentIndex < photos.length - 1) {
+    setCurrentIndex(prev => prev + 1);
+    resetZoom();
+    setRotation(0);
+  }
+};
+
+const prevPhoto = () => {
+  if (currentIndex > 0) {
+    setCurrentIndex(prev => prev - 1);
+    resetZoom();
+    setRotation(0);
+  }
+};
   
   // Mouse drag handlers
   const handleMouseDown = (e) => {
@@ -10938,7 +10943,7 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
     maxHeight: '75vh',
     objectFit: 'contain',
     borderRadius: '8px',
-    transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
+    transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px) rotate(${rotation}deg)`,
     transition: isDragging ? 'none' : 'transform 0.3s ease',
     position: 'relative',
     zIndex: 1,
@@ -11050,20 +11055,35 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
           +
         </button>
         <button 
-          onClick={resetZoom} 
-          disabled={scale === 1} 
-          style={{ 
-            padding: '8px 16px', 
-            background: scale === 1 ? '#6b7280' : '#2563eb', 
-            border: 'none', 
-            borderRadius: '8px', 
-            color: 'white', 
-            cursor: scale === 1 ? 'not-allowed' : 'pointer', 
-            fontWeight: 'bold' 
-          }}
-        >
-          Reset
-        </button>
+  onClick={resetZoom} 
+  disabled={scale === 1} 
+  style={{ 
+    padding: '8px 16px', 
+    background: scale === 1 ? '#6b7280' : '#2563eb', 
+    border: 'none', 
+    borderRadius: '8px', 
+    color: 'white', 
+    cursor: scale === 1 ? 'not-allowed' : 'pointer', 
+    fontWeight: 'bold' 
+  }}
+>
+  Reset
+</button>
+<button
+  onClick={rotatePhoto}
+  style={{
+    padding: '8px 16px',
+    background: '#8b5cf6',
+    border: 'none',
+    borderRadius: '8px',
+    color: 'white',
+    cursor: 'pointer',
+    fontWeight: 'bold',
+    fontSize: '1rem'
+  }}
+>
+  ↻ Rotate
+</button>
       </div>
     </div>
   );
