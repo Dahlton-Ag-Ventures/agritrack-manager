@@ -11008,6 +11008,8 @@ const prevPhoto = () => {
           display: 'flex',
           gap: '12px',
           alignItems: 'center',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
           position: 'relative',
           zIndex: 10
         }}
