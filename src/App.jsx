@@ -464,7 +464,7 @@ useEffect(() => {
         el.style.transition = 'outline 0.3s ease';
         el.style.outline = '3px solid #10b981';
         el.style.borderRadius = '12px';
-        setTimeout(() => { el.style.outline = ''; }, 3000);
+        setTimeout(() => { el.style.outline = ''; }, 20000);
       } else if (attemptsLeft > 0) {
         setTimeout(() => tryScroll(attemptsLeft - 1), 400);
       }
@@ -2392,7 +2392,8 @@ const generateQRDataUrl = (item) => {
     item.partNumber ? `Part #: ${item.partNumber}` : null,
     item.location ? `Location: ${item.location}` : null,
     item.quantity !== '' && item.quantity !== undefined ? `Qty: ${item.quantity}` : null,
-    `agritrack-manager.vercel.app/#inventory/${item.id}`,
+    `---`,
+    `https://agritrack-manager.vercel.app/#inventory/${item.id}`,
   ].filter(Boolean).join('\n');
   return `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(lines)}`;
 };
