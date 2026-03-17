@@ -6751,7 +6751,6 @@ const dueReminders = trackType === 'km'
 <span style={{ fontSize: '0.75rem', opacity: 0.9 }}>
   ({record.photoUrls.length} photo{record.photoUrls.length !== 1 ? 's' : ''})
 </span>
-<span style={{ fontSize: '0.7rem', opacity: 0.8 }}>↻ rotate if sideways</span>
           </button>
         )}
         
