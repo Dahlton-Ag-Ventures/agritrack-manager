@@ -403,14 +403,7 @@ useEffect(() => {
     link.rel = 'icon';
     link.href = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z'/></svg>";
     document.head.appendChild(link);
-   if (!window.QRCode) {
-      const script = document.createElement('script');
-      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
-      script.onload = () => setQrLibLoaded(true);
-      document.head.appendChild(script);
-    } else {
-      setQrLibLoaded(true);
-    }
+   setQrLibLoaded(true);
   }, []);
   // Check authentication status on load
   useEffect(() => {
@@ -2361,21 +2354,9 @@ const completeKmReminder = (reminderId) => {
   setShowCompleteReminderModal(true);
 };
   
-const generateQRDataUrl = (text) => {
-  try {
-    const canvas = document.createElement('canvas');
-    new window.QRCode(canvas, {
-      text,
-      width: 80,
-      height: 80,
-      colorDark: '#000000',
-      colorLight: '#ffffff',
-      correctLevel: window.QRCode?.CorrectLevel?.M
-    });
-    return canvas.toDataURL('image/png');
-  } catch (e) {
-    return null;
-  }
+const generateQRDataUrl = (itemId) => {
+  const url = `https://agritrack.vercel.app/#inventory/${itemId}`;
+  return `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(url)}`;
 };
 
 const printInventoryQR = (item) => {
@@ -4266,7 +4247,7 @@ className="flip-card"
                       >
                         {qrLibLoaded ? (
                           <img
-                            src={generateQRDataUrl(`https://agritrack.vercel.app/#inventory/${item.id}`)}
+                            src={generateQRDataUrl(item.id)}
                             alt="QR Code"
                             style={{
                               width: '44px',
@@ -4384,7 +4365,7 @@ className="flip-card"
                         >
                         {qrLibLoaded ? (
                           <img
-                            src={generateQRDataUrl(`https://agritrack.vercel.app/#inventory/${item.id}`)}
+                            src={generateQRDataUrl(item.id)}
                             alt="QR Code"
                             style={{
                               width: '52px',
