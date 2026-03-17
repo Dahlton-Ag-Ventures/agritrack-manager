@@ -354,6 +354,7 @@ const [editingKm, setEditingKm] = useState(false);
 const [newTotalKm, setNewTotalKm] = useState('');
 const [kmForm, setKmForm] = useState({ machineName: '', kmToAdd: '' });
 const [showKmReminderModal, setShowKmReminderModal] = useState(false);
+const [qrLibLoaded, setQrLibLoaded] = useState(false);
 
   // Export state
 const [exportInventoryOpen, setExportInventoryOpen] = useState(false);
@@ -402,10 +403,13 @@ useEffect(() => {
     link.rel = 'icon';
     link.href = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z'/></svg>";
     document.head.appendChild(link);
-    if (!window.QRCode) {
+   if (!window.QRCode) {
       const script = document.createElement('script');
       script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+      script.onload = () => setQrLibLoaded(true);
       document.head.appendChild(script);
+    } else {
+      setQrLibLoaded(true);
     }
   }, []);
   // Check authentication status on load
@@ -2357,6 +2361,23 @@ const completeKmReminder = (reminderId) => {
   setShowCompleteReminderModal(true);
 };
   
+const generateQRDataUrl = (text) => {
+  try {
+    const canvas = document.createElement('canvas');
+    new window.QRCode(canvas, {
+      text,
+      width: 80,
+      height: 80,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: window.QRCode?.CorrectLevel?.M
+    });
+    return canvas.toDataURL('image/png');
+  } catch (e) {
+    return null;
+  }
+};
+
 const printInventoryQR = (item) => {
   const url = `https://agritrack.vercel.app/#inventory/${item.id}`;
   const w = window.open('', '_blank');
@@ -4232,25 +4253,53 @@ className="flip-card"
                     )}
                     {window.innerWidth < 768 && userRole !== 'employee' && (
                       <div style={{ display: 'flex', gap: '8px', marginTop: '8px', justifyContent: 'center' }}>
-                        <button
-                          onClick={() => printInventoryQR(item)}
-                          title="Print QR Code"
-                          style={{
-                            padding: '8px',
-                            background: theme === 'light' ? '#bae6fd' : '#0891b2',
-                            border: 'none',
-                            borderRadius: '8px',
-                            color: theme === 'light' ? '#0c4a6e' : 'white',
-                            cursor: 'pointer',
+                       <div
+                        onClick={() => printInventoryQR(item)}
+                        title="Print QR Label"
+                        style={{
+                          cursor: 'pointer',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '3px',
+                        }}
+                      >
+                        {qrLibLoaded ? (
+                          <img
+                            src={generateQRDataUrl(`https://agritrack.vercel.app/#inventory/${item.id}`)}
+                            alt="QR Code"
+                            style={{
+                              width: '44px',
+                              height: '44px',
+                              borderRadius: '6px',
+                              border: `2px solid ${theme === 'light' ? '#bae6fd' : '#0891b2'}`,
+                              display: 'block',
+                            }}
+                          />
+                        ) : (
+                          <div style={{
+                            width: '44px',
+                            height: '44px',
+                            borderRadius: '6px',
+                            border: `2px solid ${theme === 'light' ? '#bae6fd' : '#0891b2'}`,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: '1rem',
-                          }}
-                        >
-                          📷
-                        </button>
-                        <button onClick={() => startEditInventory(item)} style={styles.editButton}>
+                            fontSize: '1.2rem',
+                            background: theme === 'light' ? '#f0f9ff' : '#0c4a6e',
+                          }}>
+                            ▦
+                          </div>
+                        )}
+                        <span style={{
+                          fontSize: '0.6rem',
+                          color: theme === 'light' ? '#0891b2' : '#7dd3fc',
+                          fontWeight: '600',
+                        }}>
+                          Print QR
+                        </span>
+                      </div>
+                      <button onClick={() => startEditInventory(item)} style={styles.editButton}>
                           <Edit2 size={16} />
                         </button>
                         <button
@@ -4322,25 +4371,53 @@ className="flip-card"
                   </div>
                   {window.innerWidth >= 768 && userRole !== 'employee' && (
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button
-                        onClick={() => printInventoryQR(item)}
-                        title="Print QR Code"
-                        style={{
-                          padding: '8px',
-                          background: theme === 'light' ? '#bae6fd' : '#0891b2',
-                          border: 'none',
-                          borderRadius: '8px',
-                          color: theme === 'light' ? '#0c4a6e' : 'white',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '1rem',
-                        }}
-                      >
-                        📷
-                      </button>
-                      <button onClick={() => startEditInventory(item)} style={styles.editButton}>
+                      <div
+                          onClick={() => printInventoryQR(item)}
+                          title="Print QR Label"
+                          style={{
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '3px',
+                          }}
+                        >
+                        {qrLibLoaded ? (
+                          <img
+                            src={generateQRDataUrl(`https://agritrack.vercel.app/#inventory/${item.id}`)}
+                            alt="QR Code"
+                            style={{
+                              width: '52px',
+                              height: '52px',
+                              borderRadius: '6px',
+                              border: `2px solid ${theme === 'light' ? '#bae6fd' : '#0891b2'}`,
+                              display: 'block',
+                            }}
+                          />
+                        ) : (
+                          <div style={{
+                            width: '52px',
+                            height: '52px',
+                            borderRadius: '6px',
+                            border: `2px solid ${theme === 'light' ? '#bae6fd' : '#0891b2'}`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '1.4rem',
+                            background: theme === 'light' ? '#f0f9ff' : '#0c4a6e',
+                          }}>
+                            ▦
+                          </div>
+                        )}
+                          <span style={{
+                            fontSize: '0.6rem',
+                            color: theme === 'light' ? '#0891b2' : '#7dd3fc',
+                            fontWeight: '600',
+                          }}>
+                            Print QR
+                          </span>
+                        </div>
+                        <button onClick={() => startEditInventory(item)} style={styles.editButton}>
                         <Edit2 size={16} />
                       </button>
                       <button
