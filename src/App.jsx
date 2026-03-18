@@ -7077,6 +7077,7 @@ const dueReminders = trackType === 'km'
                     )}
                   </div>
                 </div>
+                </div>
               )}
              {activeSettingsSection === 'account' && (
   <>
