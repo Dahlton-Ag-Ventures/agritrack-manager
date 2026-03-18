@@ -347,7 +347,6 @@ const [showHoursDetailModal, setShowHoursDetailModal] = useState(false);
 const [editingHours, setEditingHours] = useState(false);
 const [newTotalHours, setNewTotalHours] = useState('');;
 const [machineKm, setMachineKm] = useState([]);
-const [technicians, setTechnicians] = useState([]);
 const [showKmModal, setShowKmModal] = useState(false);
 const [showKmDetailModal, setShowKmDetailModal] = useState(false);
 const [selectedKmRecord, setSelectedKmRecord] = useState(null);
@@ -805,16 +804,6 @@ if (kmError) console.error('❌ Machine km load error:', kmError);
 else {
   console.log(`✅ Loaded ${kmData?.length || 0} machine km records`);
   setMachineKm(kmData || []);
-}
-
-const { data: techData, error: techError } = await supabase
-  .from('technicians')
-  .select('*')
-  .order('name', { ascending: true });
-if (techError) console.error('❌ Technicians load error:', techError);
-else {
-  console.log(`✅ Loaded ${techData?.length || 0} technicians`);
-  setTechnicians(techData || []);
 }
 
 setLastSync(new Date());
@@ -6553,12 +6542,11 @@ const dueReminders = trackType === 'km'
   value={serviceForm.date}
   onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
 />
-<TechnicianInput
+      <input
+        style={styles.input}
+        placeholder="Technician"
         value={serviceForm.technician}
-        onChange={(val) => setServiceForm({ ...serviceForm, technician: val })}
-        technicians={technicians}
-        styles={styles}
-        theme={theme}
+        onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
       />
      <textarea
   style={{ ...styles.input, minHeight: '80px', resize: 'vertical', fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif', fontSize: '1rem', whiteSpace: 'pre-wrap', letterSpacing: 'normal' }}
@@ -6939,7 +6927,6 @@ const dueReminders = trackType === 'km'
               </div>
 
               {activeSettingsSection === 'general' && (
-                <div>
                 <div style={styles.itemCard}>
                   <div style={{ flex: 1 }}>
                     <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>⚙️ General Settings</h3>
@@ -6986,99 +6973,8 @@ const dueReminders = trackType === 'km'
                     </div>
                   </div>
                 </div>
-
-                <div style={{ ...styles.itemCard, marginTop: '24px' }}>
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>👷 Technician List</h3>
-                    <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '16px' }}>
-                      Add technician names here to make them available as quick-select options when logging service records.
-                    </p>
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-                      <input
-                        type="text"
-                        placeholder="Add technician name..."
-                        id="new-technician-input"
-                        style={{
-                          ...styles.input,
-                          marginBottom: 0,
-                          flex: 1
-                        }}
-                      />
-                      <button
-                        onClick={async () => {
-                          const input = document.getElementById('new-technician-input');
-                          const name = input.value.trim();
-                          if (!name) return;
-                          if (technicians.some(t => t.name.toLowerCase() === name.toLowerCase())) {
-                            alert('That name already exists');
-                            return;
-                          }
-                          const newId = Date.now().toString() + Math.random().toString(36).slice(2, 6);
-                          const { error } = await supabase.from('technicians').insert([{
-                            id: newId,
-                            name: name,
-                            user_id: user.id
-                          }]);
-                          if (error) { alert('Failed to add: ' + error.message); return; }
-                          setTechnicians(prev => [...prev, { id: newId, name, user_id: user.id }].sort((a, b) => a.name.localeCompare(b.name)));
-                          input.value = '';
-                        }}
-                        style={{
-                          padding: '12px 20px',
-                          background: '#10b981',
-                          border: 'none',
-                          borderRadius: '8px',
-                          color: 'white',
-                          cursor: 'pointer',
-                          fontWeight: 'bold',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        + Add
-                      </button>
-                    </div>
-                    {technicians.length === 0 ? (
-                      <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem' }}>No technicians added yet.</p>
-                    ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {technicians.map(t => (
-                          <div key={t.id} style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            padding: '10px 14px',
-                            background: theme === 'light' ? '#f9fafb' : 'rgba(255,255,255,0.05)',
-                            border: `1px solid ${currentTheme.cardBorder}`,
-                            borderRadius: '8px'
-                          }}>
-                            <span style={{ color: currentTheme.text }}>{t.name}</span>
-                            <button
-                              onClick={async () => {
-                                if (!confirm(`Remove ${t.name}?`)) return;
-                                const { error } = await supabase.from('technicians').delete().eq('id', t.id);
-                                if (error) { alert('Failed to remove: ' + error.message); return; }
-                                setTechnicians(prev => prev.filter(x => x.id !== t.id));
-                              }}
-                              style={{
-                                padding: '4px 10px',
-                                background: theme === 'light' ? '#fca5a5' : '#7f1d1d',
-                                border: 'none',
-                                borderRadius: '6px',
-                                color: theme === 'light' ? '#7f1d1d' : 'white',
-                                cursor: 'pointer',
-                                fontSize: '0.8rem'
-                              }}
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                </div>
               )}
+
              {activeSettingsSection === 'account' && (
   <>
     {/* Account Information Card */}
@@ -8580,7 +8476,9 @@ const dueReminders = trackType === 'km'
         </div>
       </div>
     </div>
+  </div>
 )}
+            </div>
           </div>
         )}  
 {activeTab === 'admin' && (
@@ -9155,12 +9053,11 @@ const dueReminders = trackType === 'km'
     setServiceForm({ ...serviceForm, date: e.target.value });
   }}
 />
-<TechnicianInput
+    <input
+      style={styles.input}
+      placeholder="Technician Name"
       value={serviceForm.technician}
-      onChange={(val) => setServiceForm({ ...serviceForm, technician: val })}
-      technicians={technicians}
-      styles={styles}
-      theme={theme}
+      onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
     />
     <textarea
   style={{ ...styles.input, minHeight: '100px', resize: 'vertical', fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif', fontSize: '1rem', whiteSpace: 'pre-wrap', letterSpacing: 'normal' }}
@@ -9880,12 +9777,14 @@ const dueReminders = trackType === 'km'
           <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.8rem', marginBottom: '4px' }}>
             Technician
           </label>
-          <TechnicianInput
+          <input
+            style={{
+              ...styles.input,
+              marginBottom: 0
+            }}
             value={completeServiceForm.technician}
-            onChange={(val) => setCompleteServiceForm(prev => ({ ...prev, technician: val }))}
-            technicians={technicians}
-            styles={styles}
-            theme={theme}
+            onChange={e => setCompleteServiceForm(prev => ({ ...prev, technician: e.target.value }))}
+            placeholder="Who did the work?"
           />
         </div>
 
@@ -11197,106 +11096,6 @@ const prevPhoto = () => {
     </div>
   );
 }
-
-function TechnicianInput({ value, onChange, technicians, styles, theme }) {
-  const [open, setOpen] = React.useState(false);
-  const [search, setSearch] = React.useState('');
-  const inputRef = React.useRef(null);
-
-  const filtered = technicians
-    .filter(t => t.name.toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => a.name.localeCompare(b.name));
-
-  const handleSelect = (name) => {
-    onChange(name);
-    setSearch('');
-    setOpen(false);
-  };
-
-  const handleChange = (e) => {
-    setSearch(e.target.value);
-    onChange(e.target.value);
-    setOpen(true);
-  };
-
-  return (
-    <div style={{ position: 'relative', marginBottom: '16px' }}>
-      <input
-        ref={inputRef}
-        type="text"
-        placeholder="Technician Name"
-        value={value || search}
-        onChange={handleChange}
-        onFocus={() => setOpen(true)}
-        onBlur={() => setTimeout(() => setOpen(false), 150)}
-        style={{
-          ...styles.input,
-          marginBottom: 0,
-          backgroundColor: value ? (theme === 'light' ? '#f0fdf4' : '#1a3a2a') : styles.input.background,
-          borderColor: value ? '#10b981' : styles.input.borderColor,
-        }}
-      />
-      {value && (
-        <button
-          onClick={() => { onChange(''); setSearch(''); }}
-          style={{
-            position: 'absolute',
-            right: '10px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            background: 'transparent',
-            border: 'none',
-            color: '#9ca3af',
-            cursor: 'pointer',
-            fontSize: '1rem',
-            padding: '4px'
-          }}
-        >✕</button>
-      )}
-      {open && technicians.length > 0 && (
-        <div style={{
-          position: 'absolute',
-          top: '100%',
-          left: 0,
-          right: 0,
-          background: theme === 'light' ? '#ffffff' : '#1e3a5f',
-          border: `1px solid ${theme === 'light' ? '#bfdbfe' : '#2563eb'}`,
-          borderRadius: '8px',
-          zIndex: 1000,
-          maxHeight: '200px',
-          overflowY: 'auto',
-          boxShadow: '0 8px 16px rgba(0,0,0,0.3)',
-          marginTop: '4px'
-        }}>
-          {filtered.length === 0 ? (
-            <div style={{ padding: '12px 14px', color: '#9ca3af', fontSize: '0.875rem' }}>
-              No match — will save as typed
-            </div>
-          ) : (
-            filtered.map(t => (
-              <div
-                key={t.id}
-                onMouseDown={() => handleSelect(t.name)}
-                style={{
-                  padding: '10px 14px',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  color: theme === 'light' ? '#111827' : 'white',
-                  borderBottom: `1px solid ${theme === 'light' ? '#e5e7eb' : '#2d4a6b'}`,
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = theme === 'light' ? '#eff6ff' : '#2d4a6b'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-              >
-                {t.name}
-              </div>
-            ))
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // Modal component - defined outside to avoid recreation on each render
 function Modal({ children, onClose, title, theme }) {
   const modalStyles = {
