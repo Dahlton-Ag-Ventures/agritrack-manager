@@ -8580,7 +8580,6 @@ const dueReminders = trackType === 'km'
         </div>
       </div>
     </div>
-  </div>
 )}
           </div>
         )}  
