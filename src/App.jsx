@@ -8581,7 +8581,6 @@ const dueReminders = trackType === 'km'
     </div>
   </div>
 )}
-            </div>
           </div>
         )}  
 {activeTab === 'admin' && (
