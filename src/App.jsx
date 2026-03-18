@@ -1748,13 +1748,11 @@ const viewMachineServiceHistory = (machineName) => {
 const addServiceRecord = async () => {
   if (savingService) return;
   
-  setSavingService(true);
+ setSavingService(true);
   try {
     const finalDate = serviceForm.date || new Date().toISOString().split('T')[0];
-    const newId = Date.now().toString();
-    
-    await supabase.from('service_records').insert([{
-      id: newId,
+
+    const { data, error } = await supabase.from('service_records').insert([{
       user_id: user.id,
       machine_name: serviceForm.machineName,
       service_type: serviceForm.serviceType,
@@ -1762,11 +1760,15 @@ const addServiceRecord = async () => {
       notes: serviceForm.notes,
       technician: serviceForm.technician,
       photo_urls: JSON.stringify(serviceForm.photoUrls || [])
-    }]);
+    }]).select();
+
+    if (error) throw error;
+
+    const savedId = data[0].id;
 
     // ✅ UPDATE LOCAL STATE IMMEDIATELY
     setServiceHistory(prev => [{
-      id: newId,
+      id: savedId,
       machineName: serviceForm.machineName,
       serviceType: serviceForm.serviceType,
       date: finalDate,
