@@ -10667,6 +10667,13 @@ function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, start
   const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
   const [lastPinchDistance, setLastPinchDistance] = React.useState(null);
   const [rotation, setRotation] = React.useState(0);
+
+  React.useEffect(() => {
+  document.body.style.overflow = 'hidden';
+  return () => {
+    document.body.style.overflow = '';
+  };
+}, []);
   
   const photos = allPhotos || [imageUrl];
   const hasMultiplePhotos = photos.length > 1;
@@ -10680,11 +10687,10 @@ const resetZoom = () => {
 };
 const rotatePhoto = () => setRotation(prev => (prev + 90) % 360);
   
-  const nextPhoto = () => {
+const nextPhoto = () => {
   if (currentIndex < photos.length - 1) {
     setCurrentIndex(prev => prev + 1);
     resetZoom();
-    setRotation(0);
   }
 };
 
@@ -10692,7 +10698,6 @@ const prevPhoto = () => {
   if (currentIndex > 0) {
     setCurrentIndex(prev => prev - 1);
     resetZoom();
-    setRotation(0);
   }
 };
   
