@@ -7029,7 +7029,7 @@ const dueReminders = trackType === 'km'
                             marginBottom: '12px',
                           }}
                         >
-                          <span>👷 Manage Technicians ({technicians.length})</span>
+                          <span>  Manage Technicians ({technicians.length})</span>
                           <span style={{
                             transition: 'transform 0.2s ease',
                             transform: showTechnicianList ? 'rotate(180deg)' : 'rotate(0deg)',
