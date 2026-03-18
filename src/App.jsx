@@ -397,6 +397,7 @@ const [technicians, setTechnicians] = useState([]);
 const [newTechnicianName, setNewTechnicianName] = useState('');
 const [editingTechnicianId, setEditingTechnicianId] = useState(null);
 const [editingTechnicianName, setEditingTechnicianName] = useState('');
+const [showTechnicianList, setShowTechnicianList] = useState(false);
   
   // Get current theme object
   const currentTheme = themes[theme];
@@ -7006,8 +7007,36 @@ const dueReminders = trackType === 'km'
                     {userRole !== 'employee' && (
                       <div style={{ marginTop: '24px' }}>
                         <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '12px' }}>
-                          👷 Technician List
+               👷 Technician List
                         </p>
+                        <button
+                          onClick={() => setShowTechnicianList(prev => !prev)}
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            width: '100%',
+                            padding: '10px 14px',
+                            background: showTechnicianList
+                              ? (theme === 'light' ? '#f0fdf4' : 'rgba(16,185,129,0.15)')
+                              : (theme === 'light' ? '#f9fafb' : 'rgba(255,255,255,0.04)'),
+                            border: `1px solid ${showTechnicianList ? '#10b981' : currentTheme.cardBorder}`,
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            color: currentTheme.text,
+                            fontSize: '0.875rem',
+                            fontWeight: '600',
+                            marginBottom: '12px',
+                          }}
+                        >
+                          <span>👷 Manage Technicians ({technicians.length})</span>
+                          <span style={{
+                            transition: 'transform 0.2s ease',
+                            transform: showTechnicianList ? 'rotate(180deg)' : 'rotate(0deg)',
+                            display: 'inline-block'
+                          }}>▼</span>
+                        </button>
+                        {showTechnicianList && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
                           {technicians.length === 0 && (
                             <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem' }}>
@@ -7208,7 +7237,8 @@ const dueReminders = trackType === 'km'
                           >
                             + Add
                           </button>
-                        </div>
+                       </div>
+                        )}
                       </div>
                     )}
                   </div>
