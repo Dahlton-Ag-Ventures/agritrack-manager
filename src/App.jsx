@@ -393,6 +393,8 @@ const [importingService, setImportingService] = useState(false);
 const [importInventoryResult, setImportInventoryResult] = useState(null);
 const [importMachineryResult, setImportMachineryResult] = useState(null);
 const [importServiceResult, setImportServiceResult] = useState(null);
+const [technicians, setTechnicians] = useState([]);
+const [newTechnicianName, setNewTechnicianName] = useState('');
   
   // Get current theme object
   const currentTheme = themes[theme];
@@ -805,10 +807,21 @@ else {
   console.log(`✅ Loaded ${kmData?.length || 0} machine km records`);
   setMachineKm(kmData || []);
 }
+const { data: techData, error: techError } = await supabase
+  .from('technicians')
+  .select('*')
+  .order('name', { ascending: true });
+
+if (techError) {
+  console.error('❌ Technicians load error:', techError);
+} else {
+  console.log(`✅ Loaded ${techData?.length || 0} technicians`);
+  setTechnicians(techData || []);
+}
 
 setLastSync(new Date());
   } catch (error) {
-    console.error('❌ CRITICAL Load error:', error);
+    console.error('❌ CRITICAL Load error:', error); 
     console.error('Error details:', JSON.stringify(error, null, 2));
     alert('Failed to load data: ' + error.message + '\n\nCheck browser console (F12) for details.');
   } finally {
@@ -6555,11 +6568,11 @@ const dueReminders = trackType === 'km'
   value={serviceForm.date}
   onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
 />
-      <input
-        style={styles.input}
-        placeholder="Technician"
+<TechnicianField
         value={serviceForm.technician}
-        onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
+        onChange={(val) => setServiceForm({ ...serviceForm, technician: val })}
+        styles={styles}
+        technicians={technicians}
       />
      <textarea
   style={{ ...styles.input, minHeight: '80px', resize: 'vertical', fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif', fontSize: '1rem', whiteSpace: 'pre-wrap', letterSpacing: 'normal' }}
@@ -6979,15 +6992,108 @@ const dueReminders = trackType === 'km'
                           </button>
                         </div>
                       </div>     
-                      <div>
+                    <div>
                         <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Language</p>
                         <p>English (US)</p>
                       </div>
                     </div>
+                    {userRole !== 'employee' && (
+                      <div style={{ marginTop: '24px' }}>
+                        <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '12px' }}>
+                          👷 Technician List
+                        </p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                          {technicians.length === 0 && (
+                            <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem' }}>
+                              No technicians added yet.
+                            </p>
+                          )}
+                          {technicians.map(t => (
+                            <div key={t.id} style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '10px 14px',
+                              background: currentTheme.inputBackground,
+                              border: `1px solid ${currentTheme.cardBorder}`,
+                              borderRadius: '8px',
+                            }}>
+                              <span style={{ color: currentTheme.text }}>{t.name}</span>
+                              <button
+                                onClick={async () => {
+                                  if (!confirm(`Remove "${t.name}" from the technician list?`)) return;
+                                  const { error } = await supabase
+                                    .from('technicians')
+                                    .delete()
+                                    .eq('id', t.id);
+                                  if (error) { alert('Failed to remove: ' + error.message); return; }
+                                  setTechnicians(prev => prev.filter(x => x.id !== t.id));
+                                }}
+                                style={{
+                                  padding: '4px 10px',
+                                  background: theme === 'light' ? '#fca5a5' : '#7f1d1d',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  color: theme === 'light' ? '#7f1d1d' : 'white',
+                                  cursor: 'pointer',
+                                  fontSize: '0.8rem',
+                                }}
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <input
+                            style={{ ...styles.input, marginBottom: 0, flex: 1 }}
+                            placeholder="Add technician name..."
+                            value={newTechnicianName}
+                            onChange={(e) => setNewTechnicianName(e.target.value)}
+                            onKeyDown={async (e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (!newTechnicianName.trim()) return;
+                                const { data, error } = await supabase
+                                  .from('technicians')
+                                  .insert([{ name: newTechnicianName.trim(), user_id: user.id }])
+                                  .select();
+                                if (error) { alert('Failed to add: ' + error.message); return; }
+                                if (data?.[0]) setTechnicians(prev => [...prev, data[0]]);
+                                setNewTechnicianName('');
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={async () => {
+                              if (!newTechnicianName.trim()) return;
+                              const { data, error } = await supabase
+                                .from('technicians')
+                                .insert([{ name: newTechnicianName.trim(), user_id: user.id }])
+                                .select();
+                              if (error) { alert('Failed to add: ' + error.message); return; }
+                              if (data?.[0]) setTechnicians(prev => [...prev, data[0]]);
+                              setNewTechnicianName('');
+                            }}
+                            style={{
+                              padding: '12px 20px',
+                              background: theme === 'light' ? '#86efac' : '#10b981',
+                              border: 'none',
+                              borderRadius: '8px',
+                              color: theme === 'light' ? '#14532d' : 'white',
+                              cursor: 'pointer',
+                              fontWeight: 'bold',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            + Add
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
-
              {activeSettingsSection === 'account' && (
   <>
     {/* Account Information Card */}
@@ -9066,11 +9172,11 @@ const dueReminders = trackType === 'km'
     setServiceForm({ ...serviceForm, date: e.target.value });
   }}
 />
-    <input
-      style={styles.input}
-      placeholder="Technician Name"
+<TechnicianField
       value={serviceForm.technician}
-      onChange={(e) => setServiceForm({ ...serviceForm, technician: e.target.value })}
+      onChange={(val) => setServiceForm({ ...serviceForm, technician: val })}
+      styles={styles}
+      technicians={technicians}
     />
     <textarea
   style={{ ...styles.input, minHeight: '100px', resize: 'vertical', fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif', fontSize: '1rem', whiteSpace: 'pre-wrap', letterSpacing: 'normal' }}
@@ -9790,14 +9896,11 @@ const dueReminders = trackType === 'km'
           <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.8rem', marginBottom: '4px' }}>
             Technician
           </label>
-          <input
-            style={{
-              ...styles.input,
-              marginBottom: 0
-            }}
+<TechnicianField
             value={completeServiceForm.technician}
-            onChange={e => setCompleteServiceForm(prev => ({ ...prev, technician: e.target.value }))}
-            placeholder="Who did the work?"
+            onChange={(val) => setCompleteServiceForm(prev => ({ ...prev, technician: val }))}
+            styles={styles}
+            technicians={technicians}
           />
         </div>
 
@@ -11106,6 +11209,42 @@ const prevPhoto = () => {
   ↻ Rotate
 </button>
       </div>
+    </div>
+  );
+}
+function TechnicianField({ value, onChange, styles, technicians }) {
+  const isOther = value && !technicians.some(t => t.name === value);
+  const [showCustom, setShowCustom] = React.useState(isOther);
+
+  return (
+    <div>
+      <select
+        style={{ ...styles.input, marginBottom: showCustom ? '8px' : styles.input.marginBottom }}
+        value={showCustom ? '__other__' : (value || '')}
+        onChange={(e) => {
+          if (e.target.value === '__other__') {
+            setShowCustom(true);
+            onChange('');
+          } else {
+            setShowCustom(false);
+            onChange(e.target.value);
+          }
+        }}
+      >
+        <option value="">Select Technician...</option>
+        {technicians.map(t => (
+          <option key={t.id} value={t.name}>{t.name}</option>
+        ))}
+        <option value="__other__">Other (type your own)</option>
+      </select>
+      {showCustom && (
+        <input
+          style={styles.input}
+          placeholder="Enter technician name"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      )}
     </div>
   );
 }
