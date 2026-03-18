@@ -10905,7 +10905,6 @@ const prevPhoto = () => {
               prevPhoto();
             }}
             disabled={currentIndex === 0}
-            style={{
               style={{
               position: 'absolute',
               left: window.innerWidth < 768 ? '8px' : '20px',
@@ -10971,7 +10970,6 @@ const prevPhoto = () => {
               nextPhoto();
             }}
             disabled={currentIndex === photos.length - 1}
-            style={{
               style={{
               position: 'absolute',
               right: window.innerWidth < 768 ? '8px' : '20px',
