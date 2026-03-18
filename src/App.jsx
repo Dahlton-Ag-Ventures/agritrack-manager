@@ -1752,7 +1752,7 @@ const addServiceRecord = async () => {
   try {
     const finalDate = serviceForm.date || new Date().toISOString().split('T')[0];
 
-   const newId = crypto.randomUUID();
+   const newId = Date.now().toString() + Math.random().toString(36).slice(2, 6);
 
     const { error } = await supabase.from('service_records').insert([{
       id: newId,
@@ -1792,18 +1792,16 @@ const addServiceRecord = async () => {
 };
 const deleteServiceRecord = async (id) => {
   if (!confirm('Are you sure you want to delete this service record?')) return;
-
   try {
-    // ✅ UPDATE LOCAL STATE IMMEDIATELY
+    const { error } = await supabase.from('service_records').delete().eq('id', id);
+    if (error) throw error;
     setServiceHistory(prev => prev.filter(item => item.id !== id));
-    
-    await supabase.from('service_records').delete().eq('id', id);
     console.log('✅ Service record deleted');
   } catch (error) {
     console.error('Delete error:', error);
     alert('Error: ' + error.message);
   }
-};;
+};
 const startEditService = (record) => {
   isEditingRef.current = true;
   setEditingServiceId(record.id);
