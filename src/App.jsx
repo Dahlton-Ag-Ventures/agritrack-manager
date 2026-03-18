@@ -1752,7 +1752,10 @@ const addServiceRecord = async () => {
   try {
     const finalDate = serviceForm.date || new Date().toISOString().split('T')[0];
 
-    const { data, error } = await supabase.from('service_records').insert([{
+   const newId = crypto.randomUUID();
+
+    const { error } = await supabase.from('service_records').insert([{
+      id: newId,
       user_id: user.id,
       machine_name: serviceForm.machineName,
       service_type: serviceForm.serviceType,
@@ -1760,11 +1763,11 @@ const addServiceRecord = async () => {
       notes: serviceForm.notes,
       technician: serviceForm.technician,
       photo_urls: JSON.stringify(serviceForm.photoUrls || [])
-    }]).select();
+    }]);
 
     if (error) throw error;
 
-    const savedId = data[0].id;
+    const savedId = newId;
 
     // ✅ UPDATE LOCAL STATE IMMEDIATELY
     setServiceHistory(prev => [{
