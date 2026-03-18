@@ -397,6 +397,7 @@ const [technicians, setTechnicians] = useState([]);
 const [newTechnicianName, setNewTechnicianName] = useState('');
 const [editingTechnicianId, setEditingTechnicianId] = useState(null);
 const [editingTechnicianName, setEditingTechnicianName] = useState('');
+const [showTechnicianList, setShowTechnicianList] = useState(false);
   
   // Get current theme object
   const currentTheme = themes[theme];
@@ -7006,209 +7007,240 @@ const dueReminders = trackType === 'km'
                     {userRole !== 'employee' && (
                       <div style={{ marginTop: '24px' }}>
                         <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '12px' }}>
-                          👷 Technician List
+👷 Technician List
                         </p>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-                          {technicians.length === 0 && (
-                            <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem' }}>
-                              No technicians added yet.
-                            </p>
-                          )}
-                         {technicians.map(t => (
-                            <div key={t.id} style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              padding: '10px 14px',
-                              background: currentTheme.inputBackground,
-                              border: `1px solid ${currentTheme.cardBorder}`,
-                              borderRadius: '8px',
-                              gap: '8px',
-                            }}>
-                              {editingTechnicianId === t.id ? (
-                                <>
-                                  <input
-                                    style={{ ...styles.input, marginBottom: 0, flex: 1 }}
-                                    value={editingTechnicianName}
-                                    onChange={(e) => setEditingTechnicianName(e.target.value)}
-                                    onKeyDown={async (e) => {
-                                      if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        if (!editingTechnicianName.trim()) return;
-                                        const { error } = await supabase
-                                          .from('technicians')
-                                          .update({ name: editingTechnicianName.trim() })
-                                          .eq('id', t.id);
-                                        if (error) { alert('Failed to update: ' + error.message); return; }
-                                        setTechnicians(prev => prev.map(x =>
-                                          x.id === t.id ? { ...x, name: editingTechnicianName.trim() } : x
-                                        ).sort((a, b) => {
-                                          const lastA = a.name.trim().split(' ').pop().toLowerCase();
-                                          const lastB = b.name.trim().split(' ').pop().toLowerCase();
-                                          return lastA.localeCompare(lastB);
-                                        }));
-                                        setEditingTechnicianId(null);
-                                        setEditingTechnicianName('');
-                                      }
-                                      if (e.key === 'Escape') {
-                                        setEditingTechnicianId(null);
-                                        setEditingTechnicianName('');
-                                      }
-                                    }}
-                                    autoFocus
-                                  />
-                                  <button
-                                    onClick={async () => {
-                                      if (!editingTechnicianName.trim()) return;
-                                      const { error } = await supabase
-                                        .from('technicians')
-                                        .update({ name: editingTechnicianName.trim() })
-                                        .eq('id', t.id);
-                                      if (error) { alert('Failed to update: ' + error.message); return; }
-                                      setTechnicians(prev => prev.map(x =>
-                                        x.id === t.id ? { ...x, name: editingTechnicianName.trim() } : x
-                                      ).sort((a, b) => {
-                                        const lastA = a.name.trim().split(' ').pop().toLowerCase();
-                                        const lastB = b.name.trim().split(' ').pop().toLowerCase();
-                                        return lastA.localeCompare(lastB);
-                                      }));
-                                      setEditingTechnicianId(null);
-                                      setEditingTechnicianName('');
-                                    }}
-                                    style={{
-                                      padding: '4px 10px',
-                                      background: '#10b981',
-                                      border: 'none',
-                                      borderRadius: '6px',
-                                      color: 'white',
-                                      cursor: 'pointer',
-                                      fontSize: '0.8rem',
-                                      whiteSpace: 'nowrap',
-                                    }}
-                                  >
-                                    Save
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      setEditingTechnicianId(null);
-                                      setEditingTechnicianName('');
-                                    }}
-                                    style={{
-                                      padding: '4px 10px',
-                                      background: '#4b5563',
-                                      border: 'none',
-                                      borderRadius: '6px',
-                                      color: 'white',
-                                      cursor: 'pointer',
-                                      fontSize: '0.8rem',
-                                      whiteSpace: 'nowrap',
-                                    }}
-                                  >
-                                    Cancel
-                                  </button>
-                                </>
-                              ) : (
-                                <>
-                                  <span style={{ color: currentTheme.text, flex: 1 }}>{t.name}</span>
-                                  <button
-                                    onClick={() => {
-                                      setEditingTechnicianId(t.id);
-                                      setEditingTechnicianName(t.name);
-                                    }}
-                                    style={{
-                                      padding: '4px 10px',
-                                      background: theme === 'light' ? '#bae6fd' : '#0891b2',
-                                      border: 'none',
-                                      borderRadius: '6px',
-                                      color: theme === 'light' ? '#0c4a6e' : 'white',
-                                      cursor: 'pointer',
-                                      fontSize: '0.8rem',
-                                      whiteSpace: 'nowrap',
-                                    }}
-                                  >
-                                    Edit
-                                  </button>
-                                  <button
-                                    onClick={async () => {
-                                      if (!confirm(`Remove "${t.name}" from the technician list?`)) return;
-                                      const { error } = await supabase
-                                        .from('technicians')
-                                        .delete()
-                                        .eq('id', t.id);
-                                      if (error) { alert('Failed to remove: ' + error.message); return; }
-                                      setTechnicians(prev => prev.filter(x => x.id !== t.id));
-                                    }}
-                                    style={{
-                                      padding: '4px 10px',
-                                      background: theme === 'light' ? '#fca5a5' : '#7f1d1d',
-                                      border: 'none',
-                                      borderRadius: '6px',
-                                      color: theme === 'light' ? '#7f1d1d' : 'white',
-                                      cursor: 'pointer',
-                                      fontSize: '0.8rem',
-                                      whiteSpace: 'nowrap',
-                                    }}
-                                  >
-                                    Remove
-                                  </button>
-                                </>
+                        <button
+                          onClick={() => setShowTechnicianList(prev => !prev)}
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            width: '100%',
+                            padding: '10px 14px',
+                            background: showTechnicianList
+                              ? (theme === 'light' ? '#f0fdf4' : 'rgba(16,185,129,0.15)')
+                              : (theme === 'light' ? '#f9fafb' : 'rgba(255,255,255,0.04)'),
+                            border: `1px solid ${showTechnicianList ? '#10b981' : currentTheme.cardBorder}`,
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            color: currentTheme.text,
+                            fontSize: '0.875rem',
+                            fontWeight: '600',
+                            marginBottom: '12px',
+                          }}
+                        >
+                          <span>👷 Manage Technicians ({technicians.length})</span>
+                          <span style={{
+                            transition: 'transform 0.2s ease',
+                            transform: showTechnicianList ? 'rotate(180deg)' : 'rotate(0deg)',
+                            display: 'inline-block',
+                          }}>▼</span>
+                        </button>
+                        {showTechnicianList && (
+                          <div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                              {technicians.length === 0 && (
+                                <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem' }}>
+                                  No technicians added yet.
+                                </p>
                               )}
+                              {technicians.map(t => (
+                                <div key={t.id} style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  padding: '10px 14px',
+                                  background: currentTheme.inputBackground,
+                                  border: `1px solid ${currentTheme.cardBorder}`,
+                                  borderRadius: '8px',
+                                  gap: '8px',
+                                }}>
+                                  {editingTechnicianId === t.id ? (
+                                    <>
+                                      <input
+                                        style={{ ...styles.input, marginBottom: 0, flex: 1 }}
+                                        value={editingTechnicianName}
+                                        onChange={(e) => setEditingTechnicianName(e.target.value)}
+                                        onKeyDown={async (e) => {
+                                          if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            if (!editingTechnicianName.trim()) return;
+                                            const { error } = await supabase
+                                              .from('technicians')
+                                              .update({ name: editingTechnicianName.trim() })
+                                              .eq('id', t.id);
+                                            if (error) { alert('Failed to update: ' + error.message); return; }
+                                            setTechnicians(prev => prev.map(x =>
+                                              x.id === t.id ? { ...x, name: editingTechnicianName.trim() } : x
+                                            ).sort((a, b) => {
+                                              const lastA = a.name.trim().split(' ').pop().toLowerCase();
+                                              const lastB = b.name.trim().split(' ').pop().toLowerCase();
+                                              return lastA.localeCompare(lastB);
+                                            }));
+                                            setEditingTechnicianId(null);
+                                            setEditingTechnicianName('');
+                                          }
+                                          if (e.key === 'Escape') {
+                                            setEditingTechnicianId(null);
+                                            setEditingTechnicianName('');
+                                          }
+                                        }}
+                                        autoFocus
+                                      />
+                                      <button
+                                        onClick={async () => {
+                                          if (!editingTechnicianName.trim()) return;
+                                          const { error } = await supabase
+                                            .from('technicians')
+                                            .update({ name: editingTechnicianName.trim() })
+                                            .eq('id', t.id);
+                                          if (error) { alert('Failed to update: ' + error.message); return; }
+                                          setTechnicians(prev => prev.map(x =>
+                                            x.id === t.id ? { ...x, name: editingTechnicianName.trim() } : x
+                                          ).sort((a, b) => {
+                                            const lastA = a.name.trim().split(' ').pop().toLowerCase();
+                                            const lastB = b.name.trim().split(' ').pop().toLowerCase();
+                                            return lastA.localeCompare(lastB);
+                                          }));
+                                          setEditingTechnicianId(null);
+                                          setEditingTechnicianName('');
+                                        }}
+                                        style={{
+                                          padding: '4px 10px',
+                                          background: '#10b981',
+                                          border: 'none',
+                                          borderRadius: '6px',
+                                          color: 'white',
+                                          cursor: 'pointer',
+                                          fontSize: '0.8rem',
+                                          whiteSpace: 'nowrap',
+                                        }}
+                                      >
+                                        Save
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          setEditingTechnicianId(null);
+                                          setEditingTechnicianName('');
+                                        }}
+                                        style={{
+                                          padding: '4px 10px',
+                                          background: '#4b5563',
+                                          border: 'none',
+                                          borderRadius: '6px',
+                                          color: 'white',
+                                          cursor: 'pointer',
+                                          fontSize: '0.8rem',
+                                          whiteSpace: 'nowrap',
+                                        }}
+                                      >
+                                        Cancel
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span style={{ color: currentTheme.text, flex: 1 }}>{t.name}</span>
+                                      <button
+                                        onClick={() => {
+                                          setEditingTechnicianId(t.id);
+                                          setEditingTechnicianName(t.name);
+                                        }}
+                                        style={{
+                                          padding: '4px 10px',
+                                          background: theme === 'light' ? '#bae6fd' : '#0891b2',
+                                          border: 'none',
+                                          borderRadius: '6px',
+                                          color: theme === 'light' ? '#0c4a6e' : 'white',
+                                          cursor: 'pointer',
+                                          fontSize: '0.8rem',
+                                          whiteSpace: 'nowrap',
+                                        }}
+                                      >
+                                        Edit
+                                      </button>
+                                      <button
+                                        onClick={async () => {
+                                          if (!confirm(`Remove "${t.name}" from the technician list?`)) return;
+                                          const { error } = await supabase
+                                            .from('technicians')
+                                            .delete()
+                                            .eq('id', t.id);
+                                          if (error) { alert('Failed to remove: ' + error.message); return; }
+                                          setTechnicians(prev => prev.filter(x => x.id !== t.id));
+                                        }}
+                                        style={{
+                                          padding: '4px 10px',
+                                          background: theme === 'light' ? '#fca5a5' : '#7f1d1d',
+                                          border: 'none',
+                                          borderRadius: '6px',
+                                          color: theme === 'light' ? '#7f1d1d' : 'white',
+                                          cursor: 'pointer',
+                                          fontSize: '0.8rem',
+                                          whiteSpace: 'nowrap',
+                                        }}
+                                      >
+                                        Remove
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
+                              ))}
                             </div>
-                          ))}
-                        </div>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <input
-                            style={{ ...styles.input, marginBottom: 0, flex: 1 }}
-                            placeholder="Add technician name..."
-                            value={newTechnicianName}
-                            onChange={(e) => setNewTechnicianName(e.target.value)}
-                            onKeyDown={async (e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                if (!newTechnicianName.trim()) return;
-                                const { data, error } = await supabase
-                                  .from('technicians')
-                                  .insert([{ name: newTechnicianName.trim(), user_id: user.id }])
-                                  .select();
-                                if (error) { alert('Failed to add: ' + error.message); return; }
-                                if (data?.[0]) setTechnicians(prev => [...prev, data[0]].sort((a, b) => {
-                                const lastA = a.name.trim().split(' ').pop().toLowerCase();
-                                const lastB = b.name.trim().split(' ').pop().toLowerCase();
-                                return lastA.localeCompare(lastB);
-                              }));
-                                setNewTechnicianName('');
-                              }
-                            }}
-                          />
-                          <button
-                            onClick={async () => {
-                              if (!newTechnicianName.trim()) return;
-                              const { data, error } = await supabase
-                                .from('technicians')
-                                .insert([{ name: newTechnicianName.trim(), user_id: user.id }])
-                                .select();
-                              if (error) { alert('Failed to add: ' + error.message); return; }
-                              if (data?.[0]) setTechnicians(prev => [...prev, data[0]].sort((a, b) => {
-                                const lastA = a.name.trim().split(' ').pop().toLowerCase();
-                                const lastB = b.name.trim().split(' ').pop().toLowerCase();
-                                return lastA.localeCompare(lastB);
-                              }));
-                              setNewTechnicianName('');
-                            }}
-                            style={{
-                              padding: '12px 20px',
-                              background: theme === 'light' ? '#86efac' : '#10b981',
-                              border: 'none',
-                              borderRadius: '8px',
-                              color: theme === 'light' ? '#14532d' : 'white',
-                              cursor: 'pointer',
-                              fontWeight: 'bold',
-                              whiteSpace: 'nowrap',
-                            }}
-                          >
-                            + Add
-                          </button>
-                        </div>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <input
+                                style={{ ...styles.input, marginBottom: 0, flex: 1 }}
+                                placeholder="Add technician name..."
+                                value={newTechnicianName}
+                                onChange={(e) => setNewTechnicianName(e.target.value)}
+                                onKeyDown={async (e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    if (!newTechnicianName.trim()) return;
+                                    const { data, error } = await supabase
+                                      .from('technicians')
+                                      .insert([{ name: newTechnicianName.trim(), user_id: user.id }])
+                                      .select();
+                                    if (error) { alert('Failed to add: ' + error.message); return; }
+                                    if (data?.[0]) setTechnicians(prev => [...prev, data[0]].sort((a, b) => {
+                                      const lastA = a.name.trim().split(' ').pop().toLowerCase();
+                                      const lastB = b.name.trim().split(' ').pop().toLowerCase();
+                                      return lastA.localeCompare(lastB);
+                                    }));
+                                    setNewTechnicianName('');
+                                  }
+                                }}
+                              />
+                              <button
+                                onClick={async () => {
+                                  if (!newTechnicianName.trim()) return;
+                                  const { data, error } = await supabase
+                                    .from('technicians')
+                                    .insert([{ name: newTechnicianName.trim(), user_id: user.id }])
+                                    .select();
+                                  if (error) { alert('Failed to add: ' + error.message); return; }
+                                  if (data?.[0]) setTechnicians(prev => [...prev, data[0]].sort((a, b) => {
+                                    const lastA = a.name.trim().split(' ').pop().toLowerCase();
+                                    const lastB = b.name.trim().split(' ').pop().toLowerCase();
+                                    return lastA.localeCompare(lastB);
+                                  }));
+                                  setNewTechnicianName('');
+                                }}
+                                style={{
+                                  padding: '12px 20px',
+                                  background: theme === 'light' ? '#86efac' : '#10b981',
+                                  border: 'none',
+                                  borderRadius: '8px',
+                                  color: theme === 'light' ? '#14532d' : 'white',
+                                  cursor: 'pointer',
+                                  fontWeight: 'bold',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                + Add
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
