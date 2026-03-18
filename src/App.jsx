@@ -6939,6 +6939,7 @@ const dueReminders = trackType === 'km'
               </div>
 
               {activeSettingsSection === 'general' && (
+                <div>
                 <div style={styles.itemCard}>
                   <div style={{ flex: 1 }}>
                     <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>⚙️ General Settings</h3>
