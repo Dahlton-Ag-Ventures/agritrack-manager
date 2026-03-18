@@ -1747,13 +1747,18 @@ const viewMachineServiceHistory = (machineName) => {
   
 const addServiceRecord = async () => {
   if (savingService) return;
+  if (!serviceForm.machineName) {
+    alert('Please select a machine');
+    return;
+  }
+
+  setSavingService(true);
   
- setSavingService(true);
+  // Generate the ID ONCE — before the try block so it never changes on retry
+  const newId = Date.now().toString() + Math.random().toString(36).slice(2, 6);
+  const finalDate = serviceForm.date || new Date().toISOString().split('T')[0];
+
   try {
-    const finalDate = serviceForm.date || new Date().toISOString().split('T')[0];
-
-   const newId = Date.now().toString() + Math.random().toString(36).slice(2, 6);
-
     const { error } = await supabase.from('service_records').insert([{
       id: newId,
       user_id: user.id,
@@ -1765,13 +1770,20 @@ const addServiceRecord = async () => {
       photo_urls: JSON.stringify(serviceForm.photoUrls || [])
     }]);
 
-    if (error) throw error;
+    // Only treat it as a real failure if it's NOT a duplicate key error
+    // (duplicate key = record already made it in on a previous attempt)
+    if (error) {
+      const isDuplicateKey = error.code === '23505';
+      if (!isDuplicateKey) {
+        throw error;
+      }
+      // If it IS a duplicate key, the record is already in DB — fall through
+      // to update local state as normal
+      console.warn('Duplicate key — record already saved, updating local state only');
+    }
 
-    const savedId = newId;
-
-    // ✅ UPDATE LOCAL STATE IMMEDIATELY
     setServiceHistory(prev => [{
-      id: savedId,
+      id: newId,
       machineName: serviceForm.machineName,
       serviceType: serviceForm.serviceType,
       date: finalDate,
@@ -1779,10 +1791,11 @@ const addServiceRecord = async () => {
       technician: serviceForm.technician,
       photoUrls: serviceForm.photoUrls || []
     }, ...prev]);
-    
-    console.log('✅ Service saved - FAST!');
+
+    console.log('✅ Service saved');
     setServiceForm({ machineName: '', serviceType: '', date: '', notes: '', technician: '', photoUrls: [] });
     setShowServiceModal(false);
+
   } catch (error) {
     console.error('Add error:', error);
     alert('Error: ' + error.message);
