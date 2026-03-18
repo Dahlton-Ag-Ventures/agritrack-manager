@@ -10906,11 +10906,12 @@ const prevPhoto = () => {
             }}
             disabled={currentIndex === 0}
             style={{
+              style={{
               position: 'absolute',
-              left: '20px',
+              left: window.innerWidth < 768 ? '8px' : '20px',
               top: '50%',
               transform: 'translateY(-50%)',
-              padding: '8px 12px',
+              padding: window.innerWidth < 768 ? '4px 8px' : '8px 12px',
               background: currentIndex === 0 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)',
               border: 'none',
               borderRadius: '50%',
@@ -10944,7 +10945,7 @@ const prevPhoto = () => {
   alt="View" 
   style={{ 
     maxWidth: '95vw',
-    maxHeight: '75vh',
+    maxHeight: window.innerWidth < 768 ? '60vh' : '75vh',
     objectFit: 'contain',
     borderRadius: '8px',
     transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px) rotate(${rotation}deg)`,
@@ -10971,11 +10972,12 @@ const prevPhoto = () => {
             }}
             disabled={currentIndex === photos.length - 1}
             style={{
+              style={{
               position: 'absolute',
-              right: '20px',
+              right: window.innerWidth < 768 ? '8px' : '20px',
               top: '50%',
               transform: 'translateY(-50%)',
-              padding: '8px 12px',
+              padding: window.innerWidth < 768 ? '4px 8px' : '8px 12px',
               background: currentIndex === photos.length - 1 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)',
               border: 'none',
               borderRadius: '50%',
@@ -11079,13 +11081,12 @@ const prevPhoto = () => {
   onClick={rotatePhoto}
   style={{
     padding: '8px 16px',
-    background: '#8b5cf6',
+    background: '#bae6fd',
     border: 'none',
     borderRadius: '8px',
-    color: 'white',
+    color: '#000000',
     cursor: 'pointer',
-    fontWeight: 'bold',
-    fontSize: '1rem'
+    fontWeight: 'bold'
   }}
 >
   ↻ Rotate
