@@ -393,6 +393,13 @@ const [importingService, setImportingService] = useState(false);
 const [importInventoryResult, setImportInventoryResult] = useState(null);
 const [importMachineryResult, setImportMachineryResult] = useState(null);
 const [importServiceResult, setImportServiceResult] = useState(null);
+const [calendarNotes, setCalendarNotes] = useState({});
+const [calendarOpen, setCalendarOpen] = useState(false);
+const [calendarSelectedKey, setCalendarSelectedKey] = useState(null);
+const [calendarNoteText, setCalendarNoteText] = useState('');
+const [calendarNoteDirty, setCalendarNoteDirty] = useState(false);
+const [calendarSaving, setCalendarSaving] = useState(false);
+const [calendarSaved, setCalendarSaved] = useState(false);
 const [technicians, setTechnicians] = useState([]);
 const [newTechnicianName, setNewTechnicianName] = useState('');
 const [editingTechnicianId, setEditingTechnicianId] = useState(null);
@@ -825,7 +832,20 @@ if (techError) {
     return lastA.localeCompare(lastB);
   }));
 }
+const { data: calNotesData, error: calNotesError } = await supabase
+  .from('calendar_notes')
+  .select('*');
 
+if (calNotesError) {
+  console.error('❌ Calendar notes load error:', calNotesError);
+} else {
+  const notesMap = {};
+  (calNotesData || []).forEach(n => {
+    notesMap[`${n.month_index}-${n.week_number}`] = n.note;
+  });
+  setCalendarNotes(notesMap);
+  console.log(`✅ Loaded ${calNotesData?.length || 0} calendar notes`);
+}
 setLastSync(new Date());
   } catch (error) {
     console.error('❌ CRITICAL Load error:', error); 
@@ -2423,7 +2443,37 @@ const completeKmReminder = (reminderId) => {
   });
   setShowCompleteReminderModal(true);
 };
-  
+ const saveCalendarNote = async (key, text) => {
+  if (!key) return;
+  setCalendarSaving(true);
+  setCalendarSaved(false);
+  const [monthIndex, weekNumber] = key.split('-').map(Number);
+  try {
+    const existing = calendarNotes[key] !== undefined;
+    if (existing || text.trim()) {
+      const { error } = await supabase
+        .from('calendar_notes')
+        .upsert([{
+          id: `${user.id}-${key}`,
+          user_id: user.id,
+          month_index: monthIndex,
+          week_number: weekNumber,
+          note: text.trim(),
+          updated_at: new Date().toISOString()
+        }], { onConflict: 'id' });
+      if (error) throw error;
+    }
+    setCalendarNotes(prev => ({ ...prev, [key]: text.trim() }));
+    setCalendarSaved(true);
+    setCalendarNoteDirty(false);
+    setTimeout(() => setCalendarSaved(false), 2500);
+  } catch (error) {
+    console.error('❌ Calendar note save error:', error);
+    alert('Failed to save note: ' + error.message);
+  } finally {
+    setCalendarSaving(false);
+  }
+}; 
 const generateQRDataUrl = (item) => {
   const url = `https://agritrack-manager.vercel.app/#inventory/${item.id}`;
   return `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(url)}`;
@@ -3546,6 +3596,21 @@ border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
     setActiveTab('machinery');
     setShowRemindersPanel(true);
   }}
+/>
+<FarmCalendar
+  theme={theme}
+  calendarNotes={calendarNotes}
+  calendarOpen={calendarOpen}
+  setCalendarOpen={setCalendarOpen}
+  calendarSelectedKey={calendarSelectedKey}
+  setCalendarSelectedKey={setCalendarSelectedKey}
+  calendarNoteText={calendarNoteText}
+  setCalendarNoteText={setCalendarNoteText}
+  calendarNoteDirty={calendarNoteDirty}
+  setCalendarNoteDirty={setCalendarNoteDirty}
+  calendarSaving={calendarSaving}
+  calendarSaved={calendarSaved}
+  onSave={saveCalendarNote}
 />
     
   {/* General Features Flip Card - Full Width */}
@@ -10496,7 +10561,294 @@ const dueReminders = trackType === 'km'
   </>
   );
 }
+function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, calendarSelectedKey, setCalendarSelectedKey, calendarNoteText, setCalendarNoteText, calendarNoteDirty, setCalendarNoteDirty, calendarSaving, calendarSaved, onSave }) {
+  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const today = new Date();
 
+  function getWeeks(month) {
+    const weeks = [];
+    const mEnd = new Date(2026, month + 1, 0);
+    let d = new Date(2026, month, 1);
+    while (d.getDay() !== 0) d.setDate(d.getDate() - 1);
+    let wi = 1;
+    while (true) {
+      const s = new Date(d);
+      const e = new Date(d);
+      e.setDate(e.getDate() + 6);
+      if (s > mEnd) break;
+      if (e <= mEnd) {
+        weeks.push({ weekNum: wi, start: s, end: new Date(e) });
+        wi++;
+      }
+      d.setDate(d.getDate() + 7);
+    }
+    return weeks;
+  }
+
+  function fmt(d) { return `${SHORT[d.getMonth()]} ${d.getDate()}`; }
+  function isCurrent(s, e) { return today >= s && today <= e; }
+
+  const cardBg = theme === 'light' ? '#ffffff' : '#1e3a5f';
+  const cardBorder = theme === 'light' ? '#e5e7eb' : '#2563eb';
+  const textMain = theme === 'light' ? '#111827' : '#ffffff';
+  const textSub = theme === 'light' ? '#6b7280' : '#9ca3af';
+
+  function selectWeek(key, monthName, weekNum, s, e) {
+    if (calendarSelectedKey === key) {
+      setCalendarSelectedKey(null);
+      setCalendarNoteText('');
+      setCalendarNoteDirty(false);
+      return;
+    }
+    setCalendarSelectedKey(key);
+    setCalendarNoteText(calendarNotes[key] || '');
+    setCalendarNoteDirty(false);
+  }
+
+  function closeNote() {
+    setCalendarSelectedKey(null);
+    setCalendarNoteText('');
+    setCalendarNoteDirty(false);
+  }
+
+  const selectedMonthIndex = calendarSelectedKey ? parseInt(calendarSelectedKey.split('-')[0]) : null;
+  const selectedWeekNum = calendarSelectedKey ? parseInt(calendarSelectedKey.split('-')[1]) : null;
+
+  return (
+    <div style={{ marginBottom: '24px' }}>
+      {/* Toggle button */}
+      <button
+        onClick={() => {
+          setCalendarOpen(o => !o);
+          if (calendarOpen) {
+            setCalendarSelectedKey(null);
+            setCalendarNoteText('');
+            setCalendarNoteDirty(false);
+          }
+        }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          background: cardBg,
+          border: `1px solid ${cardBorder}`,
+          borderRadius: '12px',
+          padding: '13px 16px',
+          cursor: 'pointer',
+          color: textMain,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{
+            width: '28px', height: '28px', borderRadius: '8px',
+            background: '#E1F5EE', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', fontSize: '14px'
+          }}>
+            📅
+          </div>
+          <div>
+            <div style={{ fontSize: '15px', fontWeight: '500', textAlign: 'left' }}>Farm Calendar 2026</div>
+            <div style={{ fontSize: '12px', color: textSub, marginTop: '1px' }}>
+              {calendarOpen ? '2026 — 12 months' : 'Tap to open'}
+            </div>
+          </div>
+        </div>
+        <span style={{
+          fontSize: '12px', color: textSub,
+          display: 'inline-block',
+          transform: calendarOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+          transition: 'transform 0.25s'
+        }}>▼</span>
+      </button>
+
+      {/* Panel */}
+      {calendarOpen && (
+        <div style={{ marginTop: '12px' }}>
+
+          {/* Note card */}
+          {calendarSelectedKey && (
+            <div style={{
+              marginBottom: '12px',
+              background: cardBg,
+              border: '0.5px solid #9FE1CB',
+              borderRadius: '12px',
+              padding: '14px 16px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{
+                    fontSize: '11px', fontWeight: '500',
+                    background: '#1D9E75', color: '#fff',
+                    borderRadius: '8px', padding: '3px 9px'
+                  }}>
+                    {MONTHS[selectedMonthIndex]} — Week {selectedWeekNum}
+                  </span>
+                  {(() => {
+                    const weeks = getWeeks(selectedMonthIndex);
+                    const w = weeks.find(x => x.weekNum === selectedWeekNum);
+                    return w ? (
+                      <span style={{ fontSize: '12px', color: textSub }}>
+                        {fmt(w.start)} – {fmt(w.end)}
+                      </span>
+                    ) : null;
+                  })()}
+                </div>
+                <button
+                  onClick={closeNote}
+                  style={{
+                    background: 'none',
+                    border: `0.5px solid ${cardBorder}`,
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    color: textSub,
+                    cursor: 'pointer',
+                    padding: '3px 9px',
+                    lineHeight: '1.4'
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+              <textarea
+                value={calendarNoteText}
+                onChange={e => {
+                  setCalendarNoteText(e.target.value);
+                  setCalendarNoteDirty(true);
+                }}
+                placeholder="Add notes for this week — tasks, plans, reminders..."
+                style={{
+                  width: '100%',
+                  minHeight: '96px',
+                  border: `0.5px solid ${cardBorder}`,
+                  borderRadius: '8px',
+                  padding: '10px 12px',
+                  fontSize: '13px',
+                  color: textMain,
+                  background: theme === 'light' ? '#f9fafb' : '#1a2942',
+                  resize: 'vertical',
+                  fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif',
+                  lineHeight: '1.6',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={e => e.target.style.borderColor = '#1D9E75'}
+                onBlur={e => e.target.style.borderColor = cardBorder}
+              />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px' }}>
+                <span style={{ fontSize: '11px', color: textSub }}>
+                  {calendarNoteText.length} character{calendarNoteText.length !== 1 ? 's' : ''}
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {calendarSaved && (
+                    <span style={{ fontSize: '12px', color: '#1D9E75' }}>Saved</span>
+                  )}
+                  <button
+                    onClick={() => onSave(calendarSelectedKey, calendarNoteText)}
+                    disabled={!calendarNoteDirty || calendarSaving}
+                    style={{
+                      background: !calendarNoteDirty || calendarSaving ? (theme === 'light' ? '#e5e7eb' : '#374151') : '#1D9E75',
+                      color: !calendarNoteDirty || calendarSaving ? textSub : '#fff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '6px 16px',
+                      fontSize: '13px',
+                      fontWeight: '500',
+                      cursor: !calendarNoteDirty || calendarSaving ? 'default' : 'pointer'
+                    }}
+                  >
+                    {calendarSaving ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Month grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+            gap: '12px'
+          }}>
+            {MONTHS.map((monthName, mi) => {
+              const weeks = getWeeks(mi);
+              const hasSelection = calendarSelectedKey && parseInt(calendarSelectedKey.split('-')[0]) === mi;
+              return (
+                <div key={mi} style={{
+                  background: cardBg,
+                  border: `0.5px solid ${hasSelection ? '#1D9E75' : cardBorder}`,
+                  borderRadius: '12px',
+                  padding: '12px',
+                  transition: 'border-color 0.15s'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: '500', color: textMain }}>{monthName}</span>
+                    <span style={{ fontSize: '11px', color: textSub }}>{weeks.length} weeks</span>
+                  </div>
+                  {weeks.map(w => {
+                    const key = `${mi}-${w.weekNum}`;
+                    const curr = isCurrent(w.start, w.end);
+                    const selected = calendarSelectedKey === key;
+                    const hasNote = !!(calendarNotes[key] && calendarNotes[key].trim());
+                    return (
+                      <div
+                        key={key}
+                        onClick={() => selectWeek(key, monthName, w.weekNum, w.start, w.end)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          padding: '7px 8px',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          border: selected
+                            ? '0.5px solid #1D9E75'
+                            : curr
+                            ? '0.5px solid #9FE1CB'
+                            : '0.5px solid transparent',
+                          background: selected
+                            ? '#1D9E75'
+                            : curr
+                            ? '#E1F5EE'
+                            : 'transparent',
+                          marginBottom: '3px',
+                          transition: 'all 0.12s'
+                        }}
+                        onMouseEnter={e => {
+                          if (!selected) e.currentTarget.style.background = theme === 'light' ? '#f3f4f6' : 'rgba(255,255,255,0.07)';
+                        }}
+                        onMouseLeave={e => {
+                          if (!selected) e.currentTarget.style.background = curr ? '#E1F5EE' : 'transparent';
+                        }}
+                      >
+                        <div style={{
+                          width: '6px', height: '6px', borderRadius: '50%', flexShrink: 0, marginRight: '7px',
+                          background: selected ? 'rgba(255,255,255,0.5)' : hasNote ? '#1D9E75' : curr ? '#9FE1CB' : 'transparent'
+                        }} />
+                        <span style={{
+                          fontSize: '12px', fontWeight: '500', minWidth: '48px',
+                          color: selected ? '#fff' : curr ? '#0F6E56' : textMain
+                        }}>
+                          Week {w.weekNum}
+                        </span>
+                        <span style={{
+                          fontSize: '11px',
+                          color: selected ? '#9FE1CB' : curr ? '#1D9E75' : textSub
+                        }}>
+                          {fmt(w.start)} – {fmt(w.end)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 function ServiceOverview({ serviceReminders, machineHours, machineKm, theme, onReminderClick }) {
   const getHours = (name) => {
     const r = machineHours.find(h => h.machine_name === name);
