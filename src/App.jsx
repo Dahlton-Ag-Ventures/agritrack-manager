@@ -10641,13 +10641,13 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
         }}
       >
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <h2 style={{
-            fontSize: '1.1rem', fontWeight: 700, margin: 0,
-            background: 'linear-gradient(to right, #10b981, #06b6d4)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-          }}>
-            Farm Calendar 2026
-          </h2>
+     <h2 style={{
+          fontSize: '1.5rem', fontWeight: 700, margin: 0,
+          background: 'linear-gradient(to right, #10b981, #06b6d4)',
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+        }}>
+          Farm Calendar 2026
+        </h2>
         </div>
         <span style={{
           fontSize: '12px', color: textSub,
@@ -10904,8 +10904,8 @@ const priorityConfig = {
     }}>
       {/* Section header */}
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-        <h2 style={{
-          fontSize: '1.1rem', fontWeight: 700, margin: 0,
+      <h2 style={{
+          fontSize: '1.5rem', fontWeight: 700, margin: 0,
           background: 'linear-gradient(to right, #10b981, #06b6d4)',
           WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
         }}>
