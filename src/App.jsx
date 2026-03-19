@@ -10628,9 +10628,9 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
           }
         }}
         style={{
-          display: 'flex',
+          display: 'grid',
+          gridTemplateColumns: '24px 1fr 24px',
           alignItems: 'center',
-          justifyContent: 'space-between',
           width: '100%',
           background: cardBg,
           border: `1px solid ${cardBorder}`,
@@ -10640,6 +10640,7 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
           color: textMain,
         }}
       >
+        <span />
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
 <h2 style={{
           fontSize: '1.5rem', fontWeight: 700, margin: 0,
@@ -10649,7 +10650,6 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
         }}>
           Farm Calendar 2026
         </h2>
-        </div>
         <span style={{
           fontSize: '12px', color: textSub,
           display: 'inline-block',
