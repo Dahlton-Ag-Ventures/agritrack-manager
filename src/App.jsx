@@ -10641,7 +10641,7 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
         }}
       >
         <span />
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
 <h2 style={{
           fontSize: '1.5rem', fontWeight: 700, margin: 0,
           background: 'linear-gradient(to right, #10b981, #06b6d4)',
