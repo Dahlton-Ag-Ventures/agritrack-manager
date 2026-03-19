@@ -10656,6 +10656,7 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
           transform: calendarOpen ? 'rotate(180deg)' : 'rotate(0deg)',
           transition: 'transform 0.25s'
         }}>▼</span>
+        </div>
       </button>
 
       {/* Panel */}
