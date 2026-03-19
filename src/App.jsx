@@ -10641,7 +10641,7 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
         }}
       >
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-     <h2 style={{
+<h2 style={{
           fontSize: '1.5rem', fontWeight: 700, margin: 0,
           background: 'linear-gradient(to right, #10b981, #06b6d4)',
           WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
@@ -10903,11 +10903,12 @@ const priorityConfig = {
       padding: theme === 'light' ? 20 : 0,
     }}>
       {/* Section header */}
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-      <h2 style={{
+<div style={{ marginBottom: 14 }}>
+        <h2 style={{
           fontSize: '1.5rem', fontWeight: 700, margin: 0,
           background: 'linear-gradient(to right, #10b981, #06b6d4)',
           WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          textAlign: 'center',
         }}>
           🔧 Service Overview
         </h2>
