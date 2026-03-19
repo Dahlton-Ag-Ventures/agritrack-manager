@@ -10645,6 +10645,7 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
           fontSize: '1.5rem', fontWeight: 700, margin: 0,
           background: 'linear-gradient(to right, #10b981, #06b6d4)',
           WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          textAlign: 'center',
         }}>
           Farm Calendar 2026
         </h2>
