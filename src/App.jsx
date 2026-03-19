@@ -1465,6 +1465,8 @@ const getFilteredAndSortedService = () => {
           return (b.date || '').localeCompare(a.date || '');
         case 'date-asc':
           return (a.date || '').localeCompare(b.date || '');
+        case 'recently-added':
+          return Number(b.id) - Number(a.id);
         default:
           return 0;
       }
@@ -6297,6 +6299,7 @@ const dueReminders = trackType === 'km'
   >
     <option value="date-desc">Date (Newest First)</option>
     <option value="date-asc">Date (Oldest First)</option>
+    <option value="recently-added">Recently Added</option>
   </select>
   <select
     value={serviceItemsPerPage}
