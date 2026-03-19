@@ -10816,6 +10816,11 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
                     onMouseDown={e => { e.preventDefault(); execCmd('hiliteColor', '#bfdbfe'); }} title="Blue highlight" />
                   <div style={{ width: '18px', height: '18px', borderRadius: '3px', background: '#fecaca', border: '0.5px solid #dc2626', cursor: 'pointer', flexShrink: 0 }}
                     onMouseDown={e => { e.preventDefault(); execCmd('hiliteColor', '#fecaca'); }} title="Red highlight" />
+                  <div
+                    style={{ width: '18px', height: '18px', borderRadius: '3px', background: theme === 'light' ? '#ffffff' : '#1e3a5f', border: `0.5px solid ${cardBorder}`, cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: textSub, fontWeight: 'bold' }}
+                    onMouseDown={e => { e.preventDefault(); execCmd('hiliteColor', 'transparent'); }}
+                    title="Remove highlight"
+                  >✕</div>
 
                   {divider}
 
