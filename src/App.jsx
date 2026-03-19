@@ -2458,7 +2458,7 @@ const completeKmReminder = (reminderId) => {
           user_id: user.id,
           month_index: monthIndex,
           week_number: weekNumber,
-          note: text.trim(),
+          note: text,
           updated_at: new Date().toISOString()
         }], { onConflict: 'id' });
       if (error) throw error;
@@ -10565,6 +10565,7 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
   const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const today = new Date();
+  const editorRef = React.useRef(null);
 
   function getWeeks(month) {
     const weeks = [];
@@ -10594,7 +10595,7 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
   const textMain = theme === 'light' ? '#111827' : '#ffffff';
   const textSub = theme === 'light' ? '#6b7280' : '#9ca3af';
 
-  function selectWeek(key, monthName, weekNum, s, e) {
+  function selectWeek(key) {
     if (calendarSelectedKey === key) {
       setCalendarSelectedKey(null);
       setCalendarNoteText('');
@@ -10602,8 +10603,14 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
       return;
     }
     setCalendarSelectedKey(key);
-    setCalendarNoteText(calendarNotes[key] || '');
+    const existing = calendarNotes[key] || '';
+    setCalendarNoteText(existing);
     setCalendarNoteDirty(false);
+    setTimeout(() => {
+      if (editorRef.current) {
+        editorRef.current.innerHTML = existing;
+      }
+    }, 0);
   }
 
   function closeNote() {
@@ -10612,12 +10619,49 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
     setCalendarNoteDirty(false);
   }
 
+  React.useEffect(() => {
+    if (calendarSelectedKey && editorRef.current) {
+      editorRef.current.innerHTML = calendarNotes[calendarSelectedKey] || '';
+    }
+  }, [calendarSelectedKey]);
+
+  function execCmd(cmd, value) {
+    if (editorRef.current) editorRef.current.focus();
+    document.execCommand(cmd, false, value || null);
+    if (editorRef.current) {
+      setCalendarNoteText(editorRef.current.innerHTML);
+      setCalendarNoteDirty(true);
+    }
+  }
+
+  function handleEditorInput() {
+    if (editorRef.current) {
+      setCalendarNoteText(editorRef.current.innerHTML);
+      setCalendarNoteDirty(true);
+    }
+  }
+
+  function handleSave() {
+    const html = editorRef.current ? editorRef.current.innerHTML : calendarNoteText;
+    onSave(calendarSelectedKey, html);
+  }
+
+  const charCount = calendarNoteText.replace(/<[^>]*>/g, '').length;
   const selectedMonthIndex = calendarSelectedKey ? parseInt(calendarSelectedKey.split('-')[0]) : null;
   const selectedWeekNum = calendarSelectedKey ? parseInt(calendarSelectedKey.split('-')[1]) : null;
 
+  const toolbarBg = theme === 'light' ? '#f3f4f6' : '#1a2942';
+  const btnStyle = {
+    width: '26px', height: '26px', border: 'none', borderRadius: '5px',
+    cursor: 'pointer', flexShrink: 0, background: 'transparent', color: textSub,
+    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px',
+  };
+  const divider = (
+    <div style={{ width: '0.5px', height: '18px', background: cardBorder, flexShrink: 0 }} />
+  );
+
   return (
     <div style={{ marginBottom: '24px' }}>
-      {/* Toggle button */}
       <button
         onClick={() => {
           setCalendarOpen(o => !o);
@@ -10641,29 +10685,26 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
         }}
       >
         <span />
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-<h2 style={{
-          fontSize: '1.5rem', fontWeight: 700, margin: 0,
-          background: 'linear-gradient(to right, #10b981, #06b6d4)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-          textAlign: 'center',
-        }}>
-          Farm Calendar 2026
-        </h2>
-        <span style={{
-          fontSize: '12px', color: textSub,
-          display: 'inline-block',
-          transform: calendarOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-          transition: 'transform 0.25s'
-        }}>▼</span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+          <h2 style={{
+            fontSize: '1.5rem', fontWeight: 700, margin: 0,
+            background: 'linear-gradient(to right, #10b981, #06b6d4)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            textAlign: 'center',
+          }}>
+            Farm Calendar 2026
+          </h2>
+          <span style={{
+            fontSize: '12px', color: textSub, display: 'inline-block',
+            transform: calendarOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.25s'
+          }}>▼</span>
         </div>
       </button>
 
-      {/* Panel */}
       {calendarOpen && (
         <div style={{ marginTop: '12px' }}>
 
-          {/* Note card */}
           {calendarSelectedKey && (
             <div style={{
               marginBottom: '12px',
@@ -10672,13 +10713,10 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
               borderRadius: '12px',
               padding: '14px 16px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{
-                    fontSize: '11px', fontWeight: '500',
-                    background: '#1D9E75', color: '#fff',
-                    borderRadius: '8px', padding: '3px 9px'
-                  }}>
+              {/* Card header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  <span style={{ fontSize: '15px', fontWeight: '500', color: textMain }}>
                     {MONTHS[selectedMonthIndex]} — Week {selectedWeekNum}
                   </span>
                   {(() => {
@@ -10694,63 +10732,162 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
                 <button
                   onClick={closeNote}
                   style={{
-                    background: 'none',
-                    border: `0.5px solid ${cardBorder}`,
-                    borderRadius: '8px',
-                    fontSize: '13px',
-                    color: textSub,
-                    cursor: 'pointer',
-                    padding: '3px 9px',
-                    lineHeight: '1.4'
+                    background: 'none', border: `0.5px solid ${cardBorder}`,
+                    borderRadius: '8px', fontSize: '13px', color: textSub,
+                    cursor: 'pointer', padding: '5px 12px', lineHeight: '1.4', whiteSpace: 'nowrap'
                   }}
                 >
                   Close
                 </button>
               </div>
-              <textarea
-                value={calendarNoteText}
-                onChange={e => {
-                  setCalendarNoteText(e.target.value);
-                  setCalendarNoteDirty(true);
-                }}
-                placeholder="Add notes for this week — tasks, plans, reminders..."
-                style={{
-                  width: '100%',
-                  minHeight: '96px',
-                  border: `0.5px solid ${cardBorder}`,
-                  borderRadius: '8px',
-                  padding: '10px 12px',
-                  fontSize: '13px',
-                  color: textMain,
-                  background: theme === 'light' ? '#f9fafb' : '#1a2942',
-                  resize: 'vertical',
-                  fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif',
-                  lineHeight: '1.6',
-                  outline: 'none',
-                  boxSizing: 'border-box'
-                }}
-                onFocus={e => e.target.style.borderColor = '#1D9E75'}
-                onBlur={e => e.target.style.borderColor = cardBorder}
-              />
+
+              {/* Rich text editor */}
+              <div style={{ border: `0.5px solid ${cardBorder}`, borderRadius: '8px', overflow: 'hidden' }}>
+
+                {/* Toolbar */}
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: '4px',
+                  padding: '6px 8px', background: toolbarBg,
+                  borderBottom: `0.5px solid ${cardBorder}`, flexWrap: 'nowrap', overflowX: 'auto'
+                }}>
+                  <button style={{ ...btnStyle, fontWeight: 'bold' }} onMouseDown={e => { e.preventDefault(); execCmd('bold'); }} title="Bold">B</button>
+                  <button style={{ ...btnStyle, fontStyle: 'italic' }} onMouseDown={e => { e.preventDefault(); execCmd('italic'); }} title="Italic">I</button>
+                  <button style={{ ...btnStyle, textDecoration: 'underline' }} onMouseDown={e => { e.preventDefault(); execCmd('underline'); }} title="Underline">U</button>
+                  <button style={{ ...btnStyle, textDecoration: 'line-through' }} onMouseDown={e => { e.preventDefault(); execCmd('strikeThrough'); }} title="Strikethrough">S</button>
+
+                  {divider}
+
+                  <select
+                    style={{
+                      height: '26px', padding: '0 4px', fontSize: '11px',
+                      border: `0.5px solid ${cardBorder}`, borderRadius: '5px',
+                      background: theme === 'light' ? '#ffffff' : '#1e3a5f',
+                      color: textMain, cursor: 'pointer', flexShrink: 0, width: '72px'
+                    }}
+                    onMouseDown={e => e.stopPropagation()}
+                    onChange={e => {
+                      if (editorRef.current) editorRef.current.focus();
+                      const v = e.target.value;
+                      if (v === 'H1') { document.execCommand('formatBlock', false, 'h2'); }
+                      else if (v === 'H2') { document.execCommand('formatBlock', false, 'h3'); }
+                      else if (v === 'Small') { document.execCommand('fontSize', false, '1'); }
+                      else { document.execCommand('formatBlock', false, 'p'); }
+                      handleEditorInput();
+                      e.target.value = 'Normal';
+                    }}
+                    defaultValue="Normal"
+                  >
+                    <option value="Normal">Normal</option>
+                    <option value="H1">H1</option>
+                    <option value="H2">H2</option>
+                    <option value="Small">Small</option>
+                  </select>
+
+                  <select
+                    style={{
+                      height: '26px', padding: '0 4px', fontSize: '11px',
+                      border: `0.5px solid ${cardBorder}`, borderRadius: '5px',
+                      background: theme === 'light' ? '#ffffff' : '#1e3a5f',
+                      color: textMain, cursor: 'pointer', flexShrink: 0, width: '48px'
+                    }}
+                    onMouseDown={e => e.stopPropagation()}
+                    onChange={e => {
+                      if (editorRef.current) editorRef.current.focus();
+                      document.execCommand('fontSize', false, e.target.value);
+                      handleEditorInput();
+                      e.target.value = '3';
+                    }}
+                    defaultValue="3"
+                  >
+                    <option value="1">10</option>
+                    <option value="2">11</option>
+                    <option value="3">13</option>
+                    <option value="4">16</option>
+                    <option value="5">18</option>
+                    <option value="6">24</option>
+                    <option value="7">32</option>
+                  </select>
+
+                  <div style={{ width: '18px', height: '18px', borderRadius: '3px', background: '#fef08a', border: '0.5px solid #ca8a04', cursor: 'pointer', flexShrink: 0 }}
+                    onMouseDown={e => { e.preventDefault(); execCmd('hiliteColor', '#fef08a'); }} title="Yellow highlight" />
+                  <div style={{ width: '18px', height: '18px', borderRadius: '3px', background: '#bbf7d0', border: '0.5px solid #16a34a', cursor: 'pointer', flexShrink: 0 }}
+                    onMouseDown={e => { e.preventDefault(); execCmd('hiliteColor', '#bbf7d0'); }} title="Green highlight" />
+                  <div style={{ width: '18px', height: '18px', borderRadius: '3px', background: '#bfdbfe', border: '0.5px solid #2563eb', cursor: 'pointer', flexShrink: 0 }}
+                    onMouseDown={e => { e.preventDefault(); execCmd('hiliteColor', '#bfdbfe'); }} title="Blue highlight" />
+                  <div style={{ width: '18px', height: '18px', borderRadius: '3px', background: '#fecaca', border: '0.5px solid #dc2626', cursor: 'pointer', flexShrink: 0 }}
+                    onMouseDown={e => { e.preventDefault(); execCmd('hiliteColor', '#fecaca'); }} title="Red highlight" />
+
+                  {divider}
+
+                  <button
+                    style={btnStyle}
+                    onMouseDown={e => { e.preventDefault(); execCmd('insertUnorderedList'); }}
+                    title="Bullet list"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <circle cx="2" cy="3.5" r="1.5" fill="currentColor"/>
+                      <rect x="5" y="2.5" width="8" height="2" rx="1" fill="currentColor"/>
+                      <circle cx="2" cy="7" r="1.5" fill="currentColor"/>
+                      <rect x="5" y="6" width="8" height="2" rx="1" fill="currentColor"/>
+                      <circle cx="2" cy="10.5" r="1.5" fill="currentColor"/>
+                      <rect x="5" y="9.5" width="8" height="2" rx="1" fill="currentColor"/>
+                    </svg>
+                  </button>
+                  <button
+                    style={btnStyle}
+                    onMouseDown={e => { e.preventDefault(); execCmd('insertOrderedList'); }}
+                    title="Numbered list"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <text x="0" y="5" fontSize="5" fill="currentColor">1.</text>
+                      <rect x="5" y="2.5" width="8" height="2" rx="1" fill="currentColor"/>
+                      <text x="0" y="9.5" fontSize="5" fill="currentColor">2.</text>
+                      <rect x="5" y="7" width="8" height="2" rx="1" fill="currentColor"/>
+                      <text x="0" y="13.5" fontSize="5" fill="currentColor">3.</text>
+                      <rect x="5" y="11.5" width="8" height="2" rx="1" fill="currentColor"/>
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Editable area */}
+                <div
+                  ref={editorRef}
+                  contentEditable
+                  suppressContentEditableWarning
+                  onInput={handleEditorInput}
+                  data-placeholder="Add notes for this week — tasks, plans, reminders..."
+                  style={{
+                    minHeight: '110px',
+                    padding: '10px 12px',
+                    fontSize: '13px',
+                    color: textMain,
+                    background: theme === 'light' ? '#f9fafb' : '#1a2942',
+                    outline: 'none',
+                    lineHeight: '1.6',
+                    fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif',
+                    boxSizing: 'border-box',
+                    wordBreak: 'break-word',
+                  }}
+                />
+              </div>
+
+              {/* Footer */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px' }}>
                 <span style={{ fontSize: '11px', color: textSub }}>
-                  {calendarNoteText.length} character{calendarNoteText.length !== 1 ? 's' : ''}
+                  {charCount} character{charCount !== 1 ? 's' : ''}
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   {calendarSaved && (
                     <span style={{ fontSize: '12px', color: '#1D9E75' }}>Saved</span>
                   )}
                   <button
-                    onClick={() => onSave(calendarSelectedKey, calendarNoteText)}
+                    onClick={handleSave}
                     disabled={!calendarNoteDirty || calendarSaving}
                     style={{
                       background: !calendarNoteDirty || calendarSaving ? (theme === 'light' ? '#e5e7eb' : '#374151') : '#1D9E75',
                       color: !calendarNoteDirty || calendarSaving ? textSub : '#fff',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: '6px 16px',
-                      fontSize: '13px',
-                      fontWeight: '500',
+                      border: 'none', borderRadius: '8px', padding: '6px 16px',
+                      fontSize: '13px', fontWeight: '500',
                       cursor: !calendarNoteDirty || calendarSaving ? 'default' : 'pointer'
                     }}
                   >
@@ -10786,29 +10923,17 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
                     const key = `${mi}-${w.weekNum}`;
                     const curr = isCurrent(w.start, w.end);
                     const selected = calendarSelectedKey === key;
-                    const hasNote = !!(calendarNotes[key] && calendarNotes[key].trim());
+                    const hasNote = !!(calendarNotes[key] && calendarNotes[key].replace(/<[^>]*>/g, '').trim());
                     return (
                       <div
                         key={key}
-                        onClick={() => selectWeek(key, monthName, w.weekNum, w.start, w.end)}
+                        onClick={() => selectWeek(key)}
                         style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          padding: '7px 8px',
-                          borderRadius: '8px',
-                          cursor: 'pointer',
-                          border: selected
-                            ? '0.5px solid #1D9E75'
-                            : curr
-                            ? '0.5px solid #9FE1CB'
-                            : '0.5px solid transparent',
-                          background: selected
-                            ? '#1D9E75'
-                            : curr
-                            ? '#E1F5EE'
-                            : 'transparent',
-                          marginBottom: '3px',
-                          transition: 'all 0.12s'
+                          display: 'flex', alignItems: 'center', padding: '7px 8px',
+                          borderRadius: '8px', cursor: 'pointer',
+                          border: selected ? '0.5px solid #1D9E75' : curr ? '0.5px solid #9FE1CB' : '0.5px solid transparent',
+                          background: selected ? '#1D9E75' : curr ? '#E1F5EE' : 'transparent',
+                          marginBottom: '3px', transition: 'all 0.12s'
                         }}
                         onMouseEnter={e => {
                           if (!selected) e.currentTarget.style.background = theme === 'light' ? '#f3f4f6' : 'rgba(255,255,255,0.07)';
@@ -10821,16 +10946,10 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
                           width: '6px', height: '6px', borderRadius: '50%', flexShrink: 0, marginRight: '7px',
                           background: selected ? 'rgba(255,255,255,0.5)' : hasNote ? '#1D9E75' : curr ? '#9FE1CB' : 'transparent'
                         }} />
-                        <span style={{
-                          fontSize: '12px', fontWeight: '500', minWidth: '48px',
-                          color: selected ? '#fff' : curr ? '#0F6E56' : textMain
-                        }}>
+                        <span style={{ fontSize: '12px', fontWeight: '500', minWidth: '48px', color: selected ? '#fff' : curr ? '#0F6E56' : textMain }}>
                           Week {w.weekNum}
                         </span>
-                        <span style={{
-                          fontSize: '11px',
-                          color: selected ? '#9FE1CB' : curr ? '#1D9E75' : textSub
-                        }}>
+                        <span style={{ fontSize: '11px', color: selected ? '#9FE1CB' : curr ? '#1D9E75' : textSub }}>
                           {fmt(w.start)} – {fmt(w.end)}
                         </span>
                       </div>
