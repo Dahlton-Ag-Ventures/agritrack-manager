@@ -10641,19 +10641,13 @@ function FarmCalendar({ theme, calendarNotes, calendarOpen, setCalendarOpen, cal
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            width: '28px', height: '28px', borderRadius: '8px',
-            background: '#E1F5EE', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', fontSize: '14px'
+          <h2 style={{
+            fontSize: '1.6rem', fontWeight: 800, margin: 0,
+            background: 'linear-gradient(to right, #10b981, #06b6d4)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
           }}>
-            📅
-          </div>
-          <div>
-            <div style={{ fontSize: '15px', fontWeight: '500', textAlign: 'left' }}>Farm Calendar 2026</div>
-            <div style={{ fontSize: '12px', color: textSub, marginTop: '1px' }}>
-              {calendarOpen ? '2026 — 12 months' : 'Tap to open'}
-            </div>
-          </div>
+            📅 Farm Calendar 2026
+          </h2>
         </div>
         <span style={{
           fontSize: '12px', color: textSub,
