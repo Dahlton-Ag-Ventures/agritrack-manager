@@ -10876,13 +10876,6 @@ function FarmCalendar({ theme, calendarNotes, calendarSelectedKey, setCalendarSe
             );
           })}
         </div>
-        <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-          <span style={{ fontSize: '0.7rem', color: textSub, display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#1D9E75', display: 'inline-block' }} />
-            has note
-          </span>
-          <span style={{ fontSize: '0.7rem', color: '#0F6E56', fontWeight: '600' }}>● current month</span>
-        </div>
       </div>
     );
   }
