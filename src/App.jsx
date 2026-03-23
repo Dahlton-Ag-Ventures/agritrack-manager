@@ -3629,7 +3629,7 @@ className="flip-card"
       }}
     >
       <span style={{ fontSize: '3rem' }}>👥</span>
-      <h3 style={{ fontSize: '2.5rem', fontWeight: '400', color: '#1D9E75', margin: 0, textAlign: 'center' }}>General Features</h3>
+      <h3 style={{ fontSize: '1.5rem', fontWeight: '400', color: '#1D9E75', margin: 0, textAlign: 'center' }}>General Features</h3>
       <p style={{ color: '#9ca3af', fontSize: '0.85rem', margin: 0 }}>Tap to learn more</p>
     </div>
     <div
@@ -3703,7 +3703,7 @@ className="flip-card"
           }}
         >
           <span style={{ fontSize: '3rem' }}>📦</span>
-          <h3 style={{ fontSize: '2.5rem', fontWeight: '400', color: '#1D9E75', margin: 0, textAlign: 'center' }}>Inventory Management</h3>
+          <h3 style={{ fontSize: '1.5rem', fontWeight: '400', color: '#1D9E75', margin: 0, textAlign: 'center' }}>Inventory Management</h3>
           <p style={{ color: '#9ca3af', fontSize: '0.85rem', margin: 0 }}>Tap to learn more</p>
         </div>
         <div
@@ -3753,7 +3753,7 @@ className="flip-card"
           }}
         >
           <span style={{ fontSize: '3rem' }}>🚜</span>
-          <h3 style={{ fontSize: '2.5rem', fontWeight: '400', color: '#1D9E75', margin: 0, textAlign: 'center' }}>Machinery Tracking</h3>
+          <h3 style={{ fontSize: '1.5rem', fontWeight: '400', color: '#1D9E75', margin: 0, textAlign: 'center' }}>Machinery Tracking</h3>
           <p style={{ color: '#9ca3af', fontSize: '0.85rem', margin: 0 }}>Tap to learn more</p>
         </div>
         <div
@@ -3803,7 +3803,7 @@ className="flip-card"
           }}
         >
           <span style={{ fontSize: '3rem' }}>🔧</span>
-          <h3 style={{ fontSize: '2.5rem', fontWeight: '400', color: '#1D9E75', margin: 0, textAlign: 'center' }}>Service History</h3>
+          <h3 style={{ fontSize: '1.5rem', fontWeight: '400', color: '#1D9E75', margin: 0, textAlign: 'center' }}>Service History</h3>
           <p style={{ color: '#9ca3af', fontSize: '0.85rem', margin: 0 }}>Tap to learn more</p>
         </div>
         <div
@@ -10809,13 +10809,13 @@ function FarmCalendar({ theme, calendarNotes, calendarSelectedKey, setCalendarSe
   function GridView() {
     return (
       <div>
-        <p style={{
-          fontWeight: '700', fontSize: '1rem', marginBottom: '12px',
-          background: 'linear-gradient(to right, #10b981, #06b6d4)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-        }}>
-          Farm Calendar 2026
-        </p>
+       <p style={{
+  fontWeight: '400', fontSize: '1rem', marginBottom: '12px',
+  background: 'linear-gradient(to right, #10b981, #06b6d4)',
+  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+}}>
+  Farm Calendar 2026
+</p>
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
@@ -11241,12 +11241,11 @@ const priorityConfig = {
     }}>
       {/* Section header */}
 <div style={{ marginBottom: 14 }}>
-        <h2 style={{
-          fontSize: '1.5rem', fontWeight: 700, margin: 0,
-          background: 'linear-gradient(to right, #10b981, #06b6d4)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-          textAlign: 'center',
-        }}>
+<h2 style={{ fontSize: '1.5rem', fontWeight: 400, margin: 0,
+  background: 'linear-gradient(to right, #10b981, #06b6d4)',
+  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+  textAlign: 'center',
+}}>
           🔧 Service Overview
         </h2>
       </div>
