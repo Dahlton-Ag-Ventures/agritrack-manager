@@ -3555,38 +3555,38 @@ return (
 
 {activeTab === 'dashboard' && (
   <div style={styles.homeContainer}>
-    {/* Welcome Header */}
-    <div style={{ 
-      ...styles.welcomeCard, 
-     background: theme === 'light' ? 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)' : 'linear-gradient(135deg, rgba(6, 182, 212, 0.4) 0%, rgba(16, 185, 129, 0.3) 100%)',
-border: theme === 'light' ? '2px solid #fde047' : '2px solid #10b981',
-      marginBottom: '30px'
-    }}>
-<h1 style={{ 
-  color: theme === 'light' ? '#431407' : '#ffffff',
-  marginBottom: '16px', 
-  fontSize: '2.5rem', 
-  fontWeight: '700',
+   <div style={{
+  background: theme === 'light' ? '#ffffff' : 'linear-gradient(135deg, rgba(6, 182, 212, 0.4) 0%, rgba(16, 185, 129, 0.3) 100%)',
+  border: '2px solid #fde047',
+  borderRadius: '16px',
+  padding: '32px 36px 28px',
   textAlign: 'center',
-  filter: theme === 'dark' ? 'drop-shadow(2px 4px 8px rgba(0, 0, 0, 0.8)) drop-shadow(4px 6px 12px rgba(0, 0, 0, 0.6))' : 'none',
-  textShadow: theme === 'light' ? '1px 2px 6px rgba(0, 0, 0, 0.2)' : 'none',
+  marginBottom: '30px',
   animation: 'floatIn 1.2s ease-out',
-  opacity: 1
 }}>
-  Welcome to AgriTrack Manager
-</h1>
-      <p style={{ 
-        color: currentTheme.text, 
-        fontSize: '1.1rem', 
-        fontWeight: '400',
-        textAlign: 'center',
-        opacity: 0.9,
-        animation: 'floatIn 1.4s ease-out'
-      }}>
-        Track inventory, machinery, and service records all in one place
-      </p>
-    </div>
-
+  <h1 style={{
+    color: theme === 'light' ? '#085041' : '#ffffff',
+    marginBottom: '12px',
+    fontSize: '2.5rem',
+    fontWeight: '800',
+    textAlign: 'center',
+    lineHeight: '1.2',
+    filter: theme === 'dark' ? 'drop-shadow(2px 4px 8px rgba(0, 0, 0, 0.8))' : 'none',
+  }}>
+    Welcome to AgriTrack Manager
+  </h1>
+  <p style={{
+    color: theme === 'light' ? '#374151' : '#ffffff',
+    fontSize: '1.1rem',
+    fontWeight: '400',
+    textAlign: 'center',
+    lineHeight: '1.6',
+    opacity: 0.9,
+    animation: 'floatIn 1.4s ease-out',
+  }}>
+    Track inventory, machinery, and service records all in one place
+  </p>
+</div>
 <DashboardPanels
   theme={theme}
   serviceReminders={serviceReminders}
