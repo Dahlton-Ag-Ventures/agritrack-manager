@@ -3564,11 +3564,11 @@ return (
   marginBottom: '30px',
   animation: 'floatIn 1.2s ease-out',
 }}>
-  <h1 style={{
-    color: theme === 'light' ? '#085041' : '#ffffff',
+ <h1 style={{
+    color: theme === 'light' ? '#1D9E75' : '#ffffff',
     marginBottom: '12px',
     fontSize: '2.5rem',
-    fontWeight: '800',
+    fontWeight: '400',
     textAlign: 'center',
     lineHeight: '1.2',
     filter: theme === 'dark' ? 'drop-shadow(2px 4px 8px rgba(0, 0, 0, 0.8))' : 'none',
