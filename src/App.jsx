@@ -3629,7 +3629,7 @@ className="flip-card"
       }}
     >
       <span style={{ fontSize: '3rem' }}>👥</span>
-      <h3 style={{ fontSize: '1.5rem', color: '#06b6d4', margin: 0, textAlign: 'center' }}>General Features</h3>
+      <h3 style={{ fontSize: '2.5rem', fontWeight: '400', color: '#1D9E75', margin: 0, textAlign: 'center' }}>General Features</h3>
       <p style={{ color: '#9ca3af', fontSize: '0.85rem', margin: 0 }}>Tap to learn more</p>
     </div>
     <div
@@ -3703,7 +3703,7 @@ className="flip-card"
           }}
         >
           <span style={{ fontSize: '3rem' }}>📦</span>
-          <h3 style={{ fontSize: '1.5rem', color: '#06b6d4', margin: 0, textAlign: 'center' }}>Inventory Management</h3>
+          <h3 style={{ fontSize: '2.5rem', fontWeight: '400', color: '#1D9E75', margin: 0, textAlign: 'center' }}>Inventory Management</h3>
           <p style={{ color: '#9ca3af', fontSize: '0.85rem', margin: 0 }}>Tap to learn more</p>
         </div>
         <div
@@ -3753,7 +3753,7 @@ className="flip-card"
           }}
         >
           <span style={{ fontSize: '3rem' }}>🚜</span>
-          <h3 style={{ fontSize: '1.5rem', color: '#06b6d4', margin: 0, textAlign: 'center' }}>Machinery Tracking</h3>
+          <h3 style={{ fontSize: '2.5rem', fontWeight: '400', color: '#1D9E75', margin: 0, textAlign: 'center' }}>Machinery Tracking</h3>
           <p style={{ color: '#9ca3af', fontSize: '0.85rem', margin: 0 }}>Tap to learn more</p>
         </div>
         <div
@@ -3803,7 +3803,7 @@ className="flip-card"
           }}
         >
           <span style={{ fontSize: '3rem' }}>🔧</span>
-          <h3 style={{ fontSize: '1.5rem', color: '#06b6d4', margin: 0, textAlign: 'center' }}>Service History</h3>
+          <h3 style={{ fontSize: '2.5rem', fontWeight: '400', color: '#1D9E75', margin: 0, textAlign: 'center' }}>Service History</h3>
           <p style={{ color: '#9ca3af', fontSize: '0.85rem', margin: 0 }}>Tap to learn more</p>
         </div>
         <div
