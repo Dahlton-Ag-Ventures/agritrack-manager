@@ -2643,7 +2643,7 @@ homeContainer: {
   backdropFilter: 'blur(5px)',
 },
     content: {
-      maxWidth: '1200px',
+      maxWidth: '1600px',
       margin: '0 auto',
     },
   loading: {
