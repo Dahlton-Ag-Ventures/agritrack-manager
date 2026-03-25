@@ -6631,13 +6631,26 @@ const dueReminders = trackType === 'km'
         value={serviceForm.serviceType}
         onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
       />
-<input
-  style={{ ...styles.input, fontFamily: 'inherit', width: '100%', boxSizing: 'border-box', colorScheme: 'light dark' }}
-  type="date"
-  value={serviceForm.date}
-  placeholder="Select a date"
-  onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
-/>
+<div style={{ position: 'relative', marginBottom: '16px' }}>
+  {!serviceForm.date && (
+    <div style={{
+      position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+      padding: '12px', borderRadius: '8px', pointerEvents: 'none',
+      fontSize: '1rem', color: '#6b7280',
+      background: currentTheme.inputBackground,
+      border: `1px solid ${currentTheme.cardBorder}`,
+      zIndex: 1
+    }}>
+      Select a date
+    </div>
+  )}
+  <input
+    style={{ ...styles.input, fontFamily: 'inherit', width: '100%', boxSizing: 'border-box', marginBottom: 0, opacity: serviceForm.date ? 1 : 0.01, position: 'relative', zIndex: 2 }}
+    type="date"
+    value={serviceForm.date}
+    onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
+  />
+</div>
 <TechnicianField
         value={serviceForm.technician}
         onChange={(val) => setServiceForm({ ...serviceForm, technician: val })}
@@ -9379,15 +9392,26 @@ const dueReminders = trackType === 'km'
       value={serviceForm.serviceType}
       onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
     />
-<input
-  style={{ ...styles.input, fontFamily: 'inherit', width: '100%', boxSizing: 'border-box', colorScheme: 'light dark' }}
-  type="date"
-  value={serviceForm.date}
-  placeholder="Select a date"
-  onChange={(e) => {
-    setServiceForm({ ...serviceForm, date: e.target.value });
-  }}
-/>
+<div style={{ position: 'relative', marginBottom: '16px' }}>
+  {!serviceForm.date && (
+    <div style={{
+      position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+      padding: '12px', borderRadius: '8px', pointerEvents: 'none',
+      fontSize: '1rem', color: '#6b7280',
+      background: currentTheme.inputBackground,
+      border: `1px solid ${currentTheme.cardBorder}`,
+      zIndex: 1
+    }}>
+      Select a date
+    </div>
+  )}
+  <input
+    style={{ ...styles.input, fontFamily: 'inherit', width: '100%', boxSizing: 'border-box', marginBottom: 0, opacity: serviceForm.date ? 1 : 0.01, position: 'relative', zIndex: 2 }}
+    type="date"
+    value={serviceForm.date}
+    onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
+  />
+</div>
 <TechnicianField
       value={serviceForm.technician}
       onChange={(val) => setServiceForm({ ...serviceForm, technician: val })}
