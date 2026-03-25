@@ -6631,7 +6631,7 @@ const dueReminders = trackType === 'km'
         value={serviceForm.serviceType}
         onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
       />
-<div style={{ position: 'relative', marginBottom: '16px' }}>
+<div style={{ position: 'relative', marginBottom: '16px', overflow: 'hidden' }}>
   {!serviceForm.date && (
     <div style={{
       position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
@@ -6645,7 +6645,7 @@ const dueReminders = trackType === 'km'
     </div>
   )}
   <input
-    style={{ ...styles.input, fontFamily: 'inherit', width: '100%', maxWidth: '100%', boxSizing: 'border-box', marginBottom: 0, opacity: serviceForm.date ? 1 : 0.01, position: 'relative', zIndex: 2 }}
+    style={{ ...styles.input, fontFamily: 'inherit', width: '100%', maxWidth: '100%', boxSizing: 'border-box', marginBottom: 0, opacity: serviceForm.date ? 1 : 0.01, position: 'relative', zIndex: 2, display: 'block', WebkitAppearance: 'none', appearance: 'none' }}
     type="date"
     value={serviceForm.date}
     onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
@@ -9392,7 +9392,7 @@ const dueReminders = trackType === 'km'
       value={serviceForm.serviceType}
       onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
     />
-<div style={{ position: 'relative', marginBottom: '16px' }}>
+<div style={{ position: 'relative', marginBottom: '16px', overflow: 'hidden' }}>
   {!serviceForm.date && (
     <div style={{
       position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
@@ -9406,7 +9406,7 @@ const dueReminders = trackType === 'km'
     </div>
   )}
   <input
-    style={{ ...styles.input, fontFamily: 'inherit', width: '100%', maxWidth: '100%', boxSizing: 'border-box', marginBottom: 0, opacity: serviceForm.date ? 1 : 0.01, position: 'relative', zIndex: 2 }}
+    style={{ ...styles.input, fontFamily: 'inherit', width: '100%', maxWidth: '100%', boxSizing: 'border-box', marginBottom: 0, opacity: serviceForm.date ? 1 : 0.01, position: 'relative', zIndex: 2, display: 'block', WebkitAppearance: 'none', appearance: 'none' }}
     type="date"
     value={serviceForm.date}
     onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
