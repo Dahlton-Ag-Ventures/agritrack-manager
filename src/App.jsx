@@ -11004,7 +11004,7 @@ return (
 
     </div>
   );
-
+}
 function ServiceOverview({ serviceReminders, machineHours, machineKm, theme, onReminderClick }) {
   const getHours = (name) => {
     const r = machineHours.find(h => h.machine_name === name);
