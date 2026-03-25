@@ -6631,11 +6631,11 @@ const dueReminders = trackType === 'km'
         value={serviceForm.serviceType}
         onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
       />
- <input
-  style={{ ...styles.input, fontFamily: 'inherit' }}
+<input
+  style={{ ...styles.input, fontFamily: 'inherit', width: '100%', boxSizing: 'border-box', colorScheme: 'light dark' }}
   type="date"
-  placeholder="Date"
   value={serviceForm.date}
+  placeholder="Select a date"
   onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
 />
 <TechnicianField
@@ -9380,9 +9380,10 @@ const dueReminders = trackType === 'km'
       onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
     />
 <input
-  style={{ ...styles.input, fontFamily: 'inherit' }}
+  style={{ ...styles.input, fontFamily: 'inherit', width: '100%', boxSizing: 'border-box', colorScheme: 'light dark' }}
   type="date"
   value={serviceForm.date}
+  placeholder="Select a date"
   onChange={(e) => {
     setServiceForm({ ...serviceForm, date: e.target.value });
   }}
@@ -11906,6 +11907,7 @@ function TechnicianField({ value, onChange, styles, technicians }) {
 
   return (
     <div style={{ marginBottom: '16px' }}>
+       <p style={{ fontSize: '0.875rem', color: '#9ca3af', marginBottom: '6px' }}>Technician(s)</p>
       {/* Selected technicians as tags */}
       {selectedNames.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
