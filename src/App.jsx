@@ -11876,37 +11876,147 @@ const prevPhoto = () => {
   );
 }
 function TechnicianField({ value, onChange, styles, technicians }) {
-  const isOther = value && !technicians.some(t => t.name === value);
-  const [showCustom, setShowCustom] = React.useState(isOther);
+  // value is a string — we split/join with ', ' as the separator
+  const selectedNames = value ? value.split(', ').map(s => s.trim()).filter(Boolean) : [];
+
+  const [customInput, setCustomInput] = React.useState('');
+  const [showCustom, setShowCustom] = React.useState(false);
+
+  const toggleTechnician = (name) => {
+    if (selectedNames.includes(name)) {
+      onChange(selectedNames.filter(n => n !== name).join(', '));
+    } else {
+      onChange([...selectedNames, name].join(', '));
+    }
+  };
+
+  const addCustom = () => {
+    const trimmed = customInput.trim();
+    if (!trimmed) return;
+    if (!selectedNames.includes(trimmed)) {
+      onChange([...selectedNames, trimmed].join(', '));
+    }
+    setCustomInput('');
+    setShowCustom(false);
+  };
+
+  const removeTechnician = (name) => {
+    onChange(selectedNames.filter(n => n !== name).join(', '));
+  };
 
   return (
-    <div>
-      <select
-        style={{ ...styles.input, marginBottom: showCustom ? '8px' : styles.input.marginBottom }}
-        value={showCustom ? '__other__' : (value || '')}
-        onChange={(e) => {
-          if (e.target.value === '__other__') {
-            setShowCustom(true);
-            onChange('');
-          } else {
-            setShowCustom(false);
-            onChange(e.target.value);
-          }
-        }}
-      >
-        <option value="">Select Technician...</option>
-        {technicians.map(t => (
-          <option key={t.id} value={t.name}>{t.name}</option>
-        ))}
-        <option value="__other__">Other (type your own)</option>
-      </select>
-      {showCustom && (
-        <input
-          style={styles.input}
-          placeholder="Enter technician name"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
+    <div style={{ marginBottom: '16px' }}>
+      {/* Selected technicians as tags */}
+      {selectedNames.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
+          {selectedNames.map(name => (
+            <div key={name} style={{
+              display: 'flex', alignItems: 'center', gap: '4px',
+              padding: '4px 10px',
+              background: styles.input.background,
+              border: '1px solid #10b981',
+              borderRadius: '20px',
+              fontSize: '0.875rem',
+              color: styles.input.color,
+            }}>
+              <span>{name}</span>
+              <button
+                type="button"
+                onClick={() => removeTechnician(name)}
+                style={{
+                  background: 'transparent', border: 'none',
+                  color: '#ef4444', cursor: 'pointer',
+                  fontSize: '1rem', lineHeight: 1, padding: '0 0 0 2px'
+                }}
+              >✕</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Technician list as checkboxes */}
+      {technicians.length > 0 && (
+        <div style={{
+          border: `1px solid ${styles.input.borderColor || '#2563eb'}`,
+          borderRadius: '8px',
+          overflow: 'hidden',
+          marginBottom: '8px',
+          maxHeight: '160px',
+          overflowY: 'auto',
+        }}>
+          {technicians.map(t => {
+            const isSelected = selectedNames.includes(t.name);
+            return (
+              <div
+                key={t.id}
+                onClick={() => toggleTechnician(t.name)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '10px',
+                  padding: '10px 14px', cursor: 'pointer',
+                  background: isSelected
+                    ? 'rgba(16, 185, 129, 0.12)'
+                    : 'transparent',
+                  borderBottom: `1px solid ${styles.input.borderColor || '#374151'}`,
+                  transition: 'background 0.15s ease',
+                }}
+              >
+                <div style={{
+                  width: '16px', height: '16px', borderRadius: '4px', flexShrink: 0,
+                  border: `2px solid ${isSelected ? '#10b981' : '#6b7280'}`,
+                  background: isSelected ? '#10b981' : 'transparent',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '11px', color: 'white'
+                }}>
+                  {isSelected && '✓'}
+                </div>
+                <span style={{ fontSize: '0.9rem', color: styles.input.color }}>{t.name}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Add custom technician */}
+      {showCustom ? (
+        <div style={{ display: 'flex', gap: '6px' }}>
+          <input
+            style={{ ...styles.input, marginBottom: 0, flex: 1 }}
+            placeholder="Enter technician name"
+            value={customInput}
+            onChange={(e) => setCustomInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCustom(); } }}
+            autoFocus
+          />
+          <button
+            type="button"
+            onClick={addCustom}
+            style={{
+              padding: '8px 14px', background: '#10b981', border: 'none',
+              borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem'
+            }}
+          >Add</button>
+          <button
+            type="button"
+            onClick={() => { setShowCustom(false); setCustomInput(''); }}
+            style={{
+              padding: '8px 14px', background: '#4b5563', border: 'none',
+              borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '0.875rem'
+            }}
+          >Cancel</button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setShowCustom(true)}
+          style={{
+            padding: '6px 12px', background: 'transparent',
+            border: `1px dashed ${styles.input.borderColor || '#6b7280'}`,
+            borderRadius: '8px', color: styles.input.color,
+            cursor: 'pointer', fontSize: '0.8rem', width: '100%'
+          }}
+        >
+          + Add unlisted technician
+        </button>
       )}
     </div>
   );
