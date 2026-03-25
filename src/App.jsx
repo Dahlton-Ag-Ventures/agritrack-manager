@@ -5994,28 +5994,50 @@ whiteSpace: 'nowrap'
                   </div>
                 )}
 
-                {window.innerWidth < 768 && (
-                  <div style={styles.itemDetails}>
-                    <div>
-                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>VIN/Serial</p>
-                      <p>{item.vinSerial || 'N/A'}</p>
+               {window.innerWidth < 768 && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '10px' }}>
+                    <div style={{ background: currentTheme.inputBackground, borderRadius: '8px', padding: '8px 10px' }}>
+                      <p style={{ fontSize: '0.625rem', color: currentTheme.textSecondary, margin: '0 0 2px' }}>
+                        {CATEGORY_TRACKING_TYPE[item.category] === 'km' ? 'Kilometres' : 'Hours'}
+                      </p>
+                      <p style={{ fontSize: '0.9375rem', fontWeight: 'bold', margin: 0, color: CATEGORY_TRACKING_TYPE[item.category] === 'km' ? '#0891b2' : '#10b981' }}>
+                        {CATEGORY_TRACKING_TYPE[item.category] === 'km'
+                          ? `${getMachineKm(item.name).toFixed(1)} km`
+                          : CATEGORY_TRACKING_TYPE[item.category] === 'none'
+                            ? '—'
+                            : `${getMachineHours(item.name).toFixed(1)} hrs`}
+                      </p>
                     </div>
-                    {item.licensePlate && (
-                      <div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>License Plate</p>
-                        <p>{item.licensePlate}</p>
-                      </div>
-                    )}
-                    <div>
-                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Category</p>
-                      <p>{item.category || 'N/A'}</p>
+                    <div style={{ background: currentTheme.inputBackground, borderRadius: '8px', padding: '8px 10px' }}>
+                      <p style={{ fontSize: '0.625rem', color: currentTheme.textSecondary, margin: '0 0 2px' }}>Last service</p>
+                      <p style={{ fontSize: '0.9375rem', fontWeight: 'bold', margin: 0, color: currentTheme.text }}>
+                        {(() => {
+                          const records = serviceHistory.filter(r => r.machineName === item.name).filter(r => r.date);
+                          if (records.length === 0) return 'None';
+                          const latest = records.sort((a, b) => b.date.localeCompare(a.date))[0];
+                          const d = new Date(latest.date + 'T00:00:00');
+                          return d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' });
+                        })()}
+                      </p>
                     </div>
-                    {(() => {
-                      const t = CATEGORY_TRACKING_TYPE[item.category] || 'hours';
-                      if (t === 'hours' || t === 'both') return <div><p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Hours</p><p style={{ fontWeight: 'bold', color: '#10b981' }}>{getMachineHours(item.name).toFixed(1)} hrs</p></div>;
-                      if (t === 'km' || t === 'both') return <div><p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Kilometres</p><p style={{ fontWeight: 'bold', color: '#0891b2' }}>{getMachineKm(item.name).toFixed(1)} km</p></div>;
-                      return null;
-                    })()}
+                    <div style={{ background: currentTheme.inputBackground, borderRadius: '8px', padding: '8px 10px' }}>
+                      <p style={{ fontSize: '0.625rem', color: currentTheme.textSecondary, margin: '0 0 2px' }}>Services</p>
+                      <p style={{ fontSize: '0.9375rem', fontWeight: 'bold', margin: 0, color: currentTheme.text }}>
+                        {serviceHistory.filter(r => r.machineName === item.name).length} records
+                      </p>
+                    </div>
+                    <div style={{ background: currentTheme.inputBackground, borderRadius: '8px', padding: '8px 10px' }}>
+                      <p style={{ fontSize: '0.625rem', color: currentTheme.textSecondary, margin: '0 0 2px' }}>Reminders</p>
+                      {(() => {
+                        const trackType = getTrackingType(item);
+                        const reminders = trackType === 'km' ? getMachineKmReminders(item.name) : getMachineReminders(item.name);
+                        const currentMetric = trackType === 'km' ? getMachineKm(item.name) : getMachineHours(item.name);
+                        const due = trackType === 'km' ? reminders.filter(r => isKmReminderDue(r, currentMetric)) : reminders.filter(r => isReminderDue(r, currentMetric));
+                        if (due.length > 0) return <p style={{ fontSize: '0.9375rem', fontWeight: 'bold', margin: 0, color: '#ef4444' }}>{due.length} overdue</p>;
+                        if (reminders.length > 0) return <p style={{ fontSize: '0.9375rem', fontWeight: 'bold', margin: 0, color: '#10b981' }}>All clear</p>;
+                        return <p style={{ fontSize: '0.9375rem', fontWeight: 'bold', margin: 0, color: currentTheme.textSecondary }}>None set</p>;
+                      })()}
+                    </div>
                   </div>
                 )}
 
