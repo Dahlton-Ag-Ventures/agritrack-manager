@@ -6636,7 +6636,7 @@ const dueReminders = trackType === 'km'
     <div style={{
       position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
       padding: '12px', borderRadius: '8px', pointerEvents: 'none',
-      fontSize: '1rem', color: '#6b7280',
+      fontSize: '1rem', color: currentTheme.textSecondary,
       background: currentTheme.inputBackground,
       border: `1px solid ${currentTheme.cardBorder}`,
       zIndex: 1
@@ -9397,7 +9397,7 @@ const dueReminders = trackType === 'km'
     <div style={{
       position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
       padding: '12px', borderRadius: '8px', pointerEvents: 'none',
-      fontSize: '1rem', color: '#6b7280',
+      fontSize: '1rem', color: currentTheme.textSecondary,
       background: currentTheme.inputBackground,
       border: `1px solid ${currentTheme.cardBorder}`,
       zIndex: 1
