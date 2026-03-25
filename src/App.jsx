@@ -5920,91 +5920,111 @@ whiteSpace: 'nowrap'
                   </div>
                 )}
               </div>
-              <div style={{ flex: 1 }}>
-  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
-    <h3 style={{ fontSize: '1rem', margin: 0, wordBreak: 'break-word' }}>{item.name}</h3>
-  {(() => {
-const trackType = getTrackingType(item);
-const reminders = trackType === 'km'
-  ? getMachineKmReminders(item.name)
-  : getMachineReminders(item.name);
-const currentMetric = trackType === 'km'
-  ? getMachineKm(item.name)
-  : getMachineHours(item.name);
-const dueReminders = trackType === 'km'
-  ? reminders.filter(r => isKmReminderDue(r, currentMetric))
-  : reminders.filter(r => isReminderDue(r, currentMetric));;
-    
-    if (dueReminders.length > 0) {
-      return (
-        <span style={{
-          padding: '4px 12px',
-          background: 'rgba(239, 68, 68, 0.2)',
-          border: '1px solid #ef4444',
-          borderRadius: '12px',
-          fontSize: '0.75rem',
-          color: '#ef4444',
-          fontWeight: 'bold',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px'
-        }}>
-          ⚠️ {dueReminders.length} Service{dueReminders.length > 1 ? 's' : ''} Due
-        </span>
-      );
-    }
-    return null;
-  })()}
-</div>
-                <div style={styles.itemDetails}>
-<div>
-  <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>VIN/Serial</p>
-  <p>{item.vinSerial || 'N/A'}</p>
-</div>
-{item.licensePlate && (
-  <div>
-    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>License Plate</p>
-    <p>{item.licensePlate}</p>
-  </div>
-)}
-  <div>
-    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Category</p>
-    <p>{item.category || 'N/A'}</p>
-  </div>
-  {(() => {
-    const t = CATEGORY_TRACKING_TYPE[item.category] || 'hours';
-    if (t === 'hours' || t === 'both') {
-      return (
-        <div>
-          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Hours</p>
-          <p style={{ fontWeight: 'bold', color: '#10b981' }}>{getMachineHours(item.name).toFixed(1)} hrs</p>
-        </div>
-      );
-    }
-    if (t === 'km' || t === 'both') {
-      return (
-        <div>
-          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Kilometres</p>
-          <p style={{ fontWeight: 'bold', color: '#0891b2' }}>{getMachineKm(item.name).toFixed(1)} km</p>
-        </div>
-      );
-    }
-    return null;
-  })()}
-</div>
-              {item.requirements ? (
-                <div style={{
-                  marginTop: '12px',
-                  padding: '12px',
-                  background: theme === 'light' ? '#fefce8' : '#1f2937',
-                  border: theme === 'light' ? '1px solid #fde047' : '1px solid #374151',
-                  borderRadius: '8px'
-                }}>
-                  <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Machine Requirements</p>
-                  <p style={{ fontSize: '0.875rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.requirements}</p>
+<div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                  <h3 style={{ fontSize: '1rem', margin: 0, wordBreak: 'break-word' }}>{item.name}</h3>
+                  {(() => {
+                    const trackType = getTrackingType(item);
+                    const reminders = trackType === 'km' ? getMachineKmReminders(item.name) : getMachineReminders(item.name);
+                    const currentMetric = trackType === 'km' ? getMachineKm(item.name) : getMachineHours(item.name);
+                    const dueReminders = trackType === 'km' ? reminders.filter(r => isKmReminderDue(r, currentMetric)) : reminders.filter(r => isReminderDue(r, currentMetric));
+                    if (dueReminders.length > 0) {
+                      return (
+                        <span style={{ padding: '4px 12px', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid #ef4444', borderRadius: '12px', fontSize: '0.75rem', color: '#ef4444', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          ⚠️ {dueReminders.length} Service{dueReminders.length > 1 ? 's' : ''} Due
+                        </span>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
-              ) : null}
-                
+                <p style={{ fontSize: '0.8rem', color: currentTheme.textSecondary, margin: '0 0 12px' }}>{item.category || 'N/A'}{item.vinSerial ? ` · ${item.vinSerial}` : ''}{item.licensePlate ? ` · ${item.licensePlate}` : ''}</p>
+
+                {window.innerWidth >= 768 && (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(4, 1fr)',
+                    border: `1px solid ${currentTheme.cardBorder}`,
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    marginBottom: item.requirements ? '12px' : '0'
+                  }}>
+                    <div style={{ padding: '10px 14px', borderRight: `1px solid ${currentTheme.cardBorder}` }}>
+                      <p style={{ color: currentTheme.textSecondary, fontSize: '0.75rem', margin: '0 0 2px' }}>
+                        {CATEGORY_TRACKING_TYPE[item.category] === 'km' ? 'Kilometres' : 'Hours'}
+                      </p>
+                      <p style={{ fontSize: '0.9rem', fontWeight: 'bold', margin: 0, color: CATEGORY_TRACKING_TYPE[item.category] === 'km' ? '#0891b2' : '#10b981' }}>
+                        {CATEGORY_TRACKING_TYPE[item.category] === 'km'
+                          ? `${getMachineKm(item.name).toFixed(1)} km`
+                          : CATEGORY_TRACKING_TYPE[item.category] === 'none'
+                            ? '—'
+                            : `${getMachineHours(item.name).toFixed(1)} hrs`}
+                      </p>
+                    </div>
+                    <div style={{ padding: '10px 14px', borderRight: `1px solid ${currentTheme.cardBorder}` }}>
+                      <p style={{ color: currentTheme.textSecondary, fontSize: '0.75rem', margin: '0 0 2px' }}>Services</p>
+                      <p style={{ fontSize: '0.9rem', fontWeight: 'bold', margin: 0, color: currentTheme.text }}>
+                        {serviceHistory.filter(r => r.machineName === item.name).length} records
+                      </p>
+                    </div>
+                    <div style={{ padding: '10px 14px', borderRight: `1px solid ${currentTheme.cardBorder}` }}>
+                      <p style={{ color: currentTheme.textSecondary, fontSize: '0.75rem', margin: '0 0 2px' }}>Last service</p>
+                      <p style={{ fontSize: '0.9rem', fontWeight: 'bold', margin: 0, color: currentTheme.text }}>
+                        {(() => {
+                          const records = serviceHistory.filter(r => r.machineName === item.name).filter(r => r.date);
+                          if (records.length === 0) return 'None';
+                          const latest = records.sort((a, b) => b.date.localeCompare(a.date))[0];
+                          const d = new Date(latest.date + 'T00:00:00');
+                          return d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' });
+                        })()}
+                      </p>
+                    </div>
+                    <div style={{ padding: '10px 14px' }}>
+                      <p style={{ color: currentTheme.textSecondary, fontSize: '0.75rem', margin: '0 0 2px' }}>Reminders</p>
+                      {(() => {
+                        const trackType = getTrackingType(item);
+                        const reminders = trackType === 'km' ? getMachineKmReminders(item.name) : getMachineReminders(item.name);
+                        const currentMetric = trackType === 'km' ? getMachineKm(item.name) : getMachineHours(item.name);
+                        const due = trackType === 'km' ? reminders.filter(r => isKmReminderDue(r, currentMetric)) : reminders.filter(r => isReminderDue(r, currentMetric));
+                        if (due.length > 0) return <p style={{ fontSize: '0.9rem', fontWeight: 'bold', margin: 0, color: '#ef4444' }}>{due.length} overdue</p>;
+                        if (reminders.length > 0) return <p style={{ fontSize: '0.9rem', fontWeight: 'bold', margin: 0, color: '#10b981' }}>All clear</p>;
+                        return <p style={{ fontSize: '0.9rem', fontWeight: 'bold', margin: 0, color: currentTheme.textSecondary }}>None set</p>;
+                      })()}
+                    </div>
+                  </div>
+                )}
+
+                {window.innerWidth < 768 && (
+                  <div style={styles.itemDetails}>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>VIN/Serial</p>
+                      <p>{item.vinSerial || 'N/A'}</p>
+                    </div>
+                    {item.licensePlate && (
+                      <div>
+                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>License Plate</p>
+                        <p>{item.licensePlate}</p>
+                      </div>
+                    )}
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Category</p>
+                      <p>{item.category || 'N/A'}</p>
+                    </div>
+                    {(() => {
+                      const t = CATEGORY_TRACKING_TYPE[item.category] || 'hours';
+                      if (t === 'hours' || t === 'both') return <div><p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Hours</p><p style={{ fontWeight: 'bold', color: '#10b981' }}>{getMachineHours(item.name).toFixed(1)} hrs</p></div>;
+                      if (t === 'km' || t === 'both') return <div><p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Kilometres</p><p style={{ fontWeight: 'bold', color: '#0891b2' }}>{getMachineKm(item.name).toFixed(1)} km</p></div>;
+                      return null;
+                    })()}
+                  </div>
+                )}
+
+                {item.requirements ? (
+                  <div style={{ marginTop: '12px', padding: '12px', background: theme === 'light' ? '#fefce8' : '#1f2937', border: theme === 'light' ? '1px solid #fde047' : '1px solid #374151', borderRadius: '8px' }}>
+                    <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Machine Requirements</p>
+                    <p style={{ fontSize: '0.875rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.requirements}</p>
+                  </div>
+                ) : null}
               </div>
               {window.innerWidth >= 768 && (
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
