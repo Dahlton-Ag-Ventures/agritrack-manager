@@ -405,6 +405,7 @@ const [newTechnicianName, setNewTechnicianName] = useState('');
 const [editingTechnicianId, setEditingTechnicianId] = useState(null);
 const [editingTechnicianName, setEditingTechnicianName] = useState('');
 const [showTechnicianList, setShowTechnicianList] = useState(false);
+const [isDesktop, setIsDesktop] = useState(isDesktop);
   
   // Get current theme object
   const currentTheme = themes[theme];
@@ -452,6 +453,13 @@ useEffect(() => {
     }
   }, []);
 
+useEffect(() => {
+  const handleResize = () => setIsDesktop(isDesktop);
+  window.addEventListener('resize', handleResize);
+  handleResize();
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
+  
   // Handle QR code deep link — navigate to inventory item once data is loaded
   useEffect(() => {
     const hash = window.location.hash;
@@ -3612,7 +3620,7 @@ return (
 <div
 className="flip-card"
   onClick={() => toggleCard('general')}
-  style={{ minHeight: window.innerWidth < 768 ? '100px' : '260px', marginBottom: window.innerWidth < 768 ? '4px' : '16px' }}
+  style={{ minHeight: !isDesktop ? '100px' : '260px', marginBottom: !isDesktop ? '4px' : '16px' }}
 >
   <div className={`flip-card-inner ${flippedCards['general'] ? 'flipped' : ''}`}>
     <div
@@ -3677,7 +3685,7 @@ className="flip-card"
 <div style={{
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-  gap: window.innerWidth < 768 ? '4px' : '8px',
+  gap: !isDesktop ? '4px' : '8px',
   marginTop: '0px'
 }}>
 
@@ -3686,7 +3694,7 @@ className="flip-card"
     <div
       className="flip-card"
       onClick={() => toggleCard('inventory')}
-      style={{ minHeight: window.innerWidth < 768 ? 'unset' : '260px' }}
+      style={{ minHeight: !isDesktop ? 'unset' : '260px' }}
     >
       <div className={`flip-card-inner ${flippedCards['inventory'] ? 'flipped' : ''}`}>
         <div
@@ -3736,7 +3744,7 @@ className="flip-card"
     <div
       className="flip-card"
       onClick={() => toggleCard('machinery')}
-      style={{ minHeight: window.innerWidth < 768 ? 'unset' : '260px' }}
+      style={{ minHeight: !isDesktop ? 'unset' : '260px' }}
     >
       <div className={`flip-card-inner ${flippedCards['machinery'] ? 'flipped' : ''}`}>
         <div
@@ -3786,7 +3794,7 @@ className="flip-card"
     <div
       className="flip-card"
       onClick={() => toggleCard('service')}
-      style={{ minHeight: window.innerWidth < 768 ? 'unset' : '260px' }}
+      style={{ minHeight: !isDesktop ? 'unset' : '260px' }}
     >
       <div className={`flip-card-inner ${flippedCards['service'] ? 'flipped' : ''}`}>
         <div
@@ -3836,7 +3844,7 @@ className="flip-card"
 </div>
 </div>
 
-{window.innerWidth >= 768 && (
+{isDesktop && (
   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginTop: '8px' }}>
     <div style={{ background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff', border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
       <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Total Inventory</p>
@@ -3853,7 +3861,7 @@ className="flip-card"
   </div>
 )}
 
-{window.innerWidth < 768 && (
+{!isDesktop && (
   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
     <div style={{ background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff', border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
       <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Total Inventory</p>
@@ -4363,7 +4371,7 @@ className="flip-card"
                         )}
                       </div>
                     )}
-                    {window.innerWidth < 768 && userRole !== 'employee' && (
+                    {!isDesktop && userRole !== 'employee' && (
                       <div style={{ display: 'flex', gap: '8px', marginTop: '8px', justifyContent: 'center' }}>
                        <div
                         onClick={() => printInventoryQR(item)}
@@ -4481,7 +4489,7 @@ className="flip-card"
                       )}
                     </div>
                   </div>
-                  {window.innerWidth >= 768 && userRole !== 'employee' && (
+                  {isDesktop && userRole !== 'employee' && (
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <div
                           onClick={() => printInventoryQR(item)}
@@ -4725,7 +4733,7 @@ className="flip-card"
     e.currentTarget.style.background = theme === 'light' ? '#86efac' : '#10b981';
   }}
 >
-  <Wrench size={16} /> {showRemindersPanel ? 'Hide' : (window.innerWidth >= 768 ? 'Show Service Reminders' : 'Show')}
+  <Wrench size={16} /> {showRemindersPanel ? 'Hide' : (isDesktop ? 'Show Service Reminders' : 'Show')}
 </button>
     {userRole !== 'employee' && (
 <button 
@@ -4758,7 +4766,7 @@ className="flip-card"
     e.currentTarget.style.background = theme === 'light' ? '#86efac' : '#10b981';
   }}
 >
-  <Plus size={16} /> {window.innerWidth >= 768 ? 'Add Machinery' : 'Add'}
+  <Plus size={16} /> {isDesktop ? 'Add Machinery' : 'Add'}
 </button>
     )}
   </div>
@@ -5886,7 +5894,7 @@ whiteSpace: 'nowrap'
                     )}
                   </div>
                 )}
-               {window.innerWidth < 768 && (
+               {!isDesktop && (
                   <div style={{ display: 'flex', gap: '8px', marginTop: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <button 
   onClick={() => viewMachineServiceHistory(item.name)} 
@@ -5940,7 +5948,7 @@ whiteSpace: 'nowrap'
                 </div>
                 <p style={{ fontSize: '0.8rem', color: currentTheme.textSecondary, margin: '0 0 12px' }}>{item.category || 'N/A'}{item.vinSerial ? ` · ${item.vinSerial}` : ''}{item.licensePlate ? ` · ${item.licensePlate}` : ''}</p>
 
-                {window.innerWidth >= 768 && (
+                {isDesktop && (
                   <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(4, 1fr)',
@@ -5994,7 +6002,7 @@ whiteSpace: 'nowrap'
                   </div>
                 )}
 
-               {window.innerWidth < 768 && (
+               {!isDesktop && (
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '10px' }}>
                     <div style={{ background: currentTheme.inputBackground, borderRadius: '8px', padding: '8px 10px' }}>
                       <p style={{ fontSize: '0.625rem', color: currentTheme.textSecondary, margin: '0 0 2px' }}>
@@ -6048,7 +6056,7 @@ whiteSpace: 'nowrap'
                   </div>
                 ) : null}
               </div>
-              {window.innerWidth >= 768 && (
+              {isDesktop && (
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   <button 
   onClick={() => viewMachineServiceHistory(item.name)} 
@@ -6911,7 +6919,7 @@ whiteSpace: 'nowrap'
         )}
         
         {/* Mobile Edit/Delete Buttons */}
-        {window.innerWidth < 768 && userRole !== 'employee' && (
+        {!isDesktop && userRole !== 'employee' && (
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
             <button onClick={() => startEditService(record)} style={styles.editButton}>
               <Edit2 size={16} />
@@ -6957,8 +6965,8 @@ whiteSpace: 'nowrap'
     background: theme === 'light' ? '#f0f9ff' : '#1f2937', 
     borderRadius: '8px', 
     minHeight: '80px',
-    width: window.innerWidth < 768 ? 'calc(100% + 90px)' : '100%',
-    marginLeft: window.innerWidth < 768 ? '-90px' : '0'
+    width: !isDesktop ? 'calc(100% + 90px)' : '100%',
+    marginLeft: !isDesktop ? '-90px' : '0'
   }}>
     <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Notes:</p>
     <p style={{ fontSize: '0.875rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{record.notes}</p>
@@ -6967,7 +6975,7 @@ whiteSpace: 'nowrap'
       </div>
 
       {/* Desktop Edit/Delete Buttons */}
-      {window.innerWidth >= 768 && userRole !== 'employee' && (
+      {isDesktop && userRole !== 'employee' && (
         <div style={{ display: 'flex', gap: '8px' }}>
           <button onClick={() => startEditService(record)} style={styles.editButton}>
             <Edit2 size={16} />
@@ -10633,7 +10641,7 @@ function DashboardPanels({
   calendarSaving, calendarSaved, onSave
 }) {
   const [mobileTab, setMobileTab] = React.useState('service');
-  const isDesktop = window.innerWidth >= 768;
+  const isDesktop = isDesktop;
 
   const calendarProps = {
     theme, calendarNotes, calendarSelectedKey, setCalendarSelectedKey,
@@ -10736,7 +10744,7 @@ function FarmCalendar({ theme, calendarNotes, calendarSelectedKey, setCalendarSe
   const [view, setView] = React.useState('grid');
   // view: 'grid' | 'weeks' | 'editor'
 
-  const isDesktop = window.innerWidth >= 768;
+  const isDesktop = isDesktop;
 
   const cardBg     = theme === 'light' ? '#ffffff' : '#1e3a5f';
   const cardBorder = theme === 'light' ? '#e5e7eb' : '#2563eb';
@@ -11670,7 +11678,7 @@ const prevPhoto = () => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: window.innerWidth < 768 ? '8px' : '24px',
+        padding: !isDesktop ? '8px' : '24px',
         zIndex: 100
       }}
       onClick={onClose}
@@ -11758,10 +11766,10 @@ const prevPhoto = () => {
             disabled={currentIndex === 0}
               style={{
               position: 'absolute',
-              left: window.innerWidth < 768 ? '8px' : '20px',
+              left: !isDesktop ? '8px' : '20px',
               top: '50%',
               transform: 'translateY(-50%)',
-              padding: window.innerWidth < 768 ? '4px 8px' : '8px 12px',
+              padding: !isDesktop ? '4px 8px' : '8px 12px',
               background: currentIndex === 0 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)',
               border: 'none',
               borderRadius: '50%',
@@ -11795,7 +11803,7 @@ const prevPhoto = () => {
   alt="View" 
   style={{ 
     maxWidth: '95vw',
-    maxHeight: window.innerWidth < 768 ? '60vh' : '75vh',
+    maxHeight: !isDesktop ? '60vh' : '75vh',
     objectFit: 'contain',
     borderRadius: '8px',
     transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px) rotate(${rotation}deg)`,
@@ -11823,10 +11831,10 @@ const prevPhoto = () => {
             disabled={currentIndex === photos.length - 1}
               style={{
               position: 'absolute',
-              right: window.innerWidth < 768 ? '8px' : '20px',
+              right: !isDesktop ? '8px' : '20px',
               top: '50%',
               transform: 'translateY(-50%)',
-              padding: window.innerWidth < 768 ? '4px 8px' : '8px 12px',
+              padding: !isDesktop ? '4px 8px' : '8px 12px',
               background: currentIndex === photos.length - 1 ? 'rgba(107, 114, 128, 0.5)' : 'rgba(255, 255, 255, 0.9)',
               border: 'none',
               borderRadius: '50%',
