@@ -10805,380 +10805,205 @@ function FarmCalendar({ theme, calendarNotes, calendarSelectedKey, setCalendarSe
   };
   const divider = <div style={{ width: '0.5px', height: '18px', background: cardBorder, flexShrink: 0 }} />;
 
-  // ── VIEW: GRID (12-month mini tiles) ──
-  function GridView() {
-    return (
-      <div>
-       <p style={{
-  fontWeight: '400', fontSize: '1rem', marginBottom: '12px',
-  background: 'linear-gradient(to right, #10b981, #06b6d4)',
-  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-}}>
-  Farm Calendar 2026
-</p>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '8px',
-        }}>
-          {MONTHS.map((name, mi) => {
-            const noteCount = getMonthNoteCount(mi);
-            const isCurMonth = isCurrentMonth(mi);
-            const weeks = getWeeks(mi);
-            return (
-              <div
-                key={mi}
-                onClick={() => openMonth(mi)}
-                style={{
-                  border: isCurMonth ? '1.5px solid #9FE1CB' : `0.5px solid ${cardBorder}`,
-                  borderRadius: '8px',
-                  padding: '8px',
-                  background: isCurMonth ? '#E1F5EE' : cardBg,
-                  cursor: 'pointer',
-                  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '5px' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: '600', color: isCurMonth ? '#0F6E56' : textMain }}>
-                    {SHORT[mi]}
-                  </span>
-                  {noteCount > 0 && (
-                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#1D9E75', display: 'inline-block' }} />
-                  )}
-                </div>
-                {weeks.map(w => {
-                  const key = `${mi}-${w.weekNum}`;
-                  const hasNote = !!(calendarNotes[key] && calendarNotes[key].replace(/<[^>]*>/g, '').trim());
-                  const curr = isCurrent(w.start, w.end);
-                  return (
-                    <div key={key} style={{
-                      height: '4px', borderRadius: '99px',
-                      background: curr
-                        ? '#9FE1CB'
-                        : (theme === 'light' ? '#e5e7eb' : 'rgba(255,255,255,0.1)'),
-                      marginBottom: '3px', overflow: 'hidden',
-                    }}>
-                      {hasNote && (
-                        <div style={{ height: '100%', background: curr ? '#0F6E56' : '#1D9E75', borderRadius: '99px' }} />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  // ── VIEW: WEEKS (week list for selected month) ──
-  function WeeksView() {
-    const weeks = getWeeks(expandedMonth);
-    return (
-      <div>
-        <button
-          onClick={goToGrid}
-          style={{
-            background: 'none', border: 'none', color: textSub,
-            fontSize: '0.8rem', cursor: 'pointer', padding: '0 0 10px 0',
-            display: 'flex', alignItems: 'center', gap: '4px',
-          }}
-        >
-          ← All months
-        </button>
-        <p style={{ fontWeight: '600', fontSize: '1rem', color: textMain, marginBottom: '10px' }}>
-          {MONTHS[expandedMonth]}
-        </p>
-        {weeks.map(w => {
-          const key = `${expandedMonth}-${w.weekNum}`;
-          const curr = isCurrent(w.start, w.end);
-          const selected = calendarSelectedKey === key;
-          const hasNote = !!(calendarNotes[key] && calendarNotes[key].replace(/<[^>]*>/g, '').trim());
-          return (
-            <div
-              key={key}
-              onClick={() => openWeek(key)}
-              style={{
-                display: 'flex', alignItems: 'center',
-                padding: '9px 10px', borderRadius: '8px',
-                cursor: 'pointer', marginBottom: '4px',
-                border: curr ? '0.5px solid #9FE1CB' : `0.5px solid transparent`,
-                background: curr ? '#E1F5EE' : 'transparent',
-                transition: 'all 0.12s',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = theme === 'light' ? '#f3f4f6' : 'rgba(255,255,255,0.07)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = curr ? '#E1F5EE' : 'transparent';
-              }}
-            >
-              <div style={{
-                width: '6px', height: '6px', borderRadius: '50%',
-                flexShrink: 0, marginRight: '8px',
-                background: hasNote ? '#1D9E75' : curr ? '#9FE1CB' : cardBorder,
-              }} />
-              <span style={{ fontSize: '0.875rem', fontWeight: '500', minWidth: '60px', color: curr ? '#0F6E56' : textMain }}>
-                Week {w.weekNum}
-              </span>
-              <span style={{ fontSize: '0.8rem', color: curr ? '#1D9E75' : textSub }}>
-                {fmt(w.start)} – {fmt(w.end)}
-              </span>
-              {hasNote && (
-                <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: '#1D9E75', fontWeight: '600' }}>
-                  note
-                </span>
-              )}
-              <span style={{ marginLeft: hasNote ? '8px' : 'auto', fontSize: '0.75rem', color: textSub }}>›</span>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
-
-  // ── VIEW: EDITOR (full panel, week note editing) ──
-  function EditorView() {
-    if (!calendarSelectedKey || expandedMonth === null) return null;
-    const mi = expandedMonth;
-    const weekNum = parseInt(calendarSelectedKey.split('-')[1]);
-    const weeks = getWeeks(mi);
-    const currentIdx = weeks.findIndex(w => w.weekNum === weekNum);
-    const currentWeek = weeks[currentIdx];
-    const hasPrev = currentIdx > 0;
-    const hasNext = currentIdx < weeks.length - 1;
-
-    return (
-      <div>
-        {/* Back button */}
-        <button
-          onClick={goToWeeks}
-          style={{
-            background: 'none', border: 'none', color: textSub,
-            fontSize: '0.8rem', cursor: 'pointer', padding: '0 0 10px 0',
-            display: 'flex', alignItems: 'center', gap: '4px',
-          }}
-        >
-          ← Back to {MONTHS[mi]}
-        </button>
-
-        {/* Week header + prev/next */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', gap: '8px' }}>
-          <div>
-            <p style={{ fontWeight: '600', fontSize: '0.95rem', color: textMain, marginBottom: '2px' }}>
-              {MONTHS[mi]} — Week {weekNum}
-            </p>
-            {currentWeek && (
-              <p style={{ fontSize: '0.75rem', color: textSub }}>
-                {fmt(currentWeek.start)} – {fmt(currentWeek.end)}
-              </p>
-            )}
-          </div>
-          {/* Prev / Next arrows */}
-          <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-            <button
-              onClick={() => navigateWeek(-1)}
-              disabled={!hasPrev}
-              style={{
-                padding: '5px 10px',
-                background: hasPrev ? (theme === 'light' ? '#f3f4f6' : '#1a2942') : 'transparent',
-                border: `0.5px solid ${hasPrev ? cardBorder : 'transparent'}`,
-                borderRadius: '6px', color: hasPrev ? textMain : 'transparent',
-                cursor: hasPrev ? 'pointer' : 'default', fontSize: '0.8rem',
-              }}
-            >
-              ‹ Prev
-            </button>
-            <button
-              onClick={() => navigateWeek(1)}
-              disabled={!hasNext}
-              style={{
-                padding: '5px 10px',
-                background: hasNext ? (theme === 'light' ? '#f3f4f6' : '#1a2942') : 'transparent',
-                border: `0.5px solid ${hasNext ? cardBorder : 'transparent'}`,
-                borderRadius: '6px', color: hasNext ? textMain : 'transparent',
-                cursor: hasNext ? 'pointer' : 'default', fontSize: '0.8rem',
-              }}
-            >
-              Next ›
-            </button>
-          </div>
-        </div>
-
-        {/* Rich text editor */}
-        <div style={{ border: `0.5px solid ${cardBorder}`, borderRadius: '8px', overflow: 'hidden' }}>
-          {/* Toolbar */}
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '4px',
-            padding: '6px 8px', background: toolbarBg,
-            borderBottom: `0.5px solid ${cardBorder}`,
-            flexWrap: 'nowrap', overflowX: 'auto',
-          }}>
-            <button style={{ ...btnStyle, fontWeight: 'bold' }} onMouseDown={e => { e.preventDefault(); execCmd('bold'); }} title="Bold">B</button>
-            <button style={{ ...btnStyle, fontStyle: 'italic' }} onMouseDown={e => { e.preventDefault(); execCmd('italic'); }} title="Italic">I</button>
-            <button style={{ ...btnStyle, textDecoration: 'underline' }} onMouseDown={e => { e.preventDefault(); execCmd('underline'); }} title="Underline">U</button>
-            <button style={{ ...btnStyle, textDecoration: 'line-through' }} onMouseDown={e => { e.preventDefault(); execCmd('strikeThrough'); }} title="Strikethrough">S</button>
-            {divider}
-            <select
-              style={{
-                height: '26px', padding: '0 4px', fontSize: '11px',
-                border: `0.5px solid ${cardBorder}`, borderRadius: '5px',
-                background: theme === 'light' ? '#ffffff' : '#1e3a5f',
-                color: textMain, cursor: 'pointer', width: '72px', flexShrink: 0,
-              }}
-              onMouseDown={e => e.stopPropagation()}
-              onChange={e => {
-                if (editorRef.current) editorRef.current.focus();
-                const v = e.target.value;
-                if (v === 'H1') document.execCommand('formatBlock', false, 'h2');
-                else if (v === 'H2') document.execCommand('formatBlock', false, 'h3');
-                else if (v === 'Small') document.execCommand('fontSize', false, '1');
-                else document.execCommand('formatBlock', false, 'p');
-                handleEditorInput();
-                e.target.value = 'Normal';
-              }}
-              defaultValue="Normal"
-            >
-              <option value="Normal">Normal</option>
-              <option value="H1">H1</option>
-              <option value="H2">H2</option>
-              <option value="Small">Small</option>
-            </select>
-            <select
-              style={{
-                height: '26px', padding: '0 4px', fontSize: '11px',
-                border: `0.5px solid ${cardBorder}`, borderRadius: '5px',
-                background: theme === 'light' ? '#ffffff' : '#1e3a5f',
-                color: textMain, cursor: 'pointer', width: '48px', flexShrink: 0,
-              }}
-              onMouseDown={e => e.stopPropagation()}
-              onChange={e => {
-                if (editorRef.current) editorRef.current.focus();
-                document.execCommand('fontSize', false, e.target.value);
-                handleEditorInput();
-                e.target.value = '3';
-              }}
-              defaultValue="3"
-            >
-              <option value="1">10</option>
-              <option value="2">11</option>
-              <option value="3">13</option>
-              <option value="4">16</option>
-              <option value="5">18</option>
-              <option value="6">24</option>
-              <option value="7">32</option>
-            </select>
-            {divider}
-            {[['#fef08a','#ca8a04','Yellow'],['#bbf7d0','#16a34a','Green'],['#bfdbfe','#2563eb','Blue'],['#fecaca','#dc2626','Red']].map(([bg, border, label]) => (
-              <div
-                key={label}
-                style={{ width: '18px', height: '18px', borderRadius: '3px', background: bg, border: `0.5px solid ${border}`, cursor: 'pointer', flexShrink: 0 }}
-                onMouseDown={e => { e.preventDefault(); execCmd('hiliteColor', bg); }}
-                title={`${label} highlight`}
-              />
-            ))}
-            <div
-              style={{ width: '18px', height: '18px', borderRadius: '3px', background: theme === 'light' ? '#ffffff' : '#1e3a5f', border: `0.5px solid ${cardBorder}`, cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: textSub, fontWeight: 'bold' }}
-              onMouseDown={e => { e.preventDefault(); execCmd('hiliteColor', 'transparent'); }}
-              title="Remove highlight"
-            >✕</div>
-            {divider}
-            <button style={btnStyle} onMouseDown={e => { e.preventDefault(); execCmd('insertUnorderedList'); }} title="Bullet list">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <circle cx="2" cy="3.5" r="1.5" fill="currentColor"/>
-                <rect x="5" y="2.5" width="8" height="2" rx="1" fill="currentColor"/>
-                <circle cx="2" cy="7" r="1.5" fill="currentColor"/>
-                <rect x="5" y="6" width="8" height="2" rx="1" fill="currentColor"/>
-                <circle cx="2" cy="10.5" r="1.5" fill="currentColor"/>
-                <rect x="5" y="9.5" width="8" height="2" rx="1" fill="currentColor"/>
-              </svg>
-            </button>
-            <button style={btnStyle} onMouseDown={e => { e.preventDefault(); execCmd('insertOrderedList'); }} title="Numbered list">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <text x="0" y="5" fontSize="5" fill="currentColor">1.</text>
-                <rect x="5" y="2.5" width="8" height="2" rx="1" fill="currentColor"/>
-                <text x="0" y="9.5" fontSize="5" fill="currentColor">2.</text>
-                <rect x="5" y="7" width="8" height="2" rx="1" fill="currentColor"/>
-                <text x="0" y="13.5" fontSize="5" fill="currentColor">3.</text>
-                <rect x="5" y="11.5" width="8" height="2" rx="1" fill="currentColor"/>
-              </svg>
-            </button>
-          </div>
-
-          {/* Editable area */}
-          <div
-            ref={editorRef}
-            contentEditable
-            suppressContentEditableWarning
-            onInput={handleEditorInput}
-            data-placeholder="Add notes for this week — tasks, plans, reminders..."
-            style={{
-              minHeight: '140px',
-              padding: '10px 12px',
-              fontSize: '13px',
-              color: textMain,
-              background: theme === 'light' ? '#f9fafb' : '#1a2942',
-              outline: 'none',
-              lineHeight: '1.6',
-              fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif',
-              boxSizing: 'border-box',
-              wordBreak: 'break-word',
-            }}
-          />
-        </div>
-
-        {/* Footer */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px' }}>
-          <span style={{ fontSize: '11px', color: textSub }}>
-            {charCount} character{charCount !== 1 ? 's' : ''}
-          </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            {calendarSaved && (
-              <span style={{ fontSize: '12px', color: '#1D9E75' }}>Saved</span>
-            )}
-            <button
-              onClick={handleSave}
-              disabled={!calendarNoteDirty || calendarSaving}
-              style={{
-                background: !calendarNoteDirty || calendarSaving
-                  ? (theme === 'light' ? '#e5e7eb' : '#374151')
-                  : '#1D9E75',
-                color: !calendarNoteDirty || calendarSaving ? textSub : '#fff',
-                border: 'none', borderRadius: '8px', padding: '6px 16px',
-                fontSize: '13px', fontWeight: '500',
-                cursor: !calendarNoteDirty || calendarSaving ? 'default' : 'pointer',
-              }}
-            >
-              {calendarSaving ? 'Saving...' : 'Save'}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
+return (
     <div style={{
       background: cardBg,
       border: `1px solid ${cardBorder}`,
       borderRadius: '12px',
       padding: '16px',
     }}>
-      {view === 'grid' && <GridView />}
-      {view === 'weeks' && <WeeksView />}
-      {view === 'editor' && <EditorView />}
+
+      {/* ── GRID VIEW ── */}
+      {view === 'grid' && (
+        <div>
+          <p style={{
+            fontWeight: '400', fontSize: '1rem', marginBottom: '12px',
+            background: 'linear-gradient(to right, #10b981, #06b6d4)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          }}>
+            Farm Calendar 2026
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+            {MONTHS.map((name, mi) => {
+              const noteCount = getMonthNoteCount(mi);
+              const isCurMonth = isCurrentMonth(mi);
+              const weeks = getWeeks(mi);
+              return (
+                <div
+                  key={mi}
+                  onClick={() => openMonth(mi)}
+                  style={{
+                    border: isCurMonth ? '1.5px solid #9FE1CB' : `0.5px solid ${cardBorder}`,
+                    borderRadius: '8px', padding: '8px',
+                    background: isCurMonth ? '#E1F5EE' : cardBg,
+                    cursor: 'pointer',
+                    transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '5px' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '600', color: isCurMonth ? '#0F6E56' : textMain }}>
+                      {SHORT[mi]}
+                    </span>
+                    {noteCount > 0 && (
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#1D9E75', display: 'inline-block' }} />
+                    )}
+                  </div>
+                  {weeks.map(w => {
+                    const key = `${mi}-${w.weekNum}`;
+                    const hasNote = !!(calendarNotes[key] && calendarNotes[key].replace(/<[^>]*>/g, '').trim());
+                    const curr = isCurrent(w.start, w.end);
+                    return (
+                      <div key={key} style={{
+                        height: '4px', borderRadius: '99px',
+                        background: curr ? '#9FE1CB' : (theme === 'light' ? '#e5e7eb' : 'rgba(255,255,255,0.1)'),
+                        marginBottom: '3px', overflow: 'hidden',
+                      }}>
+                        {hasNote && <div style={{ height: '100%', background: curr ? '#0F6E56' : '#1D9E75', borderRadius: '99px' }} />}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── WEEKS VIEW ── */}
+      {view === 'weeks' && (
+        <div>
+          <button onClick={goToGrid} style={{ background: 'none', border: 'none', color: textSub, fontSize: '0.8rem', cursor: 'pointer', padding: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            ← All months
+          </button>
+          <p style={{ fontWeight: '600', fontSize: '1rem', color: textMain, marginBottom: '10px' }}>
+            {MONTHS[expandedMonth]}
+          </p>
+          {getWeeks(expandedMonth).map(w => {
+            const key = `${expandedMonth}-${w.weekNum}`;
+            const curr = isCurrent(w.start, w.end);
+            const hasNote = !!(calendarNotes[key] && calendarNotes[key].replace(/<[^>]*>/g, '').trim());
+            return (
+              <div
+                key={key}
+                onClick={() => openWeek(key)}
+                style={{
+                  display: 'flex', alignItems: 'center',
+                  padding: '9px 10px', borderRadius: '8px',
+                  cursor: 'pointer', marginBottom: '4px',
+                  border: curr ? '0.5px solid #9FE1CB' : '0.5px solid transparent',
+                  background: curr ? '#E1F5EE' : 'transparent',
+                  transition: 'all 0.12s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = theme === 'light' ? '#f3f4f6' : 'rgba(255,255,255,0.07)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = curr ? '#E1F5EE' : 'transparent'; }}
+              >
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', flexShrink: 0, marginRight: '8px', background: hasNote ? '#1D9E75' : curr ? '#9FE1CB' : cardBorder }} />
+                <span style={{ fontSize: '0.875rem', fontWeight: '500', minWidth: '60px', color: curr ? '#0F6E56' : textMain }}>Week {w.weekNum}</span>
+                <span style={{ fontSize: '0.8rem', color: curr ? '#1D9E75' : textSub }}>{fmt(w.start)} – {fmt(w.end)}</span>
+                {hasNote && <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: '#1D9E75', fontWeight: '600' }}>note</span>}
+                <span style={{ marginLeft: hasNote ? '8px' : 'auto', fontSize: '0.75rem', color: textSub }}>›</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ── EDITOR VIEW ── */}
+      {view === 'editor' && calendarSelectedKey && expandedMonth !== null && (() => {
+        const mi = expandedMonth;
+        const weekNum = parseInt(calendarSelectedKey.split('-')[1]);
+        const weeks = getWeeks(mi);
+        const currentIdx = weeks.findIndex(w => w.weekNum === weekNum);
+        const currentWeek = weeks[currentIdx];
+        const hasPrev = currentIdx > 0;
+        const hasNext = currentIdx < weeks.length - 1;
+        return (
+          <div>
+            <button onClick={goToWeeks} style={{ background: 'none', border: 'none', color: textSub, fontSize: '0.8rem', cursor: 'pointer', padding: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              ← Back to {MONTHS[mi]}
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', gap: '8px' }}>
+              <div>
+                <p style={{ fontWeight: '600', fontSize: '0.95rem', color: textMain, marginBottom: '2px' }}>{MONTHS[mi]} — Week {weekNum}</p>
+                {currentWeek && <p style={{ fontSize: '0.75rem', color: textSub }}>{fmt(currentWeek.start)} – {fmt(currentWeek.end)}</p>}
+              </div>
+              <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                <button onClick={() => navigateWeek(-1)} disabled={!hasPrev} style={{ padding: '5px 10px', background: hasPrev ? (theme === 'light' ? '#f3f4f6' : '#1a2942') : 'transparent', border: `0.5px solid ${hasPrev ? cardBorder : 'transparent'}`, borderRadius: '6px', color: hasPrev ? textMain : 'transparent', cursor: hasPrev ? 'pointer' : 'default', fontSize: '0.8rem' }}>‹ Prev</button>
+                <button onClick={() => navigateWeek(1)} disabled={!hasNext} style={{ padding: '5px 10px', background: hasNext ? (theme === 'light' ? '#f3f4f6' : '#1a2942') : 'transparent', border: `0.5px solid ${hasNext ? cardBorder : 'transparent'}`, borderRadius: '6px', color: hasNext ? textMain : 'transparent', cursor: hasNext ? 'pointer' : 'default', fontSize: '0.8rem' }}>Next ›</button>
+              </div>
+            </div>
+            <div style={{ border: `0.5px solid ${cardBorder}`, borderRadius: '8px', overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 8px', background: toolbarBg, borderBottom: `0.5px solid ${cardBorder}`, flexWrap: 'nowrap', overflowX: 'auto' }}>
+                <button style={{ ...btnStyle, fontWeight: 'bold' }} onMouseDown={e => { e.preventDefault(); execCmd('bold'); }} title="Bold">B</button>
+                <button style={{ ...btnStyle, fontStyle: 'italic' }} onMouseDown={e => { e.preventDefault(); execCmd('italic'); }} title="Italic">I</button>
+                <button style={{ ...btnStyle, textDecoration: 'underline' }} onMouseDown={e => { e.preventDefault(); execCmd('underline'); }} title="Underline">U</button>
+                <button style={{ ...btnStyle, textDecoration: 'line-through' }} onMouseDown={e => { e.preventDefault(); execCmd('strikeThrough'); }} title="Strikethrough">S</button>
+                {divider}
+                <select style={{ height: '26px', padding: '0 4px', fontSize: '11px', border: `0.5px solid ${cardBorder}`, borderRadius: '5px', background: theme === 'light' ? '#ffffff' : '#1e3a5f', color: textMain, cursor: 'pointer', width: '72px', flexShrink: 0 }} onMouseDown={e => e.stopPropagation()} onChange={e => { if (editorRef.current) editorRef.current.focus(); const v = e.target.value; if (v === 'H1') document.execCommand('formatBlock', false, 'h2'); else if (v === 'H2') document.execCommand('formatBlock', false, 'h3'); else if (v === 'Small') document.execCommand('fontSize', false, '1'); else document.execCommand('formatBlock', false, 'p'); handleEditorInput(); e.target.value = 'Normal'; }} defaultValue="Normal">
+                  <option value="Normal">Normal</option>
+                  <option value="H1">H1</option>
+                  <option value="H2">H2</option>
+                  <option value="Small">Small</option>
+                </select>
+                <select style={{ height: '26px', padding: '0 4px', fontSize: '11px', border: `0.5px solid ${cardBorder}`, borderRadius: '5px', background: theme === 'light' ? '#ffffff' : '#1e3a5f', color: textMain, cursor: 'pointer', width: '48px', flexShrink: 0 }} onMouseDown={e => e.stopPropagation()} onChange={e => { if (editorRef.current) editorRef.current.focus(); document.execCommand('fontSize', false, e.target.value); handleEditorInput(); e.target.value = '3'; }} defaultValue="3">
+                  <option value="1">10</option>
+                  <option value="2">11</option>
+                  <option value="3">13</option>
+                  <option value="4">16</option>
+                  <option value="5">18</option>
+                  <option value="6">24</option>
+                  <option value="7">32</option>
+                </select>
+                {divider}
+                {[['#fef08a','#ca8a04','Yellow'],['#bbf7d0','#16a34a','Green'],['#bfdbfe','#2563eb','Blue'],['#fecaca','#dc2626','Red']].map(([bg, border, label]) => (
+                  <div key={label} style={{ width: '18px', height: '18px', borderRadius: '3px', background: bg, border: `0.5px solid ${border}`, cursor: 'pointer', flexShrink: 0 }} onMouseDown={e => { e.preventDefault(); execCmd('hiliteColor', bg); }} title={`${label} highlight`} />
+                ))}
+                <div style={{ width: '18px', height: '18px', borderRadius: '3px', background: theme === 'light' ? '#ffffff' : '#1e3a5f', border: `0.5px solid ${cardBorder}`, cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: textSub, fontWeight: 'bold' }} onMouseDown={e => { e.preventDefault(); execCmd('hiliteColor', 'transparent'); }} title="Remove highlight">✕</div>
+                {divider}
+                <button style={btnStyle} onMouseDown={e => { e.preventDefault(); execCmd('insertUnorderedList'); }} title="Bullet list">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="2" cy="3.5" r="1.5" fill="currentColor"/><rect x="5" y="2.5" width="8" height="2" rx="1" fill="currentColor"/><circle cx="2" cy="7" r="1.5" fill="currentColor"/><rect x="5" y="6" width="8" height="2" rx="1" fill="currentColor"/><circle cx="2" cy="10.5" r="1.5" fill="currentColor"/><rect x="5" y="9.5" width="8" height="2" rx="1" fill="currentColor"/></svg>
+                </button>
+                <button style={btnStyle} onMouseDown={e => { e.preventDefault(); execCmd('insertOrderedList'); }} title="Numbered list">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><text x="0" y="5" fontSize="5" fill="currentColor">1.</text><rect x="5" y="2.5" width="8" height="2" rx="1" fill="currentColor"/><text x="0" y="9.5" fontSize="5" fill="currentColor">2.</text><rect x="5" y="7" width="8" height="2" rx="1" fill="currentColor"/><text x="0" y="13.5" fontSize="5" fill="currentColor">3.</text><rect x="5" y="11.5" width="8" height="2" rx="1" fill="currentColor"/></svg>
+                </button>
+              </div>
+              <div
+                ref={editorRef}
+                contentEditable
+                suppressContentEditableWarning
+                onInput={handleEditorInput}
+                data-placeholder="Add notes for this week — tasks, plans, reminders..."
+                style={{
+                  minHeight: '140px',
+                  padding: '10px 12px',
+                  fontSize: '13px',
+                  color: textMain,
+                  background: theme === 'light' ? '#f9fafb' : '#1a2942',
+                  outline: 'none',
+                  lineHeight: '1.6',
+                  fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif',
+                  boxSizing: 'border-box',
+                  wordBreak: 'break-word',
+                }}
+              />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px' }}>
+              <span style={{ fontSize: '11px', color: textSub }}>{charCount} character{charCount !== 1 ? 's' : ''}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                {calendarSaved && <span style={{ fontSize: '12px', color: '#1D9E75' }}>Saved</span>}
+                <button onClick={handleSave} disabled={!calendarNoteDirty || calendarSaving} style={{ background: !calendarNoteDirty || calendarSaving ? (theme === 'light' ? '#e5e7eb' : '#374151') : '#1D9E75', color: !calendarNoteDirty || calendarSaving ? textSub : '#fff', border: 'none', borderRadius: '8px', padding: '6px 16px', fontSize: '13px', fontWeight: '500', cursor: !calendarNoteDirty || calendarSaving ? 'default' : 'pointer' }}>
+                  {calendarSaving ? 'Saving...' : 'Save'}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
     </div>
   );
-}
 
 function ServiceOverview({ serviceReminders, machineHours, machineKm, theme, onReminderClick }) {
   const getHours = (name) => {
