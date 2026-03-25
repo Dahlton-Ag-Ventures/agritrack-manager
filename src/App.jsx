@@ -6645,7 +6645,7 @@ const dueReminders = trackType === 'km'
     </div>
   )}
   <input
-    style={{ ...styles.input, fontFamily: 'inherit', width: '100%', boxSizing: 'border-box', marginBottom: 0, opacity: serviceForm.date ? 1 : 0.01, position: 'relative', zIndex: 2 }}
+    style={{ ...styles.input, fontFamily: 'inherit', width: '100%', maxWidth: '100%', boxSizing: 'border-box', marginBottom: 0, opacity: serviceForm.date ? 1 : 0.01, position: 'relative', zIndex: 2 }}
     type="date"
     value={serviceForm.date}
     onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
@@ -9406,7 +9406,7 @@ const dueReminders = trackType === 'km'
     </div>
   )}
   <input
-    style={{ ...styles.input, fontFamily: 'inherit', width: '100%', boxSizing: 'border-box', marginBottom: 0, opacity: serviceForm.date ? 1 : 0.01, position: 'relative', zIndex: 2 }}
+    style={{ ...styles.input, fontFamily: 'inherit', width: '100%', maxWidth: '100%', boxSizing: 'border-box', marginBottom: 0, opacity: serviceForm.date ? 1 : 0.01, position: 'relative', zIndex: 2 }}
     type="date"
     value={serviceForm.date}
     onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
