@@ -3661,6 +3661,7 @@ return (
               machineHours={machineHours}
               machineKm={machineKm}
               theme={theme}
+              isDesktop={isDesktop}
               onReminderClick={() => {
                 setActiveTab('machinery');
                 setShowRemindersPanel(true);
@@ -11127,7 +11128,7 @@ return (
     </div>
   );
 }
-function ServiceOverview({ serviceReminders, machineHours, machineKm, theme, onReminderClick }) {
+function ServiceOverview({ serviceReminders, machineHours, machineKm, theme, isDesktop, onReminderClick }) {
   const getHours = (name) => {
     const r = machineHours.find(h => h.machine_name === name);
     return r ? parseFloat(r.current_hours || 0) : 0;
