@@ -11178,23 +11178,15 @@ const priorityConfig = {
   const textMain = theme === 'light' ? '#111827' : '#f0fdf4';
   const textSub  = theme === 'light' ? '#6b7280' : '#9ca3af';
 
-  return (
+return (
     <div style={{
-      marginBottom: 28,
-      background: theme === 'light' ? 'rgba(255,248,240,0.9)' : 'transparent',
-      border: theme === 'light' ? '2px solid #fde047' : 'none',
-      borderRadius: theme === 'light' ? 16 : 0,
-      padding: theme === 'light' ? 20 : 0,
+      padding: isDesktop ? '16px 20px' : '14px 16px',
     }}>
-      {/* Section header */}
-<div style={{ marginBottom: 14 }}>
-<h2 style={{ fontSize: '1.5rem', fontWeight: 400, margin: 0,
-  background: 'linear-gradient(to right, #10b981, #06b6d4)',
-  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-  textAlign: 'center',
-}}>
-          🔧 Service Overview
-        </h2>
+{/* Section header */}
+      <div style={{ marginBottom: 12 }}>
+        <p style={{ fontSize: '11px', color: textSub, fontWeight: '500', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          Service overview
+        </p>
       </div>
 
       {/* All Clear state */}
