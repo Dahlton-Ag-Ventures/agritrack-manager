@@ -10792,6 +10792,7 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
   const [view, setView] = React.useState('grid');
   const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
   const [activeFormats, setActiveFormats] = React.useState({ bold: false, italic: false, underline: false, strikeThrough: false });
+  const activeFormatsRef = React.useRef({ bold: false, italic: false, underline: false, strikeThrough: false });
   const emojiPickerRef = React.useRef(null);
 
  React.useEffect(() => {
@@ -10803,32 +10804,6 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-const pendingFormatRef = React.useRef(null);
-
-  function updateActiveFormats() {
-    if (pendingFormatRef.current) return;
-    setActiveFormats({
-      bold: document.queryCommandState('bold'),
-      italic: document.queryCommandState('italic'),
-      underline: document.queryCommandState('underline'),
-      strikeThrough: document.queryCommandState('strikeThrough'),
-    });
-  }
-
-  React.useEffect(() => {
-    let timer;
-    function debouncedUpdate() {
-      clearTimeout(timer);
-      timer = setTimeout(updateActiveFormats, 100);
-    }
-    document.addEventListener('selectionchange', debouncedUpdate);
-    return () => {
-      document.removeEventListener('selectionchange', debouncedUpdate);
-      clearTimeout(timer);
-    };
-  }, []);
-  // view: 'grid' | 'weeks' | 'editor'
 
   const cardBg     = theme === 'light' ? '#ffffff' : '#1e3a5f';
   const cardBorder = theme === 'light' ? '#e5e7eb' : '#2563eb';
@@ -10943,18 +10918,14 @@ function execCmd(cmd, value) {
       setCalendarNoteText(editorRef.current.innerHTML);
       setCalendarNoteDirty(true);
     }
-    const newFormats = {
-      bold: document.queryCommandState('bold'),
-      italic: document.queryCommandState('italic'),
-      underline: document.queryCommandState('underline'),
-      strikeThrough: document.queryCommandState('strikeThrough'),
-    };
-    pendingFormatRef.current = newFormats;
-    setActiveFormats(newFormats);
-    clearTimeout(pendingFormatRef.timer);
-    pendingFormatRef.timer = setTimeout(() => {
-      pendingFormatRef.current = null;
-    }, 300);
+    if (['bold', 'italic', 'underline', 'strikeThrough'].includes(cmd)) {
+      const newFormats = {
+        ...activeFormatsRef.current,
+        [cmd]: !activeFormatsRef.current[cmd]
+      };
+      activeFormatsRef.current = newFormats;
+      setActiveFormats({ ...newFormats });
+    }
   }
   function handleEditorInput() {
     if (editorRef.current) {
