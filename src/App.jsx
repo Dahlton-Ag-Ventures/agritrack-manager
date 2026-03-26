@@ -405,6 +405,7 @@ const [newTechnicianName, setNewTechnicianName] = useState('');
 const [editingTechnicianId, setEditingTechnicianId] = useState(null);
 const [editingTechnicianName, setEditingTechnicianName] = useState('');
 const [showTechnicianList, setShowTechnicianList] = useState(false);
+const [expandedCard, setExpandedCard] = useState(null);
 const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 768);
   
   // Get current theme object
@@ -3617,267 +3618,249 @@ return (
   onSave={saveCalendarNote}
 />
     
-  {/* General Features Flip Card - Full Width */}
-<div
-className="flip-card"
-  onClick={() => toggleCard('general')}
-  style={{ minHeight: !isDesktop ? '100px' : '260px', marginBottom: !isDesktop ? '4px' : '16px' }}
->
-  <div className={`flip-card-inner ${flippedCards['general'] ? 'flipped' : ''}`}>
-    <div
-      className="flip-card-front"
-      style={{
-        background: theme === 'dark' ? 'rgba(30, 58, 95, 0.6)' : 'white',
-        border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '16px',
-        minHeight: '260px',
-      }}
-    >
-      <span style={{ fontSize: '3rem' }}>👥</span>
-      <h3 style={{ fontSize: '1.5rem', fontWeight: '400', color: '#1D9E75', margin: 0, textAlign: 'center' }}>General Features</h3>
-      <p style={{ color: '#9ca3af', fontSize: '0.85rem', margin: 0 }}>Tap to learn more</p>
-    </div>
-    <div
-      className="flip-card-back"
-      style={{
-        background: theme === 'dark' ? 'rgba(30, 58, 95, 0.95)' : 'white',
-        border: theme === 'dark' ? '2px solid #10b981' : '2px solid #fde047',
-        minHeight: '260px',
-        maxHeight: '420px',
-      }}
-    >
-      <h3 className="flip-card-back-title" style={{ fontSize: '1.1rem', color: '#06b6d4', marginBottom: '12px' }}>👥 General Features</h3>
+{/* Feature Cards 2x2 Grid */}
+{(() => {
+  const cards = [
+    {
+      id: 'general',
+      icon: '👥',
+      title: 'General features',
+      iconBg: '#E1F5EE',
+      badgeColor: '#0F6E56',
+      badgeBg: '#E1F5EE',
+      accentColor: '#1D9E75',
+      badges: ['Real-time sync', 'Search & sort', 'Mobile friendly', 'Import/Export'],
+      features: [
+        { title: 'Real-time sync', desc: 'All changes sync instantly across every device — no manual refresh needed.' },
+        { title: 'Search, sort & paginate', desc: 'Every tab has a search bar, sort options, and page size controls to quickly find any record.' },
+        { title: 'Mobile friendly', desc: 'Fully responsive on phones, tablets, and desktop with layouts optimized for each.' },
+        { title: 'Import & export', desc: 'Bulk import inventory, machinery, or service records via CSV. Export any dataset in one click from Settings.' },
+        { title: 'Light & dark mode', desc: 'Switch between light and dark themes in Settings — your preference is saved per device.' },
+      ]
+    },
+    {
+      id: 'inventory',
+      icon: '📦',
+      title: 'Inventory',
+      iconBg: '#E6F1FB',
+      badgeColor: '#0C447C',
+      badgeBg: '#E6F1FB',
+      accentColor: '#378ADD',
+      badges: ['Stock alerts', 'Quick qty', 'QR labels', 'Photos'],
+      features: [
+        { title: 'Add & edit items', desc: 'Create entries with photos, part numbers, quantities, and storage locations.' },
+        { title: 'Stock alerts', desc: 'Items at or below minimum quantity show a red Low Stock badge. Overstocked items show in yellow.' },
+        { title: 'Quick quantity updates', desc: 'Use the + and − buttons directly on any card for fast adjustments without opening an edit form.' },
+        { title: 'QR code labels', desc: 'Generate and print a QR label for any item — scanning it opens that item directly in AgriTrack.' },
+        { title: 'Photos', desc: 'Attach a photo to any inventory item and view it full-screen with zoom and pan.' },
+      ]
+    },
+    {
+      id: 'machinery',
+      icon: '🚜',
+      title: 'Machinery',
+      iconBg: '#EAF3DE',
+      badgeColor: '#27500A',
+      badgeBg: '#EAF3DE',
+      accentColor: '#639922',
+      badges: ['Hours/km', 'Reminders', 'Categories', 'Photos'],
+      features: [
+        { title: 'Add & edit machines', desc: 'Register equipment with name, VIN/serial, license plate, category, requirements, and an optional photo.' },
+        { title: 'Hours & kilometres', desc: 'Track running totals per machine — the correct metric is assigned automatically based on category.' },
+        { title: 'Service reminders', desc: 'Set hour or km intervals for any task. Overdue machines get a red badge on their card automatically.' },
+        { title: 'Category filters', desc: 'Toggle "Show Category Filters" to narrow the machinery list by equipment type instantly.' },
+        { title: 'Service history link', desc: 'Each machine card shows its service record count — click it to jump straight to filtered records.' },
+      ]
+    },
+    {
+      id: 'service',
+      icon: '🔧',
+      title: 'Service history',
+      iconBg: '#FAEEDA',
+      badgeColor: '#633806',
+      badgeBg: '#FAEEDA',
+      accentColor: '#BA7517',
+      badges: ['Log records', '10 photos', 'Filter by machine', 'Export'],
+      features: [
+        { title: 'Log services', desc: 'Search for a machine by name, category, or VIN — fill in service type, date, technician, and notes.' },
+        { title: 'Up to 10 photos', desc: 'Attach up to 10 photos per record and browse them in the full-screen viewer with zoom and rotation.' },
+        { title: 'Filter by machine', desc: 'Jump from the Machinery tab directly to a machine\'s filtered service records in one click.' },
+        { title: 'Complete reminders', desc: 'Mark a service reminder as done directly from the record — resets the interval counter automatically.' },
+        { title: 'Edit & export', desc: 'Edit or delete any record. Export full history to CSV via Settings — by date range or manual selection.' },
+      ]
+    },
+  ];
+
+  return (
+    <div>
+      {/* 2x2 Grid */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '16px',
-        color: theme === 'dark' ? '#d1d5db' : '#374151',
-        fontSize: '0.9rem',
-        lineHeight: '1.7'
+        gridTemplateColumns: isDesktop ? 'repeat(2, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))',
+        gap: isDesktop ? '12px' : '8px',
+        marginBottom: '12px',
       }}>
-        <div>
-          <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Real-Time Sync:</p>
-          <p style={{ marginBottom: '10px' }}>All changes sync instantly across all devices — no manual refresh needed.</p>
-        </div>
-        <div>
-          <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Search, Sort & Paginate:</p>
-          <p style={{ marginBottom: '10px' }}>Every tab has a search bar, sort options, and page size controls to quickly find any record.</p>
-        </div>
-        <div>
-          <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Mobile Friendly:</p>
-          <p style={{ marginBottom: '10px' }}>Fully responsive on phones, tablets, and desktop.</p>
-        </div>
-        {userRole !== 'employee' && (
-          <div>
-            <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Import/Export (Admin):</p>
-            <p>Bulk import or export inventory, machinery, or service records via CSV in Settings.</p>
-          </div>
-        )}
+        {cards.map(card => {
+          const isActive = expandedCard === card.id;
+          return (
+            <div
+              key={card.id}
+              onClick={() => setExpandedCard(isActive ? null : card.id)}
+              style={{
+                background: currentTheme.cardBackground,
+                border: isActive ? `2px solid ${card.accentColor}` : `1px solid ${currentTheme.cardBorder}`,
+                borderRadius: '10px',
+                padding: isDesktop ? '16px' : '12px',
+                cursor: 'pointer',
+                opacity: expandedCard && !isActive ? 0.45 : 1,
+                transition: 'opacity 0.2s ease, border-color 0.2s ease',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{
+                    width: isDesktop ? '32px' : '26px',
+                    height: isDesktop ? '32px' : '26px',
+                    borderRadius: '50%',
+                    background: card.iconBg,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: isDesktop ? '16px' : '13px',
+                    flexShrink: 0,
+                  }}>
+                    {card.icon}
+                  </div>
+                  <span style={{
+                    fontSize: isDesktop ? '14px' : '12px',
+                    fontWeight: 'bold',
+                    color: currentTheme.text,
+                  }}>
+                    {card.title}
+                  </span>
+                </div>
+                {isActive && (
+                  <span style={{ fontSize: '11px', color: card.accentColor, fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                    ▲ close
+                  </span>
+                )}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                {card.badges.map(badge => (
+                  <span key={badge} style={{
+                    fontSize: isDesktop ? '10px' : '9px',
+                    padding: '2px 6px',
+                    borderRadius: '20px',
+                    background: card.badgeBg,
+                    color: card.badgeColor,
+                    fontWeight: '500',
+                  }}>
+                    {badge}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
-    </div>
-  </div>
-</div>
 
-{/* Stats Grid with Flip Cards Above Each Stat */}
-<div style={{
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-  gap: !isDesktop ? '4px' : '8px',
-  marginTop: '0px'
-}}>
+      {/* Expanded detail panel */}
+      {expandedCard && (() => {
+        const card = cards.find(c => c.id === expandedCard);
+        if (!card) return null;
+        return (
+          <div style={{
+            background: currentTheme.cardBackground,
+            border: `2px solid ${card.accentColor}`,
+            borderRadius: '10px',
+            padding: isDesktop ? '20px' : '14px',
+            marginBottom: '12px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+              <div style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                background: card.iconBg,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '18px',
+                flexShrink: 0,
+              }}>
+                {card.icon}
+              </div>
+              <div>
+                <p style={{ fontSize: isDesktop ? '15px' : '14px', fontWeight: 'bold', color: currentTheme.text, margin: 0 }}>
+                  {card.title}
+                </p>
+                <p style={{ fontSize: '11px', color: currentTheme.textSecondary, margin: 0 }}>
+                  Tap any card to collapse
+                </p>
+              </div>
+            </div>
+            {card.features.map((f, i) => (
+              <div key={i} style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '10px',
+                paddingTop: '10px',
+                paddingBottom: '10px',
+                borderBottom: i < card.features.length - 1 ? `0.5px solid ${currentTheme.cardBorder}` : 'none',
+              }}>
+                <div style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  background: card.accentColor,
+                  flexShrink: 0,
+                  marginTop: '5px',
+                }} />
+                <div>
+                  <p style={{ fontSize: isDesktop ? '13px' : '12px', fontWeight: 'bold', color: currentTheme.text, margin: '0 0 2px' }}>
+                    {f.title}
+                  </p>
+                  <p style={{ fontSize: isDesktop ? '12px' : '11px', color: currentTheme.textSecondary, margin: 0, lineHeight: '1.5' }}>
+                    {f.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
 
-  {/* Inventory Column */}
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-    <div
-      className="flip-card"
-      onClick={() => toggleCard('inventory')}
-      style={{ minHeight: !isDesktop ? 'unset' : '260px' }}
-    >
-      <div className={`flip-card-inner ${flippedCards['inventory'] ? 'flipped' : ''}`}>
-        <div
-          className="flip-card-front"
-          style={{
-            background: theme === 'dark' ? 'rgba(30, 58, 95, 0.6)' : 'white',
+      {/* Stats row */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: isDesktop ? 'repeat(3, 1fr)' : '1fr',
+        gap: isDesktop ? '8px' : '8px',
+        marginTop: '8px',
+      }}>
+        {[
+          { label: 'Total Inventory', value: loading ? '...' : inventory.length },
+          { label: 'Total Machinery', value: loading ? '...' : machinery.length },
+          { label: 'Service Records', value: loading ? '...' : serviceHistory.length },
+        ].map(stat => (
+          <div key={stat.label} style={{
+            background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff',
             border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '16px',
-            minHeight: '260px',
-          }}
-        >
-          <span style={{ fontSize: '3rem' }}>📦</span>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: '400', color: '#1D9E75', margin: 0, textAlign: 'center' }}>Inventory Management</h3>
-          <p style={{ color: '#9ca3af', fontSize: '0.85rem', margin: 0 }}>Tap to learn more</p>
-        </div>
-        <div
-          className="flip-card-back"
-          style={{
-            background: theme === 'dark' ? 'rgba(30, 58, 95, 0.95)' : 'white',
-            border: theme === 'dark' ? '2px solid #10b981' : '2px solid #fde047',
-            minHeight: '260px',
-            maxHeight: '420px',
-          }}
-        >
-          <h3 className="flip-card-back-title" style={{ fontSize: '1.1rem', color: '#06b6d4', marginBottom: '12px' }}>📦 Inventory Management</h3>
-          <div style={{ color: theme === 'dark' ? '#d1d5db' : '#374151', fontSize: '0.9rem', lineHeight: '1.7' }}>
-            <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Add & Edit Items:</p>
-            <p style={{ marginBottom: '10px' }}>Create entries with photos, part numbers, quantities, and storage locations.</p>
-            <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Stock Alerts:</p>
-            <p style={{ marginBottom: '10px' }}>Items at or below minimum show a red ⚠️ Low Stock badge — overstock shows in yellow.</p>
-            <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Quick Quantity Updates:</p>
-            <p style={{ marginBottom: '10px' }}>Use + and − buttons directly on any card for fast adjustments.</p>
-            <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Search & Filter:</p>
-            <p>Search by name, part number, or location — sort and paginate results.</p>
+            borderRadius: '8px',
+            padding: '16px',
+            textAlign: 'center',
+          }}>
+            <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>
+              {stat.label}
+            </p>
+            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+              {stat.value}
+            </p>
           </div>
-        </div>
+        ))}
       </div>
     </div>
-  </div>
-
-{/* Machinery Column */}
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-    <div
-      className="flip-card"
-      onClick={() => toggleCard('machinery')}
-      style={{ minHeight: !isDesktop ? 'unset' : '260px' }}
-    >
-      <div className={`flip-card-inner ${flippedCards['machinery'] ? 'flipped' : ''}`}>
-        <div
-          className="flip-card-front"
-          style={{
-            background: theme === 'dark' ? 'rgba(30, 58, 95, 0.6)' : 'white',
-            border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '16px',
-            minHeight: '260px',
-          }}
-        >
-          <span style={{ fontSize: '3rem' }}>🚜</span>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: '400', color: '#1D9E75', margin: 0, textAlign: 'center' }}>Machinery Tracking</h3>
-          <p style={{ color: '#9ca3af', fontSize: '0.85rem', margin: 0 }}>Tap to learn more</p>
-        </div>
-        <div
-          className="flip-card-back"
-          style={{
-            background: theme === 'dark' ? 'rgba(30, 58, 95, 0.95)' : 'white',
-            border: theme === 'dark' ? '2px solid #10b981' : '2px solid #fde047',
-            minHeight: '260px',
-            maxHeight: '420px',
-          }}
-        >
-          <h3 className="flip-card-back-title" style={{ fontSize: '1.1rem', color: '#06b6d4', marginBottom: '12px' }}>🚜 Machinery Tracking</h3>
-          <div style={{ color: theme === 'dark' ? '#d1d5db' : '#374151', fontSize: '0.9rem', lineHeight: '1.7' }}>
-            <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Add & Edit Machines:</p>
-            <p style={{ marginBottom: '10px' }}>Register equipment with name, VIN/serial, category, and optional photo.</p>
-            <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Categories & Filters:</p>
-            <p style={{ marginBottom: '10px' }}>Use "Show Category Filters" to narrow the list by equipment type.</p>
-            <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>View Service History:</p>
-            <p style={{ marginBottom: '10px' }}>Each machine shows a button with its service count — click to jump to filtered records.</p>
-            <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Service Reminders & Hours:</p>
-            <p>Track machine hours and set hour-based service intervals with automatic due alerts.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  {/* Service Column */}
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-    <div
-      className="flip-card"
-      onClick={() => toggleCard('service')}
-      style={{ minHeight: !isDesktop ? 'unset' : '260px' }}
-    >
-      <div className={`flip-card-inner ${flippedCards['service'] ? 'flipped' : ''}`}>
-        <div
-          className="flip-card-front"
-          style={{
-            background: theme === 'dark' ? 'rgba(30, 58, 95, 0.6)' : 'white',
-            border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '16px',
-            minHeight: '260px',
-          }}
-        >
-          <span style={{ fontSize: '3rem' }}>🔧</span>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: '400', color: '#1D9E75', margin: 0, textAlign: 'center' }}>Service History</h3>
-          <p style={{ color: '#9ca3af', fontSize: '0.85rem', margin: 0 }}>Tap to learn more</p>
-        </div>
-        <div
-          className="flip-card-back"
-          style={{
-            background: theme === 'dark' ? 'rgba(30, 58, 95, 0.95)' : 'white',
-            border: theme === 'dark' ? '2px solid #10b981' : '2px solid #fde047',
-            minHeight: '260px',
-            maxHeight: '420px',
-          }}
-        >
-          <h3 className="flip-card-back-title" style={{ fontSize: '1.1rem', color: '#06b6d4', marginBottom: '12px' }}>🔧 Service History</h3>
-          <div style={{ color: theme === 'dark' ? '#d1d5db' : '#374151', fontSize: '0.9rem', lineHeight: '1.7' }}>
-            <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Log Services:</p>
-            <p style={{ marginBottom: '10px' }}>Search for a machine by name, category, or VIN — fill in service type, date, technician, and notes.</p>
-            <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Photos:</p>
-            <p style={{ marginBottom: '10px' }}>Each record supports up to 10 photos — browse them in the full-screen viewer.</p>
-            <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Filter by Machine:</p>
-            <p style={{ marginBottom: '10px' }}>Jump from the Machinery tab directly to a machine's filtered service records.</p>
-            {userRole !== 'employee' && (
-              <>
-                <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>Edit & Export:</p>
-                <p>Edit or delete any record — export full history to CSV via Settings.</p>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-</div>
-</div>
-
-{isDesktop && (
-  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginTop: '8px' }}>
-    <div style={{ background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff', border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
-      <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Total Inventory</p>
-      <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>{loading ? '...' : inventory.length}</p>
-    </div>
-    <div style={{ background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff', border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
-      <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Total Machinery</p>
-      <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>{loading ? '...' : machinery.length}</p>
-    </div>
-    <div style={{ background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff', border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
-      <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Service Records</p>
-      <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>{loading ? '...' : serviceHistory.length}</p>
-    </div>
-  </div>
-)}
-
-{!isDesktop && (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
-    <div style={{ background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff', border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
-      <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Total Inventory</p>
-      <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>{loading ? '...' : inventory.length}</p>
-    </div>
-    <div style={{ background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff', border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
-      <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Total Machinery</p>
-      <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>{loading ? '...' : machinery.length}</p>
-    </div>
-    <div style={{ background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff', border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
-      <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>Service Records</p>
-      <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>{loading ? '...' : serviceHistory.length}</p>
-    </div>
-  </div>
-)}
+  );
+})()}   
   </div>
 )}
   
