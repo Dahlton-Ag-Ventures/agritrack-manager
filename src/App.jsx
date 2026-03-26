@@ -11059,22 +11059,11 @@ return (
             <button onClick={goToWeeks} style={{ background: 'none', border: 'none', color: textSub, fontSize: '0.8rem', cursor: 'pointer', padding: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
               ← Back to {MONTHS[mi]}
             </button>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', gap: '8px' }}>
-              <div>
-                <p style={{ fontWeight: '600', fontSize: '0.95rem', color: textMain, marginBottom: '2px' }}>{MONTHS[mi]} — Week {weekNum}</p>
-                {currentWeek && <p style={{ fontSize: '0.75rem', color: textSub }}>{fmt(currentWeek.start)} – {fmt(currentWeek.end)}</p>}
-              </div>
-              <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                <button onClick={() => navigateWeek(-1)} disabled={!hasPrev} style={{ padding: '5px 10px', background: hasPrev ? (theme === 'light' ? '#f3f4f6' : '#1a2942') : 'transparent', border: `0.5px solid ${hasPrev ? cardBorder : 'transparent'}`, borderRadius: '6px', color: hasPrev ? textMain : 'transparent', cursor: hasPrev ? 'pointer' : 'default', fontSize: '0.8rem' }}>‹ Prev</button>
-                <button onClick={() => navigateWeek(1)} disabled={!hasNext} style={{ padding: '5px 10px', background: hasNext ? (theme === 'light' ? '#f3f4f6' : '#1a2942') : 'transparent', border: `0.5px solid ${hasNext ? cardBorder : 'transparent'}`, borderRadius: '6px', color: hasNext ? textMain : 'transparent', cursor: hasNext ? 'pointer' : 'default', fontSize: '0.8rem' }}>Next ›</button>
-              </div>
-            </div>
-            <div style={{ border: `0.5px solid ${cardBorder}`, borderRadius: '8px', overflow: 'hidden' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 8px', background: toolbarBg, borderBottom: `0.5px solid ${cardBorder}`, flexWrap: 'nowrap', overflowX: 'auto' }}>
-                <button style={{ ...btnStyle, fontWeight: 'bold' }} onMouseDown={e => { e.preventDefault(); execCmd('bold'); }} title="Bold">B</button>
-                <button style={{ ...btnStyle, fontStyle: 'italic' }} onMouseDown={e => { e.preventDefault(); execCmd('italic'); }} title="Italic">I</button>
-                <button style={{ ...btnStyle, textDecoration: 'underline' }} onMouseDown={e => { e.preventDefault(); execCmd('underline'); }} title="Underline">U</button>
-                <button style={{ ...btnStyle, textDecoration: 'line-through' }} onMouseDown={e => { e.preventDefault(); execCmd('strikeThrough'); }} title="Strikethrough">S</button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 8px', background: toolbarBg, borderBottom: `0.5px solid ${cardBorder}`, flexWrap: 'nowrap', overflowX: 'auto' }}>
+                <button style={{ ...btnStyle, fontWeight: 'bold' }} onMouseDown={e => { e.preventDefault(); execCmd('bold'); }} onTouchEnd={e => { e.preventDefault(); execCmd('bold'); }} title="Bold">B</button>
+                <button style={{ ...btnStyle, fontStyle: 'italic' }} onMouseDown={e => { e.preventDefault(); execCmd('italic'); }} onTouchEnd={e => { e.preventDefault(); execCmd('italic'); }} title="Italic">I</button>
+                <button style={{ ...btnStyle, textDecoration: 'underline' }} onMouseDown={e => { e.preventDefault(); execCmd('underline'); }} onTouchEnd={e => { e.preventDefault(); execCmd('underline'); }} title="Underline">U</button>
+                <button style={{ ...btnStyle, textDecoration: 'line-through' }} onMouseDown={e => { e.preventDefault(); execCmd('strikeThrough'); }} onTouchEnd={e => { e.preventDefault(); execCmd('strikeThrough'); }} title="Strikethrough">S</button>
                 {divider}
                 <select style={{ height: '26px', padding: '0 4px', fontSize: '11px', border: `0.5px solid ${cardBorder}`, borderRadius: '5px', background: theme === 'light' ? '#ffffff' : '#1e3a5f', color: textMain, cursor: 'pointer', width: '72px', flexShrink: 0 }} onMouseDown={e => e.stopPropagation()} onChange={e => { if (editorRef.current) editorRef.current.focus(); const v = e.target.value; if (v === 'H1') document.execCommand('formatBlock', false, 'h2'); else if (v === 'H2') document.execCommand('formatBlock', false, 'h3'); else if (v === 'Small') document.execCommand('fontSize', false, '1'); else document.execCommand('formatBlock', false, 'p'); handleEditorInput(); e.target.value = 'Normal'; }} defaultValue="Normal">
                   <option value="Normal">Normal</option>
@@ -11093,14 +11082,14 @@ return (
                 </select>
                 {divider}
                 {[['#fef08a','#ca8a04','Yellow'],['#bbf7d0','#16a34a','Green'],['#bfdbfe','#2563eb','Blue'],['#fecaca','#dc2626','Red']].map(([bg, border, label]) => (
-                  <div key={label} style={{ width: '18px', height: '18px', borderRadius: '3px', background: bg, border: `0.5px solid ${border}`, cursor: 'pointer', flexShrink: 0 }} onMouseDown={e => { e.preventDefault(); execCmd('hiliteColor', bg); }} title={`${label} highlight`} />
+                  <div key={label} style={{ width: '18px', height: '18px', borderRadius: '3px', background: bg, border: `0.5px solid ${border}`, cursor: 'pointer', flexShrink: 0 }} onMouseDown={e => { e.preventDefault(); execCmd('hiliteColor', bg); }} onTouchEnd={e => { e.preventDefault(); execCmd('hiliteColor', bg); }} title={`${label} highlight`} />
                 ))}
-                <div style={{ width: '18px', height: '18px', borderRadius: '3px', background: theme === 'light' ? '#ffffff' : '#1e3a5f', border: `0.5px solid ${cardBorder}`, cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: textSub, fontWeight: 'bold' }} onMouseDown={e => { e.preventDefault(); execCmd('hiliteColor', 'transparent'); }} title="Remove highlight">✕</div>
+                <div style={{ width: '18px', height: '18px', borderRadius: '3px', background: theme === 'light' ? '#ffffff' : '#1e3a5f', border: `0.5px solid ${cardBorder}`, cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: textSub, fontWeight: 'bold' }} onMouseDown={e => { e.preventDefault(); execCmd('hiliteColor', 'transparent'); }} onTouchEnd={e => { e.preventDefault(); execCmd('hiliteColor', 'transparent'); }} title="Remove highlight">✕</div>
                 {divider}
-                <button style={btnStyle} onMouseDown={e => { e.preventDefault(); execCmd('insertUnorderedList'); }} title="Bullet list">
+                <button style={btnStyle} onMouseDown={e => { e.preventDefault(); execCmd('insertUnorderedList'); }} onTouchEnd={e => { e.preventDefault(); execCmd('insertUnorderedList'); }} title="Bullet list">
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="2" cy="3.5" r="1.5" fill="currentColor"/><rect x="5" y="2.5" width="8" height="2" rx="1" fill="currentColor"/><circle cx="2" cy="7" r="1.5" fill="currentColor"/><rect x="5" y="6" width="8" height="2" rx="1" fill="currentColor"/><circle cx="2" cy="10.5" r="1.5" fill="currentColor"/><rect x="5" y="9.5" width="8" height="2" rx="1" fill="currentColor"/></svg>
                 </button>
-<button style={btnStyle} onMouseDown={e => { e.preventDefault(); execCmd('insertOrderedList'); }} title="Numbered list">
+                <button style={btnStyle} onMouseDown={e => { e.preventDefault(); execCmd('insertOrderedList'); }} onTouchEnd={e => { e.preventDefault(); execCmd('insertOrderedList'); }} title="Numbered list">
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><text x="0" y="5" fontSize="5" fill="currentColor">1.</text><rect x="5" y="2.5" width="8" height="2" rx="1" fill="currentColor"/><text x="0" y="9.5" fontSize="5" fill="currentColor">2.</text><rect x="5" y="7" width="8" height="2" rx="1" fill="currentColor"/><text x="0" y="13.5" fontSize="5" fill="currentColor">3.</text><rect x="5" y="11.5" width="8" height="2" rx="1" fill="currentColor"/></svg>
                 </button>
                 {divider}
@@ -11117,9 +11106,10 @@ return (
                   ];
                   return (
                     <div ref={emojiPickerRef} style={{ position: 'relative' }}>
-                      <button
+                     <button
                         style={{ ...btnStyle, fontSize: '14px', width: 'auto', padding: '0 4px' }}
                         onMouseDown={e => { e.preventDefault(); setShowEmojiPicker(p => !p); }}
+                        onTouchEnd={e => { e.preventDefault(); setShowEmojiPicker(p => !p); }}
                         title="Insert emoji"
                       >
                         😊
@@ -11146,7 +11136,14 @@ return (
                           {emojis.map(emoji => (
                             <button
                               key={emoji}
-                              onMouseDown={e => {
+                        onMouseDown={e => {
+                                e.preventDefault();
+                                if (editorRef.current) editorRef.current.focus();
+                                document.execCommand('insertText', false, emoji);
+                                handleEditorInput();
+                                setShowEmojiPicker(false);
+                              }}
+                            onTouchEnd={e => {
                                 e.preventDefault();
                                 if (editorRef.current) editorRef.current.focus();
                                 document.execCommand('insertText', false, emoji);
