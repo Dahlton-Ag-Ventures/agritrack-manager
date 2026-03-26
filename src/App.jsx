@@ -10791,6 +10791,17 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
   const [expandedMonth, setExpandedMonth] = React.useState(null);
   const [view, setView] = React.useState('grid');
   const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
+  const emojiPickerRef = React.useRef(null);
+
+  React.useEffect(() => {
+    function handleClickOutside(e) {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target)) {
+        setShowEmojiPicker(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   // view: 'grid' | 'weeks' | 'editor'
 
   const cardBg     = theme === 'light' ? '#ffffff' : '#1e3a5f';
@@ -11096,7 +11107,7 @@ return (
                 {(() => {
                   const emojis = ['✅','❌','⚠️','📋','🔧','🚜','📦','⏰','📅','🌱','💧','☀️','🌧️','❄️','🔥','⛽','🛢️','🪛','🔩','📝','👍','👎','⭐','🚨','💡','📞','🏁','✔️','➡️','⬆️','⬇️'];
                   return (
-                    <div style={{ position: 'relative' }}>
+                    <div ref={emojiPickerRef} style={{ position: 'relative' }}>
                       <button
                         style={{ ...btnStyle, fontSize: '14px', width: 'auto', padding: '0 4px' }}
                         onMouseDown={e => { e.preventDefault(); setShowEmojiPicker(p => !p); }}
@@ -11106,10 +11117,11 @@ return (
                       </button>
                       {showEmojiPicker && (
                         <div
-                          style={{
-                            position: 'absolute',
-                            top: '110%',
-                            left: 0,
+                         style={{
+                            position: 'fixed',
+                            top: 'auto',
+                            bottom: '60px',
+                            left: 'auto',
                             zIndex: 9999,
                             background: theme === 'light' ? '#ffffff' : '#1e3a5f',
                             border: `1px solid ${cardBorder}`,
@@ -11119,7 +11131,7 @@ return (
                             gridTemplateColumns: 'repeat(6, 1fr)',
                             gap: '4px',
                             boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-                            width: '180px',
+                            width: '196px',
                           }}
                         >
                           {emojis.map(emoji => (
@@ -11167,6 +11179,20 @@ return (
                       document.execCommand('indent', false, null);
                     }
                     handleEditorInput();
+                  }
+                  if (e.key === 'Backspace') {
+                    const sel = window.getSelection();
+                    if (sel && sel.rangeCount > 0) {
+                      const range = sel.getRangeAt(0);
+                      if (range.collapsed) {
+                        const li = sel.anchorNode?.parentElement?.closest('li');
+                        if (li && li.textContent.trim() === '') {
+                          e.preventDefault();
+                          document.execCommand('outdent', false, null);
+                          handleEditorInput();
+                        }
+                      }
+                    }
                   }
                 }}
                 data-placeholder="Add notes for this week — tasks, plans, reminders..."
