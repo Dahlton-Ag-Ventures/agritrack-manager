@@ -10936,12 +10936,10 @@ function saveSelection() {
       setCalendarNoteText(editorRef.current.innerHTML);
       setCalendarNoteDirty(true);
     }
-    if (['bold', 'italic', 'underline', 'strikeThrough'].includes(cmd)) {
+   if (['bold', 'italic', 'underline', 'strikeThrough'].includes(cmd)) {
       const newFormats = {
-        bold: document.queryCommandState('bold'),
-        italic: document.queryCommandState('italic'),
-        underline: document.queryCommandState('underline'),
-        strikeThrough: document.queryCommandState('strikeThrough'),
+        ...activeFormatsRef.current,
+        [cmd]: !activeFormatsRef.current[cmd]
       };
       activeFormatsRef.current = newFormats;
       setActiveFormats({ ...newFormats });
