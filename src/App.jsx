@@ -10791,9 +10791,10 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
   const [expandedMonth, setExpandedMonth] = React.useState(null);
   const [view, setView] = React.useState('grid');
   const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
+  const [activeFormats, setActiveFormats] = React.useState({ bold: false, italic: false, underline: false, strikeThrough: false });
   const emojiPickerRef = React.useRef(null);
 
-  React.useEffect(() => {
+ React.useEffect(() => {
     function handleClickOutside(e) {
       if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target)) {
         setShowEmojiPicker(false);
@@ -10801,6 +10802,20 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  function updateActiveFormats() {
+    setActiveFormats({
+      bold: document.queryCommandState('bold'),
+      italic: document.queryCommandState('italic'),
+      underline: document.queryCommandState('underline'),
+      strikeThrough: document.queryCommandState('strikeThrough'),
+    });
+  }
+
+  React.useEffect(() => {
+    document.addEventListener('selectionchange', updateActiveFormats);
+    return () => document.removeEventListener('selectionchange', updateActiveFormats);
   }, []);
   // view: 'grid' | 'weeks' | 'editor'
 
@@ -10910,13 +10925,14 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
     }
   }, [calendarSelectedKey, view]);
 
-  function execCmd(cmd, value) {
+ function execCmd(cmd, value) {
     if (editorRef.current) editorRef.current.focus();
     document.execCommand(cmd, false, value || null);
     if (editorRef.current) {
       setCalendarNoteText(editorRef.current.innerHTML);
       setCalendarNoteDirty(true);
     }
+    updateActiveFormats();
   }
 
   function handleEditorInput() {
@@ -11060,10 +11076,10 @@ return (
               ← Back to {MONTHS[mi]}
             </button>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 8px', background: toolbarBg, borderBottom: `0.5px solid ${cardBorder}`, flexWrap: 'nowrap', overflowX: 'auto' }}>
-               <button style={{ ...btnStyle, fontWeight: 'bold', background: document.queryCommandState('bold') ? '#9FE1CB' : 'transparent', color: document.queryCommandState('bold') ? '#085041' : textSub }} onMouseDown={e => { e.preventDefault(); execCmd('bold'); }} onTouchStart={e => { e.preventDefault(); execCmd('bold'); }} title="Bold">B</button>
-                <button style={{ ...btnStyle, fontStyle: 'italic', background: document.queryCommandState('italic') ? '#9FE1CB' : 'transparent', color: document.queryCommandState('italic') ? '#085041' : textSub }} onMouseDown={e => { e.preventDefault(); execCmd('italic'); }} onTouchStart={e => { e.preventDefault(); execCmd('italic'); }} title="Italic">I</button>
-                <button style={{ ...btnStyle, textDecoration: 'underline', background: document.queryCommandState('underline') ? '#9FE1CB' : 'transparent', color: document.queryCommandState('underline') ? '#085041' : textSub }} onMouseDown={e => { e.preventDefault(); execCmd('underline'); }} onTouchStart={e => { e.preventDefault(); execCmd('underline'); }} title="Underline">U</button>
-                <button style={{ ...btnStyle, textDecoration: 'line-through', background: document.queryCommandState('strikeThrough') ? '#9FE1CB' : 'transparent', color: document.queryCommandState('strikeThrough') ? '#085041' : textSub }} onMouseDown={e => { e.preventDefault(); execCmd('strikeThrough'); }} onTouchStart={e => { e.preventDefault(); execCmd('strikeThrough'); }} title="Strikethrough">S</button>
+              <button style={{ ...btnStyle, fontWeight: 'bold', background: activeFormats.bold ? '#9FE1CB' : 'transparent', color: activeFormats.bold ? '#085041' : textSub }} onMouseDown={e => { e.preventDefault(); execCmd('bold'); }} onTouchStart={e => { e.preventDefault(); execCmd('bold'); }} title="Bold">B</button>
+                <button style={{ ...btnStyle, fontStyle: 'italic', background: activeFormats.italic ? '#9FE1CB' : 'transparent', color: activeFormats.italic ? '#085041' : textSub }} onMouseDown={e => { e.preventDefault(); execCmd('italic'); }} onTouchStart={e => { e.preventDefault(); execCmd('italic'); }} title="Italic">I</button>
+                <button style={{ ...btnStyle, textDecoration: 'underline', background: activeFormats.underline ? '#9FE1CB' : 'transparent', color: activeFormats.underline ? '#085041' : textSub }} onMouseDown={e => { e.preventDefault(); execCmd('underline'); }} onTouchStart={e => { e.preventDefault(); execCmd('underline'); }} title="Underline">U</button>
+                <button style={{ ...btnStyle, textDecoration: 'line-through', background: activeFormats.strikeThrough ? '#9FE1CB' : 'transparent', color: activeFormats.strikeThrough ? '#085041' : textSub }} onMouseDown={e => { e.preventDefault(); execCmd('strikeThrough'); }} onTouchStart={e => { e.preventDefault(); execCmd('strikeThrough'); }} title="Strikethrough">S</button>
                 {divider}
                 <select style={{ height: '26px', padding: '0 4px', fontSize: '11px', border: `0.5px solid ${cardBorder}`, borderRadius: '5px', background: theme === 'light' ? '#ffffff' : '#1e3a5f', color: textMain, cursor: 'pointer', width: '72px', flexShrink: 0 }} onMouseDown={e => e.stopPropagation()} onChange={e => { if (editorRef.current) editorRef.current.focus(); const v = e.target.value; if (v === 'H1') document.execCommand('formatBlock', false, 'h2'); else if (v === 'H2') document.execCommand('formatBlock', false, 'h3'); else if (v === 'Small') document.execCommand('fontSize', false, '1'); else document.execCommand('formatBlock', false, 'p'); handleEditorInput(); e.target.value = 'Normal'; }} defaultValue="Normal">
                   <option value="Normal">Normal</option>
