@@ -10813,9 +10813,17 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
     });
   }
 
-  React.useEffect(() => {
-    document.addEventListener('selectionchange', updateActiveFormats);
-    return () => document.removeEventListener('selectionchange', updateActiveFormats);
+React.useEffect(() => {
+    let timer;
+    function debouncedUpdate() {
+      clearTimeout(timer);
+      timer = setTimeout(updateActiveFormats, 50);
+    }
+    document.addEventListener('selectionchange', debouncedUpdate);
+    return () => {
+      document.removeEventListener('selectionchange', debouncedUpdate);
+      clearTimeout(timer);
+    };
   }, []);
   // view: 'grid' | 'weeks' | 'editor'
 
@@ -10927,16 +10935,7 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
 
 function execCmd(cmd, value) {
     if (editorRef.current) editorRef.current.focus();
-    const sel = window.getSelection();
-    let savedRange = null;
-    if (sel && sel.rangeCount > 0) {
-      savedRange = sel.getRangeAt(0).cloneRange();
-    }
     document.execCommand(cmd, false, value || null);
-    if (savedRange && sel) {
-      sel.removeAllRanges();
-      sel.addRange(savedRange);
-    }
     if (editorRef.current) {
       setCalendarNoteText(editorRef.current.innerHTML);
       setCalendarNoteDirty(true);
