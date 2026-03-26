@@ -405,7 +405,7 @@ const [newTechnicianName, setNewTechnicianName] = useState('');
 const [editingTechnicianId, setEditingTechnicianId] = useState(null);
 const [editingTechnicianName, setEditingTechnicianName] = useState('');
 const [showTechnicianList, setShowTechnicianList] = useState(false);
-const [isDesktop, setIsDesktop] = useState(isDesktop);
+const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 768);
   
   // Get current theme object
   const currentTheme = themes[theme];
@@ -454,7 +454,7 @@ useEffect(() => {
   }, []);
 
 useEffect(() => {
-  const handleResize = () => setIsDesktop(isDesktop);
+  const handleResize = () => setIsDesktop(window.innerWidth >= 768);
   window.addEventListener('resize', handleResize);
   handleResize();
   return () => window.removeEventListener('resize', handleResize);
@@ -3597,6 +3597,7 @@ return (
 </div>
 <DashboardPanels
   theme={theme}
+  isDesktop={isDesktop}
   serviceReminders={serviceReminders}
   machineHours={machineHours}
   machineKm={machineKm}
@@ -10635,16 +10636,15 @@ whiteSpace: 'nowrap'
 }
 
 function DashboardPanels({
-  theme, serviceReminders, machineHours, machineKm, onReminderClick,
+  theme, isDesktop, serviceReminders, machineHours, machineKm, onReminderClick,
   calendarNotes, calendarSelectedKey, setCalendarSelectedKey,
   calendarNoteText, setCalendarNoteText, calendarNoteDirty, setCalendarNoteDirty,
   calendarSaving, calendarSaved, onSave
 }) {
   const [mobileTab, setMobileTab] = React.useState('service');
-  const isDesktop = isDesktop;
 
-  const calendarProps = {
-    theme, calendarNotes, calendarSelectedKey, setCalendarSelectedKey,
+const calendarProps = {
+    theme, isDesktop, calendarNotes, calendarSelectedKey, setCalendarSelectedKey,
     calendarNoteText, setCalendarNoteText, calendarNoteDirty, setCalendarNoteDirty,
     calendarSaving, calendarSaved, onSave
   };
@@ -10735,7 +10735,7 @@ function DashboardPanels({
   );
 }
 
-function FarmCalendar({ theme, calendarNotes, calendarSelectedKey, setCalendarSelectedKey, calendarNoteText, setCalendarNoteText, calendarNoteDirty, setCalendarNoteDirty, calendarSaving, calendarSaved, onSave }) {
+function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, setCalendarSelectedKey, calendarNoteText, setCalendarNoteText, calendarNoteDirty, setCalendarNoteDirty, calendarSaving, calendarSaved, onSave }) {
   const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const today = new Date();
