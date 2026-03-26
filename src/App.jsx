@@ -11092,15 +11092,26 @@ return (
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><text x="0" y="5" fontSize="5" fill="currentColor">1.</text><rect x="5" y="2.5" width="8" height="2" rx="1" fill="currentColor"/><text x="0" y="9.5" fontSize="5" fill="currentColor">2.</text><rect x="5" y="7" width="8" height="2" rx="1" fill="currentColor"/><text x="0" y="13.5" fontSize="5" fill="currentColor">3.</text><rect x="5" y="11.5" width="8" height="2" rx="1" fill="currentColor"/></svg>
                 </button>
               </div>
-              <div
+             <div
                 ref={editorRef}
                 contentEditable
                 suppressContentEditableWarning
                 onInput={handleEditorInput}
+                onKeyDown={(e) => {
+                  if (e.key === 'Tab') {
+                    e.preventDefault();
+                    if (e.shiftKey) {
+                      document.execCommand('outdent', false, null);
+                    } else {
+                      document.execCommand('indent', false, null);
+                    }
+                    handleEditorInput();
+                  }
+                }}
                 data-placeholder="Add notes for this week — tasks, plans, reminders..."
                 style={{
                   minHeight: '140px',
-                  padding: '10px 12px',
+                  padding: '10px 12px 10px 28px',
                   fontSize: '13px',
                   color: textMain,
                   background: theme === 'light' ? '#f9fafb' : '#1a2942',
