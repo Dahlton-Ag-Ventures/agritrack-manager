@@ -10925,16 +10925,24 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
     }
   }, [calendarSelectedKey, view]);
 
- function execCmd(cmd, value) {
+function execCmd(cmd, value) {
     if (editorRef.current) editorRef.current.focus();
+    const sel = window.getSelection();
+    let savedRange = null;
+    if (sel && sel.rangeCount > 0) {
+      savedRange = sel.getRangeAt(0).cloneRange();
+    }
     document.execCommand(cmd, false, value || null);
+    if (savedRange && sel) {
+      sel.removeAllRanges();
+      sel.addRange(savedRange);
+    }
     if (editorRef.current) {
       setCalendarNoteText(editorRef.current.innerHTML);
       setCalendarNoteDirty(true);
     }
     updateActiveFormats();
   }
-
   function handleEditorInput() {
     if (editorRef.current) {
       setCalendarNoteText(editorRef.current.innerHTML);
