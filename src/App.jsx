@@ -3400,7 +3400,7 @@ return (
     : '2px 2px 4px rgba(0, 0, 0, 0.2)',
   marginBottom: '8px'
 }}>
-  Dahlton Ag Ventures
+  AgriTrack Manager
 </p>
 {userRole && !loading && userRole !== 'employee' && (
   <button
