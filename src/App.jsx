@@ -11088,9 +11088,70 @@ return (
                 <button style={btnStyle} onMouseDown={e => { e.preventDefault(); execCmd('insertUnorderedList'); }} title="Bullet list">
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="2" cy="3.5" r="1.5" fill="currentColor"/><rect x="5" y="2.5" width="8" height="2" rx="1" fill="currentColor"/><circle cx="2" cy="7" r="1.5" fill="currentColor"/><rect x="5" y="6" width="8" height="2" rx="1" fill="currentColor"/><circle cx="2" cy="10.5" r="1.5" fill="currentColor"/><rect x="5" y="9.5" width="8" height="2" rx="1" fill="currentColor"/></svg>
                 </button>
-                <button style={btnStyle} onMouseDown={e => { e.preventDefault(); execCmd('insertOrderedList'); }} title="Numbered list">
+<button style={btnStyle} onMouseDown={e => { e.preventDefault(); execCmd('insertOrderedList'); }} title="Numbered list">
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><text x="0" y="5" fontSize="5" fill="currentColor">1.</text><rect x="5" y="2.5" width="8" height="2" rx="1" fill="currentColor"/><text x="0" y="9.5" fontSize="5" fill="currentColor">2.</text><rect x="5" y="7" width="8" height="2" rx="1" fill="currentColor"/><text x="0" y="13.5" fontSize="5" fill="currentColor">3.</text><rect x="5" y="11.5" width="8" height="2" rx="1" fill="currentColor"/></svg>
                 </button>
+                {divider}
+                {(() => {
+                  const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
+                  const emojis = ['✅','❌','⚠️','📋','🔧','🚜','📦','⏰','📅','🌱','💧','☀️','🌧️','❄️','🔥','⛽','🛢️','🪛','🔩','📝','👍','👎','⭐','🚨','💡','📞','🏁','✔️','➡️','⬆️','⬇️'];
+                  return (
+                    <div style={{ position: 'relative' }}>
+                      <button
+                        style={{ ...btnStyle, fontSize: '14px', width: 'auto', padding: '0 4px' }}
+                        onMouseDown={e => { e.preventDefault(); setShowEmojiPicker(p => !p); }}
+                        title="Insert emoji"
+                      >
+                        😊
+                      </button>
+                      {showEmojiPicker && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: '110%',
+                            left: 0,
+                            zIndex: 9999,
+                            background: theme === 'light' ? '#ffffff' : '#1e3a5f',
+                            border: `1px solid ${cardBorder}`,
+                            borderRadius: '10px',
+                            padding: '8px',
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(6, 1fr)',
+                            gap: '4px',
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                            width: '180px',
+                          }}
+                        >
+                          {emojis.map(emoji => (
+                            <button
+                              key={emoji}
+                              onMouseDown={e => {
+                                e.preventDefault();
+                                if (editorRef.current) editorRef.current.focus();
+                                document.execCommand('insertText', false, emoji);
+                                handleEditorInput();
+                                setShowEmojiPicker(false);
+                              }}
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                fontSize: '16px',
+                                cursor: 'pointer',
+                                padding: '3px',
+                                borderRadius: '4px',
+                                lineHeight: 1,
+                              }}
+                              onMouseEnter={e => e.currentTarget.style.background = theme === 'light' ? '#f3f4f6' : 'rgba(255,255,255,0.1)'}
+                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
              <div
                 ref={editorRef}
