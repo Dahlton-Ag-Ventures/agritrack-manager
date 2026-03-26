@@ -3564,59 +3564,152 @@ return (
 
 {activeTab === 'dashboard' && (
   <div style={styles.homeContainer}>
-   <div style={{
-  background: theme === 'light' ? '#ffffff' : 'linear-gradient(135deg, rgba(6, 182, 212, 0.4) 0%, rgba(16, 185, 129, 0.3) 100%)',
-  border: '2px solid #fde047',
-  borderRadius: '16px',
-  padding: '32px 36px 28px',
-  textAlign: 'center',
-  marginBottom: '30px',
-  animation: 'floatIn 1.2s ease-out',
-}}>
- <h1 style={{
-    color: theme === 'light' ? '#1D9E75' : '#ffffff',
-    marginBottom: '12px',
-    fontSize: '2.5rem',
-    fontWeight: '400',
-    textAlign: 'center',
-    lineHeight: '1.2',
-    filter: theme === 'dark' ? 'drop-shadow(2px 4px 8px rgba(0, 0, 0, 0.8))' : 'none',
-  }}>
-    Welcome to AgriTrack Manager
-  </h1>
-  <p style={{
-    color: theme === 'light' ? '#374151' : '#ffffff',
-    fontSize: '1.1rem',
-    fontWeight: '400',
-    textAlign: 'center',
-    lineHeight: '1.6',
-    opacity: 0.9,
-    animation: 'floatIn 1.4s ease-out',
-  }}>
-    Track inventory, machinery, and service records all in one place
-  </p>
-</div>
-<DashboardPanels
-  theme={theme}
-  isDesktop={isDesktop}
-  serviceReminders={serviceReminders}
-  machineHours={machineHours}
-  machineKm={machineKm}
-  onReminderClick={() => {
-    setActiveTab('machinery');
-    setShowRemindersPanel(true);
-  }}
-  calendarNotes={calendarNotes}
-  calendarSelectedKey={calendarSelectedKey}
-  setCalendarSelectedKey={setCalendarSelectedKey}
-  calendarNoteText={calendarNoteText}
-  setCalendarNoteText={setCalendarNoteText}
-  calendarNoteDirty={calendarNoteDirty}
-  setCalendarNoteDirty={setCalendarNoteDirty}
-  calendarSaving={calendarSaving}
-  calendarSaved={calendarSaved}
-  onSave={saveCalendarNote}
-/>
+
+{(() => {
+  const hour = new Date().getHours();
+  const greeting =
+    hour >= 5 && hour < 12 ? 'Good morning' :
+    hour >= 12 && hour < 17 ? 'Good afternoon' :
+    hour >= 17 && hour < 21 ? 'Good evening' :
+    'Good night';
+
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('en-CA', {
+    weekday: 'long', month: 'long', day: 'numeric'
+  });
+
+  const activeReminders = serviceReminders.filter(r => !r.deleted_at);
+  const overdueCount = activeReminders.filter(r => {
+    const isKm = r.reminder_type === 'km';
+    const current = isKm
+      ? (machineKm.find(h => h.machine_name === r.machine_name) ? parseFloat(machineKm.find(h => h.machine_name === r.machine_name).current_km || 0) : 0)
+      : (machineHours.find(h => h.machine_name === r.machine_name) ? parseFloat(machineHours.find(h => h.machine_name === r.machine_name).current_hours || 0) : 0);
+    const last = isKm ? parseFloat(r.last_service_km || 0) : parseFloat(r.last_service_hours || 0);
+    const interval = isKm ? parseFloat(r.km_interval || 0) : parseFloat(r.hours_interval || 0);
+    return (current - last) >= interval;
+  }).length;
+
+  const dueSoonCount = activeReminders.filter(r => {
+    const isKm = r.reminder_type === 'km';
+    const current = isKm
+      ? (machineKm.find(h => h.machine_name === r.machine_name) ? parseFloat(machineKm.find(h => h.machine_name === r.machine_name).current_km || 0) : 0)
+      : (machineHours.find(h => h.machine_name === r.machine_name) ? parseFloat(machineHours.find(h => h.machine_name === r.machine_name).current_hours || 0) : 0);
+    const last = isKm ? parseFloat(r.last_service_km || 0) : parseFloat(r.last_service_hours || 0);
+    const interval = isKm ? parseFloat(r.km_interval || 0) : parseFloat(r.hours_interval || 0);
+    const used = current - last;
+    const remaining = interval - used;
+    const isOverdue = used >= interval;
+    const isDueSoon = !isOverdue && remaining <= interval * 0.15;
+    return isDueSoon;
+  }).length;
+
+  const subtitleStatus = overdueCount > 0 || dueSoonCount > 0
+    ? `${overdueCount + dueSoonCount} reminder${overdueCount + dueSoonCount !== 1 ? 's' : ''} need attention`
+    : 'All reminders clear';
+
+  return (
+    <div style={{
+      background: currentTheme.cardBackground,
+      border: `1px solid ${currentTheme.cardBorder}`,
+      borderRadius: '12px',
+      overflow: 'hidden',
+      marginBottom: '20px',
+    }}>
+      {/* Header row */}
+      <div style={{
+        padding: isDesktop ? '16px 20px' : '14px 16px',
+        borderBottom: `0.5px solid ${currentTheme.cardBorder}`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '16px',
+        flexWrap: 'wrap',
+      }}>
+        <div>
+          <p style={{ fontSize: isDesktop ? '1.1rem' : '1rem', fontWeight: 'bold', color: currentTheme.text, margin: 0 }}>
+            {greeting}, Dahlton Ag Ventures
+          </p>
+          <p style={{ fontSize: '0.75rem', color: currentTheme.textSecondary, margin: '2px 0 0' }}>
+            {dateStr} · {subtitleStatus}
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', flexShrink: 0 }}>
+          {overdueCount > 0 && (
+            <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '20px', background: 'rgba(239,68,68,0.15)', color: '#ef4444', fontWeight: 'bold', border: '1px solid rgba(239,68,68,0.3)' }}>
+              {overdueCount} overdue
+            </span>
+          )}
+          {dueSoonCount > 0 && (
+            <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '20px', background: 'rgba(245,158,11,0.15)', color: '#f59e0b', fontWeight: 'bold', border: '1px solid rgba(245,158,11,0.3)' }}>
+              {dueSoonCount} due soon
+            </span>
+          )}
+          {overdueCount === 0 && dueSoonCount === 0 && (
+            <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '20px', background: 'rgba(16,185,129,0.15)', color: '#10b981', fontWeight: 'bold', border: '1px solid rgba(16,185,129,0.3)' }}>
+              All clear
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Service + Calendar panels */}
+      {isDesktop ? (
+        <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 0 }}>
+          <div style={{ borderRight: `0.5px solid ${currentTheme.cardBorder}` }}>
+            <ServiceOverview
+              serviceReminders={serviceReminders}
+              machineHours={machineHours}
+              machineKm={machineKm}
+              theme={theme}
+              onReminderClick={() => {
+                setActiveTab('machinery');
+                setShowRemindersPanel(true);
+              }}
+            />
+          </div>
+          <div>
+            <FarmCalendar
+              theme={theme}
+              isDesktop={isDesktop}
+              calendarNotes={calendarNotes}
+              calendarSelectedKey={calendarSelectedKey}
+              setCalendarSelectedKey={setCalendarSelectedKey}
+              calendarNoteText={calendarNoteText}
+              setCalendarNoteText={setCalendarNoteText}
+              calendarNoteDirty={calendarNoteDirty}
+              setCalendarNoteDirty={setCalendarNoteDirty}
+              calendarSaving={calendarSaving}
+              calendarSaved={calendarSaved}
+              onSave={saveCalendarNote}
+            />
+          </div>
+        </div>
+      ) : (
+        <DashboardPanels
+          theme={theme}
+          isDesktop={isDesktop}
+          serviceReminders={serviceReminders}
+          machineHours={machineHours}
+          machineKm={machineKm}
+          onReminderClick={() => {
+            setActiveTab('machinery');
+            setShowRemindersPanel(true);
+          }}
+          calendarNotes={calendarNotes}
+          calendarSelectedKey={calendarSelectedKey}
+          setCalendarSelectedKey={setCalendarSelectedKey}
+          calendarNoteText={calendarNoteText}
+          setCalendarNoteText={setCalendarNoteText}
+          calendarNoteDirty={calendarNoteDirty}
+          setCalendarNoteDirty={setCalendarNoteDirty}
+          calendarSaving={calendarSaving}
+          calendarSaved={calendarSaved}
+          onSave={saveCalendarNote}
+        />
+      )}
+    </div>
+  );
+})()}
     
 {/* Feature Cards 2x2 Grid */}
 {(() => {
