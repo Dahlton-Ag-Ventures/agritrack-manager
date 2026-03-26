@@ -11159,8 +11159,8 @@ return (
                                 borderRadius: '4px',
                                 lineHeight: 1,
                               }}
-                              onMouseEnter={e => e.currentTarget.style.background = theme === 'light' ? '#f3f4f6' : 'rgba(255,255,255,0.1)'}
-                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                              onMouseEnter={e => { e.currentTarget.style.background = theme === 'light' ? '#f3f4f6' : 'rgba(255,255,255,0.1)'; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
                             >
                               {emoji}
                             </button>
