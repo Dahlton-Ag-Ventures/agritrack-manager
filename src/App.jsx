@@ -10790,6 +10790,7 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
   const editorRef = React.useRef(null);
   const [expandedMonth, setExpandedMonth] = React.useState(null);
   const [view, setView] = React.useState('grid');
+  const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
   // view: 'grid' | 'weeks' | 'editor'
 
   const cardBg     = theme === 'light' ? '#ffffff' : '#1e3a5f';
@@ -11093,7 +11094,6 @@ return (
                 </button>
                 {divider}
                 {(() => {
-                  const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
                   const emojis = ['✅','❌','⚠️','📋','🔧','🚜','📦','⏰','📅','🌱','💧','☀️','🌧️','❄️','🔥','⛽','🛢️','🪛','🔩','📝','👍','👎','⭐','🚨','💡','📞','🏁','✔️','➡️','⬆️','⬇️'];
                   return (
                     <div style={{ position: 'relative' }}>
