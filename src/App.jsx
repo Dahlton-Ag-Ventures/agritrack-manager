@@ -3829,35 +3829,6 @@ return (
           </div>
         );
       })()}
-
-      {/* Stats row */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: isDesktop ? 'repeat(3, 1fr)' : '1fr',
-        gap: isDesktop ? '8px' : '8px',
-        marginTop: '8px',
-      }}>
-        {[
-          { label: 'Total Inventory', value: loading ? '...' : inventory.length },
-          { label: 'Total Machinery', value: loading ? '...' : machinery.length },
-          { label: 'Service Records', value: loading ? '...' : serviceHistory.length },
-        ].map(stat => (
-          <div key={stat.label} style={{
-            background: theme === 'dark' ? 'rgba(6, 182, 212, 0.15)' : '#ffffff',
-            border: theme === 'dark' ? '2px solid #2563eb' : '2px solid #fde047',
-            borderRadius: '8px',
-            padding: '16px',
-            textAlign: 'center',
-          }}>
-            <p style={{ color: theme === 'dark' ? '#9ca3af' : '#111827', fontSize: '0.875rem', marginBottom: '4px' }}>
-              {stat.label}
-            </p>
-            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
-              {stat.value}
-            </p>
-          </div>
-        ))}
-      </div>
     </div>
   );
 })()}   
