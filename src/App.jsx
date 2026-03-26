@@ -10804,7 +10804,10 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+const pendingFormatRef = React.useRef(null);
+
   function updateActiveFormats() {
+    if (pendingFormatRef.current) return;
     setActiveFormats({
       bold: document.queryCommandState('bold'),
       italic: document.queryCommandState('italic'),
@@ -10813,11 +10816,11 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
     });
   }
 
-React.useEffect(() => {
+  React.useEffect(() => {
     let timer;
     function debouncedUpdate() {
       clearTimeout(timer);
-      timer = setTimeout(updateActiveFormats, 50);
+      timer = setTimeout(updateActiveFormats, 100);
     }
     document.addEventListener('selectionchange', debouncedUpdate);
     return () => {
@@ -10940,7 +10943,18 @@ function execCmd(cmd, value) {
       setCalendarNoteText(editorRef.current.innerHTML);
       setCalendarNoteDirty(true);
     }
-    updateActiveFormats();
+    const newFormats = {
+      bold: document.queryCommandState('bold'),
+      italic: document.queryCommandState('italic'),
+      underline: document.queryCommandState('underline'),
+      strikeThrough: document.queryCommandState('strikeThrough'),
+    };
+    pendingFormatRef.current = newFormats;
+    setActiveFormats(newFormats);
+    clearTimeout(pendingFormatRef.timer);
+    pendingFormatRef.timer = setTimeout(() => {
+      pendingFormatRef.current = null;
+    }, 300);
   }
   function handleEditorInput() {
     if (editorRef.current) {
