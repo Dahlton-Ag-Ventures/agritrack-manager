@@ -11168,9 +11168,8 @@ return (
                         </div>
                       )}
                     </div>
-              );
+                  );
                 })()}
-              </div>
              <div
                 ref={editorRef}
                 contentEditable
