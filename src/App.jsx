@@ -11215,7 +11215,6 @@ return (
                   wordBreak: 'break-word',
                 }}
               />
-            </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px' }}>
               <span style={{ fontSize: '11px', color: textSub }}>{charCount} character{charCount !== 1 ? 's' : ''}</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
