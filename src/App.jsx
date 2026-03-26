@@ -10793,6 +10793,7 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
   const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
   const [activeFormats, setActiveFormats] = React.useState({ bold: false, italic: false, underline: false, strikeThrough: false });
   const activeFormatsRef = React.useRef({ bold: false, italic: false, underline: false, strikeThrough: false });
+  const savedSelectionRef = React.useRef(null);
   const emojiPickerRef = React.useRef(null);
 
  React.useEffect(() => {
@@ -10911,8 +10912,25 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
     }
   }, [calendarSelectedKey, view]);
 
-function execCmd(cmd, value) {
+function saveSelection() {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+      savedSelectionRef.current = sel.getRangeAt(0).cloneRange();
+    }
+  }
+
+  function restoreSelection() {
+    if (!savedSelectionRef.current) return;
+    const sel = window.getSelection();
+    if (sel) {
+      sel.removeAllRanges();
+      sel.addRange(savedSelectionRef.current);
+    }
+  }
+
+  function execCmd(cmd, value) {
     if (editorRef.current) editorRef.current.focus();
+    restoreSelection();
     document.execCommand(cmd, false, value || null);
     if (editorRef.current) {
       setCalendarNoteText(editorRef.current.innerHTML);
@@ -10920,12 +10938,15 @@ function execCmd(cmd, value) {
     }
     if (['bold', 'italic', 'underline', 'strikeThrough'].includes(cmd)) {
       const newFormats = {
-        ...activeFormatsRef.current,
-        [cmd]: !activeFormatsRef.current[cmd]
+        bold: document.queryCommandState('bold'),
+        italic: document.queryCommandState('italic'),
+        underline: document.queryCommandState('underline'),
+        strikeThrough: document.queryCommandState('strikeThrough'),
       };
       activeFormatsRef.current = newFormats;
       setActiveFormats({ ...newFormats });
     }
+    saveSelection();
   }
   function handleEditorInput() {
     if (editorRef.current) {
@@ -11179,11 +11200,14 @@ return (
                   );
                 })()}
               </div>
-             <div
+           <div
                 ref={editorRef}
                 contentEditable
                 suppressContentEditableWarning
                 onInput={handleEditorInput}
+                onKeyUp={saveSelection}
+                onMouseUp={saveSelection}
+                onTouchEnd={saveSelection}
                 onKeyDown={(e) => {
                   if (e.key === 'Tab') {
                     e.preventDefault();
