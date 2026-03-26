@@ -10744,8 +10744,6 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
   const [view, setView] = React.useState('grid');
   // view: 'grid' | 'weeks' | 'editor'
 
-  const isDesktop = isDesktop;
-
   const cardBg     = theme === 'light' ? '#ffffff' : '#1e3a5f';
   const cardBorder = theme === 'light' ? '#e5e7eb' : '#2563eb';
   const textMain   = theme === 'light' ? '#111827' : '#ffffff';
