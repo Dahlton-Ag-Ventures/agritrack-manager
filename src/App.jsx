@@ -11150,15 +11150,13 @@ return (
                   <option value="H2">H2</option>
                   <option value="Small">Small</option>
                 </select>
-                <select ref={fontSizeSelectRef} value={currentFontSize} style={{ height: '26px', padding: '0 4px', fontSize: '11px', border: `0.5px solid ${cardBorder}`, borderRadius: '5px', background: theme === 'light' ? '#ffffff' : '#1e3a5f', color: textMain, cursor: 'pointer', width: '48px', flexShrink: 0 }} onMouseDown={e => { e.stopPropagation(); saveSelection(); }} onChange={e => {
-        onChange={e => {
+               <select ref={fontSizeSelectRef} value={currentFontSize} style={{ height: '26px', padding: '0 4px', fontSize: '11px', border: `0.5px solid ${cardBorder}`, borderRadius: '5px', background: theme === 'light' ? '#ffffff' : '#1e3a5f', color: textMain, cursor: 'pointer', width: '48px', flexShrink: 0 }} onMouseDown={e => { e.stopPropagation(); saveSelection(); }} onChange={e => {
                     const px = e.target.value;
                     restoreSelection();
                     if (editorRef.current) editorRef.current.focus();
                     const sel = window.getSelection();
                     if (sel && sel.rangeCount > 0) {
                       if (!sel.isCollapsed) {
-                        // Text is selected — apply size to selection
                         document.execCommand('fontSize', false, '7');
                         const spans = editorRef.current.querySelectorAll('font[size="7"]');
                         spans.forEach(span => {
@@ -11166,7 +11164,6 @@ return (
                           span.style.fontSize = px + 'px';
                         });
                       } else {
-                        // No selection — insert a zero-width span so new typing uses this size
                         const span = document.createElement('span');
                         span.style.fontSize = px + 'px';
                         span.appendChild(document.createTextNode('\u200b'));
@@ -11180,7 +11177,7 @@ return (
                     }
                     handleEditorInput();
                     setCurrentFontSize(px);
-                  }}
+                  }}>
                   <option value="" disabled>px</option>
                   <option value="10">10</option>
                   <option value="11">11</option>
