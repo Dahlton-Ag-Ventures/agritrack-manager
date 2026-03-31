@@ -11151,6 +11151,7 @@ return (
                   <option value="Small">Small</option>
                 </select>
                 <select ref={fontSizeSelectRef} value={currentFontSize} style={{ height: '26px', padding: '0 4px', fontSize: '11px', border: `0.5px solid ${cardBorder}`, borderRadius: '5px', background: theme === 'light' ? '#ffffff' : '#1e3a5f', color: textMain, cursor: 'pointer', width: '48px', flexShrink: 0 }} onMouseDown={e => { e.stopPropagation(); saveSelection(); }} onChange={e => {
+        onChange={e => {
                     const px = e.target.value;
                     restoreSelection();
                     if (editorRef.current) editorRef.current.focus();
