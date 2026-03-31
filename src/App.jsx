@@ -11239,12 +11239,20 @@ return (
                 onMouseUp={saveSelection}
                 onTouchEnd={saveSelection}
                 onKeyDown={(e) => {
-                  if (e.key === 'Tab') {
+                 if (e.key === 'Tab') {
                     e.preventDefault();
-                    if (e.shiftKey) {
-                      document.execCommand('outdent', false, null);
+                    const sel = window.getSelection();
+                    const inList = sel && sel.anchorNode && !!sel.anchorNode.parentElement?.closest('li');
+                    if (inList) {
+                      if (e.shiftKey) {
+                        document.execCommand('outdent', false, null);
+                      } else {
+                        document.execCommand('indent', false, null);
+                      }
                     } else {
-                      document.execCommand('indent', false, null);
+                      if (!e.shiftKey) {
+                        document.execCommand('insertText', false, '\u00a0\u00a0\u00a0\u00a0');
+                      }
                     }
                     handleEditorInput();
                   }
