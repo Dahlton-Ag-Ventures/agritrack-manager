@@ -11295,8 +11295,27 @@ return (
                 onKeyUp={saveSelection}
                 onMouseUp={saveSelection}
                 onTouchEnd={saveSelection}
-                onKeyDown={(e) => {
-                 if (e.key === 'Tab') {
+            onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const sel = window.getSelection();
+                    if (sel && sel.rangeCount > 0) {
+                      const range = sel.getRangeAt(0);
+                      const node = sel.anchorNode;
+                      const el = node?.nodeType === 3 ? node.parentElement : node;
+                      const isEmpty = el?.textContent?.trim() === '' || range.collapsed && node?.textContent === '';
+                      if (isEmpty) {
+                        e.preventDefault();
+                        document.execCommand('removeFormat');
+                        document.execCommand('insertParagraph');
+                        const newFormats = { bold: false, italic: false, underline: false, strikeThrough: false };
+                        activeFormatsRef.current = newFormats;
+                        setActiveFormats({ ...newFormats });
+                        handleEditorInput();
+                        return;
+                      }
+                    }
+                  }
+                  if (e.key === 'Tab') {
                     e.preventDefault();
                     const sel = window.getSelection();
                     const inList = sel && sel.anchorNode && !!sel.anchorNode.parentElement?.closest('li');
