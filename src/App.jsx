@@ -5772,6 +5772,16 @@ whiteSpace: 'nowrap'
   <option value="Tractors">Tractors</option>
   <option value="Trailers">Trailers</option>
 </select>
+<select
+  style={{...styles.input, position: 'relative', zIndex: 9998}}
+  value={machineryForm.tracking_type || ''}
+  onChange={(e) => setMachineryForm({ ...machineryForm, tracking_type: e.target.value })}
+>
+  <option value="">Tracking type — use category default</option>
+  <option value="hours">Hours</option>
+  <option value="km">km</option>
+  <option value="none">None</option>
+</select>
               
               <textarea
                 style={{ ...styles.input, minHeight: '100px', resize: 'vertical', fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif', fontSize: '1rem' }}
@@ -9283,7 +9293,7 @@ whiteSpace: 'nowrap'
               value={machineryForm.vinSerial}
               onChange={(e) => setMachineryForm({ ...machineryForm, vinSerial: e.target.value })}
             />
-         <select
+        <select
   style={{...styles.input, position: 'relative', zIndex: 9999}}
   value={machineryForm.category}
   onChange={(e) => setMachineryForm({ ...machineryForm, category: e.target.value })}
@@ -9309,6 +9319,16 @@ whiteSpace: 'nowrap'
   <option value="Tillage and Seeding">Tillage and Seeding</option>
   <option value="Tractors">Tractors</option>
   <option value="Trailers">Trailers</option>
+</select>
+<select
+  style={{...styles.input, position: 'relative', zIndex: 9998}}
+  value={machineryForm.tracking_type || ''}
+  onChange={(e) => setMachineryForm({ ...machineryForm, tracking_type: e.target.value })}
+>
+  <option value="">Tracking type — use category default</option>
+  <option value="hours">Hours</option>
+  <option value="km">km</option>
+  <option value="none">None</option>
 </select>
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
