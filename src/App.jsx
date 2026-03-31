@@ -10672,9 +10672,10 @@ whiteSpace: 'nowrap'
     setViewingImageArray([]);
     setViewingImageIndex(0);
   }}
-  theme={currentTheme}
+theme={currentTheme}
   allPhotos={viewingImageArray}
   startIndex={viewingImageIndex}
+  isDesktop={isDesktop}
 />
 }
       </div>
@@ -11689,7 +11690,7 @@ function LoadingScreen() {
 }
 
 // Zoomable Image Viewer Component with Photo Navigation, Pan/Drag, Pinch & Scroll Zoom
-function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, startIndex }) {
+function ZoomableImageViewer({ imageUrl, title, onClose, theme, allPhotos, startIndex, isDesktop }) {
   const [scale, setScale] = React.useState(1);
   const [currentIndex, setCurrentIndex] = React.useState(startIndex || 0);
   const [position, setPosition] = React.useState({ x: 0, y: 0 });
