@@ -10953,15 +10953,16 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
       if (!node) return;
       const el = node.nodeType === 3 ? node.parentElement : node;
       if (!editorRef.current || !editorRef.current.contains(el)) return;
-      const computed = window.getComputedStyle(el).fontSize;
-      const px = Math.round(parseFloat(computed));
+      const computed = window.getComputedStyle(el);
+      const px = Math.round(parseFloat(computed.fontSize));
       const validSizes = [10, 11, 13, 16, 18, 24, 32];
       setCurrentFontSize(validSizes.includes(px) ? String(px) : '');
+      // Use computed styles directly — queryCommandState is unreliable on inherited/empty lines
       const newFormats = {
-        bold: document.queryCommandState('bold'),
-        italic: document.queryCommandState('italic'),
-        underline: document.queryCommandState('underline'),
-        strikeThrough: document.queryCommandState('strikeThrough'),
+        bold: computed.fontWeight === 'bold' || parseInt(computed.fontWeight) >= 700,
+        italic: computed.fontStyle === 'italic',
+        underline: computed.textDecorationLine?.includes('underline') ?? false,
+        strikeThrough: computed.textDecorationLine?.includes('line-through') ?? false,
       };
       activeFormatsRef.current = newFormats;
       setActiveFormats({ ...newFormats });
@@ -10996,14 +10997,23 @@ function saveSelection() {
       setCalendarNoteDirty(true);
     }
   if (['bold', 'italic', 'underline', 'strikeThrough'].includes(cmd)) {
-      const newFormats = {
-        bold: document.queryCommandState('bold'),
-        italic: document.queryCommandState('italic'),
-        underline: document.queryCommandState('underline'),
-        strikeThrough: document.queryCommandState('strikeThrough'),
-      };
-      activeFormatsRef.current = newFormats;
-      setActiveFormats({ ...newFormats });
+      setTimeout(() => {
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) return;
+        const node = sel.anchorNode;
+        if (!node) return;
+        const el = node.nodeType === 3 ? node.parentElement : node;
+        if (!editorRef.current || !editorRef.current.contains(el)) return;
+        const computed = window.getComputedStyle(el);
+        const newFormats = {
+          bold: computed.fontWeight === 'bold' || parseInt(computed.fontWeight) >= 700,
+          italic: computed.fontStyle === 'italic',
+          underline: computed.textDecorationLine?.includes('underline') ?? false,
+          strikeThrough: computed.textDecorationLine?.includes('line-through') ?? false,
+        };
+        activeFormatsRef.current = newFormats;
+        setActiveFormats({ ...newFormats });
+      }, 0);
     }
     saveSelection();
   }
