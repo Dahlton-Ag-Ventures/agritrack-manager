@@ -10824,6 +10824,8 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
   const [activeFormats, setActiveFormats] = React.useState({ bold: false, italic: false, underline: false, strikeThrough: false });
   const activeFormatsRef = React.useRef({ bold: false, italic: false, underline: false, strikeThrough: false });
   const savedSelectionRef = React.useRef(null);
+  const fontSizeSelectRef = React.useRef(null);
+  const [currentFontSize, setCurrentFontSize] = React.useState('');
   const emojiPickerRef = React.useRef(null);
 
  React.useEffect(() => {
@@ -10936,11 +10938,29 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
     }, 0);
   }
 
-  React.useEffect(() => {
+ React.useEffect(() => {
     if (view === 'editor' && calendarSelectedKey && editorRef.current) {
       editorRef.current.innerHTML = calendarNotes[calendarSelectedKey] || '';
     }
   }, [calendarSelectedKey, view]);
+
+  React.useEffect(() => {
+    function handleSelectionChange() {
+      if (view !== 'editor') return;
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      const node = sel.anchorNode;
+      if (!node) return;
+      const el = node.nodeType === 3 ? node.parentElement : node;
+      if (!editorRef.current || !editorRef.current.contains(el)) return;
+      const computed = window.getComputedStyle(el).fontSize;
+      const px = Math.round(parseFloat(computed));
+      const validSizes = [10, 11, 13, 16, 18, 24, 32];
+      setCurrentFontSize(validSizes.includes(px) ? String(px) : '');
+    }
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => document.removeEventListener('selectionchange', handleSelectionChange);
+  }, [view]);
 
 function saveSelection() {
     const sel = window.getSelection();
@@ -11130,14 +11150,30 @@ return (
                   <option value="H2">H2</option>
                   <option value="Small">Small</option>
                 </select>
-                <select style={{ height: '26px', padding: '0 4px', fontSize: '11px', border: `0.5px solid ${cardBorder}`, borderRadius: '5px', background: theme === 'light' ? '#ffffff' : '#1e3a5f', color: textMain, cursor: 'pointer', width: '48px', flexShrink: 0 }} onMouseDown={e => e.stopPropagation()} onChange={e => { if (editorRef.current) editorRef.current.focus(); document.execCommand('fontSize', false, e.target.value); handleEditorInput(); e.target.value = '3'; }} defaultValue="3">
-                  <option value="1">10</option>
-                  <option value="2">11</option>
-                  <option value="3">13</option>
-                  <option value="4">16</option>
-                  <option value="5">18</option>
-                  <option value="6">24</option>
-                  <option value="7">32</option>
+                <select ref={fontSizeSelectRef} value={currentFontSize} style={{ height: '26px', padding: '0 4px', fontSize: '11px', border: `0.5px solid ${cardBorder}`, borderRadius: '5px', background: theme === 'light' ? '#ffffff' : '#1e3a5f', color: textMain, cursor: 'pointer', width: '48px', flexShrink: 0 }} onMouseDown={e => { e.stopPropagation(); saveSelection(); }} onChange={e => {
+                    const px = e.target.value;
+                    restoreSelection();
+                    if (editorRef.current) editorRef.current.focus();
+                    const sel = window.getSelection();
+                    if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+                      document.execCommand('fontSize', false, '7');
+                      const spans = editorRef.current.querySelectorAll('font[size="7"]');
+                      spans.forEach(span => {
+                        span.removeAttribute('size');
+                        span.style.fontSize = px + 'px';
+                      });
+                    }
+                  handleEditorInput();
+                    setCurrentFontSize(px);
+                  }} >
+                  <option value="" disabled>px</option>
+                  <option value="10">10</option>
+                  <option value="11">11</option>
+                  <option value="13">13</option>
+                  <option value="16">16</option>
+                  <option value="18">18</option>
+                  <option value="24">24</option>
+                  <option value="32">32</option>
                 </select>
                 {divider}
                 {[['#fef08a','#ca8a04','Yellow'],['#bbf7d0','#16a34a','Green'],['#bfdbfe','#2563eb','Blue'],['#fecaca','#dc2626','Red']].map(([bg, border, label]) => (
