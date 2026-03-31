@@ -10945,7 +10945,7 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
   }, [calendarSelectedKey, view]);
 
   React.useEffect(() => {
-    function handleSelectionChange() {
+   function handleSelectionChange() {
       if (view !== 'editor') return;
       const sel = window.getSelection();
       if (!sel || sel.rangeCount === 0) return;
@@ -10957,6 +10957,14 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
       const px = Math.round(parseFloat(computed));
       const validSizes = [10, 11, 13, 16, 18, 24, 32];
       setCurrentFontSize(validSizes.includes(px) ? String(px) : '');
+      const newFormats = {
+        bold: document.queryCommandState('bold'),
+        italic: document.queryCommandState('italic'),
+        underline: document.queryCommandState('underline'),
+        strikeThrough: document.queryCommandState('strikeThrough'),
+      };
+      activeFormatsRef.current = newFormats;
+      setActiveFormats({ ...newFormats });
     }
     document.addEventListener('selectionchange', handleSelectionChange);
     return () => document.removeEventListener('selectionchange', handleSelectionChange);
