@@ -1810,27 +1810,41 @@ const addServiceRecord = async () => {
   const finalDate = serviceForm.date || new Date().toISOString().split('T')[0];
 
   try {
-    const { error } = await supabase.from('service_records').insert([{
-      id: newId,
-      user_id: user.id,
-      machine_name: serviceForm.machineName,
-      service_type: serviceForm.serviceType,
-      date: finalDate,
-      notes: serviceForm.notes,
-      technician: serviceForm.technician,
-      photo_urls: JSON.stringify(serviceForm.photoUrls || [])
-    }]);
+    let error = null;
 
-    // Only treat it as a real failure if it's NOT a duplicate key error
-    // (duplicate key = record already made it in on a previous attempt)
-    if (error) {
+    // iOS Safari cold-connection retry: first fetch to Supabase often fails
+    // on the first attempt. Retry once with a short delay before surfacing error.
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      const result = await supabase.from('service_records').insert([{
+        id: newId,
+        user_id: user.id,
+        machine_name: serviceForm.machineName,
+        service_type: serviceForm.serviceType,
+        date: finalDate,
+        notes: serviceForm.notes,
+        technician: serviceForm.technician,
+        photo_urls: JSON.stringify(serviceForm.photoUrls || [])
+      }]);
+      error = result.error;
+
+      if (!error) break; // success — stop retrying
+
       const isDuplicateKey = error.code === '23505';
-      if (!isDuplicateKey) {
-        throw error;
+      if (isDuplicateKey) {
+        // Record already made it in on a previous attempt — treat as success
+        console.warn('Duplicate key — record already saved, updating local state only');
+        error = null;
+        break;
       }
-      // If it IS a duplicate key, the record is already in DB — fall through
-      // to update local state as normal
-      console.warn('Duplicate key — record already saved, updating local state only');
+
+      if (attempt === 1) {
+        console.warn(`Service record insert failed (attempt 1), retrying in 800ms...`, error);
+        await new Promise(resolve => setTimeout(resolve, 800));
+      }
+    }
+
+    if (error) {
+      throw error;
     }
 
     setServiceHistory(prev => [{
