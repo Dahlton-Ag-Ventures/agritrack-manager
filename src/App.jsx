@@ -4533,19 +4533,21 @@ return (
                           <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
                         ) : (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <button 
-                              onClick={() => quickUpdateQuantity(item.id, -1)}
-                              style={styles.quantityButton}
-                            >
-                              −
-                            </button>
-                            <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
-                            <button 
-                              onClick={() => quickUpdateQuantity(item.id, 1)}
-                              style={styles.quantityButton}
-                            >
-                              +
-                            </button>
+<button 
+  onClick={(e) => { e.stopPropagation(); quickUpdateQuantity(item.id, -1); }}
+  onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); quickUpdateQuantity(item.id, -1); }}
+  style={{ ...styles.quantityButton, touchAction: 'manipulation' }}
+>
+  −
+</button>
+<p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
+<button 
+  onClick={(e) => { e.stopPropagation(); quickUpdateQuantity(item.id, 1); }}
+  onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); quickUpdateQuantity(item.id, 1); }}
+  style={{ ...styles.quantityButton, touchAction: 'manipulation' }}
+>
+  +
+</button>
                           </div>
                         )}
                       </div>
