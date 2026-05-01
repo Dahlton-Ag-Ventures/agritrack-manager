@@ -2924,12 +2924,12 @@ itemCard: {
   transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
   cursor: 'pointer',
 },
-    itemDetails: {
-      marginTop: '16px',
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-      gap: '16px',
-    },
+itemDetails: {
+  marginTop: '16px',
+  display: 'grid',
+  gridTemplateColumns: 'repeat(4, minmax(120px, 1fr))',
+  gap: '16px',
+},
   editButton: {
   padding: '8px',
   background: theme === 'light' ? '#86efac' : '#0891b2',
