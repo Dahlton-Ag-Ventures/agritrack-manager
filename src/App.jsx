@@ -4381,15 +4381,17 @@ return (
                             display: 'block'
                           }}
                           onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setViewingImage(item.photoUrl);
-                            setImageModalTitle(item.name);
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'scale(1.05)';
-                            e.currentTarget.style.borderColor = '#10b981';
-                          }}
+  e.preventDefault();
+  e.stopPropagation();
+  setViewingImage(item.photoUrl);
+  setViewingImageArray([item.photoUrl]);
+  setViewingImageIndex(0);
+  setImageModalTitle(item.name);
+}}
+onMouseEnter={(e) => {
+  e.currentTarget.style.transform = 'scale(1.05)';
+  e.currentTarget.style.borderColor = '#10b981';
+}}
                           onMouseLeave={(e) => {
                             e.currentTarget.style.transform = 'scale(1)';
                             e.currentTarget.style.borderColor = 'transparent';
@@ -5915,16 +5917,18 @@ whiteSpace: 'nowrap'
                         pointerEvents: 'auto',
                         display: 'block'
                       }}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setViewingImage(item.photoUrl);
-                        setImageModalTitle(item.name);
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'scale(1.05)';
-                        e.currentTarget.style.borderColor = '#10b981';
-                      }}
+                     onClick={(e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  setViewingImage(item.photoUrl);
+  setViewingImageArray([item.photoUrl]);
+  setViewingImageIndex(0);
+  setImageModalTitle(item.name);
+}}
+onMouseEnter={(e) => {
+  e.currentTarget.style.transform = 'scale(1.05)';
+  e.currentTarget.style.borderColor = '#10b981';
+}}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = 'scale(1)';
                         e.currentTarget.style.borderColor = 'transparent';
