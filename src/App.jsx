@@ -4534,7 +4534,7 @@ onMouseEnter={(e) => {
                         {userRole === 'employee' ? (
                           <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
                         ) : (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
 <button 
   onClick={(e) => { e.stopPropagation(); quickUpdateQuantity(item.id, -1); }}
   onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); quickUpdateQuantity(item.id, -1); }}
