@@ -4524,7 +4524,7 @@ onMouseEnter={(e) => {
                         <span style={styles.stockBadgeHigh}>⚠️ Overstocked</span>
                       )}
                     </div>
-                    <div style={styles.itemDetails}>
+                    <div style={{ ...styles.itemDetails, gridTemplateColumns: isDesktop ? 'repeat(4, minmax(120px, 1fr))' : 'repeat(2, 1fr)' }}>
                       <div>
                         <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Part Number</p>
                         <p>{item.partNumber || 'N/A'}</p>
