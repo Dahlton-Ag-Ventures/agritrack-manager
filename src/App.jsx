@@ -2916,7 +2916,7 @@ itemCard: {
   background: currentTheme.cardBackground,
   border: `1px solid ${currentTheme.cardBorder}`,
   borderRadius: '12px',
-  padding: '24px',
+  padding: isDesktop ? '24px' : '12px',
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'start',
@@ -7036,7 +7036,7 @@ onMouseEnter={(e) => {
         }}>
           {record.serviceType}
         </p>
-        <div style={styles.itemDetails}>
+        <div style={{ ...styles.itemDetails, gridTemplateColumns: isDesktop ? 'repeat(4, minmax(120px, 1fr))' : 'repeat(2, 1fr)' }}>
           <div>
             <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Date</p>
             <p>{record.date || 'N/A'}</p>
@@ -7053,8 +7053,8 @@ onMouseEnter={(e) => {
     background: theme === 'light' ? '#f0f9ff' : '#1f2937', 
     borderRadius: '8px', 
     minHeight: '80px',
-    width: !isDesktop ? 'calc(100% + 90px)' : '100%',
-    marginLeft: !isDesktop ? '-90px' : '0'
+    width: isDesktop ? 'calc(100% + 90px)' : '100%',
+    marginLeft: isDesktop ? '-90px' : '0'
   }}>
     <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Notes:</p>
     <p style={{ fontSize: '0.875rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{record.notes}</p>
