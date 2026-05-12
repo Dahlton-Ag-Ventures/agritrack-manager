@@ -4529,7 +4529,7 @@ onMouseEnter={(e) => {
                         <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Part Number</p>
                         <p>{item.partNumber || 'N/A'}</p>
                       </div>
-                      <div>
+                        <div style={{ minWidth: 0, overflow: 'hidden' }}>
                         <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Quantity</p>
                         {userRole === 'employee' ? (
                           <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
