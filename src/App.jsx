@@ -2916,7 +2916,8 @@ itemCard: {
   background: currentTheme.cardBackground,
   border: `1px solid ${currentTheme.cardBorder}`,
   borderRadius: '12px',
-  padding: isDesktop ? '24px' : '12px',
+  padding: isDesktop ? '24px' : '16px 4px',
+  position: 'relative'
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'start',
