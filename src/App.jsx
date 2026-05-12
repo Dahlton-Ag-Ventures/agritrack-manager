@@ -2920,7 +2920,7 @@ itemCard: {
   paddingBottom: '16px',
   paddingLeft: isDesktop ? '24px' : '4px',
   paddingRight: isDesktop ? '24px' : '4px',
-  position: 'relative'
+  position: 'relative',
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'start',
