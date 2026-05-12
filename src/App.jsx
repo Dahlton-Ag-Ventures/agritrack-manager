@@ -2982,6 +2982,7 @@ itemDetails: {
    quantityButton: {
   width: '32px',
   height: '32px',
+  flexShrink: 0,
   background: theme === 'light' ? '#86efac' : '#10b981',
   border: 'none',
   borderRadius: '6px',
