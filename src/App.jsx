@@ -2959,7 +2959,7 @@ itemCard: {
 itemDetails: {
   marginTop: '16px',
   display: 'grid',
-  gridTemplateColumns: 'repeat(4, minmax(120px, 1fr))',
+  gridTemplateColumns: isDesktop ? 'repeat(4, minmax(120px, 1fr))' : 'repeat(2, 1fr)',
   gap: '16px',
 },
   editButton: {
@@ -7508,8 +7508,8 @@ onMouseEnter={(e) => {
           </div>
           <div>
             <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>User ID</p>
-            <p style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>
-              {user?.id || 'Not available'}
+            <p style={{ fontSize: '0.75rem', wordBreak: 'break-all', overflowWrap: 'anywhere' }}>
+          {user?.id || 'Not available'}
             </p>
           </div>
           <div>
