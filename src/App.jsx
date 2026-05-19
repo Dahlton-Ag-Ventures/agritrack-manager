@@ -841,9 +841,11 @@ if (techError) {
     return lastA.localeCompare(lastB);
   }));
 }
+const ADMIN_USER_ID = '001f830b-05d1-4f2d-ba0c-846a6acd3fae';
 const { data: calNotesData, error: calNotesError } = await supabase
   .from('calendar_notes')
-  .select('*');
+  .select('*')
+  .eq('user_id', ADMIN_USER_ID);
 
 if (calNotesError) {
   console.error('❌ Calendar notes load error:', calNotesError);
@@ -2511,11 +2513,12 @@ const completeKmReminder = (reminderId) => {
   try {
     const existing = calendarNotes[key] !== undefined;
     if (existing || text.trim()) {
-      const { error } = await supabase
+const ADMIN_USER_ID = '001f830b-05d1-4f2d-ba0c-846a6acd3fae';
+const { error } = await supabase
         .from('calendar_notes')
         .upsert([{
-          id: `${user.id}-${key}`,
-          user_id: user.id,
+          id: `${ADMIN_USER_ID}-${key}`,
+          user_id: ADMIN_USER_ID,
           month_index: monthIndex,
           week_number: weekNumber,
           note: text,
@@ -3725,7 +3728,7 @@ return (
             />
           </div>
           <div>
-            <FarmCalendar
+      <FarmCalendar
               theme={theme}
               isDesktop={isDesktop}
               calendarNotes={calendarNotes}
@@ -3738,11 +3741,12 @@ return (
               calendarSaving={calendarSaving}
               calendarSaved={calendarSaved}
               onSave={saveCalendarNote}
+              userRole={userRole}
             />
           </div>
         </div>
       ) : (
-        <DashboardPanels
+<DashboardPanels
           theme={theme}
           isDesktop={isDesktop}
           serviceReminders={serviceReminders}
@@ -3762,6 +3766,7 @@ return (
           calendarSaving={calendarSaving}
           calendarSaved={calendarSaved}
           onSave={saveCalendarNote}
+          userRole={userRole}
         />
       )}
     </div>
@@ -10760,14 +10765,14 @@ function DashboardPanels({
   theme, isDesktop, serviceReminders, machineHours, machineKm, onReminderClick,
   calendarNotes, calendarSelectedKey, setCalendarSelectedKey,
   calendarNoteText, setCalendarNoteText, calendarNoteDirty, setCalendarNoteDirty,
-  calendarSaving, calendarSaved, onSave
+  calendarSaving, calendarSaved, onSave, userRole
 }) {
   const [mobileTab, setMobileTab] = React.useState('service');
 
 const calendarProps = {
     theme, isDesktop, calendarNotes, calendarSelectedKey, setCalendarSelectedKey,
     calendarNoteText, setCalendarNoteText, calendarNoteDirty, setCalendarNoteDirty,
-    calendarSaving, calendarSaved, onSave
+    calendarSaving, calendarSaved, onSave, userRole
   };
 
   const servicePanel = (
@@ -10856,7 +10861,7 @@ const calendarProps = {
   );
 }
 
-function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, setCalendarSelectedKey, calendarNoteText, setCalendarNoteText, calendarNoteDirty, setCalendarNoteDirty, calendarSaving, calendarSaved, onSave }) {
+function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, setCalendarSelectedKey, calendarNoteText, setCalendarNoteText, calendarNoteDirty, setCalendarNoteDirty, calendarSaving, calendarSaved, onSave, userRole }) {
   const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const today = new Date();
@@ -11200,7 +11205,7 @@ return (
             <button onClick={goToWeeks} style={{ background: 'none', border: 'none', color: textSub, fontSize: '0.8rem', cursor: 'pointer', padding: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
               ← Back to {MONTHS[mi]}
             </button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 8px', background: toolbarBg, borderBottom: `0.5px solid ${cardBorder}`, flexWrap: 'nowrap', overflowX: 'auto' }}>
+            <div style={{ display: userRole === 'employee' ? 'none' : 'flex', alignItems: 'center', gap: '4px', padding: '6px 8px', background: toolbarBg, borderBottom: `0.5px solid ${cardBorder}`, flexWrap: 'nowrap', overflowX: 'auto' }}>
             <button style={{ ...btnStyle, fontWeight: 'bold', background: activeFormats.bold ? '#9FE1CB' : 'transparent', color: activeFormats.bold ? '#085041' : textSub }} onPointerDown={e => { e.preventDefault(); saveSelection(); execCmd('bold'); }} onMouseDown={e => { e.preventDefault(); saveSelection(); execCmd('bold'); }} title="Bold">B</button>
                 <button style={{ ...btnStyle, fontStyle: 'italic', background: activeFormats.italic ? '#9FE1CB' : 'transparent', color: activeFormats.italic ? '#085041' : textSub }} onPointerDown={e => { e.preventDefault(); saveSelection(); execCmd('italic'); }} onMouseDown={e => { e.preventDefault(); saveSelection(); execCmd('italic'); }} title="Italic">I</button>
                 <button style={{ ...btnStyle, textDecoration: 'underline', background: activeFormats.underline ? '#9FE1CB' : 'transparent', color: activeFormats.underline ? '#085041' : textSub }} onPointerDown={e => { e.preventDefault(); saveSelection(); execCmd('underline'); }} onMouseDown={e => { e.preventDefault(); saveSelection(); execCmd('underline'); }} title="Underline">U</button>
@@ -11340,9 +11345,9 @@ return (
                   );
                 })()}
               </div>
-           <div
+          <div
                 ref={editorRef}
-                contentEditable
+                contentEditable={userRole !== 'employee'}
                 suppressContentEditableWarning
                 onInput={handleEditorInput}
                 onKeyUp={saveSelection}
@@ -11416,12 +11421,17 @@ return (
               />
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px' }}>
               <span style={{ fontSize: '11px', color: textSub }}>{charCount} character{charCount !== 1 ? 's' : ''}</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                {calendarSaved && <span style={{ fontSize: '12px', color: '#1D9E75' }}>Saved</span>}
-                <button onClick={handleSave} disabled={!calendarNoteDirty || calendarSaving} style={{ background: !calendarNoteDirty || calendarSaving ? (theme === 'light' ? '#e5e7eb' : '#374151') : '#1D9E75', color: !calendarNoteDirty || calendarSaving ? textSub : '#fff', border: 'none', borderRadius: '8px', padding: '6px 16px', fontSize: '13px', fontWeight: '500', cursor: !calendarNoteDirty || calendarSaving ? 'default' : 'pointer' }}>
-                  {calendarSaving ? 'Saving...' : 'Save'}
-                </button>
-              </div>
+              {userRole !== 'employee' && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {calendarSaved && <span style={{ fontSize: '12px', color: '#1D9E75' }}>Saved</span>}
+                  <button onClick={handleSave} disabled={!calendarNoteDirty || calendarSaving} style={{ background: !calendarNoteDirty || calendarSaving ? (theme === 'light' ? '#e5e7eb' : '#374151') : '#1D9E75', color: !calendarNoteDirty || calendarSaving ? textSub : '#fff', border: 'none', borderRadius: '8px', padding: '6px 16px', fontSize: '13px', fontWeight: '500', cursor: !calendarNoteDirty || calendarSaving ? 'default' : 'pointer' }}>
+                    {calendarSaving ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+              )}
+              {userRole === 'employee' && (
+                <span style={{ fontSize: '11px', color: textSub, fontStyle: 'italic' }}>Read only</span>
+              )}
             </div>
           </div>
         );
