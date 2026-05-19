@@ -9170,7 +9170,8 @@ onMouseEnter={(e) => {
           <div style={{ marginBottom: '20px' }}>
             <h4 style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '8px' }}>📅 Farm Calendar</h4>
             <ul style={{ paddingLeft: '20px', color: currentTheme.text, lineHeight: '1.8' }}>
-              <li>View notes on a 12-month calendar for 2026 on the Dashboard</li>
+              <li>✅ View notes on a 12-month calendar for 2026 on the Dashboard</li>
+              <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot add, edit, or delete calendar notes</span></li>
             </ul>
           </div>
 
