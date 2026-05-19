@@ -1744,8 +1744,12 @@ setMachineryForm({
 const saveMachineryEdit = async (id) => {
   setSavingMachinery(true);
   try {
+const oldName = machinery.find(item => item.id === id)?.name;
+const newName = machineryForm.name;
+const nameChanged = oldName && newName && oldName !== newName;
+
 const updates = {
-  name: machineryForm.name,
+  name: newName,
   vin_serial: machineryForm.vinSerial,
   category: machineryForm.category,
   status: machineryForm.status,
@@ -1754,8 +1758,32 @@ const updates = {
   tracking_type: machineryForm.tracking_type || null,
   license_plate: machineryForm.licensePlate || ''
 };
-    
-    await supabase.from('machinery_items').update(updates).eq('id', id);
+
+if (nameChanged) {
+  await Promise.all([
+    supabase.from('service_records').update({ machine_name: newName }).eq('machine_name', oldName),
+    supabase.from('machine_hours').update({ machine_name: newName }).eq('machine_name', oldName),
+    supabase.from('machine_km').update({ machine_name: newName }).eq('machine_name', oldName),
+    supabase.from('service_reminders').update({ machine_name: newName }).eq('machine_name', oldName),
+  ]);
+}
+
+await supabase.from('machinery_items').update(updates).eq('id', id);
+
+if (nameChanged) {
+  setServiceHistory(prev => prev.map(r =>
+    r.machineName === oldName ? { ...r, machineName: newName } : r
+  ));
+  setMachineHours(prev => prev.map(r =>
+    r.machine_name === oldName ? { ...r, machine_name: newName } : r
+  ));
+  setMachineKm(prev => prev.map(r =>
+    r.machine_name === oldName ? { ...r, machine_name: newName } : r
+  ));
+  setServiceReminders(prev => prev.map(r =>
+    r.machine_name === oldName ? { ...r, machine_name: newName } : r
+  ));
+}
 
 setMachinery(prev => prev.map(item => 
   item.id === id ? {
