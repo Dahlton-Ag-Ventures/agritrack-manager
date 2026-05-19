@@ -6802,23 +6802,21 @@ onMouseEnter={(e) => {
         value={serviceForm.serviceType}
         onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
       />
-<div style={{ position: 'relative', marginBottom: '16px', overflow: 'hidden' }}>
+<div style={{ position: 'relative', marginBottom: '16px' }}>
   {!serviceForm.date && (
-<div style={{
-  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-  padding: '12px', borderRadius: '8px', pointerEvents: 'none',
-  fontSize: '1rem', color: currentTheme.textSecondary,
-  background: currentTheme.inputBackground,
-  border: `1px solid ${currentTheme.cardBorder}`,
-  zIndex: 1,
-  height: '48px',
-  boxSizing: 'border-box'
-}}>
-  Select a date
-</div>
+    <div style={{
+      position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+      padding: '12px', borderRadius: '8px', pointerEvents: 'none',
+      fontSize: '1rem', color: currentTheme.textSecondary,
+      zIndex: 1,
+      height: '48px',
+      boxSizing: 'border-box'
+    }}>
+      Select a date
+    </div>
   )}
   <input
-    style={{ ...styles.input, fontFamily: 'inherit', width: '100%', maxWidth: '100%', boxSizing: 'border-box', marginBottom: 0, opacity: serviceForm.date ? 1 : 0.01, position: 'relative', zIndex: 2, display: 'block', WebkitAppearance: 'none', appearance: 'none', height: '48px' }}
+    style={{ ...styles.input, fontFamily: 'inherit', width: '100%', maxWidth: '100%', boxSizing: 'border-box', marginBottom: 0, opacity: serviceForm.date ? 1 : 0.5, position: 'relative', zIndex: 2, display: 'block', WebkitAppearance: 'none', appearance: 'none', height: '48px' }}
     type="date"
     value={serviceForm.date}
     onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
@@ -9575,21 +9573,21 @@ onMouseEnter={(e) => {
       value={serviceForm.serviceType}
       onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
     />
-<div style={{ position: 'relative', marginBottom: '16px', overflow: 'hidden' }}>
+<div style={{ position: 'relative', marginBottom: '16px' }}>
   {!serviceForm.date && (
     <div style={{
       position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
       padding: '12px', borderRadius: '8px', pointerEvents: 'none',
       fontSize: '1rem', color: currentTheme.textSecondary,
-      background: currentTheme.inputBackground,
-      border: `1px solid ${currentTheme.cardBorder}`,
-      zIndex: 1
+      zIndex: 1,
+      height: '48px',
+      boxSizing: 'border-box'
     }}>
       Select a date
     </div>
   )}
   <input
-    style={{ ...styles.input, fontFamily: 'inherit', width: '100%', maxWidth: '100%', boxSizing: 'border-box', marginBottom: 0, opacity: serviceForm.date ? 1 : 0.01, position: 'relative', zIndex: 2, display: 'block', WebkitAppearance: 'none', appearance: 'none', height: '48px' }}
+    style={{ ...styles.input, fontFamily: 'inherit', width: '100%', maxWidth: '100%', boxSizing: 'border-box', marginBottom: 0, opacity: serviceForm.date ? 1 : 0.5, position: 'relative', zIndex: 2, display: 'block', WebkitAppearance: 'none', appearance: 'none', height: '48px' }}
     type="date"
     value={serviceForm.date}
     onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
