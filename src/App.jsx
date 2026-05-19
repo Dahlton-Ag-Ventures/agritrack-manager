@@ -9170,10 +9170,7 @@ onMouseEnter={(e) => {
           <div style={{ marginBottom: '20px' }}>
             <h4 style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '8px' }}>📅 Farm Calendar</h4>
             <ul style={{ paddingLeft: '20px', color: currentTheme.text, lineHeight: '1.8' }}>
-              <li>View a 12-month calendar for 2026 on the Dashboard</li>
-              <li>Click any month to expand its weeks, then click a week to open the note editor</li>
-              <li>Write rich-text notes per week — supports bold, italic, underline, strikethrough, font size, highlights, bullet lists, numbered lists, and emojis</li>
-              <li>Notes are saved per user and sync across devices in real time</li>
+              <li>View notes on a 12-month calendar for 2026 on the Dashboard</li>
             </ul>
           </div>
 
@@ -9194,7 +9191,7 @@ onMouseEnter={(e) => {
             <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot change the app theme</span></li>
             <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot reset passwords from within the app</span></li>
             <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot manage the technician list</span></li>
-            <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot view or write Farm Calendar notes</span></li>
+            <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot write, edit, or save Farm Calendar notes</span></li>
             </ul>
           </div>
         </div>
