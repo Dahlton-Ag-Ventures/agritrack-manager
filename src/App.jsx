@@ -9065,8 +9065,11 @@ onMouseEnter={(e) => {
               <li>Assign categories and VIN/serial numbers, upload photos</li>
               <li>Filter by category using the "Show Category Filters" toggle</li>
               <li>Click the purple Services button to jump to a machine's service history</li>
-              <li>Log machine hours and create hour-based service reminders</li>
+              <li>Log machine hours and kilometres per machine — the correct metric is assigned automatically by category</li>
+              <li>Create hour-based or km-based service reminders per machine</li>
               <li>Mark reminders as complete or delete them from the Reminders panel</li>
+              <li>Restore soft-deleted reminders via the "View Deleted" button — choose to restore fresh or keep original history</li>
+              <li>Rename a machine and all connected service records, hours, km, and reminders update automatically</li>
             </ul>
           </div>
 
@@ -9097,6 +9100,7 @@ onMouseEnter={(e) => {
               <li>Switch between Dark and Light mode (saved per browser)</li>
               <li>View account info, user ID, and access level</li>
               <li>Send a password reset email from the Account section</li>
+              <li>Manage the technician list — add, edit, or remove technicians that appear in the service record form</li>
               <li>Export inventory, machinery, or service records to CSV</li>
               <li>Import data in bulk from CSV files</li>
               <li>View real-time sync status and last sync time</li>
@@ -9141,9 +9145,9 @@ onMouseEnter={(e) => {
               <li>✅ View all machines, categories, and VIN/serial numbers</li>
               <li>✅ Search, sort, filter by category, and paginate</li>
               <li>✅ Click the purple Services button to view a machine's service history</li>
-              <li>✅ View the Reminders panel and machine hours (read only)</li>
+              <li>✅ View the Reminders panel and machine hours and km (read only)</li>
               <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot add, edit, or delete machines</span></li>
-              <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot log hours or create/complete/delete reminders</span></li>
+              <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot log hours or km, or create/complete/delete reminders</span></li>
             </ul>
           </div>
 
@@ -9159,6 +9163,16 @@ onMouseEnter={(e) => {
           </div>
 
           <div style={{ marginBottom: '20px' }}>
+            <h4 style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '8px' }}>📅 Farm Calendar</h4>
+            <ul style={{ paddingLeft: '20px', color: currentTheme.text, lineHeight: '1.8' }}>
+              <li>View a 12-month calendar for 2026 on the Dashboard</li>
+              <li>Click any month to expand its weeks, then click a week to open the note editor</li>
+              <li>Write rich-text notes per week — supports bold, italic, underline, strikethrough, font size, highlights, bullet lists, numbered lists, and emojis</li>
+              <li>Notes are saved per user and sync across devices in real time</li>
+            </ul>
+          </div>
+
+          <div style={{ marginBottom: '20px' }}>
             <h4 style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '8px' }}>⏰ Service Reminders</h4>
             <ul style={{ paddingLeft: '20px', color: currentTheme.text, lineHeight: '1.8' }}>
               <li>✅ View machine hours and active reminders in the Reminders panel</li>
@@ -9170,10 +9184,12 @@ onMouseEnter={(e) => {
           <div>
             <h4 style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '8px' }}>⚙️ Settings</h4>
             <ul style={{ paddingLeft: '20px', color: currentTheme.text, lineHeight: '1.8' }}>
-              <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>No Settings tab — employees do not see it in the navigation</span></li>
-              <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot import or export data</span></li>
-              <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot change the app theme</span></li>
-              <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot reset passwords from within the app</span></li>
+           <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>No Settings tab — employees do not see it in the navigation</span></li>
+            <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot import or export data</span></li>
+            <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot change the app theme</span></li>
+            <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot reset passwords from within the app</span></li>
+            <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot manage the technician list</span></li>
+            <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot view or write Farm Calendar notes</span></li>
             </ul>
           </div>
         </div>
