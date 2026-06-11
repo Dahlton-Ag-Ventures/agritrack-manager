@@ -1652,7 +1652,24 @@ setTimeout(() => {
   recentlyUpdatedIdsRef.current.delete(id);
 }, 15000);
 
-await supabase.from('inventory_items').update(updates).eq('id', id);
+let result = await supabase.from('inventory_items').update(updates).eq('id', id);
+    if (result.error) {
+      console.warn('First update attempt failed, retrying...', result.error);
+      await new Promise(r => setTimeout(r, 800));
+      result = await supabase.from('inventory_items').update(updates).eq('id', id);
+    }
+    if (result.error) throw result.error;
+
+    // Verify the update actually landed in the database
+    const { data: verified, error: verifyError } = await supabase
+      .from('inventory_items')
+      .select('id, quantity')
+      .eq('id', id)
+      .single();
+
+    if (verifyError || !verified) {
+      throw new Error('Edit did not save correctly — please try again.');
+    }
 
     setInventory(prev => prev.map(item => 
       item.id === id ? {
@@ -1667,12 +1684,17 @@ await supabase.from('inventory_items').update(updates).eq('id', id);
       } : item
     ));
 
-    console.log('✅ Inventory updated - FAST!');
+    console.log('✅ Inventory updated and verified!');
     setEditingInventoryId(null);
     setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
+
+    // Show confirmation banner briefly
+    setInventorySaveConfirmed(true);
+    setTimeout(() => setInventorySaveConfirmed(false), 4000);
+
 } catch (error) {
     console.error('Update error:', error);
-    alert('Error: ' + error.message);
+    alert('❌ Failed to save edit: ' + error.message + '\n\nPlease try again. If this keeps happening, check your internet connection.');
   } finally {
     setSavingInventory(false);
   }
@@ -2618,30 +2640,51 @@ const printInventoryQR = (item) => {
 };
 
 const quickUpdateQuantity = async (id, delta) => {
+  const item = inventory.find(i => i.id === id);
+  if (!item) return;
+
+  const originalQuantity = item.quantity;
+  const newQuantity = Math.max(0, (parseInt(item.quantity) || 0) + delta).toString();
+
+  // Update local state immediately for responsive feel
+  setInventory(prev => prev.map(i => 
+    i.id === id ? { ...i, quantity: newQuantity } : i
+  ));
+
+  recentlyUpdatedIdsRef.current.add(id);
+  setTimeout(() => {
+    recentlyUpdatedIdsRef.current.delete(id);
+  }, 15000);
+
   try {
-    const item = inventory.find(i => i.id === id);
-    if (!item) return;
-    
-    const newQuantity = Math.max(0, (parseInt(item.quantity) || 0) + delta).toString();
-
-    // ✅ UPDATE LOCAL STATE IMMEDIATELY
-    setInventory(prev => prev.map(i => 
-      i.id === id ? { ...i, quantity: newQuantity } : i
-    ));
-
-    recentlyUpdatedIdsRef.current.add(id);
-setTimeout(() => {
-  recentlyUpdatedIdsRef.current.delete(id);
-}, 15000);
-    
-    await supabase.from('inventory_items').update({
+    let result = await supabase.from('inventory_items').update({
       quantity: newQuantity
     }).eq('id', id);
-    
-    console.log('✅ Quantity updated - FAST!');
+
+    // Retry once on failure
+    if (result.error) {
+      console.warn('Quantity update failed, retrying...', result.error);
+      await new Promise(r => setTimeout(r, 800));
+      result = await supabase.from('inventory_items').update({
+        quantity: newQuantity
+      }).eq('id', id);
+    }
+
+    if (result.error) throw result.error;
+
+    console.log('✅ Quantity updated and saved!');
   } catch (error) {
-    console.error('Update error:', error);
-    alert('Error updating quantity: ' + error.message);
+    console.error('Quantity update error:', error);
+
+    // Revert local state back to original since the save failed
+    setInventory(prev => prev.map(i =>
+      i.id === id ? { ...i, quantity: originalQuantity } : i
+    ));
+
+    // Also remove from the guard since the update didn't actually land
+    recentlyUpdatedIdsRef.current.delete(id);
+
+    alert('❌ Failed to update quantity — your change has been reversed.\n\nPlease try again. If this keeps happening, check your internet connection.');
   }
 };
 
