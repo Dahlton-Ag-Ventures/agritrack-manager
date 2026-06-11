@@ -1540,7 +1540,8 @@ const getFilteredAndSortedService = () => {
   };
 
 const addInventoryItem = async () => {
-  if (uploadingPhoto) return;
+  if (uploadingPhoto || savingInventory) return;
+  setSavingInventory(true);
   
   try {
     const newId = Date.now().toString();
@@ -1596,9 +1597,11 @@ const addInventoryItem = async () => {
     setInventorySaveConfirmed(true);
     setTimeout(() => setInventorySaveConfirmed(false), 4000);
 
-  } catch (error) {
+} catch (error) {
     console.error('Add error:', error);
     alert('❌ Failed to save item: ' + error.message + '\n\nPlease try again. If this keeps happening, check your internet connection.');
+  } finally {
+    setSavingInventory(false);
   }
 };
  const deleteInventoryItem = async (id) => {
@@ -9383,14 +9386,29 @@ onMouseEnter={(e) => {
     onClick={addInventoryItem} 
     style={{
       ...styles.primaryButton,
-      opacity: uploadingPhoto ? 0.5 : 1,
-      cursor: uploadingPhoto ? 'not-allowed' : 'pointer'
+      opacity: uploadingPhoto || savingInventory ? 0.5 : 1,
+      cursor: uploadingPhoto || savingInventory ? 'not-allowed' : 'pointer'
     }}
-    disabled={uploadingPhoto}
+    disabled={uploadingPhoto || savingInventory}
   >
-    {uploadingPhoto ? 'Uploading Photo...' : 'Add Item'}
+    {uploadingPhoto ? 'Uploading Photo...' : savingInventory ? (
+      <>
+        <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />
+        Adding Item...
+      </>
+    ) : 'Add Item'}
   </button>
-  <button onClick={() => setShowInventoryModal(false)} style={styles.secondaryButton}>Cancel</button>
+  <button 
+    onClick={() => setShowInventoryModal(false)} 
+    style={{
+      ...styles.secondaryButton,
+      opacity: savingInventory ? 0.5 : 1,
+      cursor: savingInventory ? 'not-allowed' : 'pointer'
+    }}
+    disabled={savingInventory}
+  >
+    Cancel
+  </button>
 </div>
           </Modal>
         )}
