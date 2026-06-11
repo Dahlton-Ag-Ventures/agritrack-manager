@@ -313,6 +313,7 @@ const [serviceForm, setServiceForm] = useState({
   const [savingService, setSavingService] = useState(false);
   const [savingInventory, setSavingInventory] = useState(false);
   const [savingMachinery, setSavingMachinery] = useState(false);
+  const [inventorySaveConfirmed, setInventorySaveConfirmed] = useState(false);
   // Search and sort states
   const [inventorySearch, setInventorySearch] = useState('');
   const [inventorySort, setInventorySort] = useState('name-asc');
@@ -1543,39 +1544,62 @@ const addInventoryItem = async () => {
   if (uploadingPhoto) return;
   
   try {
-const newId = Date.now().toString();
-const newItem = {
-  id: newId,
-  user_id: user.id,
-  name: inventoryForm.name,
-  part_number: inventoryForm.partNumber,
-  quantity: inventoryForm.quantity,
-  location: inventoryForm.location,
-  min_quantity: inventoryForm.minQuantity,
-  max_quantity: inventoryForm.maxQuantity,
-  photo_url: inventoryForm.photoUrl || ''
-};
+    const newId = Date.now().toString();
+    const newItem = {
+      id: newId,
+      user_id: user.id,
+      name: inventoryForm.name,
+      part_number: inventoryForm.partNumber,
+      quantity: inventoryForm.quantity,
+      location: inventoryForm.location,
+      min_quantity: inventoryForm.minQuantity,
+      max_quantity: inventoryForm.maxQuantity,
+      photo_url: inventoryForm.photoUrl || ''
+    };
 
-await supabase.from('inventory_items').insert([newItem]);
+    // Attempt insert with one retry on failure
+    let result = await supabase.from('inventory_items').insert([newItem]);
+    if (result.error) {
+      console.warn('First insert attempt failed, retrying...', result.error);
+      await new Promise(r => setTimeout(r, 800));
+      result = await supabase.from('inventory_items').insert([newItem]);
+    }
+    if (result.error) throw result.error;
 
-// ✅ UPDATE LOCAL STATE IMMEDIATELY
-setInventory(prev => [...prev, {
-  id: newId,
-  name: newItem.name,
-  partNumber: newItem.part_number,
-  quantity: newItem.quantity,
-  location: newItem.location,
-  minQuantity: newItem.min_quantity,
-  maxQuantity: newItem.max_quantity,
-  photoUrl: newItem.photo_url
-}]);
+    // Verify the item actually exists in the database
+    const { data: verified, error: verifyError } = await supabase
+      .from('inventory_items')
+      .select('id')
+      .eq('id', newId)
+      .single();
 
-console.log('✅ Inventory saved - FAST!');
-setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
-setShowInventoryModal(false);
+    if (verifyError || !verified) {
+      throw new Error('Item did not save correctly — please try again.');
+    }
+
+    // ✅ Only update local state after confirmed save
+    setInventory(prev => [...prev, {
+      id: newId,
+      name: newItem.name,
+      partNumber: newItem.part_number,
+      quantity: newItem.quantity,
+      location: newItem.location,
+      minQuantity: newItem.min_quantity,
+      maxQuantity: newItem.max_quantity,
+      photoUrl: newItem.photo_url
+    }]);
+
+    console.log('✅ Inventory saved and verified!');
+    setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
+    setShowInventoryModal(false);
+
+    // Show confirmation banner briefly
+    setInventorySaveConfirmed(true);
+    setTimeout(() => setInventorySaveConfirmed(false), 4000);
+
   } catch (error) {
     console.error('Add error:', error);
-    alert('Error: ' + error.message);
+    alert('❌ Failed to save item: ' + error.message + '\n\nPlease try again. If this keeps happening, check your internet connection.');
   }
 };
  const deleteInventoryItem = async (id) => {
@@ -4002,6 +4026,25 @@ return (
   
   {activeTab === 'inventory' && (
   <div>
+{inventorySaveConfirmed && (
+  <div style={{
+    padding: '12px 18px',
+    marginBottom: '16px',
+    background: 'rgba(16, 185, 129, 0.15)',
+    border: '2px solid #10b981',
+    borderRadius: '10px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    color: '#10b981',
+    animation: 'floatIn 0.3s ease-out'
+  }}>
+    <span style={{ fontSize: '1.2rem' }}>✅</span>
+    Item saved and confirmed in database
+  </div>
+)}
 {exportMode === 'inventory' && (
       <div style={{
         padding: '14px 18px', marginBottom: '16px',
