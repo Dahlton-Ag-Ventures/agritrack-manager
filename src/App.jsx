@@ -660,10 +660,20 @@ const loadData = async () => {
         throw invError;
       }
       
-      if (inventoryData && inventoryData.length > 0) {
+if (inventoryData && inventoryData.length > 0) {
         allInventory = [...allInventory, ...inventoryData];
         inventoryPage++;
-        hasMoreInventory = inventoryData.length === pageSize;
+        // Only stop if we got a full page — a short page on a slow connection
+        // could be a partial result, so retry once before giving up
+        if (inventoryData.length < pageSize) {
+          // Verify by attempting the next page — if it returns 0 we're truly done
+          const { data: checkData } = await supabase
+            .from('inventory_items')
+            .select('id')
+            .range(inventoryPage * pageSize, inventoryPage * pageSize)
+            .limit(1);
+          hasMoreInventory = !!(checkData && checkData.length > 0);
+        }
       } else {
         hasMoreInventory = false;
       }
@@ -1614,7 +1624,7 @@ const saveInventoryEdit = async (id) => {
 
 setTimeout(() => {
   recentlyUpdatedIdsRef.current.delete(id);
-}, 3000);
+}, 15000);
 
 await supabase.from('inventory_items').update(updates).eq('id', id);
 
@@ -2596,7 +2606,7 @@ const quickUpdateQuantity = async (id, delta) => {
     recentlyUpdatedIdsRef.current.add(id);
 setTimeout(() => {
   recentlyUpdatedIdsRef.current.delete(id);
-}, 2000);
+}, 15000);
     
     await supabase.from('inventory_items').update({
       quantity: newQuantity
