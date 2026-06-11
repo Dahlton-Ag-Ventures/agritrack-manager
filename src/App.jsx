@@ -4160,7 +4160,7 @@ return (
   flexWrap: 'nowrap',
   overflow: 'auto'
 }}>
-  <input
+ <input
     type="text"
     placeholder="🔍 Search inventory (name, part number, location)..."
     value={inventorySearch}
@@ -4169,6 +4169,9 @@ return (
       setInventoryPage(1);
     }}
     style={styles.searchInput}
+    autoCorrect="off"
+    autoCapitalize="none"
+    spellCheck={false}
   />
   <select
     value={inventorySort}
@@ -4360,12 +4363,15 @@ return (
                     value={inventoryForm.name}
                     onChange={(e) => setInventoryForm({ ...inventoryForm, name: e.target.value })}
                   />
-                  <input
-                    style={styles.input}
-                    placeholder="Part Number"
-                    value={inventoryForm.partNumber}
-                    onChange={(e) => setInventoryForm({ ...inventoryForm, partNumber: e.target.value })}
-                  />
+                <input
+              style={styles.input}
+              placeholder="Part Number"
+              value={inventoryForm.partNumber}
+              onChange={(e) => setInventoryForm({ ...inventoryForm, partNumber: e.target.value })}
+              autoCorrect="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+                />
                   <input
                     style={styles.input}
                     type="number"
@@ -4452,7 +4458,7 @@ return (
   </div>
 )}
                   </div>
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
+                 <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <button 
   onClick={() => saveInventoryEdit(item.id)} 
   style={{
@@ -4476,6 +4482,19 @@ return (
                     <button onClick={cancelInventoryEdit} style={styles.cancelButton}>
                       <X size={16} /> Cancel
                     </button>
+                    {inventorySaveConfirmed && (
+                      <span style={{
+                        fontSize: '0.875rem',
+                        fontWeight: '600',
+                        color: '#10b981',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        animation: 'floatIn 0.3s ease-out'
+                      }}>
+                        ✅ Saved
+                      </span>
+                    )}
                     <button
                       onClick={() => printInventoryQR(item)}
                       style={{
@@ -5000,6 +5019,9 @@ onMouseEnter={(e) => {
       setMachineryPage(1);
     }}
     style={styles.searchInput}
+    autoCorrect="off"
+    autoCapitalize="none"
+    spellCheck={false}
   />
 <select
   value={machinerySort}
@@ -6611,6 +6633,9 @@ onMouseEnter={(e) => {
       setServicePage(1);
     }}
     style={styles.searchInput}
+    autoCorrect="off"
+    autoCapitalize="none"
+    spellCheck={false}
   />
   <select
     value={serviceSort}
@@ -9332,12 +9357,15 @@ onMouseEnter={(e) => {
               value={inventoryForm.name}
               onChange={(e) => setInventoryForm({ ...inventoryForm, name: e.target.value })}
             />
-            <input
-              style={styles.input}
-              placeholder="Part Number"
-              value={inventoryForm.partNumber}
-              onChange={(e) => setInventoryForm({ ...inventoryForm, partNumber: e.target.value })}
-            />
+<input
+                    style={styles.input}
+                    placeholder="Part Number"
+                    value={inventoryForm.partNumber}
+                    onChange={(e) => setInventoryForm({ ...inventoryForm, partNumber: e.target.value })}
+                    autoCorrect="off"
+                    autoCapitalize="characters"
+                    spellCheck={false}
+                  />
             <input
               style={styles.input}
               type="number"
