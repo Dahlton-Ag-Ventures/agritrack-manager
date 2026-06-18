@@ -170,7 +170,22 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-{/*Machinery categories for dropdown */}
+const INVENTORY_CATEGORIES = [
+  'Filters',
+  'Belts & Chains',
+  'Electrical',
+  'Fluids & Lubricants',
+  'Seals & Gaskets',
+  'Bearings & Bushings',
+  'Tires & Tracks',
+  'Fasteners & Hardware',
+  'Hoses & Fittings',
+  'Blades & Wear Parts',
+  'Sprayer Parts',
+  'Auger & Conveyor Parts',
+  'Other',
+];
+
 const MACHINERY_CATEGORIES = [
   'Attachments',
   'Augers and Conveyors',
@@ -293,7 +308,7 @@ const toggleCard = (cardId) => {
 
 const [inventoryForm, setInventoryForm] = useState({ 
   name: '', partNumber: '', quantity: '', location: '', 
-  minQuantity: '', maxQuantity: '', photoUrl: ''
+  minQuantity: '', maxQuantity: '', photoUrl: '', category: ''
 });
 const [machineryForm, setMachineryForm] = useState({ 
   name: '', vinSerial: '', category: '', status: 'Active', 
@@ -316,6 +331,8 @@ const [serviceForm, setServiceForm] = useState({
   // Search and sort states
   const [inventorySearch, setInventorySearch] = useState('');
   const [inventorySort, setInventorySort] = useState('name-asc');
+  const [inventoryCategoryFilter, setInventoryCategoryFilter] = useState('');
+  const [inventorySheetItem, setInventorySheetItem] = useState(null);
   const [machinerySearch, setMachinerySearch] = useState('');
   const [machinerySort, setMachinerySort] = useState('name-asc');
   const [serviceSearch, setServiceSearch] = useState('');
@@ -680,7 +697,7 @@ if (inventoryData && inventoryData.length > 0) {
     }
     
     console.log(`✅ Loaded ${allInventory.length} inventory items from database`);
-    setInventory(allInventory.map(item => ({
+setInventory(allInventory.map(item => ({
       id: item.id,
       name: item.name || '',
       partNumber: item.part_number || '',
@@ -688,7 +705,8 @@ if (inventoryData && inventoryData.length > 0) {
       location: item.location || '',
       minQuantity: item.min_quantity || '',
       maxQuantity: item.max_quantity || '',
-      photoUrl: item.photo_url || ''
+      photoUrl: item.photo_url || '',
+      category: item.category || ''
     })));
     
     let allMachinery = [];
@@ -885,7 +903,7 @@ supabase
   .channel('inventory-changes')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory_items' }, (payload) => {
     console.log('🔔 Inventory change');
-    if (payload.eventType === 'INSERT') {
+  if (payload.eventType === 'INSERT') {
       setInventory(prev => [...prev, {
         id: payload.new.id,
         name: payload.new.name,
@@ -894,7 +912,8 @@ supabase
         location: payload.new.location,
         minQuantity: payload.new.min_quantity,
         maxQuantity: payload.new.max_quantity,
-        photoUrl: payload.new.photo_url
+        photoUrl: payload.new.photo_url,
+        category: payload.new.category || ''
       }]);
     } else if (payload.eventType === 'UPDATE') {
   // ✅ Skip realtime update if we just updated this item locally
@@ -907,7 +926,8 @@ supabase
     location: payload.new.location,
     minQuantity: payload.new.min_quantity,
     maxQuantity: payload.new.max_quantity,
-    photoUrl: payload.new.photo_url
+    photoUrl: payload.new.photo_url,
+    category: payload.new.category || ''
   } : item));
 } else if (payload.eventType === 'DELETE') {
       setInventory(prev => prev.filter(item => item.id !== payload.old.id));
@@ -1243,7 +1263,8 @@ const runImport = async (type, rows, catMap = {}) => {
           location: row.location,
           min_quantity: row.minQty,
           max_quantity: row.maxQty,
-          photo_url: ''
+          photo_url: '',
+          category: ''
         };
         const { error } = await supabase.from('inventory_items').insert([newItem]);
         if (error) throw error;
@@ -1255,7 +1276,8 @@ const runImport = async (type, rows, catMap = {}) => {
           location: newItem.location,
           minQuantity: newItem.min_quantity,
           maxQuantity: newItem.max_quantity,
-          photoUrl: ''
+          photoUrl: '',
+          category: ''
         }]);
         succeeded.push(row.name);
       } catch (err) {
@@ -1393,14 +1415,17 @@ const getServiceRows = (items) => items.map(item => [
     return 'normal';
   };
 
-  const getFilteredAndSortedInventory = () => {
+const getFilteredAndSortedInventory = () => {
   let filtered = inventory.filter(item => {
     const searchLower = inventorySearch.toLowerCase();
-    return (
+    const matchesSearch = (
       item.name?.toLowerCase().includes(searchLower) ||
       item.partNumber?.toLowerCase().includes(searchLower) ||
       item.location?.toLowerCase().includes(searchLower)
     );
+    const matchesCategory = !inventoryCategoryFilter ||
+      (inventoryCategoryFilter === 'uncategorized' ? !item.category : item.category === inventoryCategoryFilter);
+    return matchesSearch && matchesCategory;
   });
 
   return filtered.sort((a, b) => {
@@ -1545,7 +1570,7 @@ const addInventoryItem = async () => {
   
   try {
     const newId = Date.now().toString();
-    const newItem = {
+   const newItem = {
       id: newId,
       user_id: user.id,
       name: inventoryForm.name,
@@ -1554,7 +1579,8 @@ const addInventoryItem = async () => {
       location: inventoryForm.location,
       min_quantity: inventoryForm.minQuantity,
       max_quantity: inventoryForm.maxQuantity,
-      photo_url: inventoryForm.photoUrl || ''
+      photo_url: inventoryForm.photoUrl || '',
+      category: inventoryForm.category || ''
     };
 
     // Attempt insert with one retry on failure
@@ -1577,7 +1603,7 @@ const addInventoryItem = async () => {
       throw new Error('Item did not save correctly — please try again.');
     }
 
-    // ✅ Only update local state after confirmed save
+   // ✅ Only update local state after confirmed save
     setInventory(prev => [...prev, {
       id: newId,
       name: newItem.name,
@@ -1586,9 +1612,9 @@ const addInventoryItem = async () => {
       location: newItem.location,
       minQuantity: newItem.min_quantity,
       maxQuantity: newItem.max_quantity,
-      photoUrl: newItem.photo_url
+      photoUrl: newItem.photo_url,
+      category: newItem.category || ''
     }]);
-
     console.log('✅ Inventory saved and verified!');
     setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
     setShowInventoryModal(false);
@@ -1629,21 +1655,23 @@ const startEditInventory = (item) => {
     location: item.location || '',
     minQuantity: item.minQuantity || '',
     maxQuantity: item.maxQuantity || '',
-    photoUrl: item.photoUrl || ''
+    photoUrl: item.photoUrl || '',
+    category: item.category || ''
   });
 };
 
 const saveInventoryEdit = async (id) => {
   setSavingInventory(true);
   try {
-    const updates = {
+const updates = {
       name: inventoryForm.name,
       part_number: inventoryForm.partNumber,
       quantity: inventoryForm.quantity,
       location: inventoryForm.location,
       min_quantity: inventoryForm.minQuantity,
       max_quantity: inventoryForm.maxQuantity,
-      photo_url: inventoryForm.photoUrl || ''
+      photo_url: inventoryForm.photoUrl || '',
+      category: inventoryForm.category || ''
     };
     
    recentlyUpdatedIdsRef.current.add(id);
@@ -1671,7 +1699,7 @@ let result = await supabase.from('inventory_items').update(updates).eq('id', id)
       throw new Error('Edit did not save correctly — please try again.');
     }
 
-    setInventory(prev => prev.map(item => 
+   setInventory(prev => prev.map(item => 
       item.id === id ? {
         id: item.id,
         name: updates.name,
@@ -1680,7 +1708,8 @@ let result = await supabase.from('inventory_items').update(updates).eq('id', id)
         location: updates.location,
         minQuantity: updates.min_quantity,
         maxQuantity: updates.max_quantity,
-        photoUrl: updates.photo_url
+        photoUrl: updates.photo_url,
+        category: updates.category || ''
       } : item
     ));
 
@@ -1703,7 +1732,7 @@ let result = await supabase.from('inventory_items').update(updates).eq('id', id)
 const cancelInventoryEdit = () => {
   setEditingInventoryId(null);
   isEditingRef.current = false;
-  setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '' });
+  setInventoryForm({ name: '', partNumber: '', quantity: '', location: '', minQuantity: '', maxQuantity: '', photoUrl: '', category: '' });
 };
 
 const addMachineryItem = async () => {
@@ -4069,8 +4098,19 @@ return (
   </div>
 )}
   
-  {activeTab === 'inventory' && (
+{activeTab === 'inventory' && (
   <div>
+{inventorySheetItem && (
+  <InventoryBottomSheet
+    item={inventorySheetItem}
+    onClose={() => setInventorySheetItem(null)}
+    onEdit={(item) => { startEditInventory(item); setInventorySheetItem(null); }}
+    onDelete={(id) => { deleteInventoryItem(id); setInventorySheetItem(null); }}
+    theme={theme}
+    currentTheme={currentTheme}
+    userRole={userRole}
+  />
+)}
 {inventorySaveConfirmed && (
   <div style={{
     padding: '12px 18px',
@@ -4228,6 +4268,72 @@ return (
     <option value="99999">Show All</option>
   </select>
 </div>
+    {/* Category pill filters */}
+{inventory.length > 0 && (
+  <div style={{
+    display: 'flex',
+    gap: '6px',
+    marginBottom: '16px',
+    flexWrap: 'wrap',
+  }}>
+    <button
+      onClick={() => { setInventoryCategoryFilter(''); setInventoryPage(1); }}
+      style={{
+        padding: '4px 12px',
+        borderRadius: '999px',
+        border: 'none',
+        fontSize: '12px',
+        cursor: 'pointer',
+        background: !inventoryCategoryFilter ? '#E6F1FB' : currentTheme.cardBackground,
+        color: !inventoryCategoryFilter ? '#0C447C' : currentTheme.textSecondary,
+        fontWeight: !inventoryCategoryFilter ? '600' : '400',
+        border: !inventoryCategoryFilter ? '1px solid #B5D4F4' : `1px solid ${currentTheme.cardBorder}`,
+      }}
+    >
+      All
+    </button>
+    {INVENTORY_CATEGORIES.filter(cat =>
+      inventory.some(item => item.category === cat)
+    ).map(cat => (
+      <button
+        key={cat}
+        onClick={() => { setInventoryCategoryFilter(cat); setInventoryPage(1); }}
+        style={{
+          padding: '4px 12px',
+          borderRadius: '999px',
+          border: 'none',
+          fontSize: '12px',
+          cursor: 'pointer',
+          background: inventoryCategoryFilter === cat ? '#E6F1FB' : currentTheme.cardBackground,
+          color: inventoryCategoryFilter === cat ? '#0C447C' : currentTheme.textSecondary,
+          fontWeight: inventoryCategoryFilter === cat ? '600' : '400',
+          border: inventoryCategoryFilter === cat ? '1px solid #B5D4F4' : `1px solid ${currentTheme.cardBorder}`,
+        }}
+      >
+        {cat}
+      </button>
+    ))}
+    {inventory.some(item => !item.category) && (
+      <button
+        onClick={() => { setInventoryCategoryFilter('uncategorized'); setInventoryPage(1); }}
+        style={{
+          padding: '4px 12px',
+          borderRadius: '999px',
+          border: 'none',
+          fontSize: '12px',
+          cursor: 'pointer',
+          background: inventoryCategoryFilter === 'uncategorized' ? '#E6F1FB' : currentTheme.cardBackground,
+          color: inventoryCategoryFilter === 'uncategorized' ? '#0C447C' : currentTheme.textSecondary,
+          fontWeight: inventoryCategoryFilter === 'uncategorized' ? '600' : '400',
+          border: inventoryCategoryFilter === 'uncategorized' ? '1px solid #B5D4F4' : `1px solid ${currentTheme.cardBorder}`,
+        }}
+      >
+        Uncategorized
+      </button>
+    )}
+  </div>
+)}
+
     {inventory.length === 0 ? (
       <div style={styles.emptyState}>
         <Package size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
@@ -4333,14 +4439,52 @@ return (
           </div>
         </div>
 
-        {/* INVENTORY ITEMS LIST */}
+       {/* INVENTORY ITEMS LIST */}
         <div style={styles.itemsList}>
-          {getPaginatedInventory().items.map(item => (
+          {(() => {
+            const items = getPaginatedInventory().items;
+            const result = [];
+            let lastCategory = null;
+            items.forEach((item, index) => {
+              const cat = item.category || 'Uncategorized';
+              if (cat !== lastCategory) {
+                lastCategory = cat;
+                result.push(
+                  <div key={`header-${cat}-${index}`} style={{
+                    background: currentTheme.cardBackground,
+                    padding: '5px 14px',
+                    borderTop: `0.5px solid ${currentTheme.cardBorder}`,
+                    borderBottom: `0.5px solid ${currentTheme.cardBorder}`,
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    color: currentTheme.textSecondary,
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
+                    marginBottom: '4px',
+                    marginTop: index === 0 ? '0' : '8px',
+                  }}>
+                    {cat}
+                  </div>
+                );
+              }
+              result.push(item);
+            });
+            return result;
+          })().map((itemOrHeader, index) => {
+            if (!itemOrHeader.id) return itemOrHeader;
+            const item = itemOrHeader;
+            return (
 <div key={item.id} id={`inventory-item-${item.id}`} className="item-card" style={{
                 ...styles.itemCard,
                 outline: exportMode === 'inventory' && exportInventorySelected.has(item.id)
                   ? '2px solid #10b981' : 'none'
-              }}>
+              }}
+              onClick={() => {
+                if (editingInventoryId !== item.id && exportMode !== 'inventory') {
+                  setInventorySheetItem(item);
+                }
+              }}
+            >
               {exportMode === 'inventory' && (
                 <input
                   type="checkbox"
@@ -4791,7 +4935,8 @@ onMouseEnter={(e) => {
               </>
             )}
           </div>
-        ))}
+            );
+          })}
       </div>
 
       {/* BOTTOM PAGINATION CONTROLS */}
@@ -9351,7 +9496,7 @@ onMouseEnter={(e) => {
     setShowInventoryModal(false);
     isEditingRef.current = false;
   }}>
-            <input
+           <input
               style={styles.input}
               placeholder="Item Name"
               value={inventoryForm.name}
@@ -9366,19 +9511,29 @@ onMouseEnter={(e) => {
                     autoCapitalize="characters"
                     spellCheck={false}
                   />
-            <input
-              style={styles.input}
-              type="number"
-              placeholder="Quantity"
-              value={inventoryForm.quantity}
-              onChange={(e) => setInventoryForm({ ...inventoryForm, quantity: e.target.value })}
-            />
-            <input
-              style={styles.input}
-              placeholder="Location"
-              value={inventoryForm.location}
-              onChange={(e) => setInventoryForm({ ...inventoryForm, location: e.target.value })}
-            />
+                  <select
+                    style={styles.input}
+                    value={inventoryForm.category}
+                    onChange={(e) => setInventoryForm({ ...inventoryForm, category: e.target.value })}
+                  >
+                    <option value="">Select Category (optional)...</option>
+                    {INVENTORY_CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                  <input
+                    style={styles.input}
+                    type="number"
+                    placeholder="Quantity"
+                    value={inventoryForm.quantity}
+                    onChange={(e) => setInventoryForm({ ...inventoryForm, quantity: e.target.value })}
+                  />
+                  <input
+                    style={styles.input}
+                    placeholder="Location"
+                    value={inventoryForm.location}
+                    onChange={(e) => setInventoryForm({ ...inventoryForm, location: e.target.value })}
+                  />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               <input
                 style={styles.input}
@@ -12589,7 +12744,128 @@ function TechnicianField({ value, onChange, styles, technicians }) {
   );
 }
 // Modal component - defined outside to avoid recreation on each render
+function InventoryBottomSheet({ item, onClose, onEdit, onDelete, theme, currentTheme, userRole }) {
+  if (!item) return null;
+  const qty = parseInt(item.quantity) || 0;
+  const min = parseInt(item.minQuantity) || 0;
+  const isLow = min > 0 && qty <= min;
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        top: 0, left: 0, right: 0, bottom: 0,
+        background: 'rgba(0,0,0,0.5)',
+        zIndex: 60,
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: currentTheme.modalBackground,
+          borderRadius: '16px 16px 0 0',
+          padding: '16px 20px 32px',
+          width: '100%',
+          maxWidth: '600px',
+          boxSizing: 'border-box',
+          border: `1px solid ${currentTheme.cardBorder}`,
+          borderBottom: 'none',
+        }}
+      >
+        {/* Handle bar */}
+        <div style={{
+          width: '36px', height: '4px',
+          background: currentTheme.cardBorder,
+          borderRadius: '999px',
+          margin: '0 auto 16px',
+        }} />
+
+        {/* Item name + low stock */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+          <p style={{ fontSize: '16px', fontWeight: '500', color: currentTheme.text, margin: 0 }}>
+            {item.name}
+          </p>
+          {isLow && (
+            <span style={{
+              fontSize: '11px', padding: '2px 8px',
+              borderRadius: '999px',
+              background: 'rgba(239,68,68,0.15)',
+              color: '#ef4444',
+              border: '1px solid rgba(239,68,68,0.3)',
+              fontWeight: '600',
+            }}>
+              ⚠ Low Stock
+            </span>
+          )}
+        </div>
+
+        {/* Detail rows */}
+        <div style={{ borderTop: `0.5px solid ${currentTheme.cardBorder}` }}>
+          {[
+            { label: 'Part #', value: item.partNumber || '—' },
+            { label: 'Category', value: item.category || '—' },
+            { label: 'Quantity', value: item.quantity || '0' },
+            { label: 'Location', value: item.location || '—' },
+            { label: 'Min / Max', value: (item.minQuantity || item.maxQuantity) ? `${item.minQuantity || '—'} / ${item.maxQuantity || '—'}` : '—' },
+          ].map(row => (
+            <div key={row.label} style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: '10px 0',
+              borderBottom: `0.5px solid ${currentTheme.cardBorder}`,
+            }}>
+              <span style={{ fontSize: '13px', color: currentTheme.textSecondary }}>{row.label}</span>
+              <span style={{ fontSize: '13px', fontWeight: '500', color: currentTheme.text }}>{row.value}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Action buttons */}
+        {userRole !== 'employee' && (
+          <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+            <button
+              onClick={() => { onClose(); onEdit(item); }}
+              style={{
+                flex: 1, padding: '12px',
+                background: '#E6F1FB',
+                border: '1px solid #B5D4F4',
+                borderRadius: '10px',
+                color: '#0C447C',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+              }}
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => { onClose(); onDelete(item.id); }}
+              style={{
+                flex: 1, padding: '12px',
+                background: 'rgba(239,68,68,0.1)',
+                border: '1px solid rgba(239,68,68,0.3)',
+                borderRadius: '10px',
+                color: '#ef4444',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function Modal({ children, onClose, title, theme }) {
+  
   const modalStyles = {
     modalOverlay: {
       position: 'fixed',
