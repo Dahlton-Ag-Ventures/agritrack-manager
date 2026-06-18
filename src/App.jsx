@@ -4100,17 +4100,6 @@ return (
   
 {activeTab === 'inventory' && (
   <div>
-{inventorySheetItem && (
-  <InventoryBottomSheet
-    item={inventorySheetItem}
-    onClose={() => setInventorySheetItem(null)}
-    onEdit={(item) => { startEditInventory(item); setInventorySheetItem(null); }}
-    onDelete={(id) => { deleteInventoryItem(id); setInventorySheetItem(null); }}
-    theme={theme}
-    currentTheme={currentTheme}
-    userRole={userRole}
-  />
-)}
 {inventorySaveConfirmed && (
   <div style={{
     padding: '12px 18px',
