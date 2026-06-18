@@ -1428,7 +1428,7 @@ const getFilteredAndSortedInventory = () => {
     return matchesSearch && matchesCategory;
   });
 
-  return filtered.sort((a, b) => {
+  const sorted = filtered.sort((a, b) => {
     switch (inventorySort) {
       case 'name-asc':
         return (a.name || '').localeCompare(b.name || '');
@@ -1447,6 +1447,14 @@ const getFilteredAndSortedInventory = () => {
       default:
         return 0;
     }
+  });
+
+  return sorted.sort((a, b) => {
+    const catA = a.category || 'Uncategorized';
+    const catB = b.category || 'Uncategorized';
+    if (catA === 'Uncategorized' && catB !== 'Uncategorized') return 1;
+    if (catB === 'Uncategorized' && catA !== 'Uncategorized') return -1;
+    return catA.localeCompare(catB);
   });
 };
 
@@ -4431,13 +4439,7 @@ return (
        {/* INVENTORY ITEMS LIST */}
         <div style={styles.itemsList}>
           {(() => {
-           const items = [...getPaginatedInventory().items].sort((a, b) => {
-              const catA = a.category || 'Uncategorized';
-              const catB = b.category || 'Uncategorized';
-              if (catA === 'Uncategorized' && catB !== 'Uncategorized') return 1;
-              if (catB === 'Uncategorized' && catA !== 'Uncategorized') return -1;
-              return catA.localeCompare(catB);
-            });
+          const items = getPaginatedInventory().items;
             const result = [];
             let lastCategory = null;
             items.forEach((item, index) => {
