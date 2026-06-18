@@ -729,30 +729,30 @@ setMachinery(allMachinery.map(item => ({
   licensePlate: item.license_plate || ''
 })));
     
-    let allServiceRecords = [];
-    let servicePage = 0;
-    let hasMoreService = true;
-    
-    while (hasMoreService) {
-      const { data: serviceData, error: servError } = await supabase
+   let allServiceRecords = [];
+
+    let { data: serviceData, error: servError } = await supabase
+      .from('service_records')
+      .select('*')
+      .order('date', { ascending: false });
+
+    if (servError) {
+      console.warn('⚠️ Service records first attempt failed, retrying...', servError);
+      await new Promise(r => setTimeout(r, 1000));
+      const retry = await supabase
         .from('service_records')
         .select('*')
-        .order('date', { ascending: false })
-        .range(servicePage * pageSize, (servicePage + 1) * pageSize - 1);
-      
-      if (servError) {
-        console.error('❌ Service records load error:', servError);
-        throw servError;
-      }
-      
-      if (serviceData && serviceData.length > 0) {
-        allServiceRecords = [...allServiceRecords, ...serviceData];
-        servicePage++;
-        hasMoreService = serviceData.length === pageSize;
-      } else {
-        hasMoreService = false;
-      }
+        .order('date', { ascending: false });
+      serviceData = retry.data;
+      servError = retry.error;
     }
+
+    if (servError) {
+      console.error('❌ Service records load error:', servError);
+      throw servError;
+    }
+
+    allServiceRecords = serviceData || [];
     
     console.log(`✅ Loaded ${allServiceRecords.length} service records from database`);
     
