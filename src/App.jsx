@@ -4431,7 +4431,13 @@ return (
        {/* INVENTORY ITEMS LIST */}
         <div style={styles.itemsList}>
           {(() => {
-            const items = getPaginatedInventory().items;
+           const items = [...getPaginatedInventory().items].sort((a, b) => {
+              const catA = a.category || 'Uncategorized';
+              const catB = b.category || 'Uncategorized';
+              if (catA === 'Uncategorized' && catB !== 'Uncategorized') return 1;
+              if (catB === 'Uncategorized' && catA !== 'Uncategorized') return -1;
+              return catA.localeCompare(catB);
+            });
             const result = [];
             let lastCategory = null;
             items.forEach((item, index) => {
