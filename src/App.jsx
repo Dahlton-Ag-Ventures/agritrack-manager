@@ -7103,6 +7103,9 @@ onMouseEnter={(e) => {
         onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
       />
 <div style={{ position: 'relative', marginBottom: '16px' }}>
+  <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+    Date
+  </label>
   <input
     style={{ ...styles.input, fontFamily: 'inherit', width: '100%', maxWidth: '100%', boxSizing: 'border-box', marginBottom: 0, position: 'relative', display: 'block', WebkitAppearance: 'none', appearance: 'none', height: '48px' }}
     type="date"
@@ -9904,6 +9907,9 @@ onMouseEnter={(e) => {
       onChange={(e) => setServiceForm({ ...serviceForm, serviceType: e.target.value })}
     />
 <div style={{ position: 'relative', marginBottom: '16px' }}>
+  <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+    Date
+  </label>
   <input
     style={{ ...styles.input, fontFamily: 'inherit', width: '100%', maxWidth: '100%', boxSizing: 'border-box', marginBottom: 0, position: 'relative', display: 'block', WebkitAppearance: 'none', appearance: 'none', height: '48px' }}
     type="date"
