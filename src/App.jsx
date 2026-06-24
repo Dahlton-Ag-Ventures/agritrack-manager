@@ -237,6 +237,8 @@ const getTrackingType = (machine) => {
   return CATEGORY_TRACKING_TYPE[machine.category] || 'hours';
 };
 
+const isIOSDevice = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
 export default function App() {
   // Authentication state
   const [user, setUser] = useState(null);
@@ -7096,7 +7098,7 @@ onMouseEnter={(e) => {
         )}
       </div>
       
-      <input
+     <input
         style={styles.input}
         placeholder="Service Type (e.g., Oil Change, Repair)"
         value={serviceForm.serviceType}
@@ -7109,6 +7111,19 @@ onMouseEnter={(e) => {
     value={serviceForm.date}
     onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
   />
+  {isIOSDevice() && !serviceForm.date && (
+    <span style={{
+      position: 'absolute',
+      left: '12px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      color: '#9ca3af',
+      fontSize: '1rem',
+      pointerEvents: 'none'
+    }}>
+      Date
+    </span>
+  )}
 </div>
 <TechnicianField
         value={serviceForm.technician}
@@ -9897,7 +9912,7 @@ onMouseEnter={(e) => {
         </div>
       )}
     </div>
-    <input
+   <input
       style={styles.input}
       placeholder="Service Type (e.g., Oil Change, Repair, Inspection)"
       value={serviceForm.serviceType}
@@ -9910,6 +9925,19 @@ onMouseEnter={(e) => {
     value={serviceForm.date}
     onChange={(e) => setServiceForm({ ...serviceForm, date: e.target.value })}
   />
+  {isIOSDevice() && !serviceForm.date && (
+    <span style={{
+      position: 'absolute',
+      left: '12px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      color: '#9ca3af',
+      fontSize: '1rem',
+      pointerEvents: 'none'
+    }}>
+      Date
+    </span>
+  )}
 </div>
 <TechnicianField
       value={serviceForm.technician}
