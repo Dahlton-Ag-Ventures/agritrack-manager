@@ -1857,16 +1857,46 @@ const updates = {
 };
 
 if (nameChanged) {
-  await Promise.all([
-    supabase.from('service_records').update({ machine_name: newName }).eq('machine_name', oldName),
-    supabase.from('machine_hours').update({ machine_name: newName }).eq('machine_name', oldName),
-    supabase.from('machine_km').update({ machine_name: newName }).eq('machine_name', oldName),
-    supabase.from('service_reminders').update({ machine_name: newName }).eq('machine_name', oldName),
+  const expectedServiceCount = serviceHistory.filter(r => r.machineName === oldName).length;
+  const expectedHoursCount = machineHours.filter(r => r.machine_name === oldName).length;
+  const expectedKmCount = machineKm.filter(r => r.machine_name === oldName).length;
+  const expectedReminderCount = serviceReminders.filter(r => r.machine_name === oldName).length;
+
+  const [serviceResult, hoursResult, kmResult, remindersResult] = await Promise.all([
+    supabase.from('service_records').update({ machine_name: newName }).eq('machine_name', oldName).select('id'),
+    supabase.from('machine_hours').update({ machine_name: newName }).eq('machine_name', oldName).select('id'),
+    supabase.from('machine_km').update({ machine_name: newName }).eq('machine_name', oldName).select('id'),
+    supabase.from('service_reminders').update({ machine_name: newName }).eq('machine_name', oldName).select('id'),
   ]);
+
+  const cascadeErrors = [];
+  if (serviceResult.error) cascadeErrors.push(`Service records: ${serviceResult.error.message}`);
+  if (hoursResult.error) cascadeErrors.push(`Hours: ${hoursResult.error.message}`);
+  if (kmResult.error) cascadeErrors.push(`Km: ${kmResult.error.message}`);
+  if (remindersResult.error) cascadeErrors.push(`Reminders: ${remindersResult.error.message}`);
+
+  if (cascadeErrors.length > 0) {
+    alert('⚠️ Machine renamed, but some related records FAILED to update:\n\n' + cascadeErrors.join('\n'));
+  } else {
+    const actualServiceCount = serviceResult.data?.length || 0;
+    const actualHoursCount = hoursResult.data?.length || 0;
+    const actualKmCount = kmResult.data?.length || 0;
+    const actualReminderCount = remindersResult.data?.length || 0;
+
+    if (actualServiceCount !== expectedServiceCount || actualHoursCount !== expectedHoursCount || actualKmCount !== expectedKmCount || actualReminderCount !== expectedReminderCount) {
+      alert(
+        `⚠️ Rename mismatch detected:\n\n` +
+        `Service records — updated: ${actualServiceCount}, expected: ${expectedServiceCount}\n` +
+        `Hours — updated: ${actualHoursCount}, expected: ${expectedHoursCount}\n` +
+        `Km — updated: ${actualKmCount}, expected: ${expectedKmCount}\n` +
+        `Reminders — updated: ${actualReminderCount}, expected: ${expectedReminderCount}\n\n` +
+        `This usually means the stored name had a different capitalization or extra space than what's shown on screen.`
+      );
+    }
+  }
 }
 
 await supabase.from('machinery_items').update(updates).eq('id', id);
-
 if (nameChanged) {
   setServiceHistory(prev => prev.map(r =>
     r.machineName === oldName ? { ...r, machineName: newName } : r
