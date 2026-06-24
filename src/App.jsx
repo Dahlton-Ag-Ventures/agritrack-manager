@@ -7098,7 +7098,7 @@ onMouseEnter={(e) => {
         )}
       </div>
       
-     <input
+    <input
         style={styles.input}
         placeholder="Service Type (e.g., Oil Change, Repair)"
         value={serviceForm.serviceType}
@@ -7123,6 +7123,29 @@ onMouseEnter={(e) => {
     }}>
       Date
     </span>
+  )}
+  {isIOSDevice() && serviceForm.date && (
+    <button
+      type="button"
+      onClick={() => setServiceForm({ ...serviceForm, date: '' })}
+      style={{
+        position: 'absolute',
+        right: '12px',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        background: 'transparent',
+        border: 'none',
+        color: '#9ca3af',
+        fontSize: '1.1rem',
+        cursor: 'pointer',
+        padding: '4px',
+        lineHeight: 1,
+        zIndex: 2
+      }}
+      title="Clear date"
+    >
+      ✕
+    </button>
   )}
 </div>
 <TechnicianField
@@ -9912,7 +9935,7 @@ onMouseEnter={(e) => {
         </div>
       )}
     </div>
-   <input
+  <input
       style={styles.input}
       placeholder="Service Type (e.g., Oil Change, Repair, Inspection)"
       value={serviceForm.serviceType}
@@ -9937,6 +9960,29 @@ onMouseEnter={(e) => {
     }}>
       Date
     </span>
+  )}
+  {isIOSDevice() && serviceForm.date && (
+    <button
+      type="button"
+      onClick={() => setServiceForm({ ...serviceForm, date: '' })}
+      style={{
+        position: 'absolute',
+        right: '12px',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        background: 'transparent',
+        border: 'none',
+        color: '#9ca3af',
+        fontSize: '1.1rem',
+        cursor: 'pointer',
+        padding: '4px',
+        lineHeight: 1,
+        zIndex: 2
+      }}
+      title="Clear date"
+    >
+      ✕
+    </button>
   )}
 </div>
 <TechnicianField
