@@ -1960,11 +1960,11 @@ const addServiceRecord = async () => {
     return;
   }
 
-  setSavingService(true);
+setSavingService(true);
   
   // Generate the ID ONCE — before the try block so it never changes on retry
   const newId = Date.now().toString() + Math.random().toString(36).slice(2, 6);
-  const finalDate = serviceForm.date || new Date().toISOString().split('T')[0];
+  const finalDate = serviceForm.date || null; // leave blank if no date was selected — do not default to today
 
   try {
     let error = null;
