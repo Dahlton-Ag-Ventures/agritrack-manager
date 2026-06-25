@@ -327,6 +327,7 @@ const [serviceForm, setServiceForm] = useState({
   // Photo upload state
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [savingService, setSavingService] = useState(false);
+  const [loadingPhotosId, setLoadingPhotosId] = useState(null);
   const [savingInventory, setSavingInventory] = useState(false);
   const [savingMachinery, setSavingMachinery] = useState(false);
   const [inventorySaveConfirmed, setInventorySaveConfirmed] = useState(false);
@@ -756,7 +757,7 @@ let allServiceRecords = [];
     while (hasMoreService) {
       let { data: serviceData, error: servError } = await supabase
         .from('service_records')
-        .select('*')
+        .select('id, user_id, machine_name, service_type, date, notes, technician')
         .order('date', { ascending: false })
         .range(servicePage * pageSize, (servicePage + 1) * pageSize - 1);
 
@@ -765,13 +766,12 @@ let allServiceRecords = [];
         await new Promise(r => setTimeout(r, 1000));
         const retry = await supabase
           .from('service_records')
-          .select('*')
+          .select('id, user_id, machine_name, service_type, date, notes, technician')
           .order('date', { ascending: false })
           .range(servicePage * pageSize, (servicePage + 1) * pageSize - 1);
         serviceData = retry.data;
         servError = retry.error;
       }
-
       if (servError) {
         console.error('❌ Service records load error:', servError);
         throw servError;
@@ -788,28 +788,11 @@ let allServiceRecords = [];
     
     console.log(`✅ Loaded ${allServiceRecords.length} service records from database`);
     
-    const mappedServiceRecords = [];
+   const mappedServiceRecords = [];
     let skippedRecords = 0;
     
     for (const item of allServiceRecords) {
       try {
-        let photoUrls = [];
-        
-if (item.photo_urls) {
-  try {
-    photoUrls = JSON.parse(item.photo_urls);
-  } catch (parseError) {
-    if (typeof item.photo_urls === 'string' && item.photo_urls.trim().length > 0) {
-      photoUrls = [item.photo_urls];
-    } else {
-      console.warn(`⚠️ Could not parse photo_urls for record ${item.id}:`, parseError);
-      photoUrls = [];
-    }
-  }
-} else if (item.photo_url) {
-  photoUrls = [item.photo_url];
-}
-        
         mappedServiceRecords.push({
           id: item.id,
           machineName: item.machine_name || '',
@@ -817,7 +800,7 @@ if (item.photo_urls) {
           date: item.date || '',
           notes: item.notes || '',
           technician: item.technician || '',
-          photoUrls: photoUrls
+          photoUrls: [] // fetched on demand now — see handleOpenPhotos
         });
       } catch (recordError) {
         console.error(`❌ Error mapping service record ${item.id}:`, recordError);
@@ -2049,7 +2032,53 @@ const deleteServiceRecord = async (id) => {
     alert('Error: ' + error.message);
   }
 };
-const startEditService = (record) => {
+
+// Fetch photos for ONE record only — replaces bulk-loading photos for everything
+const fetchRecordPhotos = async (recordId) => {
+  const { data, error } = await supabase
+    .from('service_records')
+    .select('photo_urls, photo_url')
+    .eq('id', recordId)
+    .single();
+
+  if (error) throw error;
+
+  let photoUrls = [];
+  if (data.photo_urls) {
+    try {
+      photoUrls = JSON.parse(data.photo_urls);
+    } catch (parseError) {
+      if (typeof data.photo_urls === 'string' && data.photo_urls.trim().length > 0) {
+        photoUrls = [data.photo_urls];
+      }
+    }
+  } else if (data.photo_url) {
+    photoUrls = [data.photo_url];
+  }
+
+  return photoUrls;
+};
+
+const handleOpenPhotos = async (record) => {
+  setLoadingPhotosId(record.id);
+  try {
+    const photoUrls = await fetchRecordPhotos(record.id);
+    if (photoUrls.length === 0) {
+      alert('No photos attached to this service record.');
+      return;
+    }
+    setViewingImage(photoUrls[0]);
+    setViewingImageArray(photoUrls);
+    setViewingImageIndex(0);
+    setImageModalTitle(`${record.machineName} - ${record.serviceType}`);
+  } catch (error) {
+    console.error('Error loading photos:', error);
+    alert('Failed to load photos: ' + error.message);
+  } finally {
+    setLoadingPhotosId(null);
+  }
+};
+const startEditService = async (record) => {
   isEditingRef.current = true;
   setEditingServiceId(record.id);
   setServiceForm({
@@ -2058,8 +2087,15 @@ const startEditService = (record) => {
     date: record.date || '',
     notes: record.notes || '',
     technician: record.technician || '',
-    photoUrls: record.photoUrls || []
+    photoUrls: []
   });
+
+  try {
+    const photoUrls = await fetchRecordPhotos(record.id);
+    setServiceForm(prev => ({ ...prev, photoUrls }));
+  } catch (error) {
+    console.error('Error loading existing photos for edit:', error);
+  }
 };
 
 const saveServiceEdit = async (id) => {
@@ -7324,56 +7360,52 @@ onMouseEnter={(e) => {
   ) : (
     <>
       {/* Left side - Photo Button instead of photo grid */}
-      <div style={{ 
+     <div style={{ 
         marginRight: '16px',
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column',
         gap: '8px'
       }}>
-        {/* Photo Button - only show if photos exist */}
-        {record.photoUrls && record.photoUrls.length > 0 && (
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setViewingImage(record.photoUrls[0]);
-              setViewingImageArray(record.photoUrls);
-              setViewingImageIndex(0);
-              setImageModalTitle(`${record.machineName} - ${record.serviceType}`);
-            }}
-            style={{
-            padding: '12px 16px',
-            background: theme === 'light' ? '#bae6fd' : '#8b5cf6',
-            border: 'none',
-            borderRadius: '8px',
-            color: theme === 'light' ? '#0c4a6e' : 'white',
-              cursor: 'pointer',
-              fontSize: '0.875rem',
-              fontWeight: 'bold',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-              minWidth: '100px',
-              transition: 'all 0.2s ease'
-            }}
-           onMouseEnter={(e) => {
+        {/* Photo button always shown now — photos fetch on click */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleOpenPhotos(record);
+          }}
+          disabled={loadingPhotosId === record.id}
+          style={{
+          padding: '12px 16px',
+          background: theme === 'light' ? '#bae6fd' : '#8b5cf6',
+          border: 'none',
+          borderRadius: '8px',
+          color: theme === 'light' ? '#0c4a6e' : 'white',
+            cursor: loadingPhotosId === record.id ? 'not-allowed' : 'pointer',
+            fontSize: '0.875rem',
+            fontWeight: 'bold',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px',
+            minWidth: '100px',
+            transition: 'all 0.2s ease',
+            opacity: loadingPhotosId === record.id ? 0.6 : 1
+          }}
+         onMouseEnter={(e) => {
+            if (loadingPhotosId !== record.id) {
               e.target.style.background = theme === 'light' ? '#7dd3fc' : '#7c3aed';
               e.target.style.transform = 'scale(1.05)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = theme === 'light' ? '#bae6fd' : '#8b5cf6';
-              e.target.style.transform = 'scale(1)';
-            }}
-          >
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = theme === 'light' ? '#bae6fd' : '#8b5cf6';
+            e.target.style.transform = 'scale(1)';
+          }}
+        >
 <span style={{ fontSize: '1.5rem' }}>📸</span>
-<span>Open Photos</span>
-<span style={{ fontSize: '0.75rem', opacity: 0.9 }}>
-  ({record.photoUrls.length} photo{record.photoUrls.length !== 1 ? 's' : ''})
-</span>
-          </button>
-        )}
+<span>{loadingPhotosId === record.id ? 'Loading...' : 'View Photos'}</span>
+        </button>
         
         {/* Mobile Edit/Delete Buttons */}
         {!isDesktop && userRole !== 'employee' && (
