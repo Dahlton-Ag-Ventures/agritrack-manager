@@ -4524,12 +4524,12 @@ return (
               const cat = item.category || 'Uncategorized';
               if (cat !== lastCategory) {
                 lastCategory = cat;
-                result.push(
+                  result.push(
                   <div key={`header-${cat}-${index}`} style={{
                     background: currentTheme.cardBackground,
                     padding: '5px 14px',
-                    borderTop: `0.5px solid ${currentTheme.cardBorder}`,
-                    borderBottom: `0.5px solid ${currentTheme.cardBorder}`,
+                    border: `0.5px solid ${currentTheme.cardBorder}`,
+                    borderRadius: '12px',
                     fontSize: '12px',
                     fontWeight: '500',
                     color: currentTheme.textSecondary,
