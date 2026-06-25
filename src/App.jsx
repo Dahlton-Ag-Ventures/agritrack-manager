@@ -2037,7 +2037,7 @@ const deleteServiceRecord = async (id) => {
 const fetchRecordPhotos = async (recordId) => {
   const { data, error } = await supabase
     .from('service_records')
-    .select('photo_urls, photo_url')
+    .select('photo_urls')
     .eq('id', recordId)
     .single();
 
@@ -2052,8 +2052,6 @@ const fetchRecordPhotos = async (recordId) => {
         photoUrls = [data.photo_urls];
       }
     }
-  } else if (data.photo_url) {
-    photoUrls = [data.photo_url];
   }
 
   return photoUrls;
