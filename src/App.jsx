@@ -10732,8 +10732,6 @@ onMouseEnter={(e) => {
           disabled={savingSafety}
           style={{
             ...styles.primaryButton,
-                     style={{
-            ...styles.primaryButton,
             background: theme === 'light' ? '#fde68a' : '#b45309',
             color: theme === 'light' ? '#78350f' : 'white',
             opacity: savingSafety ? 0.6 : 1,
