@@ -1,7 +1,7 @@
 // BUILD VERSION: 2026-06-11-v3
 import React, { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut, ChevronDown, Wrench, Mail, Wifi, WifiOff } from 'lucide-react';
+import { Plus, Trash2, Package, Truck, Users, AlertCircle, RefreshCw, Edit2, Save, X, LogOut, ChevronDown, Wrench, Mail, Wifi, WifiOff, ShieldCheck } from 'lucide-react';
 
 const styleSheet = document.createElement("style");
 styleSheet.innerText = `
@@ -237,6 +237,8 @@ const getTrackingType = (machine) => {
   return CATEGORY_TRACKING_TYPE[machine.category] || 'hours';
 };
 
+const SAFETY_CATEGORIES = ['Heavy Trucks', 'Trailers'];
+
 const isIOSDevice = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
 export default function App() {
@@ -266,6 +268,10 @@ export default function App() {
   const isEditingRef = useRef(false);
   const recentlyUpdatedIdsRef = useRef(new Set());
   const [showRemindersPanel, setShowRemindersPanel] = useState(false);
+  const [showSafetyPanel, setShowSafetyPanel] = useState(false);
+  useEffect(() => {
+    if (showRemindersPanel) setShowSafetyPanel(false);
+  }, [showRemindersPanel]);
   const [showCompleteReminderModal, setShowCompleteReminderModal] = useState(false);
   const [completingReminder, setCompletingReminder] = useState(null);
   const [showDeletedRemindersModal, setShowDeletedRemindersModal] = useState(false);
@@ -3741,6 +3747,7 @@ return (
   setActiveTab(tab);
   if (tab === 'machinery') {
     setShowRemindersPanel(false);
+    setShowSafetyPanel(false);
   }
 }}
       style={{
@@ -5186,6 +5193,42 @@ onMouseEnter={(e) => {
 >
   <Wrench size={16} /> {showRemindersPanel ? 'Hide' : (isDesktop ? 'Show Service Reminders' : 'Show')}
 </button>
+{machinery.some(m => SAFETY_CATEGORIES.includes(m.category)) && (
+<button
+  onClick={() => {
+    setShowSafetyPanel(!showSafetyPanel);
+    setShowRemindersPanel(false);
+  }}
+  style={{
+    padding: '10px 16px',
+    background: theme === 'light' ? '#86efac' : '#10b981',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '0.875rem',
+    fontWeight: 'bold',
+    color: theme === 'light' ? '#14532d' : 'white',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    whiteSpace: 'nowrap',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.transform = 'translateY(-2px)';
+    e.currentTarget.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.4)';
+    e.currentTarget.style.background = theme === 'light' ? '#4ade80' : '#059669';
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.transform = 'translateY(0)';
+    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+    e.currentTarget.style.background = theme === 'light' ? '#86efac' : '#10b981';
+  }}
+>
+  <ShieldCheck size={16} /> {showSafetyPanel ? (isDesktop ? 'Hide Safety Reminders' : 'Hide') : (isDesktop ? 'Show Safety Reminders' : 'Safety')}
+</button>
+)}
     {userRole !== 'employee' && (
 <button 
   onClick={() => {
@@ -5999,8 +6042,27 @@ whiteSpace: 'nowrap'
   </div>
 )}
 
+{/* SAFETY REMINDERS PANEL - Heavy Trucks & Trailers only */}
+{showSafetyPanel && (
+  <div style={{
+    background: theme === 'dark' ? 'rgba(139, 92, 246, 0.1)' : '#ffffff',
+    border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
+    borderRadius: '12px',
+    padding: '24px',
+    marginBottom: '24px'
+  }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+      <h3 style={{ fontSize: '1.5rem', color: theme === 'light' ? '#111827' : '#a78bfa', margin: 0 }}>🛡️ Safety Reminders</h3>
+    </div>
+    <div style={styles.emptyState}>
+      <ShieldCheck size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+      <p>No safety reminders set yet</p>
+    </div>
+  </div>
+)}
+
 {/* Only show machinery list when reminders panel is hidden */}
-{!showRemindersPanel && (
+{!showRemindersPanel && !showSafetyPanel && (
   <>
      {machinery.length === 0 ? (
   <div style={styles.emptyState}>
