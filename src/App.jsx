@@ -6184,10 +6184,9 @@ whiteSpace: 'nowrap'
 
       const statusConfig = {
         overdue:    { label: '⚠️ OVERDUE',  color: '#ef4444', border: '#fca5a5', bgLight: '#ffffff', bgDark: 'rgba(239, 68, 68, 0.1)',  accent: '5px solid #ef4444' },
-        'due-soon': { label: '⏳ DUE SOON', color: theme === 'light' ? '#d97706' : '#f59e0b', border: '#fcd34d', bgLight: '#fffbeb', bgDark: 'rgba(245, 158, 11, 0.1)', accent: '5px solid #f59e0b' },
-        upcoming:   { label: '✓ UPCOMING',  color: '#8b5cf6', border: theme === 'light' ? '#ddd6fe' : '#8b5cf6', bgLight: '#f5f3ff', bgDark: currentTheme.cardBackground, accent: undefined },
+        'due-soon': { label: '⏳ DUE SOON', color: theme === 'light' ? '#c2410c' : '#fb923c', border: theme === 'light' ? '#fdba74' : '#f97316', bgLight: '#fff7ed', bgDark: 'rgba(249, 115, 22, 0.12)', accent: '5px solid #f97316' },
+        upcoming:   { label: '✓ UPCOMING',  color: theme === 'light' ? '#92400e' : '#fbbf24', border: theme === 'light' ? '#fcd34d' : '#b45309', bgLight: '#fffbeb', bgDark: 'rgba(180, 83, 9, 0.15)', accent: undefined },
       };
-
       return (
         <div style={styles.itemsList}>
           {safetyReminders.map(reminder => {
