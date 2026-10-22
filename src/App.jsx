@@ -305,6 +305,9 @@ export default function App() {
   const [showSafetyReminderModal, setShowSafetyReminderModal] = useState(false);
   const [safetyForm, setSafetyForm] = useState({ machineName: '', lastSafetyDate: '', intervalMonths: '12' });
   const [savingSafety, setSavingSafety] = useState(false);
+  const [showDeletedSafetyModal, setShowDeletedSafetyModal] = useState(false);
+  const [deletedSafetyReminders, setDeletedSafetyReminders] = useState([]);
+  const [restoringSafetyId, setRestoringSafetyId] = useState(null);
   useEffect(() => {
     if (showRemindersPanel) setShowSafetyPanel(false);
   }, [showRemindersPanel]);
@@ -2474,6 +2477,7 @@ const loadDeletedReminders = async () => {
       .from('service_reminders')
       .select('*')
       .not('deleted_at', 'is', null)
+      .or('reminder_type.is.null,reminder_type.neq.safety')
       .order('deleted_at', { ascending: false });
     if (error) { alert('Failed to load deleted reminders'); return; }
     setDeletedReminders(data || []);
@@ -2613,6 +2617,62 @@ const createSafetyReminder = async () => {
     alert('Failed to create safety reminder: ' + error.message);
   } finally {
     setSavingSafety(false);
+  }
+};
+
+const loadDeletedSafetyReminders = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('service_reminders')
+      .select('*')
+      .eq('reminder_type', 'safety')
+      .not('deleted_at', 'is', null)
+      .order('deleted_at', { ascending: false });
+    if (error) { alert('Failed to load deleted safety reminders: ' + error.message); return; }
+    setDeletedSafetyReminders(data || []);
+    setShowDeletedSafetyModal(true);
+  } catch (error) {
+    alert('Failed to load deleted safety reminders');
+  }
+};
+
+const restoreSafetyReminder = async (reminder) => {
+  if (restoringSafetyId) return;
+  const conflictMessage = `${reminder.machine_name} already has a safety reminder. Delete that one first.`;
+  const hasActive = serviceReminders.some(r =>
+    r.machine_name === reminder.machine_name && r.reminder_type === 'safety' && !r.deleted_at && r.id !== reminder.id
+  );
+  if (hasActive) { alert(conflictMessage); return; }
+
+  setRestoringSafetyId(reminder.id);
+  try {
+    const updates = { deleted_at: null, is_active: true };
+    const { error } = await supabase.from('service_reminders').update(updates).eq('id', reminder.id);
+    if (error) {
+      alert(error.code === '23505' ? conflictMessage : 'Failed to restore safety reminder: ' + error.message);
+      return;
+    }
+    setServiceReminders(prev => prev.some(r => r.id === reminder.id)
+      ? prev.map(r => r.id === reminder.id ? { ...r, ...updates } : r)
+      : [...prev, { ...reminder, ...updates }]
+    );
+    setDeletedSafetyReminders(prev => prev.filter(r => r.id !== reminder.id));
+  } catch (error) {
+    alert('Failed to restore safety reminder');
+  } finally {
+    setRestoringSafetyId(null);
+  }
+};
+
+const permanentlyDeleteSafetyReminder = async (reminder) => {
+  if (!confirm(`Permanently delete the safety reminder for ${reminder.machine_name}? This cannot be undone.`)) return;
+  try {
+    const { error } = await supabase.from('service_reminders').delete().eq('id', reminder.id);
+    if (error) { alert('Failed to delete: ' + error.message); return; }
+    setServiceReminders(prev => prev.filter(r => r.id !== reminder.id));
+    setDeletedSafetyReminders(prev => prev.filter(r => r.id !== reminder.id));
+  } catch (error) {
+    alert('Failed to delete safety reminder');
   }
 };
 
@@ -6142,7 +6202,29 @@ whiteSpace: 'nowrap'
     marginBottom: '24px'
   }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
         <h3 style={{ fontSize: '1.5rem', color: theme === 'light' ? '#111827' : '#a78bfa', margin: 0 }}>🛡️ Safety Reminders</h3>
+        {userRole !== 'employee' && (
+          <button
+            onClick={loadDeletedSafetyReminders}
+            style={{
+              padding: '6px 14px',
+              background: theme === 'light' ? '#fee2e2' : 'rgba(239, 68, 68, 0.15)',
+              border: '1px solid #ef4444',
+              borderRadius: '8px',
+              color: '#ef4444',
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontWeight: 'bold'
+            }}
+          >
+            <Trash2 size={14} /> View Deleted
+          </button>
+        )}
+      </div>
            {userRole !== 'employee' && (
         <button
           onClick={openSafetyReminderModal}
@@ -6232,12 +6314,23 @@ whiteSpace: 'nowrap'
                       <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Due Date</p>
                       <p>{formatSafetyDate(reminder.dueDate)}</p>
                     </div>
-                    <div>
+                                       <div>
                       <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Status</p>
                       <p style={{ fontWeight: 'bold', color: s.color }}>{getSafetyStatusText(reminder.daysLeft)}</p>
                     </div>
                   </div>
                 </div>
+                {userRole !== 'employee' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <button
+                      onClick={() => deleteReminder(reminder.id)}
+                      style={styles.deleteButton}
+                      title="Delete safety reminder"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -10627,6 +10720,107 @@ onMouseEnter={(e) => {
   </Modal>
 )}
       
+{/* Deleted Safety Reminders Modal */}
+{showDeletedSafetyModal && (
+  <Modal
+    title="🗑️ Deleted Safety Reminders"
+    theme={theme}
+    onClose={() => setShowDeletedSafetyModal(false)}
+  >
+    {deletedSafetyReminders.length === 0 ? (
+      <div style={{ textAlign: 'center', padding: '24px' }}>
+        <p style={{ fontSize: '2rem', marginBottom: '8px' }}>🛡️</p>
+        <p style={{ color: theme === 'light' ? '#6b7280' : '#9ca3af' }}>No deleted safety reminders found</p>
+      </div>
+    ) : (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <p style={{ color: theme === 'light' ? '#6b7280' : '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+          {deletedSafetyReminders.length} deleted safety reminder{deletedSafetyReminders.length !== 1 ? 's' : ''} found. Restore any to bring them back.
+        </p>
+        {deletedSafetyReminders.map(reminder => {
+          const months = parseInt(reminder.interval_months, 10) || 12;
+          const isBusy = restoringSafetyId === reminder.id;
+          return (
+            <div key={reminder.id} style={{
+              padding: '16px',
+              background: theme === 'light' ? '#f9fafb' : 'rgba(255,255,255,0.05)',
+              border: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+              borderRadius: '10px',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontWeight: 'bold', fontSize: '0.95rem', marginBottom: '4px', color: theme === 'light' ? '#111827' : 'white', wordBreak: 'break-word' }}>
+                    {reminder.machine_name}
+                  </p>
+                  <p style={{ color: theme === 'light' ? '#92400e' : '#fbbf24', fontSize: '0.875rem', marginBottom: '8px' }}>
+                    {reminder.reminder_name || 'Safety Inspection'}
+                  </p>
+                  <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.75rem' }}>Last Inspection</p>
+                      <p style={{ fontSize: '0.85rem', color: theme === 'light' ? '#111827' : 'white' }}>
+                        {formatSafetyDate(addMonthsToDate(reminder.last_safety_date, 0))}
+                      </p>
+                    </div>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.75rem' }}>Interval</p>
+                      <p style={{ fontSize: '0.85rem', color: theme === 'light' ? '#111827' : 'white' }}>
+                        Every {months} month{months === 1 ? '' : 's'}
+                      </p>
+                    </div>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.75rem' }}>Deleted</p>
+                      <p style={{ fontSize: '0.85rem', color: theme === 'light' ? '#111827' : 'white' }}>
+                        {new Date(reminder.deleted_at).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <button
+                    onClick={() => restoreSafetyReminder(reminder)}
+                    disabled={isBusy}
+                    style={{
+                      padding: '10px 16px',
+                      background: isBusy ? '#6b7280' : 'linear-gradient(to right, #10b981, #06b6d4)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      color: 'white',
+                      cursor: isBusy ? 'not-allowed' : 'pointer',
+                      fontSize: '0.875rem',
+                      fontWeight: 'bold',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {isBusy ? 'Restoring...' : '↺ Restore'}
+                  </button>
+                  <button
+                    onClick={() => permanentlyDeleteSafetyReminder(reminder)}
+                    disabled={isBusy}
+                    style={{
+                      padding: '10px 16px',
+                      background: isBusy ? '#6b7280' : '#7f1d1d',
+                      border: 'none',
+                      borderRadius: '8px',
+                      color: 'white',
+                      cursor: isBusy ? 'not-allowed' : 'pointer',
+                      fontSize: '0.875rem',
+                      fontWeight: 'bold',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    🗑️ Delete Forever
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    )}
+  </Modal>
+)}
+
 {/* Create Safety Reminder Modal */}
 {showSafetyReminderModal && (() => {
   const eligibleMachines = machinery
