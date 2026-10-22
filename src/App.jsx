@@ -239,6 +239,18 @@ const getTrackingType = (machine) => {
 
 const SAFETY_CATEGORIES = ['Heavy Trucks', 'Trailers'];
 
+// Adds months to a 'YYYY-MM-DD' date. Jan 31 + 1 month lands on Feb 28/29, not Mar 3.
+const addMonthsToDate = (dateStr, months) => {
+  if (!dateStr) return null;
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const result = new Date(y, m - 1 + months, d);
+  if (result.getDate() !== d) result.setDate(0);
+  return result;
+};
+
+const formatSafetyDate = (date) =>
+  date ? date.toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+
 const isIOSDevice = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
 export default function App() {
@@ -269,6 +281,9 @@ export default function App() {
   const recentlyUpdatedIdsRef = useRef(new Set());
   const [showRemindersPanel, setShowRemindersPanel] = useState(false);
   const [showSafetyPanel, setShowSafetyPanel] = useState(false);
+  const [showSafetyReminderModal, setShowSafetyReminderModal] = useState(false);
+  const [safetyForm, setSafetyForm] = useState({ machineName: '', lastSafetyDate: '', intervalMonths: '12' });
+  const [savingSafety, setSavingSafety] = useState(false);
   useEffect(() => {
     if (showRemindersPanel) setShowSafetyPanel(false);
   }, [showRemindersPanel]);
@@ -2523,6 +2538,60 @@ const deleteReminder = async (reminderId) => {
   } catch (error) {
     console.error('Error deleting reminder:', error);
     alert('Failed to delete reminder');
+  }
+};
+
+const openSafetyReminderModal = () => {
+  setSafetyForm({ machineName: '', lastSafetyDate: '', intervalMonths: '12' });
+  setShowSafetyReminderModal(true);
+};
+
+const createSafetyReminder = async () => {
+  if (savingSafety) return;
+  const months = parseInt(safetyForm.intervalMonths, 10);
+  if (!safetyForm.machineName || !safetyForm.lastSafetyDate) {
+    alert('Please select a machine and enter the last safety inspection date');
+    return;
+  }
+  if (isNaN(months) || months < 1) {
+    alert('Interval must be at least 1 month');
+    return;
+  }
+  const todayStr = new Date().toLocaleDateString('en-CA');
+  if (safetyForm.lastSafetyDate > todayStr) {
+    alert('The last safety inspection date can\'t be in the future');
+    return;
+  }
+
+  setSavingSafety(true);
+  try {
+    const { error } = await supabase.from('service_reminders').insert([{
+      machine_name: safetyForm.machineName,
+      reminder_name: 'Safety Inspection',
+      reminder_type: 'safety',
+      last_safety_date: safetyForm.lastSafetyDate,
+      interval_months: months,
+      is_active: true,
+      user_id: user.id
+    }]);
+
+    if (error) {
+      if (error.code === '23505') {
+        alert(`${safetyForm.machineName} already has a safety reminder.`);
+      } else {
+        console.error('❌ createSafetyReminder error:', error);
+        alert('Failed to create safety reminder: ' + error.message);
+      }
+      return;
+    }
+
+    setShowSafetyReminderModal(false);
+    setSafetyForm({ machineName: '', lastSafetyDate: '', intervalMonths: '12' });
+  } catch (error) {
+    console.error('❌ createSafetyReminder catch:', error);
+    alert('Failed to create safety reminder: ' + error.message);
+  } finally {
+    setSavingSafety(false);
   }
 };
 
@@ -5496,6 +5565,28 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
         <Plus size={16} /> Create km Reminder
       </button>
     )}
+    {machinery.some(m => SAFETY_CATEGORIES.includes(m.category)) && (
+      <button
+        onClick={openSafetyReminderModal}
+        style={{
+          padding: '10px 20px',
+          background: '#8b5cf6',
+          border: 'none',
+          borderRadius: '8px',
+          color: 'white',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '0.875rem',
+          transition: 'all 0.2s ease'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.background = '#7c3aed'}
+        onMouseLeave={(e) => e.currentTarget.style.background = '#8b5cf6'}
+      >
+        <Plus size={16} /> Create Safety Reminder
+      </button>
+    )}
   </div>
 )}
     </div>
@@ -6052,7 +6143,29 @@ whiteSpace: 'nowrap'
     marginBottom: '24px'
   }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-      <h3 style={{ fontSize: '1.5rem', color: theme === 'light' ? '#111827' : '#a78bfa', margin: 0 }}>🛡️ Safety Reminders</h3>
+        <h3 style={{ fontSize: '1.5rem', color: theme === 'light' ? '#111827' : '#a78bfa', margin: 0 }}>🛡️ Safety Reminders</h3>
+      {userRole !== 'employee' && (
+        <button
+          onClick={openSafetyReminderModal}
+          style={{
+            padding: '10px 20px',
+            background: '#8b5cf6',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontSize: '0.875rem',
+            transition: 'all 0.2s ease'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = '#7c3aed'}
+          onMouseLeave={(e) => e.currentTarget.style.background = '#8b5cf6'}
+        >
+          <Plus size={16} /> Create Safety Reminder
+        </button>
+      )}
     </div>
     <div style={styles.emptyState}>
       <ShieldCheck size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
@@ -10441,6 +10554,103 @@ onMouseEnter={(e) => {
   </Modal>
 )}
       
+{/* Create Safety Reminder Modal */}
+{showSafetyReminderModal && (() => {
+  const eligibleMachines = machinery
+    .filter(m => SAFETY_CATEGORIES.includes(m.category))
+    .filter(m => !serviceReminders.some(r =>
+      r.machine_name === m.name && r.reminder_type === 'safety' && !r.deleted_at
+    ))
+    .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+  const months = parseInt(safetyForm.intervalMonths, 10);
+  const dueDate = (safetyForm.lastSafetyDate && months >= 1)
+    ? addMonthsToDate(safetyForm.lastSafetyDate, months)
+    : null;
+  const dueSoonDate = dueDate ? new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate() - 30) : null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const alreadyOverdue = dueDate && dueDate <= today;
+  const labelStyle = { display: 'block', color: '#9ca3af', fontSize: '0.8rem', marginBottom: '4px' };
+
+  return (
+    <Modal title="Create Safety Reminder" theme={theme} onClose={() => setShowSafetyReminderModal(false)}>
+      <label style={labelStyle}>Machine (Heavy Trucks and Trailers only)</label>
+      <select
+        style={styles.input}
+        value={safetyForm.machineName}
+        onChange={(e) => setSafetyForm({ ...safetyForm, machineName: e.target.value })}
+      >
+        <option value="">-- Select Machine --</option>
+        {eligibleMachines.map(machine => (
+          <option key={machine.id} value={machine.name}>
+            {machine.name} ({machine.category})
+          </option>
+        ))}
+      </select>
+      {eligibleMachines.length === 0 && (
+        <p style={{ color: '#9ca3af', fontSize: '0.8rem', marginTop: '-8px', marginBottom: '16px' }}>
+          Every heavy truck and trailer already has a safety reminder.
+        </p>
+      )}
+
+      <label style={labelStyle}>Last safety inspection date</label>
+      <input
+        type="date"
+        style={{ ...styles.input, fontFamily: 'inherit' }}
+        value={safetyForm.lastSafetyDate}
+        max={new Date().toLocaleDateString('en-CA')}
+        onChange={(e) => setSafetyForm({ ...safetyForm, lastSafetyDate: e.target.value })}
+      />
+
+      <label style={labelStyle}>Interval (months)</label>
+      <input
+        type="number"
+        min="1"
+        step="1"
+        style={styles.input}
+        value={safetyForm.intervalMonths}
+        onChange={(e) => setSafetyForm({ ...safetyForm, intervalMonths: e.target.value })}
+      />
+
+      {dueDate && (
+        <div style={{
+          padding: '12px 14px',
+          marginBottom: '16px',
+          borderRadius: '8px',
+          fontSize: '0.875rem',
+          background: alreadyOverdue ? 'rgba(239, 68, 68, 0.12)' : 'rgba(139, 92, 246, 0.12)',
+          border: `1px solid ${alreadyOverdue ? '#ef4444' : '#8b5cf6'}`,
+          color: theme === 'light' ? '#111827' : 'white'
+        }}>
+          Next due: <strong>{formatSafetyDate(dueDate)}</strong>
+          {alreadyOverdue
+            ? <span style={{ color: '#ef4444', fontWeight: 'bold' }}> · Already overdue</span>
+            : <> · Due soon from {formatSafetyDate(dueSoonDate)}</>}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: '12px' }}>
+        <button
+          onClick={createSafetyReminder}
+          disabled={savingSafety}
+          style={{
+            ...styles.primaryButton,
+            background: '#8b5cf6',
+            opacity: savingSafety ? 0.6 : 1,
+            cursor: savingSafety ? 'not-allowed' : 'pointer'
+          }}
+        >
+          {savingSafety ? 'Saving...' : 'Create Reminder'}
+        </button>
+        <button onClick={() => setShowSafetyReminderModal(false)} style={styles.secondaryButton}>
+          Cancel
+        </button>
+      </div>
+    </Modal>
+  );
+})()}
+
 {/* Hours Detail Modal */}
 {showHoursDetailModal && selectedHoursRecord && (
   <Modal title={selectedHoursRecord.machine.name} theme={theme} onClose={() => setShowHoursDetailModal(false)}>
