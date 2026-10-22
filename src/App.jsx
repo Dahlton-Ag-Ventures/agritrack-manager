@@ -251,6 +251,27 @@ const addMonthsToDate = (dateStr, months) => {
 const formatSafetyDate = (date) =>
   date ? date.toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
 
+// Works out due date, days left, and status for a safety reminder.
+// Overdue = on or after the due date. Due soon = within 30 days of it.
+const getSafetyStatus = (reminder) => {
+  const months = parseInt(reminder.interval_months, 10) || 12;
+  const lastDate = addMonthsToDate(reminder.last_safety_date, 0);
+  const dueDate = addMonthsToDate(reminder.last_safety_date, months);
+  if (!dueDate) return { lastDate: null, dueDate: null, daysLeft: null, months, status: 'upcoming' };
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const daysLeft = Math.round((dueDate - today) / 86400000);
+  const status = daysLeft <= 0 ? 'overdue' : daysLeft <= 30 ? 'due-soon' : 'upcoming';
+  return { lastDate, dueDate, daysLeft, months, status };
+};
+
+const getSafetyStatusText = (daysLeft) => {
+  if (daysLeft === null) return '—';
+  if (daysLeft === 0) return 'Due today';
+  if (daysLeft < 0) return `${Math.abs(daysLeft)} day${Math.abs(daysLeft) === 1 ? '' : 's'} overdue`;
+  return `${daysLeft} day${daysLeft === 1 ? '' : 's'} left`;
+};
+
 const isIOSDevice = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
 export default function App() {
@@ -5565,15 +5586,15 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
         <Plus size={16} /> Create km Reminder
       </button>
     )}
-    {machinery.some(m => SAFETY_CATEGORIES.includes(m.category)) && (
+       {machinery.some(m => SAFETY_CATEGORIES.includes(m.category)) && (
       <button
         onClick={openSafetyReminderModal}
         style={{
           padding: '10px 20px',
-          background: '#8b5cf6',
+          background: theme === 'light' ? '#fde68a' : '#b45309',
           border: 'none',
           borderRadius: '8px',
-          color: 'white',
+          color: theme === 'light' ? '#78350f' : 'white',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
@@ -5581,8 +5602,8 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
           fontSize: '0.875rem',
           transition: 'all 0.2s ease'
         }}
-        onMouseEnter={(e) => e.currentTarget.style.background = '#7c3aed'}
-        onMouseLeave={(e) => e.currentTarget.style.background = '#8b5cf6'}
+        onMouseEnter={(e) => e.currentTarget.style.background = theme === 'light' ? '#fcd34d' : '#92400e'}
+        onMouseLeave={(e) => e.currentTarget.style.background = theme === 'light' ? '#fde68a' : '#b45309'}
       >
         <Plus size={16} /> Create Safety Reminder
       </button>
@@ -6144,15 +6165,15 @@ whiteSpace: 'nowrap'
   }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
         <h3 style={{ fontSize: '1.5rem', color: theme === 'light' ? '#111827' : '#a78bfa', margin: 0 }}>🛡️ Safety Reminders</h3>
-      {userRole !== 'employee' && (
+           {userRole !== 'employee' && (
         <button
           onClick={openSafetyReminderModal}
           style={{
             padding: '10px 20px',
-            background: '#8b5cf6',
+            background: theme === 'light' ? '#fde68a' : '#b45309',
             border: 'none',
             borderRadius: '8px',
-            color: 'white',
+            color: theme === 'light' ? '#78350f' : 'white',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -6160,17 +6181,92 @@ whiteSpace: 'nowrap'
             fontSize: '0.875rem',
             transition: 'all 0.2s ease'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.background = '#7c3aed'}
-          onMouseLeave={(e) => e.currentTarget.style.background = '#8b5cf6'}
+          onMouseEnter={(e) => e.currentTarget.style.background = theme === 'light' ? '#fcd34d' : '#92400e'}
+          onMouseLeave={(e) => e.currentTarget.style.background = theme === 'light' ? '#fde68a' : '#b45309'}
         >
           <Plus size={16} /> Create Safety Reminder
         </button>
       )}
     </div>
-    <div style={styles.emptyState}>
-      <ShieldCheck size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
-      <p>No safety reminders set yet</p>
-    </div>
+    {(() => {
+      const visibleNames = getFilteredAndSortedMachinery().map(m => m.name);
+      const safetyReminders = serviceReminders
+        .filter(r => r.reminder_type === 'safety' && !r.deleted_at && visibleNames.includes(r.machine_name))
+        .map(r => ({ ...r, ...getSafetyStatus(r) }))
+        .sort((a, b) => (a.dueDate ? a.dueDate.getTime() : Infinity) - (b.dueDate ? b.dueDate.getTime() : Infinity));
+
+      if (safetyReminders.length === 0) {
+        return (
+          <div style={styles.emptyState}>
+            <ShieldCheck size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
+            <p>{serviceReminders.some(r => r.reminder_type === 'safety' && !r.deleted_at) ? 'No safety reminders match your search' : 'No safety reminders set yet'}</p>
+          </div>
+        );
+      }
+
+      const statusConfig = {
+        overdue:    { label: '⚠️ OVERDUE',  color: '#ef4444', border: '#fca5a5', bgLight: '#ffffff', bgDark: 'rgba(239, 68, 68, 0.1)',  accent: '5px solid #ef4444' },
+        'due-soon': { label: '⏳ DUE SOON', color: theme === 'light' ? '#d97706' : '#f59e0b', border: '#fcd34d', bgLight: '#fffbeb', bgDark: 'rgba(245, 158, 11, 0.1)', accent: '5px solid #f59e0b' },
+        upcoming:   { label: '✓ UPCOMING',  color: '#8b5cf6', border: theme === 'light' ? '#ddd6fe' : '#8b5cf6', bgLight: '#f5f3ff', bgDark: currentTheme.cardBackground, accent: undefined },
+      };
+
+      return (
+        <div style={styles.itemsList}>
+          {safetyReminders.map(reminder => {
+            const s = statusConfig[reminder.status];
+            const category = machinery.find(m => m.name === reminder.machine_name)?.category || '';
+            return (
+              <div key={reminder.id} style={{
+                ...styles.itemCard,
+                background: theme === 'light' ? s.bgLight : s.bgDark,
+                border: `1px solid ${s.border}`,
+                borderLeft: s.accent,
+                cursor: 'default'
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                    <h4 style={{ fontSize: '1.1rem', margin: 0, wordBreak: 'break-word' }}>{reminder.machine_name}</h4>
+                    <span style={{
+                      padding: '4px 12px',
+                      background: `${s.color}22`,
+                      border: `1px solid ${s.color}`,
+                      borderRadius: '12px',
+                      fontSize: '0.75rem',
+                      color: s.color,
+                      fontWeight: 'bold',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {s.label}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '0.875rem', color: currentTheme.textSecondary, margin: '0 0 12px' }}>
+                    {category}{category ? ' · ' : ''}{reminder.reminder_name || 'Safety Inspection'}
+                  </p>
+                  <div style={styles.itemDetails}>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Last Inspection</p>
+                      <p>{formatSafetyDate(reminder.lastDate)}</p>
+                    </div>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Interval</p>
+                      <p>Every {reminder.months} month{reminder.months === 1 ? '' : 's'}</p>
+                    </div>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Due Date</p>
+                      <p>{formatSafetyDate(reminder.dueDate)}</p>
+                    </div>
+                    <div>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Status</p>
+                      <p style={{ fontWeight: 'bold', color: s.color }}>{getSafetyStatusText(reminder.daysLeft)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    })()}
   </div>
 )}
 
@@ -10636,7 +10732,10 @@ onMouseEnter={(e) => {
           disabled={savingSafety}
           style={{
             ...styles.primaryButton,
-            background: '#8b5cf6',
+                     style={{
+            ...styles.primaryButton,
+            background: theme === 'light' ? '#fde68a' : '#b45309',
+            color: theme === 'light' ? '#78350f' : 'white',
             opacity: savingSafety ? 0.6 : 1,
             cursor: savingSafety ? 'not-allowed' : 'pointer'
           }}
