@@ -5583,29 +5583,7 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
         onMouseEnter={(e) => e.target.style.background = '#0e7490'}
         onMouseLeave={(e) => e.target.style.background = '#0891b2'}
       >
-        <Plus size={16} /> Create km Reminder
-      </button>
-    )}
-       {machinery.some(m => SAFETY_CATEGORIES.includes(m.category)) && (
-      <button
-        onClick={openSafetyReminderModal}
-        style={{
-          padding: '10px 20px',
-          background: theme === 'light' ? '#fde68a' : '#b45309',
-          border: 'none',
-          borderRadius: '8px',
-          color: theme === 'light' ? '#78350f' : 'white',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          fontSize: '0.875rem',
-          transition: 'all 0.2s ease'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.background = theme === 'light' ? '#fcd34d' : '#92400e'}
-        onMouseLeave={(e) => e.currentTarget.style.background = theme === 'light' ? '#fde68a' : '#b45309'}
-      >
-        <Plus size={16} /> Create Safety Reminder
+             <Plus size={16} /> Create km Reminder
       </button>
     )}
   </div>
