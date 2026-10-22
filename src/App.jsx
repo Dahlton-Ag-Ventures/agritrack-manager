@@ -2216,7 +2216,7 @@ const getMachineHours = (machineName) => {
 // Get active reminders for a machine
 const getMachineReminders = (machineName) => {
   return serviceReminders.filter(r => 
-    r.machine_name === machineName && !r.deleted_at
+    r.machine_name === machineName && !r.deleted_at && r.reminder_type !== 'safety'
   );
 };
 
@@ -3831,7 +3831,7 @@ return (
     weekday: 'long', month: 'long', day: 'numeric'
   });
 
-  const activeReminders = serviceReminders.filter(r => !r.deleted_at);
+  const activeReminders = serviceReminders.filter(r => !r.deleted_at && r.reminder_type !== 'safety');
   const overdueCount = activeReminders.filter(r => {
     const isKm = r.reminder_type === 'km';
     const current = isKm
@@ -5730,7 +5730,7 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
         if (hoursOnlyMachines.length === 0) return null;
         const hoursOnlyMachineNames = hoursOnlyMachines.map(m => m.name);
         const allFiltered = serviceReminders.filter(r =>
-          hoursOnlyMachineNames.includes(r.machine_name) && r.reminder_type !== 'km' && !r.deleted_at
+          hoursOnlyMachineNames.includes(r.machine_name) && r.reminder_type !== 'km' && r.reminder_type !== 'safety' && !r.deleted_at
         );
         const filteredReminders = [
           ...allFiltered.filter(r => !r.completed_at),
@@ -5742,7 +5742,7 @@ border: theme === 'dark' ? '2px solid #8b5cf6' : '2px solid #bfdbfe',
               <h4 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Active Hour Reminders</h4>
               <div style={styles.emptyState}>
                 <AlertCircle size={48} style={{ margin: '0 auto 16px', color: '#9ca3af' }} />
-                <p>{serviceReminders.filter(r => r.reminder_type !== 'km').length === 0 ? 'No hour reminders set' : 'No reminders match your search'}</p>
+                <p>{serviceReminders.filter(r => r.reminder_type !== 'km' && r.reminder_type !== 'safety').length === 0 ? 'No hour reminders set' : 'No reminders match your search'}</p>
               </div>
             </>
           );
@@ -11887,7 +11887,7 @@ function ServiceOverview({ serviceReminders, machineHours, machineKm, theme, isD
     return r ? parseFloat(r.current_km || 0) : 0;
   };
 
-  const active = serviceReminders.filter(r => !r.deleted_at);
+  const active = serviceReminders.filter(r => !r.deleted_at && r.reminder_type !== 'safety');
 
   const withStatus = active.map(r => {
     const isKm = r.reminder_type === 'km';
