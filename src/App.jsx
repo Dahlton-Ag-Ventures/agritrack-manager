@@ -933,7 +933,7 @@ if (calNotesError) {
 } else {
   const notesMap = {};
   (calNotesData || []).forEach(n => {
-    notesMap[`${n.month_index}-${n.week_number}`] = n.note;
+    notesMap[`${n.year}-${n.month_index}-${n.week_number}`] = n.note;
   });
   setCalendarNotes(notesMap);
   console.log(`✅ Loaded ${calNotesData?.length || 0} calendar notes`);
@@ -2969,7 +2969,7 @@ const completeKmReminder = (reminderId) => {
   if (!key) return;
   setCalendarSaving(true);
   setCalendarSaved(false);
-  const [monthIndex, weekNumber] = key.split('-').map(Number);
+  const [year, monthIndex, weekNumber] = key.split('-').map(Number);
   try {
     const existing = calendarNotes[key] !== undefined;
     if (existing || text.trim()) {
@@ -2979,6 +2979,7 @@ const { error } = await supabase
         .upsert([{
           id: `${ADMIN_USER_ID}-${key}`,
           user_id: ADMIN_USER_ID,
+          year: year,
           month_index: monthIndex,
           week_number: weekNumber,
           note: text,
@@ -10051,7 +10052,7 @@ onMouseEnter={(e) => {
           <div style={{ marginBottom: '20px' }}>
             <h4 style={{ color: '#06b6d4', fontSize: '1rem', marginBottom: '8px' }}>📅 Farm Calendar</h4>
             <ul style={{ paddingLeft: '20px', color: currentTheme.text, lineHeight: '1.8' }}>
-              <li>✅ View notes on a 12-month calendar for 2026 on the Dashboard</li>
+              <li>✅ View notes on the Farm Calendar on the Dashboard and flip between years</li>
               <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot add, edit, or delete calendar notes</span></li>
             </ul>
           </div>
@@ -12281,6 +12282,9 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
   const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const today = new Date();
+  const MIN_YEAR = 2026;
+  const MAX_YEAR = today.getFullYear() + 1;
+  const [viewYear, setViewYear] = React.useState(Math.max(MIN_YEAR, today.getFullYear()));
   const editorRef = React.useRef(null);
   const [expandedMonth, setExpandedMonth] = React.useState(null);
   const [view, setView] = React.useState('grid');
@@ -12310,8 +12314,8 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
 
   function getWeeks(month) {
     const weeks = [];
-    const mEnd = new Date(2026, month + 1, 0);
-    let d = new Date(2026, month, 1);
+    const mEnd = new Date(viewYear, month + 1, 0);
+    let d = new Date(viewYear, month, 1);
     while (d.getDay() !== 0) d.setDate(d.getDate() - 1);
     let wi = 1;
     while (true) {
@@ -12333,13 +12337,13 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
 
   function getMonthNoteCount(mi) {
     return getWeeks(mi).filter(w => {
-      const key = `${mi}-${w.weekNum}`;
+      const key = `${viewYear}-${mi}-${w.weekNum}`;
       return calendarNotes[key] && calendarNotes[key].replace(/<[^>]*>/g, '').trim();
     }).length;
   }
 
   function isCurrentMonth(mi) {
-    return today.getFullYear() === 2026 && today.getMonth() === mi;
+    return today.getFullYear() === viewYear && today.getMonth() === mi;
   }
 
   function openMonth(mi) {
@@ -12387,12 +12391,12 @@ function FarmCalendar({ theme, isDesktop, calendarNotes, calendarSelectedKey, se
   function navigateWeek(direction) {
     if (!calendarSelectedKey || expandedMonth === null) return;
     const weeks = getWeeks(expandedMonth);
-    const currentWeekNum = parseInt(calendarSelectedKey.split('-')[1]);
+    const currentWeekNum = parseInt(calendarSelectedKey.split('-')[2]);
     const currentIdx = weeks.findIndex(w => w.weekNum === currentWeekNum);
     const nextIdx = currentIdx + direction;
     if (nextIdx < 0 || nextIdx >= weeks.length) return;
     const nextWeek = weeks[nextIdx];
-    const nextKey = `${expandedMonth}-${nextWeek.weekNum}`;
+    const nextKey = `${viewYear}-${expandedMonth}-${nextWeek.weekNum}`;
     setCalendarSelectedKey(nextKey);
     const existing = calendarNotes[nextKey] || '';
     setCalendarNoteText(existing);
@@ -12513,13 +12517,48 @@ return (
       {/* ── GRID VIEW ── */}
       {view === 'grid' && (
         <div>
-          <p style={{
-            fontWeight: '400', fontSize: '1rem', marginBottom: '12px',
-            background: 'linear-gradient(to right, #10b981, #06b6d4)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-          }}>
-            Farm Calendar 2026
-          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', gap: '8px' }}>
+            <p style={{
+              fontWeight: '400', fontSize: '1rem', margin: 0,
+              background: 'linear-gradient(to right, #10b981, #06b6d4)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            }}>
+              Farm Calendar
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <button
+                onClick={() => setViewYear(y => Math.max(MIN_YEAR, y - 1))}
+                disabled={viewYear <= MIN_YEAR}
+                title="Previous year"
+                style={{
+                  width: '28px', height: '28px', padding: 0, borderRadius: '6px',
+                  border: `1px solid ${viewYear <= MIN_YEAR ? cardBorder : '#10b981'}`,
+                  background: 'transparent',
+                  color: viewYear <= MIN_YEAR ? textSub : '#10b981',
+                  opacity: viewYear <= MIN_YEAR ? 0.4 : 1,
+                  cursor: viewYear <= MIN_YEAR ? 'default' : 'pointer',
+                  fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >◀</button>
+              <span style={{ fontWeight: '600', fontSize: '0.95rem', color: textMain, minWidth: '40px', textAlign: 'center' }}>
+                {viewYear}
+              </span>
+              <button
+                onClick={() => setViewYear(y => Math.min(MAX_YEAR, y + 1))}
+                disabled={viewYear >= MAX_YEAR}
+                title="Next year"
+                style={{
+                  width: '28px', height: '28px', padding: 0, borderRadius: '6px',
+                  border: `1px solid ${viewYear >= MAX_YEAR ? cardBorder : '#10b981'}`,
+                  background: 'transparent',
+                  color: viewYear >= MAX_YEAR ? textSub : '#10b981',
+                  opacity: viewYear >= MAX_YEAR ? 0.4 : 1,
+                  cursor: viewYear >= MAX_YEAR ? 'default' : 'pointer',
+                  fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >▶</button>
+            </div>
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
             {MONTHS.map((name, mi) => {
               const noteCount = getMonthNoteCount(mi);
@@ -12548,7 +12587,7 @@ return (
                     )}
                   </div>
                   {weeks.map(w => {
-                    const key = `${mi}-${w.weekNum}`;
+                    const key = `${viewYear}-${mi}-${w.weekNum}`;
                     const hasNote = !!(calendarNotes[key] && calendarNotes[key].replace(/<[^>]*>/g, '').trim());
                     const curr = isCurrent(w.start, w.end);
                     return (
@@ -12575,10 +12614,10 @@ return (
             ← All months
           </button>
           <p style={{ fontWeight: '600', fontSize: '1rem', color: textMain, marginBottom: '10px' }}>
-            {MONTHS[expandedMonth]}
+            {MONTHS[expandedMonth]} {viewYear}
           </p>
           {getWeeks(expandedMonth).map(w => {
-            const key = `${expandedMonth}-${w.weekNum}`;
+            const key = `${viewYear}-${expandedMonth}-${w.weekNum}`;
             const curr = isCurrent(w.start, w.end);
             const hasNote = !!(calendarNotes[key] && calendarNotes[key].replace(/<[^>]*>/g, '').trim());
             return (
@@ -12610,7 +12649,7 @@ return (
       {/* ── EDITOR VIEW ── */}
       {view === 'editor' && calendarSelectedKey && expandedMonth !== null && (() => {
         const mi = expandedMonth;
-        const weekNum = parseInt(calendarSelectedKey.split('-')[1]);
+        const weekNum = parseInt(calendarSelectedKey.split('-')[2]);
         const weeks = getWeeks(mi);
         const currentIdx = weeks.findIndex(w => w.weekNum === weekNum);
         const currentWeek = weeks[currentIdx];
@@ -12619,7 +12658,7 @@ return (
         return (
           <div>
             <button onClick={goToWeeks} style={{ background: 'none', border: 'none', color: textSub, fontSize: '0.8rem', cursor: 'pointer', padding: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              ← Back to {MONTHS[mi]}
+              ← Back to {MONTHS[mi]} {viewYear}
             </button>
             <div style={{ display: userRole === 'employee' ? 'none' : 'flex', alignItems: 'center', gap: '4px', padding: '6px 8px', background: toolbarBg, borderBottom: `0.5px solid ${cardBorder}`, flexWrap: 'nowrap', overflowX: 'auto' }}>
             <button style={{ ...btnStyle, fontWeight: 'bold', background: activeFormats.bold ? '#9FE1CB' : 'transparent', color: activeFormats.bold ? '#085041' : textSub }} onPointerDown={e => { e.preventDefault(); saveSelection(); execCmd('bold'); }} onMouseDown={e => { e.preventDefault(); saveSelection(); execCmd('bold'); }} title="Bold">B</button>
