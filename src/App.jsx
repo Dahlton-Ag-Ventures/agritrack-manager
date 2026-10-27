@@ -3989,7 +3989,7 @@ return (
   });
 
   const activeReminders = serviceReminders.filter(r => !r.deleted_at && r.reminder_type !== 'safety');
-  const overdueCount = activeReminders.filter(r => {
+  const hoursKmOverdueCount = activeReminders.filter(r => {
     const isKm = r.reminder_type === 'km';
     const current = isKm
       ? (machineKm.find(h => h.machine_name === r.machine_name) ? parseFloat(machineKm.find(h => h.machine_name === r.machine_name).current_km || 0) : 0)
@@ -3999,7 +3999,7 @@ return (
     return (current - last) >= interval;
   }).length;
 
-  const dueSoonCount = activeReminders.filter(r => {
+  const hoursKmDueSoonCount = activeReminders.filter(r => {
     const isKm = r.reminder_type === 'km';
     const current = isKm
       ? (machineKm.find(h => h.machine_name === r.machine_name) ? parseFloat(machineKm.find(h => h.machine_name === r.machine_name).current_km || 0) : 0)
@@ -4012,6 +4012,12 @@ return (
     const isDueSoon = !isOverdue && remaining <= interval * 0.15;
     return isDueSoon;
   }).length;
+
+  const safetyStatuses = serviceReminders
+    .filter(r => r.reminder_type === 'safety' && !r.deleted_at)
+    .map(r => getSafetyStatus(r).status);
+  const overdueCount = hoursKmOverdueCount + safetyStatuses.filter(s => s === 'overdue').length;
+  const dueSoonCount = hoursKmDueSoonCount + safetyStatuses.filter(s => s === 'due-soon').length;
 
   const subtitleStatus = overdueCount > 0 || dueSoonCount > 0
     ? `${overdueCount + dueSoonCount} reminder${overdueCount + dueSoonCount !== 1 ? 's' : ''} need attention`
@@ -4076,6 +4082,11 @@ return (
                 setActiveTab('machinery');
                 setShowRemindersPanel(true);
               }}
+              onSafetyReminderClick={() => {
+                setActiveTab('machinery');
+                setShowRemindersPanel(false);
+                setShowSafetyPanel(true);
+              }}
             />
           </div>
           <div>
@@ -4106,6 +4117,11 @@ return (
           onReminderClick={() => {
             setActiveTab('machinery');
             setShowRemindersPanel(true);
+          }}
+          onSafetyReminderClick={() => {
+            setActiveTab('machinery');
+            setShowRemindersPanel(false);
+            setShowSafetyPanel(true);
           }}
           calendarNotes={calendarNotes}
           calendarSelectedKey={calendarSelectedKey}
@@ -11739,7 +11755,7 @@ theme={currentTheme}
 }
 
 function DashboardPanels({
-  theme, isDesktop, serviceReminders, machineHours, machineKm, onReminderClick,
+  theme, isDesktop, serviceReminders, machineHours, machineKm, onReminderClick, onSafetyReminderClick,
   calendarNotes, calendarSelectedKey, setCalendarSelectedKey,
   calendarNoteText, setCalendarNoteText, calendarNoteDirty, setCalendarNoteDirty,
   calendarSaving, calendarSaved, onSave, userRole
@@ -11759,6 +11775,7 @@ const calendarProps = {
       machineKm={machineKm}
       theme={theme}
       onReminderClick={onReminderClick}
+      onSafetyReminderClick={onSafetyReminderClick}
     />
   );
 
@@ -12417,7 +12434,7 @@ return (
     </div>
   );
 }
-function ServiceOverview({ serviceReminders, machineHours, machineKm, theme, isDesktop, onReminderClick }) {
+function ServiceOverview({ serviceReminders, machineHours, machineKm, theme, isDesktop, onReminderClick, onSafetyReminderClick }) {
   const getHours = (name) => {
     const r = machineHours.find(h => h.machine_name === name);
     return r ? parseFloat(r.current_hours || 0) : 0;
@@ -12447,10 +12464,36 @@ function ServiceOverview({ serviceReminders, machineHours, machineKm, theme, isD
     return { ...r, current, progress, remaining, isOverdue, isDueSoon, priority, overageLabel, isKm };
   });
 
+  const safetyWithStatus = serviceReminders
+    .filter(r => r.reminder_type === 'safety' && !r.deleted_at)
+    .map(r => {
+      const s = getSafetyStatus(r);
+      const totalDays = (s.dueDate && s.lastDate) ? Math.max(1, Math.round((s.dueDate - s.lastDate) / 86400000)) : 1;
+      const daysUsed = s.daysLeft === null ? 0 : totalDays - s.daysLeft;
+      const progress = Math.min(100, Math.max(0, Math.round((daysUsed / totalDays) * 100)));
+      const absDays = Math.abs(s.daysLeft || 0);
+      const overageLabel = s.daysLeft === null ? '—'
+        : s.daysLeft === 0 ? 'Due today'
+        : s.daysLeft < 0 ? `${absDays} day${absDays === 1 ? '' : 's'} over`
+        : `${absDays} day${absDays === 1 ? '' : 's'} left`;
+      const subLabel = `${s.daysLeft !== null && s.daysLeft < 0 ? 'Was due' : 'Due'} ${formatSafetyDate(s.dueDate)}`;
+      return {
+        ...r,
+        reminder_name: `🛡️ ${r.reminder_name || 'Safety Inspection'}`,
+        priority: s.status,
+        progress,
+        overageLabel,
+        subLabel,
+        isSafety: true,
+      };
+    });
+
+  const allWithStatus = [...withStatus, ...safetyWithStatus];
+
   const sorted = [
-    ...withStatus.filter(r => r.priority === 'overdue'),
-    ...withStatus.filter(r => r.priority === 'due-soon'),
-    ...withStatus.filter(r => r.priority === 'upcoming'),
+    ...allWithStatus.filter(r => r.priority === 'overdue'),
+    ...allWithStatus.filter(r => r.priority === 'due-soon'),
+    ...allWithStatus.filter(r => r.priority === 'upcoming'),
   ];
 
   const overdueCount = sorted.filter(r => r.priority === 'overdue').length;
@@ -12475,12 +12518,12 @@ return (
 {/* Section header */}
       <div style={{ marginBottom: 12 }}>
         <p style={{ fontSize: '11px', color: textSub, fontWeight: '500', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-          Service overview
+          Reminders overview
         </p>
       </div>
 
       {/* All Clear state */}
-      {allClear && active.length > 0 && (
+      {allClear && sorted.length > 0 && (
         <div style={{
           padding: '18px 20px',
           background: theme === 'light' ? '#f0fdf4' : 'rgba(16,185,129,0.10)',
@@ -12496,14 +12539,14 @@ return (
             <p style={{ color: textSub, margin: 0, fontSize: '0.8rem', marginTop: 2 }}>
               {upcomingCount > 0
                 ? `${upcomingCount} reminder${upcomingCount !== 1 ? 's' : ''} active — nothing due yet.`
-                : 'No service reminders are due. You\'re all caught up.'}
+                : 'No reminders are due. You\'re all caught up.'}
             </p>
           </div>
         </div>
       )}
 
       {/* No reminders at all */}
-      {active.length === 0 && (
+      {sorted.length === 0 && (
         <div style={{
           padding: '18px 20px',
           background: cardBg,
@@ -12512,7 +12555,7 @@ return (
           color: textSub,
           fontSize: '0.875rem',
         }}>
-          No service reminders set yet. Add reminders in the Machinery tab.
+          No reminders set yet. Add reminders in the Machinery tab.
         </div>
       )}
 
@@ -12563,7 +12606,7 @@ return (
         return (
           <div
             key={r.id}
-            onClick={() => onReminderClick()}
+            onClick={() => (r.isSafety ? onSafetyReminderClick() : onReminderClick())}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -12636,7 +12679,7 @@ return (
                 {r.overageLabel}
               </div>
               <div style={{ fontSize: '0.68rem', color: textSub }}>
-                {r.current.toFixed(1)} {r.isKm ? 'km' : 'hrs'} current
+                {r.isSafety ? r.subLabel : `${r.current.toFixed(1)} ${r.isKm ? 'km' : 'hrs'} current`}
               </div>
             </div>
 
