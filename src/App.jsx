@@ -499,10 +499,13 @@ useEffect(() => {
 
   // Load data when user is authenticated
   useEffect(() => {
-    if (user) {
-      loadData();
-      setupRealtime();
-    }
+    if (!user) return;
+    loadData();
+    setupRealtime();
+    // Close Live Sync channels on logout / account switch so the next login can recreate them
+    return () => {
+      supabase.removeAllChannels();
+    };
   }, [user]);
   
   // Close dropdown when clicking outside
