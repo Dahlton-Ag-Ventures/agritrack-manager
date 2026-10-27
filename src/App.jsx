@@ -312,6 +312,10 @@ export default function App() {
   const [completingSafety, setCompletingSafety] = useState(null);
   const [completeSafetyForm, setCompleteSafetyForm] = useState({ date: '', logService: null, serviceType: '', technician: '', notes: '' });
   const [savingCompleteSafety, setSavingCompleteSafety] = useState(false);
+  const [showEditSafetyModal, setShowEditSafetyModal] = useState(false);
+  const [editingSafety, setEditingSafety] = useState(null);
+  const [editSafetyForm, setEditSafetyForm] = useState({ reminderName: '', lastSafetyDate: '', intervalMonths: '12' });
+  const [savingEditSafety, setSavingEditSafety] = useState(false);
   useEffect(() => {
     if (showRemindersPanel) setShowSafetyPanel(false);
   }, [showRemindersPanel]);
@@ -2755,6 +2759,48 @@ const handleCompleteSafetySubmit = async (shouldLog) => {
     alert('Failed to complete safety reminder: ' + error.message);
   } finally {
     setSavingCompleteSafety(false);
+  }
+};
+
+const openEditSafety = (reminder) => {
+  setEditingSafety(reminder);
+  setEditSafetyForm({
+    reminderName: reminder.reminder_name || 'Safety Inspection',
+    lastSafetyDate: reminder.last_safety_date || '',
+    intervalMonths: String(parseInt(reminder.interval_months, 10) || 12),
+  });
+  setShowEditSafetyModal(true);
+};
+
+const saveSafetyEdit = async () => {
+  if (!editingSafety || savingEditSafety) return;
+  const months = parseInt(editSafetyForm.intervalMonths, 10);
+  const todayStr = new Date().toLocaleDateString('en-CA');
+  if (!editSafetyForm.lastSafetyDate) { alert('Please enter the last safety inspection date'); return; }
+  if (editSafetyForm.lastSafetyDate > todayStr) { alert('The last safety inspection date can\'t be in the future'); return; }
+  if (isNaN(months) || months < 1) { alert('Interval must be at least 1 month'); return; }
+
+  setSavingEditSafety(true);
+  try {
+    const updates = {
+      reminder_name: editSafetyForm.reminderName.trim() || 'Safety Inspection',
+      last_safety_date: editSafetyForm.lastSafetyDate,
+      interval_months: months,
+    };
+    const { error } = await supabase.from('service_reminders').update(updates).eq('id', editingSafety.id);
+    if (error) {
+      console.error('❌ saveSafetyEdit error:', error);
+      alert('Failed to save changes: ' + error.message);
+      return;
+    }
+    setServiceReminders(prev => prev.map(r => r.id === editingSafety.id ? { ...r, ...updates } : r));
+    setShowEditSafetyModal(false);
+    setEditingSafety(null);
+  } catch (error) {
+    console.error('❌ saveSafetyEdit catch:', error);
+    alert('Failed to save changes: ' + error.message);
+  } finally {
+    setSavingEditSafety(false);
   }
 };
 
@@ -6430,6 +6476,13 @@ whiteSpace: 'nowrap'
                       }}
                     >
                       ✓ Complete
+                    </button>
+                    <button
+                      onClick={() => openEditSafety(reminder)}
+                      style={styles.editButton}
+                      title="Edit safety reminder"
+                    >
+                      <Edit2 size={16} />
                     </button>
                     <button
                       onClick={() => deleteReminder(reminder.id)}
@@ -10829,6 +10882,103 @@ onMouseEnter={(e) => {
   </Modal>
 )}
       
+{/* Edit Safety Reminder Modal */}
+{showEditSafetyModal && editingSafety && (() => {
+  const months = parseInt(editSafetyForm.intervalMonths, 10);
+  const dueDate = (editSafetyForm.lastSafetyDate && months >= 1)
+    ? addMonthsToDate(editSafetyForm.lastSafetyDate, months)
+    : null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const alreadyOverdue = dueDate && dueDate <= today;
+  const category = machinery.find(m => m.name === editingSafety.machine_name)?.category || '';
+  const labelStyle = { display: 'block', color: '#9ca3af', fontSize: '0.8rem', marginBottom: '4px' };
+  const closeModal = () => {
+    if (savingEditSafety) return;
+    setShowEditSafetyModal(false);
+    setEditingSafety(null);
+  };
+
+  return (
+    <Modal title="Edit Safety Reminder" theme={theme} onClose={closeModal}>
+      <label style={labelStyle}>Machine</label>
+      <div style={{
+        padding: '10px 14px',
+        background: theme === 'light' ? '#f3f4f6' : '#1a2942',
+        border: `1px solid ${theme === 'light' ? '#d1d5db' : '#374151'}`,
+        borderRadius: '8px',
+        color: theme === 'light' ? '#374151' : '#9ca3af',
+        fontSize: '0.95rem',
+        marginBottom: '16px',
+        wordBreak: 'break-word'
+      }}>
+        {editingSafety.machine_name}{category ? ` (${category})` : ''}
+      </div>
+
+      <label style={labelStyle}>Reminder name</label>
+      <input
+        style={styles.input}
+        value={editSafetyForm.reminderName}
+        onChange={(e) => setEditSafetyForm(prev => ({ ...prev, reminderName: e.target.value }))}
+        placeholder="Safety Inspection"
+      />
+
+      <label style={labelStyle}>Last safety inspection date</label>
+      <input
+        type="date"
+        style={{ ...styles.input, fontFamily: 'inherit' }}
+        value={editSafetyForm.lastSafetyDate}
+        max={new Date().toLocaleDateString('en-CA')}
+        onChange={(e) => setEditSafetyForm(prev => ({ ...prev, lastSafetyDate: e.target.value }))}
+      />
+
+      <label style={labelStyle}>Interval (months)</label>
+      <input
+        type="number"
+        min="1"
+        step="1"
+        style={styles.input}
+        value={editSafetyForm.intervalMonths}
+        onChange={(e) => setEditSafetyForm(prev => ({ ...prev, intervalMonths: e.target.value }))}
+      />
+
+      {dueDate && (
+        <div style={{
+          padding: '12px 14px',
+          marginBottom: '16px',
+          borderRadius: '8px',
+          fontSize: '0.875rem',
+          background: theme === 'light' ? '#fffbeb' : 'rgba(180, 83, 9, 0.15)',
+          border: `1px solid ${alreadyOverdue ? '#ef4444' : (theme === 'light' ? '#fcd34d' : '#b45309')}`,
+          color: theme === 'light' ? '#111827' : 'white'
+        }}>
+          Next due: <strong>{formatSafetyDate(dueDate)}</strong>
+          {alreadyOverdue && <span style={{ color: '#ef4444', fontWeight: 'bold' }}> · Already overdue</span>}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: '12px' }}>
+        <button
+          onClick={saveSafetyEdit}
+          disabled={savingEditSafety}
+          style={{
+            ...styles.primaryButton,
+            background: theme === 'light' ? '#fde68a' : '#b45309',
+            color: theme === 'light' ? '#78350f' : 'white',
+            opacity: savingEditSafety ? 0.6 : 1,
+            cursor: savingEditSafety ? 'not-allowed' : 'pointer'
+          }}
+        >
+          {savingEditSafety ? 'Saving...' : 'Save Changes'}
+        </button>
+        <button onClick={closeModal} style={styles.secondaryButton} disabled={savingEditSafety}>
+          Cancel
+        </button>
+      </div>
+    </Modal>
+  );
+})()}
+
 {/* Complete Safety Reminder Modal */}
 {showCompleteSafetyModal && completingSafety && (() => {
   const months = parseInt(completingSafety.interval_months, 10) || 12;
