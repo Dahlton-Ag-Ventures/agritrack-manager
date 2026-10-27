@@ -13020,136 +13020,119 @@ return (
         </div>
       )}
 
-      {/* Summary tiles — only show when there's something to report */}
-      {!allClear && (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 10,
-          marginBottom: 14,
-        }}>
-          {[
-            { key: 'overdue',   label: 'Overdue',  count: overdueCount  },
-            { key: 'due-soon',  label: 'Due Soon', count: dueSoonCount  },
-            { key: 'upcoming',  label: 'Upcoming', count: upcomingCount },
-          ].map(({ key, label, count }) => {
-            const p = priorityConfig[key];
-            return (
-              <div key={key} style={{
-                background: count > 0 ? p.bg : (theme === 'light' ? '#f9fafb' : 'rgba(255,255,255,0.02)'),
-                border: `1px solid ${count > 0 ? p.border : cardBdr}`,
-                borderRadius: 10,
-                padding: '14px 16px',
-              }}>
-                <div style={{
-                  fontSize: '1.8rem', fontWeight: 800,
-                  color: count > 0 ? p.color : textSub,
-                  lineHeight: 1, marginBottom: 4,
-                }}>
-                  {String(count).padStart(2, '0')}
-                </div>
-                <div style={{
-                  fontSize: '0.7rem', letterSpacing: '0.1em',
-                  color: count > 0 ? p.color : textSub,
-                  fontWeight: 600, textTransform: 'uppercase',
-                }}>
-                  {label}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+         {/* Summary ring tiles + reminder rows (style E) */}
+      {!allClear && (() => {
+        const isDark = theme !== 'light';
+        const total = sorted.length || 1;
+        const C = 2 * Math.PI * 18;
+        const ringTiles = [
+          { key: 'overdue',  label: 'Overdue',  count: overdueCount,
+            ring: isDark ? '#f87171' : '#ef4444', track: isDark ? 'rgba(239,68,68,0.2)' : '#fee2e2',
+            num: isDark ? '#f87171' : '#dc2626', glow: '239,68,68', shadow: 'rgba(220,38,38,0.35)' },
+          { key: 'due-soon', label: 'Due soon', count: dueSoonCount,
+            ring: isDark ? '#fbbf24' : '#f59e0b', track: isDark ? 'rgba(245,158,11,0.2)' : '#fef3c7',
+            num: isDark ? '#fbbf24' : '#d97706', glow: '245,158,11', shadow: 'rgba(217,119,6,0.35)' },
+          { key: 'upcoming', label: 'Upcoming', count: upcomingCount,
+            ring: isDark ? '#34d399' : '#10b981', track: isDark ? 'rgba(16,185,129,0.2)' : '#dcfce7',
+            num: isDark ? '#34d399' : '#059669', glow: '16,185,129', shadow: 'rgba(5,150,105,0.35)' },
+        ];
 
-      {/* Work queue rows — only overdue + due-soon */}
-      {!allClear && sorted.filter(r => r.priority !== 'upcoming').map((r, i) => {
-        const p = priorityConfig[r.priority];
         return (
-          <div
-            key={r.id}
-            onClick={() => (r.isSafety ? onSafetyReminderClick() : onReminderClick())}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 14,
-              padding: '13px 16px',
-              background: p.bg,
-              border: `1px solid ${p.border}`,
-              borderLeft: p.accentBorder || `1px solid ${p.border}`,
-              borderRadius: 10,
-              marginBottom: 8,
-              cursor: 'pointer',
-              transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = `0 6px 20px ${p.bg}`;
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
-          >
-            {/* Priority dot */}
-            <div style={{
-              width: 8, height: 8, borderRadius: '50%',
-              background: p.color, flexShrink: 0,
-            }} />
-
-            {/* Main info */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                flexWrap: 'wrap', marginBottom: 4,
-              }}>
-                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: textMain }}>
-                  {r.machine_name}
-                </span>
-                <span style={{
-                  fontSize: '0.75rem', color: textSub,
+          <>
+            {/* Ring tiles */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10, marginBottom: 14 }}>
+              {ringTiles.map(t => (
+                <div key={t.key} style={{
+                  background: isDark ? '#111c30' : '#ffffff',
+                  border: isDark ? `1px solid rgba(${t.glow},0.4)` : 'none',
+                  borderRadius: 14,
+                  padding: '10px 8px',
+                  textAlign: 'center',
+                  boxShadow: isDark ? `0 0 18px rgba(${t.glow},0.22)` : `0 10px 20px -6px ${t.shadow}`,
                 }}>
-                  — {r.reminder_name}
-                </span>
-              </div>
-              {/* Progress bar */}
-              <div style={{
-                height: 4, borderRadius: 99,
-                background: theme === 'light' ? '#e5e7eb' : 'rgba(255,255,255,0.08)',
-                overflow: 'hidden',
-              }}>
-                <div style={{
-                  height: '100%',
-                  width: `${r.progress}%`,
-                  background: p.color,
-                  borderRadius: 99,
-                  transition: 'width 0.5s ease',
-                }} />
-              </div>
+                  <svg width="48" height="48" viewBox="0 0 44 44" aria-hidden="true" style={{ display: 'block', margin: '0 auto' }}>
+                    <circle cx="22" cy="22" r="18" fill="none" stroke={t.track} strokeWidth="5" />
+                    {t.count > 0 && (
+                      <circle
+                        cx="22" cy="22" r="18" fill="none"
+                        stroke={t.ring} strokeWidth="5" strokeLinecap="round"
+                        strokeDasharray={C}
+                        strokeDashoffset={C * (1 - t.count / total)}
+                        transform="rotate(-90 22 22)"
+                      />
+                    )}
+                    <text x="22" y="27" textAnchor="middle" fontSize="13" fontWeight="600" fill={t.num}>{t.count}</text>
+                  </svg>
+                  <div style={{
+                    fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase',
+                    marginTop: 4, fontWeight: 600, color: isDark ? '#94a3b8' : '#6b7280',
+                  }}>
+                    {t.label}
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {/* Right: status + metric */}
-            <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <div style={{
-                fontSize: '0.68rem', fontWeight: 700,
-                color: p.color, letterSpacing: '0.08em',
-                marginBottom: 1,
-              }}>
-                {p.label}
-              </div>
-              <div style={{ fontSize: '0.8rem', color: textMain, fontWeight: 600 }}>
-                {r.overageLabel}
-              </div>
-              <div style={{ fontSize: '0.68rem', color: textSub }}>
-                {r.isSafety ? r.subLabel : `${r.current.toFixed(1)} ${r.isKm ? 'km' : 'hrs'} current`}
-              </div>
-            </div>
+            {/* Reminder rows — overdue + due soon */}
+            {sorted.filter(r => r.priority !== 'upcoming').map(r => {
+              const isOverdue = r.priority === 'overdue';
+              const badgeBg = isOverdue
+                ? (isDark ? 'rgba(239,68,68,0.18)' : '#fee2e2')
+                : (isDark ? 'rgba(245,158,11,0.18)' : '#fef3c7');
+              const statusColor = isOverdue
+                ? (isDark ? '#f87171' : '#ef4444')
+                : (isDark ? '#fbbf24' : '#d97706');
+              const name = r.isSafety ? r.reminder_name.replace('🛡️ ', '') : r.reminder_name;
+              const detail = r.isSafety
+                ? r.subLabel.charAt(0).toLowerCase() + r.subLabel.slice(1)
+                : `${Math.round(r.current)} ${r.isKm ? 'km' : 'hrs'}`;
 
-            {/* Arrow */}
-            <div style={{ color: p.color, fontSize: '0.9rem', flexShrink: 0 }}>→</div>
-          </div>
+              return (
+                <div
+                  key={r.id}
+                  onClick={() => (r.isSafety ? onSafetyReminderClick() : onReminderClick())}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+                    padding: '10px 12px', marginBottom: 8, borderRadius: 12, cursor: 'pointer',
+                    background: isDark ? '#111c30' : '#ffffff',
+                    border: isDark ? '1px solid #1f3355' : 'none',
+                    boxShadow: isDark ? 'none' : '0 6px 16px -4px rgba(15,23,42,0.15)',
+                    transition: 'transform 0.15s ease',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                    <div style={{
+                      width: 30, height: 30, borderRadius: 9, background: badgeBg, flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15,
+                    }}>
+                      {r.isSafety ? '🛡️' : '🔧'}
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{
+                        fontWeight: 600, fontSize: '0.875rem', color: textMain,
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>
+                        {r.machine_name}
+                      </div>
+                      <div style={{
+                        fontSize: '0.7rem', color: textSub,
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>
+                        {name} · {detail}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: statusColor, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                    {r.overageLabel}
+                  </div>
+                </div>
+              );
+            })}
+          </>
         );
-      })}
-
+      })()}
       {/* Upcoming count hint when all clear */}
       {!allClear && upcomingCount > 0 && (
         <p style={{
