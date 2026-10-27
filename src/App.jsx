@@ -308,6 +308,10 @@ export default function App() {
   const [showDeletedSafetyModal, setShowDeletedSafetyModal] = useState(false);
   const [deletedSafetyReminders, setDeletedSafetyReminders] = useState([]);
   const [restoringSafetyId, setRestoringSafetyId] = useState(null);
+  const [showCompleteSafetyModal, setShowCompleteSafetyModal] = useState(false);
+  const [completingSafety, setCompletingSafety] = useState(null);
+  const [completeSafetyForm, setCompleteSafetyForm] = useState({ date: '', logService: null, serviceType: '', technician: '', notes: '' });
+  const [savingCompleteSafety, setSavingCompleteSafety] = useState(false);
   useEffect(() => {
     if (showRemindersPanel) setShowSafetyPanel(false);
   }, [showRemindersPanel]);
@@ -2673,6 +2677,84 @@ const permanentlyDeleteSafetyReminder = async (reminder) => {
     setDeletedSafetyReminders(prev => prev.filter(r => r.id !== reminder.id));
   } catch (error) {
     alert('Failed to delete safety reminder');
+  }
+};
+
+const openCompleteSafety = (reminder) => {
+  setCompletingSafety(reminder);
+  setCompleteSafetyForm({
+    date: new Date().toLocaleDateString('en-CA'),
+    logService: null,
+    serviceType: reminder.reminder_name || 'Safety Inspection',
+    technician: '',
+    notes: '',
+  });
+  setShowCompleteSafetyModal(true);
+};
+
+const handleCompleteSafetySubmit = async (shouldLog) => {
+  if (!completingSafety || savingCompleteSafety) return;
+  const doneDate = completeSafetyForm.date;
+  const todayStr = new Date().toLocaleDateString('en-CA');
+  if (!doneDate) { alert('Please enter the date the inspection was completed'); return; }
+  if (doneDate > todayStr) { alert('The inspection date can\'t be in the future'); return; }
+
+  const months = parseInt(completingSafety.interval_months, 10) || 12;
+  const nextDue = addMonthsToDate(doneDate, months);
+
+  setSavingCompleteSafety(true);
+  try {
+    // 1. Save the service record first, so a failed log never leaves a reset reminder with no history
+    if (shouldLog) {
+      const newId = Date.now().toString() + Math.random().toString(36).slice(2, 6);
+      const tag = `[Logged via safety reminder — next due ${formatSafetyDate(nextDue)}]`;
+      const trimmedNotes = completeSafetyForm.notes.trim();
+      const fullNotes = trimmedNotes ? `${trimmedNotes}\n\n${tag}` : tag;
+      const serviceType = completeSafetyForm.serviceType.trim() || 'Safety Inspection';
+
+      const { error: logError } = await supabase.from('service_records').insert([{
+        id: newId,
+        user_id: user.id,
+        machine_name: completingSafety.machine_name,
+        service_type: serviceType,
+        date: doneDate,
+        notes: fullNotes,
+        technician: completeSafetyForm.technician,
+        photo_urls: JSON.stringify([])
+      }]);
+      if (logError) {
+        alert('Failed to log the service record: ' + logError.message + '\n\nThe safety reminder was NOT completed. Please try again.');
+        return;
+      }
+      setServiceHistory(prev => [{
+        id: newId,
+        machineName: completingSafety.machine_name,
+        serviceType,
+        date: doneDate,
+        notes: fullNotes,
+        technician: completeSafetyForm.technician,
+        photoUrls: []
+      }, ...prev]);
+    }
+
+    // 2. Roll the reminder forward to the new inspection date
+    const updates = { last_safety_date: doneDate };
+    const { error } = await supabase.from('service_reminders').update(updates).eq('id', completingSafety.id);
+    if (error) {
+      alert('Failed to complete safety reminder: ' + error.message +
+        (shouldLog ? '\n\nThe service record WAS saved. Try completing again and choose "Just mark complete".' : ''));
+      return;
+    }
+    setServiceReminders(prev => prev.map(r => r.id === completingSafety.id ? { ...r, ...updates } : r));
+
+    setShowCompleteSafetyModal(false);
+    setCompletingSafety(null);
+    setCompleteSafetyForm({ date: '', logService: null, serviceType: '', technician: '', notes: '' });
+  } catch (error) {
+    console.error('❌ handleCompleteSafetySubmit error:', error);
+    alert('Failed to complete safety reminder: ' + error.message);
+  } finally {
+    setSavingCompleteSafety(false);
   }
 };
 
@@ -6338,6 +6420,17 @@ whiteSpace: 'nowrap'
                 </div>
                 {userRole !== 'employee' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <button
+                      onClick={() => openCompleteSafety(reminder)}
+                      style={{
+                        ...styles.saveButton,
+                        background: theme === 'light' ? '#fde68a' : '#b45309',
+                        color: theme === 'light' ? '#78350f' : 'white',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      ✓ Complete
+                    </button>
                     <button
                       onClick={() => deleteReminder(reminder.id)}
                       style={styles.deleteButton}
@@ -10736,6 +10829,182 @@ onMouseEnter={(e) => {
   </Modal>
 )}
       
+{/* Complete Safety Reminder Modal */}
+{showCompleteSafetyModal && completingSafety && (() => {
+  const months = parseInt(completingSafety.interval_months, 10) || 12;
+  const lastDate = addMonthsToDate(completingSafety.last_safety_date, 0);
+  const nextDue = completeSafetyForm.date ? addMonthsToDate(completeSafetyForm.date, months) : null;
+  const labelStyle = { display: 'block', color: '#9ca3af', fontSize: '0.8rem', marginBottom: '4px' };
+  const closeModal = () => {
+    if (savingCompleteSafety) return;
+    setShowCompleteSafetyModal(false);
+    setCompletingSafety(null);
+  };
+
+  return (
+    <Modal
+      title={`Complete — ${completingSafety.reminder_name || 'Safety Inspection'}`}
+      theme={theme}
+      onClose={closeModal}
+    >
+      {/* Summary */}
+      <div style={{
+        padding: '16px',
+        background: theme === 'light' ? '#fffbeb' : 'rgba(180, 83, 9, 0.15)',
+        border: `1px solid ${theme === 'light' ? '#fcd34d' : '#b45309'}`,
+        borderRadius: '10px',
+        marginBottom: '16px',
+      }}>
+        <p style={{ fontWeight: 'bold', fontSize: '1rem', marginBottom: '6px', color: theme === 'light' ? '#111827' : 'white' }}>
+          {completingSafety.machine_name}
+        </p>
+        <p style={{ color: theme === 'light' ? '#374151' : '#9ca3af', fontSize: '0.875rem', margin: 0 }}>
+          Last: {formatSafetyDate(lastDate)} &nbsp;·&nbsp; Every {months} month{months === 1 ? '' : 's'}
+        </p>
+      </div>
+
+      {/* Completion date */}
+      <label style={labelStyle}>Inspection completed on</label>
+      <input
+        type="date"
+        style={{ ...styles.input, marginBottom: '6px', fontFamily: 'inherit' }}
+        value={completeSafetyForm.date}
+        max={new Date().toLocaleDateString('en-CA')}
+        onChange={(e) => setCompleteSafetyForm(prev => ({ ...prev, date: e.target.value }))}
+      />
+      <p style={{ fontSize: '0.8rem', color: theme === 'light' ? '#92400e' : '#fbbf24', margin: '0 0 20px' }}>
+        {nextDue ? `Next due: ${formatSafetyDate(nextDue)}` : 'Pick the date the inspection was done'}
+      </p>
+
+      {/* Question */}
+      {completeSafetyForm.logService === null && (
+        <>
+          <p style={{ fontSize: '1.05rem', fontWeight: '600', marginBottom: '16px', color: theme === 'light' ? '#111827' : 'white', textAlign: 'center' }}>
+            Would you like to log this in service history?
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <button
+              onClick={() => setCompleteSafetyForm(prev => ({ ...prev, logService: true }))}
+              disabled={savingCompleteSafety}
+              style={{
+                padding: '16px',
+                background: 'linear-gradient(to right, #10b981, #06b6d4)',
+                border: 'none',
+                borderRadius: '10px',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                fontWeight: 'bold'
+              }}
+            >
+              📋 Yes — log it in service history
+            </button>
+            <button
+              onClick={() => handleCompleteSafetySubmit(false)}
+              disabled={savingCompleteSafety}
+              style={{
+                padding: '16px',
+                background: theme === 'light' ? '#f3f4f6' : '#374151',
+                border: `1px solid ${theme === 'light' ? '#d1d5db' : '#4b5563'}`,
+                borderRadius: '10px',
+                color: theme === 'light' ? '#374151' : '#d1d5db',
+                cursor: savingCompleteSafety ? 'not-allowed' : 'pointer',
+                fontSize: '1rem',
+                opacity: savingCompleteSafety ? 0.6 : 1
+              }}
+            >
+              {savingCompleteSafety ? 'Saving...' : '✓ Just mark complete'}
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* Service log form */}
+      {completeSafetyForm.logService === true && (
+        <>
+          <label style={labelStyle}>Machine</label>
+          <div style={{
+            padding: '10px 14px',
+            background: theme === 'light' ? '#f3f4f6' : '#1a2942',
+            border: `1px solid ${theme === 'light' ? '#d1d5db' : '#374151'}`,
+            borderRadius: '8px',
+            color: theme === 'light' ? '#374151' : '#9ca3af',
+            fontSize: '0.95rem',
+            marginBottom: '12px'
+          }}>
+            {completingSafety.machine_name}
+          </div>
+
+          <label style={labelStyle}>Service Type</label>
+          <input
+            style={{ ...styles.input, marginBottom: '12px' }}
+            value={completeSafetyForm.serviceType}
+            onChange={(e) => setCompleteSafetyForm(prev => ({ ...prev, serviceType: e.target.value }))}
+            placeholder="Safety Inspection"
+          />
+
+          <label style={labelStyle}>Technician</label>
+          <TechnicianField
+            value={completeSafetyForm.technician}
+            onChange={(val) => setCompleteSafetyForm(prev => ({ ...prev, technician: val }))}
+            styles={styles}
+            technicians={technicians}
+          />
+
+          <label style={labelStyle}>Notes</label>
+          <textarea
+            style={{
+              ...styles.input,
+              minHeight: '100px',
+              resize: 'vertical',
+              fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif',
+              fontSize: '1rem'
+            }}
+            value={completeSafetyForm.notes}
+            onChange={(e) => setCompleteSafetyForm(prev => ({ ...prev, notes: e.target.value }))}
+            placeholder="What was done? Any defects found?"
+          />
+
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button
+              onClick={() => handleCompleteSafetySubmit(true)}
+              disabled={savingCompleteSafety}
+              style={{
+                flex: 1,
+                padding: '14px',
+                background: savingCompleteSafety ? '#6b7280' : 'linear-gradient(to right, #10b981, #06b6d4)',
+                border: 'none',
+                borderRadius: '10px',
+                color: 'white',
+                cursor: savingCompleteSafety ? 'not-allowed' : 'pointer',
+                fontSize: '1rem',
+                fontWeight: 'bold'
+              }}
+            >
+              {savingCompleteSafety ? 'Saving...' : '✓ Save & Complete'}
+            </button>
+            <button
+              onClick={() => setCompleteSafetyForm(prev => ({ ...prev, logService: null }))}
+              disabled={savingCompleteSafety}
+              style={{
+                padding: '14px 20px',
+                background: theme === 'light' ? '#f3f4f6' : '#374151',
+                border: `1px solid ${theme === 'light' ? '#d1d5db' : '#4b5563'}`,
+                borderRadius: '10px',
+                color: theme === 'light' ? '#374151' : '#d1d5db',
+                cursor: 'pointer',
+                fontSize: '1rem'
+              }}
+            >
+              ← Back
+            </button>
+          </div>
+        </>
+      )}
+    </Modal>
+  );
+})()}
+
 {/* Deleted Safety Reminders Modal */}
 {showDeletedSafetyModal && (
   <Modal
