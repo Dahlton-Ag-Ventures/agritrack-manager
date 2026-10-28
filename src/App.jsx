@@ -4105,7 +4105,11 @@ return (
         </div>
 
 {activeTab === 'dashboard' && (
-  <div style={styles.homeContainer}>
+  <div style={{
+    ...styles.homeContainer,
+    background: theme === 'light' ? 'linear-gradient(180deg, #f8fafc, #eef2f7)' : '#0b1220',
+    padding: isDesktop ? '24px' : '14px',
+  }}>
 
 {(() => {
   const hour = new Date().getHours();
@@ -4156,17 +4160,10 @@ return (
     : 'All reminders clear';
 
   return (
-    <div style={{
-      background: currentTheme.cardBackground,
-      border: `1px solid ${currentTheme.cardBorder}`,
-      borderRadius: '12px',
-      overflow: 'hidden',
-      marginBottom: '20px',
-    }}>
+    <div style={{ marginBottom: '20px' }}>
       {/* Header row */}
       <div style={{
-        padding: isDesktop ? '16px 20px' : '14px 16px',
-        borderBottom: `0.5px solid ${currentTheme.cardBorder}`,
+        padding: '0 4px 14px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -4183,17 +4180,17 @@ return (
         </div>
         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', flexShrink: 0 }}>
           {overdueCount > 0 && (
-            <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '20px', background: 'rgba(239,68,68,0.15)', color: '#ef4444', fontWeight: 'bold', border: '1px solid rgba(239,68,68,0.3)' }}>
+            <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '20px', fontWeight: 'bold', background: theme === 'light' ? '#ffffff' : '#111c30', color: theme === 'light' ? '#dc2626' : '#f87171', border: theme === 'light' ? 'none' : '1px solid rgba(239,68,68,0.4)', boxShadow: theme === 'light' ? '0 4px 10px -3px rgba(220,38,38,0.35)' : '0 0 12px rgba(239,68,68,0.25)' }}>
               {overdueCount} overdue
             </span>
           )}
           {dueSoonCount > 0 && (
-            <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '20px', background: 'rgba(245,158,11,0.15)', color: '#f59e0b', fontWeight: 'bold', border: '1px solid rgba(245,158,11,0.3)' }}>
+            <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '20px', fontWeight: 'bold', background: theme === 'light' ? '#ffffff' : '#111c30', color: theme === 'light' ? '#d97706' : '#fbbf24', border: theme === 'light' ? 'none' : '1px solid rgba(245,158,11,0.4)', boxShadow: theme === 'light' ? '0 4px 10px -3px rgba(217,119,6,0.35)' : '0 0 12px rgba(245,158,11,0.2)' }}>
               {dueSoonCount} due soon
             </span>
           )}
           {overdueCount === 0 && dueSoonCount === 0 && (
-            <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '20px', background: 'rgba(16,185,129,0.15)', color: '#10b981', fontWeight: 'bold', border: '1px solid rgba(16,185,129,0.3)' }}>
+            <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '20px', fontWeight: 'bold', background: theme === 'light' ? '#ffffff' : '#111c30', color: theme === 'light' ? '#059669' : '#34d399', border: theme === 'light' ? 'none' : '1px solid rgba(16,185,129,0.4)', boxShadow: theme === 'light' ? '0 4px 10px -3px rgba(5,150,105,0.35)' : '0 0 12px rgba(16,185,129,0.2)' }}>
               All clear
             </span>
           )}
@@ -4202,8 +4199,13 @@ return (
 
       {/* Service + Calendar panels */}
       {isDesktop ? (
-        <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 0 }}>
-          <div style={{ borderRight: `0.5px solid ${currentTheme.cardBorder}` }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 3fr) minmax(0, 2fr)', gap: '14px', alignItems: 'start' }}>
+          <div style={{
+            borderRadius: '16px',
+            background: theme === 'light' ? '#ffffff' : 'linear-gradient(160deg, #13233d, #0f1a2e)',
+            border: theme === 'light' ? 'none' : '1px solid #1f3355',
+            boxShadow: theme === 'light' ? '0 10px 24px -8px rgba(15,23,42,0.15)' : '0 12px 30px rgba(0,0,0,0.45)',
+          }}>
             <ServiceOverview
               serviceReminders={serviceReminders}
               machineHours={machineHours}
@@ -12192,14 +12194,21 @@ const calendarProps = {
   };
 
   const servicePanel = (
-    <ServiceOverview
-      serviceReminders={serviceReminders}
-      machineHours={machineHours}
-      machineKm={machineKm}
-      theme={theme}
-      onReminderClick={onReminderClick}
-      onSafetyReminderClick={onSafetyReminderClick}
-    />
+    <div style={{
+      borderRadius: '16px',
+      background: theme === 'light' ? '#ffffff' : 'linear-gradient(160deg, #13233d, #0f1a2e)',
+      border: theme === 'light' ? 'none' : '1px solid #1f3355',
+      boxShadow: theme === 'light' ? '0 10px 24px -8px rgba(15,23,42,0.15)' : '0 12px 30px rgba(0,0,0,0.45)',
+    }}>
+      <ServiceOverview
+        serviceReminders={serviceReminders}
+        machineHours={machineHours}
+        machineKm={machineKm}
+        theme={theme}
+        onReminderClick={onReminderClick}
+        onSafetyReminderClick={onSafetyReminderClick}
+      />
+    </div>
   );
 
   const calendarPanel = <FarmCalendar {...calendarProps} />;
@@ -12508,10 +12517,11 @@ function saveSelection() {
 
 return (
     <div style={{
-      background: cardBg,
-      border: `1px solid ${cardBorder}`,
-      borderRadius: '12px',
+      background: theme === 'light' ? '#ffffff' : 'linear-gradient(160deg, #13233d, #0f1a2e)',
+      border: theme === 'light' ? 'none' : '1px solid #1f3355',
+      borderRadius: '16px',
       padding: '16px',
+      boxShadow: theme === 'light' ? '0 10px 24px -8px rgba(15,23,42,0.15)' : '0 12px 30px rgba(0,0,0,0.45)',
     }}>
 
       {/* ── GRID VIEW ── */}
@@ -12569,17 +12579,24 @@ return (
                   key={mi}
                   onClick={() => openMonth(mi)}
                   style={{
-                    border: isCurMonth ? '1.5px solid #9FE1CB' : `0.5px solid ${cardBorder}`,
-                    borderRadius: '8px', padding: '8px',
-                    background: isCurMonth ? '#E1F5EE' : cardBg,
+                    border: theme === 'light'
+                      ? 'none'
+                      : (isCurMonth ? '1px solid rgba(16,185,129,0.5)' : '1px solid #1f3355'),
+                    borderRadius: '10px', padding: '8px',
+                    background: theme === 'light'
+                      ? (isCurMonth ? '#E1F5EE' : '#ffffff')
+                      : '#111c30',
+                    boxShadow: theme === 'light'
+                      ? (isCurMonth ? '0 6px 14px -4px rgba(16,185,129,0.45)' : '0 4px 10px -4px rgba(15,23,42,0.18)')
+                      : (isCurMonth ? '0 0 14px rgba(16,185,129,0.3)' : 'none'),
                     cursor: 'pointer',
-                    transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                    transition: 'transform 0.15s ease',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '5px' }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: '600', color: isCurMonth ? '#0F6E56' : textMain }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '600', color: isCurMonth ? (theme === 'light' ? '#0F6E56' : '#34d399') : textMain }}>
                       {SHORT[mi]}
                     </span>
                     {noteCount > 0 && (
