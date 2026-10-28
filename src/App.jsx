@@ -7037,7 +7037,9 @@ onMouseEnter={(e) => {
                 {item.requirements ? (
                   <div style={{ marginTop: '12px', padding: '12px', background: theme === 'light' ? '#fefce8' : '#1f2937', border: theme === 'light' ? '1px solid #fde047' : '1px solid #374151', borderRadius: '8px' }}>
                     <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>Machine Requirements</p>
-                    <p style={{ fontSize: '0.875rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.requirements}</p>
+                    <p style={{ fontSize: '0.875rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                      <LinkifiedText text={item.requirements} theme={theme} />
+                    </p>
                   </div>
                 ) : null}
               </div>
@@ -13940,6 +13942,42 @@ function TechnicianField({ value, onChange, styles, technicians }) {
     </div>
   );
 }
+// Turns web addresses in plain text into clickable links (opens in a new tab)
+function LinkifiedText({ text, theme }) {
+  if (!text) return null;
+  const urlRegex = /((?:https?:\/\/|www\.)[^\s<]+)/gi;
+  const parts = text.split(urlRegex);
+
+  return parts.map((part, i) => {
+    // With one capture group, every odd index is a matched address
+    if (i % 2 === 1) {
+      const trailingMatch = part.match(/[.,;:!?)\]'"]+$/);
+      const trailing = trailingMatch ? trailingMatch[0] : '';
+      const url = trailing ? part.slice(0, -trailing.length) : part;
+      const href = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+      return (
+        <React.Fragment key={i}>
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              color: theme === 'light' ? '#2563eb' : '#60a5fa',
+              textDecoration: 'underline',
+              wordBreak: 'break-all',
+            }}
+          >
+            {url}
+          </a>
+          {trailing}
+        </React.Fragment>
+      );
+    }
+    return <React.Fragment key={i}>{part}</React.Fragment>;
+  });
+}
+
 // Modal component - defined outside to avoid recreation on each render
 function InventoryBottomSheet({ item, onClose, onEdit, onDelete, theme, currentTheme, userRole }) {
   if (!item) return null;
