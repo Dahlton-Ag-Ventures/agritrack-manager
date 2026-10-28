@@ -4363,22 +4363,29 @@ return (
               key={card.id}
               onClick={() => setExpandedCard(isActive ? null : card.id)}
               style={{
-                background: currentTheme.cardBackground,
-                border: isActive ? `2px solid ${card.accentColor}` : `1px solid ${currentTheme.cardBorder}`,
-                borderRadius: '10px',
+                background: theme === 'light' ? '#ffffff' : '#111c30',
+                border: isActive
+                  ? `2px solid ${card.accentColor}`
+                  : (theme === 'light' ? '2px solid transparent' : `2px solid ${card.accentColor}66`),
+                borderRadius: '14px',
                 padding: isDesktop ? '16px' : '12px',
                 cursor: 'pointer',
+                boxShadow: theme === 'light'
+                  ? `0 10px 20px -8px ${card.accentColor}66`
+                  : `0 0 16px ${card.accentColor}33`,
                 opacity: expandedCard && !isActive ? 0.45 : 1,
-                transition: 'opacity 0.2s ease, border-color 0.2s ease',
+                transition: 'opacity 0.2s ease, border-color 0.2s ease, transform 0.15s ease',
               }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div style={{
                     width: isDesktop ? '32px' : '26px',
                     height: isDesktop ? '32px' : '26px',
-                    borderRadius: '50%',
-                    background: card.iconBg,
+                    borderRadius: '9px',
+                    background: theme === 'light' ? card.iconBg : `${card.accentColor}33`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -4407,8 +4414,8 @@ return (
                     fontSize: isDesktop ? '10px' : '9px',
                     padding: '2px 6px',
                     borderRadius: '20px',
-                    background: card.badgeBg,
-                    color: card.badgeColor,
+                    background: theme === 'light' ? card.badgeBg : `${card.accentColor}26`,
+                    color: theme === 'light' ? card.badgeColor : card.accentColor,
                     fontWeight: '500',
                   }}>
                     {badge}
@@ -4426,18 +4433,21 @@ return (
         if (!card) return null;
         return (
           <div style={{
-            background: currentTheme.cardBackground,
+            background: theme === 'light' ? '#ffffff' : '#111c30',
             border: `2px solid ${card.accentColor}`,
-            borderRadius: '10px',
+            borderRadius: '14px',
             padding: isDesktop ? '20px' : '14px',
             marginBottom: '12px',
+            boxShadow: theme === 'light'
+              ? `0 12px 24px -10px ${card.accentColor}66`
+              : `0 0 20px ${card.accentColor}33`,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
               <div style={{
                 width: '36px',
                 height: '36px',
-                borderRadius: '50%',
-                background: card.iconBg,
+                borderRadius: '10px',
+                background: theme === 'light' ? card.iconBg : `${card.accentColor}33`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -4462,7 +4472,7 @@ return (
                 gap: '10px',
                 paddingTop: '10px',
                 paddingBottom: '10px',
-                borderBottom: i < card.features.length - 1 ? `0.5px solid ${currentTheme.cardBorder}` : 'none',
+                borderBottom: i < card.features.length - 1 ? `0.5px solid ${theme === 'light' ? '#e5e7eb' : '#1f3355'}` : 'none',
               }}>
                 <div style={{
                   width: '6px',
