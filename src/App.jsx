@@ -4908,6 +4908,16 @@ return (
               autoCapitalize="characters"
               spellCheck={false}
                 />
+                  <select
+                    style={styles.input}
+                    value={inventoryForm.category || ''}
+                    onChange={(e) => setInventoryForm({ ...inventoryForm, category: e.target.value })}
+                  >
+                    <option value="">Select Category (optional)...</option>
+                    {INVENTORY_CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
                   <input
                     style={styles.input}
                     type="number"
