@@ -5222,27 +5222,7 @@ onMouseEnter={(e) => {
                       </div>
                         <div style={{ minWidth: 0, overflow: 'hidden' }}>
                         <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Quantity</p>
-                        {userRole === 'employee' ? (
-                          <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
-                        ) : (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-<button 
-  onClick={(e) => { e.stopPropagation(); quickUpdateQuantity(item.id, -1); }}
-  onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); quickUpdateQuantity(item.id, -1); }}
-  style={{ ...styles.quantityButton, touchAction: 'manipulation' }}
->
-  −
-</button>
-<p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
-<button 
-  onClick={(e) => { e.stopPropagation(); quickUpdateQuantity(item.id, 1); }}
-  onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); quickUpdateQuantity(item.id, 1); }}
-  style={{ ...styles.quantityButton, touchAction: 'manipulation' }}
->
-  +
-</button>
-                          </div>
-                        )}
+                                                <p style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{item.quantity || 0}</p>
                       </div>
                       <div>
                         <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Location</p>
