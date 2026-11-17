@@ -1447,7 +1447,8 @@ const idToDate = (id) => {
 
 const getInventoryRows = (items) => items.map(item => [
   item.name, item.partNumber, item.quantity,
-  item.location, item.minQuantity, item.maxQuantity
+  item.location, item.minQuantity, item.maxQuantity,
+  item.category || 'Uncategorized'
 ]);
 
 const getMachineryRows = (items) => items.map(item => [
@@ -8671,7 +8672,7 @@ onMouseEnter={(e) => {
             </p>
             <button onClick={() => exportToCSV(
               getInventoryRows(inventory),
-              ['Name', 'Part Number', 'Quantity', 'Location', 'Min Qty', 'Max Qty'],
+              ['Name', 'Part Number', 'Quantity', 'Location', 'Min Qty', 'Max Qty', 'Category'],
               'inventory-all.csv'
             )} style={{
               padding: '10px 20px', background: '#10b981', border: 'none',
@@ -8725,7 +8726,7 @@ onMouseEnter={(e) => {
               <button
                 onClick={() => exportToCSV(
                   getInventoryRows(filtered),
-                  ['Name', 'Part Number', 'Quantity', 'Location', 'Min Qty', 'Max Qty'],
+                  ['Name', 'Part Number', 'Quantity', 'Location', 'Min Qty', 'Max Qty', 'Category'],
                   'inventory-daterange.csv'
                 )}
                 disabled={filtered.length === 0}
@@ -8782,7 +8783,7 @@ onMouseEnter={(e) => {
                 const selected = inventory.filter(i => exportInventorySelected.has(i.id));
                 exportToCSV(
                   getInventoryRows(selected),
-                  ['Name', 'Part Number', 'Quantity', 'Location', 'Min Qty', 'Max Qty'],
+                  ['Name', 'Part Number', 'Quantity', 'Location', 'Min Qty', 'Max Qty', 'Category'],
                   'inventory-selected.csv'
                 );
               }}
