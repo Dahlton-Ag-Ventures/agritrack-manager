@@ -8796,10 +8796,90 @@ onMouseEnter={(e) => {
                 background: exportInventorySelected.size === 0 ? '#6b7280' : '#10b981',
                 opacity: exportInventorySelected.size === 0 ? 0.6 : 1
               }}>
-              ⬇ Download CSV
+                           ⬇ Download CSV
             </button>
           </div>
         )}
+
+        {/* By Category */}
+        {exportInventoryTab === 'category' && (() => {
+          const categoryOptions = [...INVENTORY_CATEGORIES, 'Uncategorized'];
+          const getItemCategory = (item) =>
+            INVENTORY_CATEGORIES.includes(item.category) ? item.category : 'Uncategorized';
+          const filtered = inventory
+            .filter(item => exportInventoryCategories.has(getItemCategory(item)))
+            .sort((a, b) => {
+              const diff = categoryOptions.indexOf(getItemCategory(a)) - categoryOptions.indexOf(getItemCategory(b));
+              if (diff !== 0) return diff;
+              return (a.name || '').localeCompare(b.name || '');
+            });
+          const toggleCategory = (cat) => setExportInventoryCategories(prev => {
+            const next = new Set(prev);
+            if (next.has(cat)) { next.delete(cat); } else { next.add(cat); }
+            return next;
+          });
+          return (
+            <div>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                <button onClick={() => setExportInventoryCategories(new Set(categoryOptions))} style={{
+                  padding: '6px 14px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.8rem',
+                  background: theme === 'light' ? '#e5e7eb' : '#374151', color: currentTheme.text
+                }}>
+                  Select All
+                </button>
+                <button onClick={() => setExportInventoryCategories(new Set())} style={{
+                  padding: '6px 14px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.8rem',
+                  background: theme === 'light' ? '#e5e7eb' : '#374151', color: currentTheme.text
+                }}>
+                  Clear
+                </button>
+              </div>
+              <div style={{
+                display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                columnGap: '20px', rowGap: '4px', marginBottom: '12px'
+              }}>
+                {categoryOptions.map(cat => {
+                  const count = inventory.filter(item => getItemCategory(item) === cat).length;
+                  return (
+                    <label key={cat} style={{
+                      display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 0',
+                      cursor: 'pointer', fontSize: '0.875rem', color: currentTheme.text,
+                      fontStyle: cat === 'Uncategorized' ? 'italic' : 'normal'
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={exportInventoryCategories.has(cat)}
+                        onChange={() => toggleCategory(cat)}
+                        style={{ width: '18px', height: '18px', accentColor: '#10b981', cursor: 'pointer' }}
+                      />
+                      <span style={{ flex: 1 }}>{cat}</span>
+                      <span style={{ color: currentTheme.textSecondary, fontSize: '0.8rem' }}>{count}</span>
+                    </label>
+                  );
+                })}
+              </div>
+              <p style={{ color: currentTheme.textSecondary, fontSize: '0.875rem', marginBottom: '12px' }}>
+                <strong style={{ color: currentTheme.text }}>{filtered.length}</strong> items in <strong style={{ color: currentTheme.text }}>{exportInventoryCategories.size}</strong> categor{exportInventoryCategories.size === 1 ? 'y' : 'ies'}.
+              </p>
+              <button
+                onClick={() => exportToCSV(
+                  getInventoryRows(filtered),
+                  ['Name', 'Part Number', 'Quantity', 'Location', 'Min Qty', 'Max Qty', 'Category'],
+                  'inventory-by-category.csv'
+                )}
+                disabled={filtered.length === 0}
+                style={{
+                  padding: '10px 20px', border: 'none', borderRadius: '8px',
+                  color: 'white', cursor: filtered.length === 0 ? 'not-allowed' : 'pointer',
+                  fontSize: '0.875rem', fontWeight: '600',
+                  background: filtered.length === 0 ? '#6b7280' : '#10b981',
+                  opacity: filtered.length === 0 ? 0.6 : 1
+                }}>
+                ⬇ Download CSV
+              </button>
+            </div>
+          );
+        })()}
       </div>
     )}
   </div>
