@@ -443,6 +443,7 @@ const [exportMachineryDateEnd, setExportMachineryDateEnd] = useState('');
 const [exportServiceDateStart, setExportServiceDateStart] = useState('');
 const [exportServiceDateEnd, setExportServiceDateEnd] = useState('');
 const [exportInventorySelected, setExportInventorySelected] = useState(new Set());
+const [exportInventoryCategories, setExportInventoryCategories] = useState(new Set());
 const [exportMachinerySelected, setExportMachinerySelected] = useState(new Set());
 const [exportServiceSelected, setExportServiceSelected] = useState(new Set());
 const [exportMode, setExportMode] = useState(null); // 'inventory' | 'machinery' | 'service' | null
@@ -8649,8 +8650,8 @@ onMouseEnter={(e) => {
     {exportInventoryOpen && (
       <div style={{ padding: '16px', borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` }}>
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-          {['all', 'daterange', 'manual'].map(tab => (
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+          {['all', 'daterange', 'manual', 'category'].map(tab => (
             <button key={tab} onClick={() => setExportInventoryTab(tab)} style={{
               padding: '8px 16px', border: 'none', borderRadius: '8px', cursor: 'pointer',
               fontSize: '0.875rem', fontWeight: exportInventoryTab === tab ? '700' : '400',
@@ -8659,7 +8660,7 @@ onMouseEnter={(e) => {
                 : (theme === 'light' ? '#e5e7eb' : '#374151'),
               color: exportInventoryTab === tab ? 'white' : currentTheme.text,
             }}>
-              {tab === 'all' ? 'Export All' : tab === 'daterange' ? 'Date Range' : 'Manual Select'}
+              {tab === 'all' ? 'Export All' : tab === 'daterange' ? 'Date Range' : tab === 'manual' ? 'Manual Select' : 'By Category'}
             </button>
           ))}
         </div>
