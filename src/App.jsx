@@ -4966,6 +4966,15 @@ return (
                       onChange={(e) => setInventoryForm({ ...inventoryForm, maxQuantity: e.target.value })}
                     />
                   </div>
+                  <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
+                    📝 Notes
+                  </label>
+                  <textarea
+                    style={{ ...styles.input, minHeight: '80px', resize: 'vertical', fontFamily: 'inherit', fontSize: '16px' }}
+                    placeholder="Fits the Quad 485, order 2 at a time…"
+                    value={inventoryForm.notes || ''}
+                    onChange={(e) => setInventoryForm({ ...inventoryForm, notes: e.target.value })}
+                  />
                  <div style={{ marginBottom: '12px' }}>
                     <label style={{ display: 'block', color: '#9ca3af', fontSize: '0.875rem', marginBottom: '4px' }}>
                       📸 Upload Photo
