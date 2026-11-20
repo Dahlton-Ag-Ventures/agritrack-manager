@@ -768,7 +768,7 @@ setInventory(allInventory.map(item => ({
       photoUrl: item.photo_url || '',
       category: item.category || '',
       isStarred: item.is_starred || false
-    })));done 
+    })));
     
     let allMachinery = [];
     let machineryPage = 0;
