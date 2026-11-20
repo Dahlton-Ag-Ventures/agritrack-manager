@@ -5231,6 +5231,41 @@ onMouseEnter={(e) => {
                   </div>
                  <div style={{ flex: 1 }}>
   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+    <button
+      onClick={async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const newValue = !item.isStarred;
+        setInventory(prev => prev.map(i =>
+          i.id === item.id ? { ...i, isStarred: newValue } : i
+        ));
+        const { error } = await supabase
+          .from('inventory_items')
+          .update({ is_starred: newValue })
+          .eq('id', item.id);
+        if (error) {
+          console.error('Star update error:', error);
+          setInventory(prev => prev.map(i =>
+            i.id === item.id ? { ...i, isStarred: !newValue } : i
+          ));
+          alert('Could not update star: ' + error.message);
+        }
+      }}
+      title={item.isStarred ? 'Unstar' : 'Star'}
+      style={{
+        background: 'none',
+        border: 'none',
+        padding: '4px',
+        cursor: 'pointer',
+        fontSize: '1.25rem',
+        lineHeight: 1,
+        flexShrink: 0,
+        touchAction: 'manipulation',
+        color: currentTheme.textSecondary
+      }}
+    >
+      {item.isStarred ? '⭐' : '☆'}
+    </button>
     <h3 style={{ fontSize: '1rem', wordBreak: 'break-word' }}>{item.name}</h3>
                     {getStockStatus(item) === 'low' && (
   <span className="stock-badge-low" style={styles.stockBadgeLow}>⚠️ Low Stock</span>
