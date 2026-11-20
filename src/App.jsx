@@ -4877,6 +4877,9 @@ return (
             return (
 <div key={item.id} id={`inventory-item-${item.id}`} className="item-card" style={{
                 ...styles.itemCard,
+                border: item.isStarred
+                  ? `2px solid ${theme === 'light' ? '#d97706' : '#f59e0b'}`
+                  : styles.itemCard.border,
                 outline: exportMode === 'inventory' && exportInventorySelected.has(item.id)
                   ? '2px solid #10b981' : 'none'
               }}
