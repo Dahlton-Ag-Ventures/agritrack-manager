@@ -958,7 +958,7 @@ supabase
   .channel('inventory-changes')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory_items' }, (payload) => {
     console.log('🔔 Inventory change');
-  if (payload.eventType === 'INSERT') {
+    if (payload.eventType === 'INSERT') {
       setInventory(prev => [...prev, {
         id: payload.new.id,
         name: payload.new.name,
@@ -968,7 +968,8 @@ supabase
         minQuantity: payload.new.min_quantity,
         maxQuantity: payload.new.max_quantity,
         photoUrl: payload.new.photo_url,
-        category: payload.new.category || ''
+        category: payload.new.category || '',
+        isStarred: payload.new.is_starred || false
       }]);
     } else if (payload.eventType === 'UPDATE') {
   // ✅ Skip realtime update if we just updated this item locally
@@ -982,7 +983,8 @@ supabase
     minQuantity: payload.new.min_quantity,
     maxQuantity: payload.new.max_quantity,
     photoUrl: payload.new.photo_url,
-    category: payload.new.category || ''
+    category: payload.new.category || '',
+    isStarred: payload.new.is_starred || false
   } : item));
 } else if (payload.eventType === 'DELETE') {
       setInventory(prev => prev.filter(item => item.id !== payload.old.id));
