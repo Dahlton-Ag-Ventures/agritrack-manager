@@ -10229,7 +10229,6 @@ onMouseEnter={(e) => {
               <li>✅ On phones, tap a card to open its full details</li>
               <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot write or edit notes</span></li>
             </ul>
-            </ul>
           </div>
 
           <div style={{ marginBottom: '20px' }}>
