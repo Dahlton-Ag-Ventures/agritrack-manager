@@ -5223,7 +5223,7 @@ onMouseEnter={(e) => {
                           Print QR
                         </span>
                       </div>
-                      <button onClick={() => startEditInventory(item)} style={styles.editButton}>
+                      <button onClick={(e) => { e.stopPropagation(); startEditInventory(item); }} style={styles.editButton}>
                           <Edit2 size={16} />
                         </button>
                         <button
@@ -5408,7 +5408,7 @@ onMouseEnter={(e) => {
                             Print QR
                           </span>
                         </div>
-                        <button onClick={() => startEditInventory(item)} style={styles.editButton}>
+                        <button onClick={(e) => { e.stopPropagation(); startEditInventory(item); }} style={styles.editButton}>
                         <Edit2 size={16} />
                       </button>
                       <button
