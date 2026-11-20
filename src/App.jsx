@@ -10303,6 +10303,154 @@ onMouseEnter={(e) => {
 </div>
   </div>
 )}
+{inventorySheetItem && !isDesktop && (() => {
+  const sheetItem = inventory.find(i => i.id === inventorySheetItem.id) || inventorySheetItem;
+  return (
+    <div
+      onClick={() => setInventorySheetItem(null)}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0,0,0,0.5)',
+        zIndex: 2000,
+        display: 'flex',
+        alignItems: 'flex-end'
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: '100%',
+          maxHeight: '85vh',
+          overflowY: 'auto',
+          background: currentTheme.cardBackground,
+          color: currentTheme.text,
+          borderTopLeftRadius: '16px',
+          borderTopRightRadius: '16px',
+          padding: '12px 16px',
+          paddingBottom: 'calc(16px + env(safe-area-inset-bottom))',
+          boxSizing: 'border-box'
+        }}
+      >
+        <div style={{ width: '40px', height: '4px', borderRadius: '999px', background: currentTheme.cardBorder, margin: '0 auto 12px' }} />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+          <button
+            onClick={async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const newValue = !sheetItem.isStarred;
+              setInventory(prev => prev.map(i =>
+                i.id === sheetItem.id ? { ...i, isStarred: newValue } : i
+              ));
+              const { error } = await supabase
+                .from('inventory_items')
+                .update({ is_starred: newValue })
+                .eq('id', sheetItem.id);
+              if (error) {
+                console.error('Star update error:', error);
+                setInventory(prev => prev.map(i =>
+                  i.id === sheetItem.id ? { ...i, isStarred: !newValue } : i
+                ));
+                alert('Could not update star: ' + error.message);
+              }
+            }}
+            style={{ background: 'none', border: 'none', padding: '4px', fontSize: '1.4rem', lineHeight: 1, cursor: 'pointer', touchAction: 'manipulation', color: currentTheme.textSecondary }}
+          >
+            {sheetItem.isStarred ? '⭐' : '☆'}
+          </button>
+          <h3 style={{ flex: 1, margin: 0, fontSize: '1.1rem', wordBreak: 'break-word' }}>{sheetItem.name}</h3>
+          <button
+            onClick={() => setInventorySheetItem(null)}
+            style={{ background: 'none', border: 'none', padding: '6px', fontSize: '1.2rem', lineHeight: 1, cursor: 'pointer', touchAction: 'manipulation', color: currentTheme.textSecondary }}
+          >
+            ✕
+          </button>
+        </div>
+
+        {sheetItem.photoUrl && (
+          <img
+            src={sheetItem.photoUrl}
+            alt={sheetItem.name}
+            onClick={() => {
+              setInventorySheetItem(null);
+              setViewingImage(sheetItem.photoUrl);
+              setViewingImageArray([sheetItem.photoUrl]);
+              setViewingImageIndex(0);
+              setImageModalTitle(sheetItem.name);
+            }}
+            style={{ width: '100%', maxHeight: '220px', objectFit: 'cover', borderRadius: '10px', display: 'block', marginBottom: '12px' }}
+          />
+        )}
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px 16px', marginBottom: '12px' }}>
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.8rem', margin: 0 }}>Part Number</p>
+            <p style={{ margin: 0, wordBreak: 'break-word' }}>{sheetItem.partNumber || 'N/A'}</p>
+          </div>
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.8rem', margin: 0 }}>Quantity</p>
+            <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 'bold' }}>{sheetItem.quantity || 0}</p>
+          </div>
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.8rem', margin: 0 }}>Location</p>
+            <p style={{ margin: 0, wordBreak: 'break-word' }}>{sheetItem.location || 'N/A'}</p>
+          </div>
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.8rem', margin: 0 }}>Category</p>
+            <p style={{ margin: 0 }}>{sheetItem.category || 'Uncategorized'}</p>
+          </div>
+          <div>
+            <p style={{ color: '#9ca3af', fontSize: '0.8rem', margin: 0 }}>Min / Max</p>
+            <p style={{ margin: 0 }}>{sheetItem.minQuantity || '—'} / {sheetItem.maxQuantity || '—'}</p>
+          </div>
+        </div>
+
+        {sheetItem.notes && sheetItem.notes.trim() !== '' && (
+          <div style={{
+            background: theme === 'light' ? '#f3f4f6' : 'rgba(255,255,255,0.06)',
+            borderRadius: '8px',
+            padding: '10px 12px',
+            fontSize: '0.9rem',
+            lineHeight: '1.5',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+            marginBottom: '12px'
+          }}>
+            📝 {sheetItem.notes}
+          </div>
+        )}
+
+        {userRole !== 'employee' && (
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={() => {
+                setInventorySheetItem(null);
+                startEditInventory(sheetItem);
+                setTimeout(() => {
+                  const el = document.getElementById(`inventory-item-${sheetItem.id}`);
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 150);
+              }}
+              style={{ flex: 1, padding: '12px', borderRadius: '10px', border: 'none', background: '#10b981', color: 'white', fontSize: '0.95rem', fontWeight: '600', cursor: 'pointer', touchAction: 'manipulation' }}
+            >
+              ✏️ Edit
+            </button>
+            <button
+              onClick={() => printInventoryQR(sheetItem)}
+              style={{ flex: 1, padding: '12px', borderRadius: '10px', border: `1px solid ${currentTheme.cardBorder}`, background: 'transparent', color: currentTheme.text, fontSize: '0.95rem', fontWeight: '600', cursor: 'pointer', touchAction: 'manipulation' }}
+            >
+              ▦ Print QR
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+})()}
 {showInventoryModal && (
   <Modal title="Add Inventory Item" theme={theme} onClose={() => {
     setShowInventoryModal(false);
