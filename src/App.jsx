@@ -1512,7 +1512,11 @@ const getFilteredAndSortedInventory = () => {
     const catB = b.category || 'Uncategorized';
     if (catA === 'Uncategorized' && catB !== 'Uncategorized') return 1;
     if (catB === 'Uncategorized' && catA !== 'Uncategorized') return -1;
-    return catA.localeCompare(catB);
+    const catDiff = catA.localeCompare(catB);
+    if (catDiff !== 0) return catDiff;
+    if (a.isStarred && !b.isStarred) return -1;
+    if (b.isStarred && !a.isStarred) return 1;
+    return 0;
   });
 };
 
