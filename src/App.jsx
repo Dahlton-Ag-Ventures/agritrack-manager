@@ -1729,7 +1729,8 @@ const startEditInventory = (item) => {
     minQuantity: item.minQuantity || '',
     maxQuantity: item.maxQuantity || '',
     photoUrl: item.photoUrl || '',
-    category: item.category || ''
+    category: item.category || '',
+    notes: item.notes || ''
   });
 };
 
@@ -1744,7 +1745,8 @@ const updates = {
       min_quantity: inventoryForm.minQuantity,
       max_quantity: inventoryForm.maxQuantity,
       photo_url: inventoryForm.photoUrl || '',
-      category: inventoryForm.category || ''
+      category: inventoryForm.category || '',
+      notes: inventoryForm.notes || ''
     };
     
    recentlyUpdatedIdsRef.current.add(id);
@@ -1774,6 +1776,7 @@ let result = await supabase.from('inventory_items').update(updates).eq('id', id)
 
    setInventory(prev => prev.map(item => 
       item.id === id ? {
+        ...item,
         id: item.id,
         name: updates.name,
         partNumber: updates.part_number,
@@ -1782,7 +1785,8 @@ let result = await supabase.from('inventory_items').update(updates).eq('id', id)
         minQuantity: updates.min_quantity,
         maxQuantity: updates.max_quantity,
         photoUrl: updates.photo_url,
-        category: updates.category || ''
+        category: updates.category || '',
+        notes: updates.notes || ''
       } : item
     ));
 
