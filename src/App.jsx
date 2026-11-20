@@ -10084,7 +10084,7 @@ onMouseEnter={(e) => {
   background: theme === 'dark' 
     ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%)'
     : '#ffffff',
-  border: theme === 'dark' ? '1px solid #10b981' : '2px solid #111827',
+  border: '1.5px solid #10b981',
   marginBottom: '24px'
 }}>
   <div style={{ flex: 1 }}>
@@ -10159,7 +10159,6 @@ onMouseEnter={(e) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <span style={{ fontSize: '1.1rem' }}>🕘</span>
             <h3 style={{ flex: 1, margin: 0, fontSize: '1.1rem' }}>Recent Updates</h3>
-            <span style={{ fontSize: '0.75rem', color: currentTheme.textSecondary }}>Newest first</span>
           </div>
           {ADMIN_UPDATES.map((entry, entryIndex) => (
             <div key={entry.date} style={{
@@ -10221,7 +10220,7 @@ onMouseEnter={(e) => {
      {/* Admin Permissions Card */}
 <div style={{
   ...styles.itemCard,
-  border: theme === 'dark' ? `1px solid ${currentTheme.cardBorder}` : '2px solid #111827'
+  border: '1.5px solid #10b981'
 }}>
   <div style={{ flex: 1 }}>
     <h3 style={{
@@ -10302,7 +10301,7 @@ onMouseEnter={(e) => {
     {/* Employee Permissions Card */}
 <div style={{
   ...styles.itemCard,
-  border: theme === 'dark' ? `1px solid ${currentTheme.cardBorder}` : '2px solid #111827'
+  border: '1.5px solid #10b981'
 }}>
   <div style={{ flex: 1 }}>
     <h3 style={{
@@ -10393,7 +10392,7 @@ onMouseEnter={(e) => {
   ...styles.itemCard,
   marginTop: '24px',
   background: theme === 'dark' ? 'rgba(139, 92, 246, 0.1)' : '#ffffff',
-  border: theme === 'dark' ? '1px solid #8b5cf6' : '2px solid #111827'
+  border: '1.5px solid #10b981'
 }}>
   <div style={{ flex: 1 }}>
     <h3 style={{ 
