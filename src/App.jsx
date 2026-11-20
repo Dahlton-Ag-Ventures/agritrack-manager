@@ -4892,7 +4892,7 @@ return (
                   ? '2px solid #10b981' : 'none'
               }}
               onClick={() => {
-                if (editingInventoryId !== item.id && exportMode !== 'inventory') {
+                if (!isDesktop && editingInventoryId !== item.id && exportMode !== 'inventory') {
                   setInventorySheetItem(item);
                 }
               }}
