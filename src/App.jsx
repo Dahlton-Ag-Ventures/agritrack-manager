@@ -358,6 +358,7 @@ const toggleCard = (cardId) => {
   const [showCategoryTabs, setShowCategoryTabs] = useState(false);
 
   const [editingInventoryId, setEditingInventoryId] = useState(null);
+  const [expandedNoteIds, setExpandedNoteIds] = useState(new Set());
   const [editingMachineryId, setEditingMachineryId] = useState(null);
   const [editingServiceId, setEditingServiceId] = useState(null);
 
@@ -5308,6 +5309,52 @@ onMouseEnter={(e) => {
                         </div>
                       )}
                     </div>
+                    {item.notes && item.notes.trim() !== '' && (
+                      <div style={{ marginTop: '10px' }}>
+                        <div style={{
+                          background: theme === 'light' ? '#f3f4f6' : 'rgba(255,255,255,0.06)',
+                          borderRadius: '8px',
+                          padding: '8px 10px',
+                          fontSize: '0.875rem',
+                          lineHeight: '1.5',
+                          color: currentTheme.text,
+                          whiteSpace: 'pre-wrap',
+                          wordBreak: 'break-word',
+                          ...(expandedNoteIds.has(item.id) ? {} : {
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden'
+                          })
+                        }}>
+                          📝 {item.notes}
+                        </div>
+                        {(item.notes.length > 80 || item.notes.split('\n').length > 2) && (
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setExpandedNoteIds(prev => {
+                                const next = new Set(prev);
+                                if (next.has(item.id)) { next.delete(item.id); } else { next.add(item.id); }
+                                return next;
+                              });
+                            }}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              padding: '4px 0',
+                              color: '#3b82f6',
+                              fontSize: '0.8rem',
+                              cursor: 'pointer',
+                              touchAction: 'manipulation'
+                            }}
+                          >
+                            {expandedNoteIds.has(item.id) ? 'less' : 'more'}
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                   {isDesktop && userRole !== 'employee' && (
                     <div style={{ display: 'flex', gap: '8px' }}>
