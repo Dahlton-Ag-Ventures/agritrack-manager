@@ -1502,10 +1502,6 @@ const getFilteredAndSortedInventory = () => {
         return idB - idA;
       case 'location':
         return (a.location || '').localeCompare(b.location || '');
-      case 'starred':
-        if (a.isStarred && !b.isStarred) return -1;
-        if (b.isStarred && !a.isStarred) return 1;
-        return (a.name || '').localeCompare(b.name || '');
       default:
         return 0;
     }
@@ -4643,7 +4639,6 @@ return (
     <option value="quantity-asc">Stock (Low → High)</option>
     <option value="quantity-desc">Stock (High → Low)</option>
     <option value="location">Location</option>
-    <option value="starred">⭐ Starred</option>
   </select>
   <select
     value={inventoryItemsPerPage}
