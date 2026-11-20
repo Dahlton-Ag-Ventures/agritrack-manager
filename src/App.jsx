@@ -10113,6 +10113,108 @@ onMouseEnter={(e) => {
   </div>
 </div>
 
+    {/* Recent Updates */}
+    {(() => {
+      const ADMIN_UPDATES = [
+        {
+          date: 'Nov 20, 2026',
+          areas: [
+            {
+              area: '📦 Inventory',
+              items: [
+                { type: 'new', text: 'Star items to keep them at the top of their category' },
+                { type: 'new', text: 'Gold border on starred cards' },
+                { type: 'new', text: 'Notes in the edit form, shown on cards with "more"' },
+                { type: 'new', text: 'Tap a card on your phone for full details' },
+                { type: 'fixed', text: 'Editing a starred item no longer removes the star' },
+                { type: 'fixed', text: 'Pencil no longer opens the details sheet on phones' },
+                { type: 'fixed', text: 'Notes no longer clip at the bottom on iPhone' }
+              ]
+            }
+          ]
+        }
+      ];
+      const tagStyle = (type) => ({
+        fontSize: '0.7rem',
+        fontWeight: '600',
+        padding: '1px 6px',
+        borderRadius: '4px',
+        marginRight: '6px',
+        background: type === 'new'
+          ? (theme === 'light' ? '#E6F1FB' : 'rgba(55,138,221,0.2)')
+          : (theme === 'light' ? '#FAEEDA' : 'rgba(239,159,39,0.2)'),
+        color: type === 'new'
+          ? (theme === 'light' ? '#0C447C' : '#85B7EB')
+          : (theme === 'light' ? '#633806' : '#FAC775')
+      });
+      return (
+        <div style={{
+          background: currentTheme.cardBackground,
+          border: '1.5px solid #10b981',
+          borderRadius: '12px',
+          padding: isDesktop ? '16px 20px' : '12px 14px',
+          marginBottom: '24px',
+          color: currentTheme.text
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <span style={{ fontSize: '1.1rem' }}>🕘</span>
+            <h3 style={{ flex: 1, margin: 0, fontSize: '1.1rem' }}>Recent Updates</h3>
+            <span style={{ fontSize: '0.75rem', color: currentTheme.textSecondary }}>Newest first</span>
+          </div>
+          {ADMIN_UPDATES.map((entry, entryIndex) => (
+            <div key={entry.date} style={{
+              borderLeft: `3px solid ${entryIndex === 0 ? '#10b981' : currentTheme.cardBorder}`,
+              paddingLeft: '12px',
+              marginTop: '12px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <strong style={{ fontSize: '0.95rem' }}>{entry.date}</strong>
+                {entryIndex === 0 && (
+                  <span style={{
+                    fontSize: '0.7rem',
+                    padding: '1px 8px',
+                    borderRadius: '999px',
+                    background: theme === 'light' ? '#dcfce7' : 'rgba(16,185,129,0.2)',
+                    color: theme === 'light' ? '#166534' : '#6ee7b7'
+                  }}>
+                    Latest
+                  </span>
+                )}
+              </div>
+              {entry.areas.map(section => (
+                <div key={section.area} style={{ marginBottom: '8px' }}>
+                  <p style={{ margin: '0 0 4px', fontSize: '0.8rem', color: currentTheme.textSecondary }}>{section.area}</p>
+                  {isDesktop ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '16px' }}>
+                      {['new', 'fixed'].filter(t => section.items.some(i => i.type === t)).map(type => (
+                        <div key={type}>
+                          <span style={tagStyle(type)}>{type === 'new' ? 'New' : 'Fixed'}</span>
+                          <ul style={{ margin: '6px 0 0', paddingLeft: '18px', lineHeight: '1.7', fontSize: '0.875rem' }}>
+                            {section.items.filter(i => i.type === type).map(i => (
+                              <li key={i.text}>{i.text}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <ul style={{ margin: 0, paddingLeft: '18px', lineHeight: '1.7', fontSize: '0.85rem' }}>
+                      {section.items.map(i => (
+                        <li key={i.text}>
+                          <span style={tagStyle(i.type)}>{i.type === 'new' ? 'New' : 'Fixed'}</span>
+                          {i.text}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      );
+    })()}
+
     {/* Permissions Comparison Grid */}
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '20px' }}>
 
