@@ -767,7 +767,8 @@ setInventory(allInventory.map(item => ({
       maxQuantity: item.max_quantity || '',
       photoUrl: item.photo_url || '',
       category: item.category || '',
-      isStarred: item.is_starred || false
+      isStarred: item.is_starred || false,
+      notes: item.notes || ''
     })));
     
     let allMachinery = [];
