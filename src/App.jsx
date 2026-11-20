@@ -5311,25 +5311,29 @@ onMouseEnter={(e) => {
                     </div>
                     {item.notes && item.notes.trim() !== '' && (
                       <div style={{ marginTop: '10px' }}>
-                        <div style={{
+                                                <div style={{
                           background: theme === 'light' ? '#f3f4f6' : 'rgba(255,255,255,0.06)',
                           borderRadius: '8px',
-                          padding: '8px 10px',
-                          fontSize: '0.875rem',
-                          lineHeight: '1.5',
-                          color: currentTheme.text,
-                          whiteSpace: 'pre-wrap',
-                          wordBreak: 'break-word',
-                          ...(expandedNoteIds.has(item.id) ? {} : {
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden'
-                          })
+                          padding: '8px 10px'
                         }}>
-                          📝 {item.notes}
+                          <div style={{
+                            fontSize: '0.875rem',
+                            lineHeight: '1.5',
+                            color: currentTheme.text,
+                            whiteSpace: 'pre-wrap',
+                            wordBreak: 'break-word',
+                            ...(expandedNoteIds.has(item.id) ? {} : {
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                              maxHeight: '3em'
+                            })
+                          }}>
+                            📝 {item.notes}
+                          </div>
                         </div>
-                        {(item.notes.length > 80 || item.notes.split('\n').length > 2) && (
+                        {(item.notes.length > (isDesktop ? 80 : 50) || item.notes.split('\n').length > 2) && (
                           <button
                             onClick={(e) => {
                               e.preventDefault();
