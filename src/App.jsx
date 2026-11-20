@@ -10140,6 +10140,9 @@ onMouseEnter={(e) => {
               <li>Set min/max stock levels for automatic low/overstock alerts</li>
               <li>Upload, view, and remove photos per item</li>
               <li>Search by name, part number, or location — sort and paginate</li>
+              <li>Star (⭐) any item to keep it at the top of its category — starred cards get a gold border</li>
+              <li>Write notes in the edit form — the first 2 lines show on the card, tap "more" to read the rest</li>
+              <li>On phones, tap a card to open a full-details sheet with photo, notes, star, Edit, and Print QR</li>
             </ul>
           </div>
 
@@ -10221,6 +10224,11 @@ onMouseEnter={(e) => {
               <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot add, edit, or delete items</span></li>
               <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot adjust quantities — no + / − buttons</span></li>
               <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot upload or remove photos</span></li>
+              <li>✅ See starred items (gold border) at the top of each category</li>
+              <li>✅ Read item notes on cards — tap "more" to expand long notes</li>
+              <li>✅ On phones, tap a card to open its full details</li>
+              <li>❌ <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>Cannot write or edit notes</span></li>
+            </ul>
             </ul>
           </div>
 
