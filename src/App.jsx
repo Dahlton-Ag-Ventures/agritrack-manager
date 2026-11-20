@@ -970,7 +970,8 @@ supabase
         maxQuantity: payload.new.max_quantity,
         photoUrl: payload.new.photo_url,
         category: payload.new.category || '',
-        isStarred: payload.new.is_starred || false
+        isStarred: payload.new.is_starred || false,
+        notes: payload.new.notes || ''
       }]);
     } else if (payload.eventType === 'UPDATE') {
   // ✅ Skip realtime update if we just updated this item locally
@@ -985,7 +986,8 @@ supabase
     maxQuantity: payload.new.max_quantity,
     photoUrl: payload.new.photo_url,
     category: payload.new.category || '',
-    isStarred: payload.new.is_starred || false
+    isStarred: payload.new.is_starred || false,
+    notes: payload.new.notes || ''
   } : item));
 } else if (payload.eventType === 'DELETE') {
       setInventory(prev => prev.filter(item => item.id !== payload.old.id));
