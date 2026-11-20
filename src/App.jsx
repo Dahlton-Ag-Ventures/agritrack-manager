@@ -766,8 +766,9 @@ setInventory(allInventory.map(item => ({
       minQuantity: item.min_quantity || '',
       maxQuantity: item.max_quantity || '',
       photoUrl: item.photo_url || '',
-      category: item.category || ''
-    })));
+      category: item.category || '',
+      isStarred: item.is_starred || false
+    })));done 
     
     let allMachinery = [];
     let machineryPage = 0;
